@@ -14,3 +14,23 @@ ever deleting stored history.
 
 See `CLAUDE.md` for architecture, roadmap, and the empirically confirmed
 NSF API defects the pipeline defends against.
+
+## Layout
+
+- `config/orgs.json` — org registry (agency → directorate → division), each
+  leaf carrying its source-adapter params. Discovered and verified
+  empirically by `scripts/discover_orgs.py` (runs on CI).
+- `adapters/` — one module per data source (`nsf.py` wraps the NSF Award
+  Search API with all known-defect workarounds; `common.py` holds the
+  store/aggregation logic shared with rollups).
+- `scripts/pull_unit.py` — pull one division; `scripts/rollup.py` — build
+  directorate/agency/root dashboards plus the nav index;
+  `scripts/verify_dms_baseline.py` — exact-parity gate against the
+  hand-verified DMS baseline.
+- `data/<agency>/<directorate>/<division>/` — per-division `awards.csv`
+  (store of record; never pruned) and `dashboard.json`; rollup
+  `dashboard.json` at every level; `data/index.json` for navigation.
+- `site/index.html` — the single static page that renders any node
+  (`?org=nsf/mps/dms`), deployed via GitHub Pages.
+- `.github/workflows/update-data.yml` — weekly incremental matrix (full
+  reconciliation the first Monday of each month), rollups, deploy.

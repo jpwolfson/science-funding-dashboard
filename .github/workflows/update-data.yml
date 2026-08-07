@@ -1,0 +1,220 @@
+name: Update data
+
+on:
+  schedule:
+    - cron: "13 9 * * 1" # Mondays 09:13 UTC; incremental (full on the first Monday)
+  workflow_dispatch:
+    inputs:
+      units:
+        description: "Comma-separated unit paths (agency/dir/div) or 'all'"
+        default: "all"
+      full_refresh:
+        description: "Re-pull the full history (reconciles amendments)"
+        type: boolean
+        default: false
+      verify_dms:
+        description: "Fail unless DMS exactly matches the verified baseline"
+        type: boolean
+        default: false
+  push:
+    branches: ["claude/**"]
+    paths: [".github/triggers/update.json"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-data-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      full: ${{ steps.plan.outputs.full }}
+      verify: ${{ steps.plan.outputs.verify }}
+      any: ${{ steps.plan.outputs.any }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - id: plan
+        name: Resolve units to a leaf matrix
+        shell: python
+        run: |
+          import datetime, json, os
+
+          event = os.environ["GITHUB_EVENT_NAME"]
+          units, full, verify = "all", False, False
+          if event == "workflow_dispatch":
+              inp = (json.load(open(os.environ["GITHUB_EVENT_PATH"])).get("inputs") or {})
+              units = (inp.get("units") or "all").strip()
+              full = str(inp.get("full_refresh")).lower() == "true"
+              verify = str(inp.get("verify_dms")).lower() == "true"
+          elif event == "push":
+              t = json.load(open(".github/triggers/update.json"))
+              units = str(t.get("units", "all")).strip()
+              full = bool(t.get("full_refresh"))
+              verify = bool(t.get("verify_dms"))
+          elif event == "schedule":
+              full = datetime.date.today().day <= 7
+
+          cfg = json.load(open("config/orgs.json"))
+          leaves = [f"{ag['slug']}/{dr['slug']}/{dv['slug']}"
+                    for ag in cfg["agencies"]
+                    for dr in ag["directorates"]
+                    for dv in dr["divisions"]]
+          if units != "all":
+              want = [u.strip().strip("/") for u in units.split(",") if u.strip()]
+              unknown = [u for u in want if u not in leaves]
+              if unknown:
+                  raise SystemExit(f"unknown units (not in config/orgs.json): {unknown}")
+              leaves = want
+          print(f"{len(leaves)} unit(s), full={full}, verify={verify}")
+          with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
+              fh.write("matrix=" + json.dumps({"include": [{"unit": u} for u in leaves]}) + "\n")
+              fh.write(f"full={'true' if full else 'false'}\n")
+              fh.write(f"verify={'true' if verify else 'false'}\n")
+              fh.write(f"any={'true' if leaves else 'false'}\n")
+
+  pull:
+    needs: plan
+    if: needs.plan.outputs.any == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      max-parallel: 4 # be polite to the NSF API
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      BRANCH: ${{ github.ref_name }}
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Sync to branch tip
+        # The triggering commit can be behind (data commits land continuously);
+        # start from the newest store so incremental mode engages.
+        run: git pull --ff-only origin "$BRANCH" || git reset --hard "origin/$BRANCH"
+      - name: Pull ${{ matrix.unit }}
+        run: |
+          FLAG=""
+          if [ "${{ needs.plan.outputs.full }}" = "true" ]; then FLAG="--full"; fi
+          echo "mode flag: '$FLAG'"
+          python scripts/pull_unit.py --unit "${{ matrix.unit }}" $FLAG
+      - name: Commit this unit's data subtree
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "data/${{ matrix.unit }}"
+          if git diff --cached --quiet; then
+            echo "No data changes."
+            exit 0
+          fi
+          git commit -m "Refresh ${{ matrix.unit }} award data [skip ci]"
+          for i in 1 2 3 4 5; do
+            git push origin "HEAD:$BRANCH" && exit 0
+            # A concurrent matrix job pushed its own data commit; replay ours
+            # on top, preferring our freshly generated files on conflict
+            # (each job only ever touches its own data/<unit> subtree).
+            git pull --rebase -X theirs origin "$BRANCH" || { git rebase --abort; exit 1; }
+          done
+          exit 1
+
+  rollup:
+    # Publish what we have even if some pulls failed: failed units keep
+    # their previously committed data (stores are never deleted).
+    needs: [plan, pull]
+    if: ${{ !cancelled() && needs.plan.outputs.any == 'true' }}
+    runs-on: ubuntu-latest
+    env:
+      BRANCH: ${{ github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Sync to branch tip
+        run: git pull --ff-only origin "$BRANCH" || git reset --hard "origin/$BRANCH"
+      - name: Build rollups and nav index
+        run: python scripts/rollup.py
+      - name: Commit rollups
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data
+          if git diff --cached --quiet; then
+            echo "No rollup changes."
+            exit 0
+          fi
+          git commit -m "Rebuild rollup dashboards and nav index [skip ci]"
+          for i in 1 2 3 4 5; do
+            git push origin "HEAD:$BRANCH" && exit 0
+            git pull --rebase -X theirs origin "$BRANCH" || { git rebase --abort; exit 1; }
+          done
+          exit 1
+
+  verify-dms:
+    needs: [plan, pull]
+    if: ${{ !cancelled() && needs.plan.outputs.verify == 'true' }}
+    runs-on: ubuntu-latest
+    env:
+      BRANCH: ${{ github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Sync to branch tip
+        run: git pull --ff-only origin "$BRANCH" || git reset --hard "origin/$BRANCH"
+      - name: Verify DMS against the hand-verified baseline
+        run: python scripts/verify_dms_baseline.py
+
+  deploy:
+    needs: rollup
+    # Hardcoded 'main': github.event.repository is absent on schedule events.
+    if: ${{ !cancelled() && needs.rollup.result == 'success' && github.ref_name == 'main' }}
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+      contents: read
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    env:
+      BRANCH: ${{ github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - name: Sync to branch tip
+        run: git pull --ff-only origin "$BRANCH" || git reset --hard "origin/$BRANCH"
+      - name: Assemble site
+        run: |
+          mkdir -p _site
+          cp site/index.html _site/
+          cp -r data _site/data
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - name: Upload site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

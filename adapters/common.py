@@ -1,0 +1,183 @@
+"""Shared store, aggregation, and output logic for all source adapters and
+for the rollup builder. The aggregation here is verbatim from the verified
+DMS pipeline (reference/pull_nsf_dms.py); the site reads exactly this shape.
+
+Award record shape used everywhere in this repo (the "store" shape):
+  {id, date (ISO), month (YYYY-MM), amount (int), type (std|cont|fell|other),
+   transType, title, awardee}
+"""
+
+import csv
+import json
+from datetime import date, timedelta
+from pathlib import Path
+
+SERIES_START = date(2014, 10, 1)  # FY2015 onward
+
+CSV_HEADER = ["id", "date", "estimatedTotalAmt", "transType", "title", "awardeeName"]
+
+
+def norm_type(t):
+    t = (t or "").lower()
+    if t.startswith("standard"):
+        return "std"
+    if t.startswith("continuing"):
+        return "cont"
+    if t.startswith("fellowship"):
+        return "fell"
+    return "other"
+
+
+def fiscal_year(d):
+    return d.year + 1 if d.month >= 10 else d.year
+
+
+def month_floor(d):
+    return d.replace(day=1)
+
+
+def months_back(d, n):
+    y, m = d.year, d.month - n
+    while m < 1:
+        y, m = y - 1, m + 12
+    return date(y, m, 1)
+
+
+def month_windows(first, last):
+    cur = first.replace(day=1)
+    while cur <= last:
+        nxt = (cur.replace(day=28) + timedelta(days=4)).replace(day=1)
+        yield cur, min(nxt - timedelta(days=1), last)
+        cur = nxt
+
+
+def median(xs):
+    xs = sorted(xs)
+    n = len(xs)
+    return 0 if n == 0 else (xs[n // 2] if n % 2 else (xs[n // 2 - 1] + xs[n // 2]) // 2)
+
+
+def load_store(csv_path):
+    """awards.csv is the committed store of record from prior runs."""
+    csv_path = Path(csv_path)
+    if not csv_path.exists():
+        return {}
+    store = {}
+    with open(csv_path, newline="") as fh:
+        for row in csv.DictReader(fh):
+            date.fromisoformat(row["date"])  # validate before trusting the row
+            store[row["id"]] = {
+                "id": row["id"],
+                "date": row["date"],
+                "month": row["date"][:7],
+                "amount": int(row["estimatedTotalAmt"]),
+                "type": norm_type(row["transType"]),
+                "transType": row["transType"],
+                "title": row["title"],
+                "awardee": row["awardeeName"],
+            }
+    return store
+
+
+def write_store(csv_path, awards):
+    csv_path = Path(csv_path)
+    csv_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(csv_path, "w", newline="") as fh:
+        w = csv.writer(fh)
+        w.writerow(CSV_HEADER)
+        for a in sorted(awards, key=lambda a: (a["date"], a["id"])):
+            w.writerow([a["id"], a["date"], a["amount"], a["transType"],
+                        a["title"], a["awardee"]])
+
+
+def aggregate(awards, today, series_start=SERIES_START):
+    """Monthly and fiscal-year series in the exact shape the site consumes."""
+    months = {}
+    for a in awards:
+        m = months.setdefault(a["month"], {"awards": 0, "dollars": 0,
+                                           "std": 0, "cont": 0, "fell": 0, "other": 0})
+        m["awards"] += 1
+        m["dollars"] += a["amount"]
+        m[a["type"]] += 1
+    # Explicit zero rows so gaps read as 0, not missing data.
+    for mstart, _ in month_windows(series_start, today):
+        months.setdefault(mstart.strftime("%Y-%m"),
+                          {"awards": 0, "dollars": 0, "std": 0, "cont": 0, "fell": 0, "other": 0})
+    monthly = [{"month": k, **v} for k, v in sorted(months.items())]
+
+    fys = {}
+    for a in awards:
+        d = date.fromisoformat(a["date"])
+        fy = fys.setdefault(fiscal_year(d), {
+            "awards": 0, "dollars": 0, "amounts": [],
+            "oj": {"awards": 0, "dollars": 0, "std": 0, "cont": 0, "fell": 0, "other": 0},
+        })
+        fy["awards"] += 1
+        fy["dollars"] += a["amount"]
+        fy["amounts"].append(a["amount"])
+        if d.month not in (8, 9):  # Oct-Jul basis for partial-year comparison
+            fy["oj"]["awards"] += 1
+            fy["oj"]["dollars"] += a["amount"]
+            fy["oj"][a["type"]] += 1
+
+    current_fy = fiscal_year(today)
+    fy_rows = []
+    for fy in sorted(fys):
+        f = fys[fy]
+        top3 = sorted((a for a in awards if fiscal_year(date.fromisoformat(a["date"])) == fy),
+                      key=lambda a: -a["amount"])[:3]
+        fy_rows.append({
+            "fy": fy,
+            "partial": fy == current_fy,
+            "awards": f["awards"],
+            "dollars": f["dollars"],
+            "median": median(f["amounts"]),
+            "exTop3Dollars": f["dollars"] - sum(a["amount"] for a in top3),
+            "octJul": f["oj"],
+            "top3": [{"id": a["id"], "title": a["title"], "awardee": a["awardee"],
+                      "amount": a["amount"]} for a in top3],
+        })
+
+    return {
+        "totalAwards": len(awards),
+        "currentFY": current_fy,
+        "monthly": monthly,
+        "fiscalYears": fy_rows,
+    }
+
+
+def write_dashboard(data_dir, node, source, awards, warnings, today,
+                    children=None, series_start=SERIES_START):
+    """Aggregate and write dashboard.json for one node (leaf or rollup).
+
+    Invariant check: per-unit monthly counts may only grow. The store is
+    never pruned, so a shrinking month means a code or merge bug — warn
+    loudly (into the published warnings, so it surfaces on the site) rather
+    than publish silently.
+    """
+    data_dir = Path(data_dir)
+    warnings = list(warnings)
+    agg = aggregate(awards, today, series_start)
+
+    prev_path = data_dir / "dashboard.json"
+    if prev_path.exists():
+        prev = json.loads(prev_path.read_text())
+        prev_counts = {m["month"]: m["awards"] for m in prev.get("monthly", [])}
+        new_counts = {m["month"]: m["awards"] for m in agg["monthly"]}
+        for month, n in sorted(prev_counts.items()):
+            if new_counts.get(month, 0) < n:
+                warnings.append(
+                    f"invariant violated: {month} shrank from {n} to "
+                    f"{new_counts.get(month, 0)} awards")
+
+    out = {
+        "generated": today.isoformat(),
+        "node": node,
+        "source": source,
+        "warnings": warnings,
+        **agg,
+        "children": children if children is not None else [],
+    }
+    data_dir.mkdir(parents=True, exist_ok=True)
+    (data_dir / "dashboard.json").write_text(json.dumps(out, indent=1))
+    return warnings
