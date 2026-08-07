@@ -81,13 +81,57 @@ baseline (`reference/verified_baseline.json`, 11,508 awards, 143/143 months).
   tolerance; invariant failures and divergences auto-file a GitHub issue
   rather than publishing silently.
 
+## Environment constraint (discovered 2026-08-07)
+
+The remote dev environment has NO egress to api.nsf.gov / www.nsf.gov
+(proxy policy 403). Every API-touching task — pulls, probes, org
+discovery — must run on GitHub Actions, which has full egress. Two
+consequences already encoded:
+
+- `scripts/discover_orgs.py` + `.github/workflows/discover-orgs.yml` do the
+  empirical org-registry discovery/verification on CI and commit
+  `config/orgs.json` + `reference/org_registry_report.md` back.
+- `workflow_dispatch` may be unreliable on non-default branches, so both
+  workflows also fire on pushes to `claude/**` that touch their trigger
+  file (`.github/triggers/update.json` / `discover.json`); the trigger
+  file's JSON fields mirror the dispatch inputs. On `main`, use normal
+  dispatch/schedule.
+
 ## Roadmap / status
 
 - [x] Kickoff: repo created, regime + API lessons documented, DMS pipeline
       and verified baseline seeded under `reference/` (2026-08-07)
-- [ ] Phase 1 — NSF-wide: org registry for all directorates/divisions,
-      generalized NSF adapter, matrix CI, rollups, site with nav.
-      DMS numbers must reproduce the reference baseline exactly.
+- [~] Phase 1 — NSF-wide (code landed 2026-08-07 on `claude/phase-1-50i2eh`;
+      awaiting CI results):
+      - Done: `adapters/common.py` (aggregation regression-verified EXACT
+        against fed-funding-dashboard's committed dashboard.json),
+        `adapters/nsf.py` (all API-defect workarounds + org-filter probe +
+        per-unit plausibility caps from `config/orgs.json` `checks`),
+        `scripts/pull_unit.py`, `scripts/rollup.py` (id-deduped rollups,
+        child summaries, `data/index.json`), `scripts/verify_dms_baseline.py`
+        (exact-parity gate), `scripts/discover_orgs.py`, both workflows,
+        `site/index.html` (multi-node port of the old page).
+      - In flight (kicked off 2026-08-07 ~22:32 UTC, on the phase branch):
+        run 31224153926 "Update data" = DMS full pull + exact baseline
+        verify; run 31224153930 "Discover NSF org registry".
+      - Next session / check-in: (1) confirm DMS verify-dms job PASSED —
+        that is the Phase 1 release bar; (2) review the discovered
+        config/orgs.json against reference/org_registry_report.md (check
+        unresolved list, directorate grouping anomalies, parse-failure
+        debug dumps; sanity-check division count ~30-45 incl. defunct);
+        (3) fire the all-units backfill by committing
+        `.github/triggers/update.json` = {"units":"all","full_refresh":true}
+        (~35 division jobs, max-parallel 4, hours of wall-clock — check in
+        via send_later, never in-session); (4) after rollups land, eyeball
+        site with real data, then open the Phase 1 PR to main; owner
+        enables Pages (Settings → Pages → Source "GitHub Actions"); deploy
+        job only runs on main.
+      - Known open items: discover_orgs.py's showAward HTML parser was
+        written blind (no egress to test); if discovery fails, fix the
+        parser from reference/discover_debug/*.html dumps and re-fire via
+        `.github/triggers/discover.json`. Adapter's org-filter probe
+        behavior depends on the unknown-code finding in the discovery
+        report. Weekly schedule only activates once merged to main.
 - [ ] Phase 2 — NIH via RePORTER API (institutes/centers as the
       directorate tier). Forces the year-shard/compression storage format
       at realistic volume.
