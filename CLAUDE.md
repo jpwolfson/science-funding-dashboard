@@ -113,7 +113,18 @@ consequences already encoded:
         `site/index.html` (multi-node port of the old page).
       - In flight (kicked off 2026-08-07 ~22:32 UTC, on the phase branch):
         run 31224153926 "Update data" = DMS full pull + exact baseline
-        verify; run 31224153930 "Discover NSF org registry".
+        verify (still pulling at 23:20 UTC — full history takes ~1h+).
+        Discovery run 31224153930 FAILED as anticipated: the API sweep
+        worked (59 live codes, 461 empty; unknown org codes return EMPTY,
+        so the adapter's bogus-code abort guard is fully armed), but the
+        blind-written showAward HTML parser parsed nothing and the
+        ground-truth gate refused to write. Reworked (commit 93779a9):
+        discovery now verifies identity via NSF bulk award XML downloads
+        (award records carry org Code + Division/Directorate names),
+        adds param-semantics + two-way completeness checks, always writes
+        the report, and the workflow commits diagnostics on failure.
+        Re-fired via trigger bump — check the newest "Discover NSF org
+        registry" run.
       - Next session / check-in: (1) confirm DMS verify-dms job PASSED —
         that is the Phase 1 release bar; (2) review the discovered
         config/orgs.json against reference/org_registry_report.md (check
@@ -126,12 +137,13 @@ consequences already encoded:
         site with real data, then open the Phase 1 PR to main; owner
         enables Pages (Settings → Pages → Source "GitHub Actions"); deploy
         job only runs on main.
-      - Known open items: discover_orgs.py's showAward HTML parser was
-        written blind (no egress to test); if discovery fails, fix the
-        parser from reference/discover_debug/*.html dumps and re-fire via
-        `.github/triggers/discover.json`. Adapter's org-filter probe
-        behavior depends on the unknown-code finding in the discovery
-        report. Weekly schedule only activates once merged to main.
+      - Known open items: if bulk-XML discovery also fails, diagnose from
+        reference/discover_debug/ dumps (now committed even on failure)
+        and re-fire via `.github/triggers/discover.json`. Watch the
+        report's "not queryable via the API" section — any bulk code the
+        API refuses means awards invisible to our pulls. Site review of a
+        node with many children (root/agency) once real multi-division
+        data exists. Weekly schedule only activates once merged to main.
 - [ ] Phase 2 — NIH via RePORTER API (institutes/centers as the
       directorate tier). Forces the year-shard/compression storage format
       at realistic volume.
