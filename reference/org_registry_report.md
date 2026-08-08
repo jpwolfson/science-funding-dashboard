@@ -1,6 +1,6 @@
 # NSF org registry discovery report
 
-Generated 2026-08-07 by scripts/discover_orgs.py on CI.
+Generated 2026-08-08 by scripts/discover_orgs.py on CI.
 
 **FATAL: bulk download produced no parsed awards; cannot verify anything - config/orgs.json NOT written.**
 
@@ -13,19 +13,23 @@ Generated 2026-08-07 by scripts/discover_orgs.py on CI.
 ## Bulk download source
 
 - Years loaded: 2014..2026; 0 awards parsed; 0 distinct org codes seen
-- bulk 2014: not a zip (128 bytes)
-- bulk 2015: not a zip (128 bytes)
-- bulk 2016: not a zip (128 bytes)
-- bulk 2017: not a zip (128 bytes)
-- bulk 2018: not a zip (128 bytes)
-- bulk 2019: not a zip (128 bytes)
-- bulk 2020: not a zip (128 bytes)
-- bulk 2021: not a zip (128 bytes)
-- bulk 2022: not a zip (128 bytes)
-- bulk 2023: not a zip (128 bytes)
-- bulk 2024: not a zip (128 bytes)
-- bulk 2025: not a zip (128 bytes)
-- bulk 2026: not a zip (128 bytes)
+- download page https://www.nsf.gov/awardsearch/download.jsp: 128 bytes, 0 download-ish hrefs
+- download page https://nsf.gov/awardsearch/download.jsp: 128 bytes, 0 download-ish hrefs
+- download page https://www.nsf.gov/awardsearch/download: 128 bytes, 0 download-ish hrefs
+- no hrefs scraped; using legacy URL pattern with browser User-Agent for all years
+- bulk 2014: not a zip (128 bytes) [https://www.nsf.gov/awardsearch/download?DownloadFileName=2014&All=true]
+- bulk 2015: not a zip (128 bytes) [https://www.nsf.gov/awardsearch/download?DownloadFileName=2015&All=true]
+- bulk 2016: not a zip (128 bytes) [https://www.nsf.gov/awardsearch/download?DownloadFileName=2016&All=true]
+- bulk 2017: not a zip (128 bytes) [https://www.nsf.gov/awardsearch/download?DownloadFileName=2017&All=true]
+- bulk 2018: not a zip (128 bytes) [https://www.nsf.gov/awardsearch/download?DownloadFileName=2018&All=true]
+- bulk 2019: not a zip (128 bytes) [https://www.nsf.gov/awardsearch/download?DownloadFileName=2019&All=true]
+- bulk 2020: not a zip (128 bytes) [https://www.nsf.gov/awardsearch/download?DownloadFileName=2020&All=true]
+- bulk 2021: not a zip (128 bytes) [https://www.nsf.gov/awardsearch/download?DownloadFileName=2021&All=true]
+- bulk 2022: not a zip (128 bytes) [https://www.nsf.gov/awardsearch/download?DownloadFileName=2022&All=true]
+- bulk 2023: not a zip (128 bytes) [https://www.nsf.gov/awardsearch/download?DownloadFileName=2023&All=true]
+- bulk 2024: not a zip (128 bytes) [https://www.nsf.gov/awardsearch/download?DownloadFileName=2024&All=true]
+- bulk 2025: not a zip (128 bytes) [https://www.nsf.gov/awardsearch/download?DownloadFileName=2025&All=true]
+- bulk 2026: not a zip (128 bytes) [https://www.nsf.gov/awardsearch/download?DownloadFileName=2026&All=true]
 
 ## Verified codes
 
