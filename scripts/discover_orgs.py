@@ -109,10 +109,39 @@ def get(url, retries=4, timeout=300, binary=False, ua=None):
             time.sleep(2 ** attempt)
 
 
-def resolve_bulk_urls(years, notes):
+def dir_abbr_from_name(name):
+    """Map a scraped directorate name to a canonical abbrev by token
+    overlap (bulk/detail names are often truncated). None if no match."""
+    stop = {"directorate", "direct", "for", "of", "the", "and", "&"}
+    nt = {w[:6] for w in re.findall(r"[a-z&]+", (name or "").lower())
+          if w not in stop}
+    if not nt:
+        return None
+    if "office of the director" in (name or "").lower():
+        return "OD"
+    best = None
+    for ab, full in DIRECTORATE_NAMES.items():
+        ft = {w[:6] for w in re.findall(r"[a-z&]+", full.lower()) if w not in stop}
+        if not ft:
+            continue
+        score = len(nt & ft) / len(nt)
+        if score >= 0.5 and (best is None or score > best[0]):
+            best = (score, ab)
+    return best[1] if best else None
+
+
+def derived_abbrev(div_name):
+    """Initials fallback when no abbreviation field exists (flagged in the
+    report; NSF's official abbrev may differ, this only affects slugs)."""
+    words = [w for w in re.findall(r"[A-Za-z]+", div_name or "")
+             if w.lower() not in {"of", "the", "and", "for"}]
+    return "".join(w[0].upper() for w in words)[:5] or None
+
+
+def resolve_bulk_urls(years, notes, extra=()):
     """Locate the per-year bulk zip URLs from NSF's own download page.
     Returns {year: url}. Every attempt is logged into notes."""
-    hrefs = []
+    hrefs = [u for u in extra if re.search(r"download|\.zip", u, re.I)]
     for page_url in DOWNLOAD_PAGES:
         try:
             page = get(page_url, ua=BROWSER_UA, timeout=60)
@@ -124,7 +153,7 @@ def resolve_bulk_urls(years, notes):
         notes.append(f"download page {page_url}: {len(page)} bytes, "
                      f"{len(found)} download-ish hrefs")
         if found:
-            hrefs = [urllib.parse.urljoin(page_url, h) for h in found]
+            hrefs += [urllib.parse.urljoin(page_url, h) for h in found]
             break
         DEBUG_DIR.mkdir(parents=True, exist_ok=True)
         (DEBUG_DIR / f"download_page_{urllib.parse.quote(page_url, safe='')[:60]}.html"
@@ -205,6 +234,140 @@ def parse_award_xml(blob):
             "div_name": sub("Division", "LongName"),
         })
     return aid, eff, orgs
+
+
+def scan_spa_for_endpoints(notes):
+    """The redesigned Award Search is a JS app; its bundles reference the
+    real data endpoints (award detail API, bulk zip locations). Fetch the
+    app shell + bundles and harvest endpoint-ish URLs. Everything found is
+    logged; heads are dumped for offline diagnosis."""
+    found = set()
+    for page_url in ["https://www.nsf.gov/awardsearch/simple-search",
+                     "https://www.nsf.gov/funding/award-search"]:
+        try:
+            page = get(page_url, ua=BROWSER_UA, timeout=60)
+        except Exception as e:
+            notes.append(f"spa {page_url}: fetch failed ({e})")
+            continue
+        notes.append(f"spa {page_url}: {len(page)} bytes")
+        DEBUG_DIR.mkdir(parents=True, exist_ok=True)
+        (DEBUG_DIR / ("spa_" + re.sub(r"[^a-z0-9]+", "_", page_url[8:])[:50] + ".html")
+         ).write_text(page[:16384])
+        found.update(re.findall(r"https?://[^\s\"'<>\\]+", page))
+        srcs = re.findall(r"""(?:src|href)=["']([^"']+\.m?js[^"']*)["']""", page)
+        for s in srcs[:12]:
+            u = urllib.parse.urljoin(page_url, s)
+            try:
+                js = get(u, ua=BROWSER_UA, timeout=120)
+            except Exception:
+                continue
+            hits = set()
+            for mm in re.findall(
+                    r"""["'`](https?://[^"'`\s]{8,200}|/[A-Za-z0-9_\-./]{3,120}"""
+                    r"""(?:api|award|download|zip|search)[A-Za-z0-9_\-./?=&{}:]{0,80})["'`]""",
+                    js):
+                if re.search(r"api|award|download|zip", mm, re.I):
+                    hits.add(urllib.parse.urljoin(u, mm))
+            notes.append(f"bundle {u}: {len(js)} bytes, {len(hits)} endpoint-ish strings")
+            found.update(hits)
+    interesting = sorted(h for h in found
+                         if re.search(r"api|award|download|zip", h, re.I)
+                         and "w3.org" not in h and "schema.org" not in h)
+    if interesting:
+        DEBUG_DIR.mkdir(parents=True, exist_ok=True)
+        (DEBUG_DIR / "spa_endpoints.txt").write_text("\n".join(interesting))
+        notes.append(f"spa scan: {len(interesting)} candidate endpoints "
+                     "(full list in discover_debug/spa_endpoints.txt); "
+                     "sample: " + "; ".join(interesting[:6]))
+    else:
+        notes.append("spa scan: no candidate endpoints found")
+    return interesting
+
+
+DETAIL_ENDPOINTS = [
+    "https://api.nsf.gov/services/v1/awards/{id}.json",
+    "https://www.research.gov/awardapi-service/v1/awards/{id}.json",
+]
+EXTRA_FIELDS = ("id,date,title,transType,fundProgramName,primaryProgram,"
+                "division,divisionCode,directorate,directorateCode,orgCode,"
+                "fundOrg,nsfOrganization,awardAgencyCode,fundAgencyCode")
+
+
+def strings_in(obj, path=""):
+    """Yield (json_path, string_value) for every string in a JSON tree."""
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            yield from strings_in(v, f"{path}.{k}" if path else str(k))
+    elif isinstance(obj, list):
+        for i, v in enumerate(obj):
+            yield from strings_in(v, f"{path}[{i}]")
+    elif isinstance(obj, str):
+        yield path, obj
+
+
+def extract_org_identity(detail_json):
+    """Best-effort (div_abbr, div_name, dir_name) from an award-detail JSON
+    blob, using value patterns rather than assumed keys. Trust is decided
+    by the DMS ground-truth gate, not here."""
+    div_name = dir_name = div_abbr = None
+    for path, s in strings_in(detail_json):
+        sv = s.strip()
+        low = sv.lower()
+        pl = path.lower()
+        if div_name is None and re.match(r"(division|office) of .{3,}", low) \
+                and "director" not in low:
+            div_name = sv
+        if dir_name is None and ("directorate" in low or
+                                 re.match(r"direct for .{3,}", low) or
+                                 low.startswith("office of the director")):
+            dir_name = sv
+        if div_abbr is None and re.fullmatch(r"[A-Z]{2,5}", sv) \
+                and re.search(r"abbr|org|div", pl) and "dir" not in pl:
+            div_abbr = sv
+    return div_abbr, div_name, dir_name
+
+
+def probe_detail_endpoints(sample_id, extra_candidates, notes):
+    """Find a per-award detail source that exposes division/directorate.
+    Returns a fetch(id)->json callable or None. Raw heads are dumped."""
+    candidates = list(DETAIL_ENDPOINTS)
+    candidates.append(DETAIL_ENDPOINTS[0] + "?printFields=" + EXTRA_FIELDS)
+    for c in extra_candidates:
+        if "{id}" in c or re.search(r"award", c, re.I):
+            t = c if "{id}" in c else None
+            if t is None and re.search(r"[?&](awd_id|id|awardId)=", c):
+                t = re.sub(r"([?&](?:awd_id|id|awardId))=[^&]*", r"\1={id}", c)
+            if t:
+                candidates.append(t)
+    tried = []
+    for tmpl in candidates[:12]:
+        url = tmpl.replace("{id}", str(sample_id))
+        try:
+            body = get(url, ua=BROWSER_UA, timeout=60)
+        except Exception as e:
+            tried.append(f"{tmpl} -> fetch failed ({e})")
+            continue
+        DEBUG_DIR.mkdir(parents=True, exist_ok=True)
+        (DEBUG_DIR / ("detail_" + re.sub(r"[^a-z0-9]+", "_", tmpl[8:])[:60] + ".json")
+         ).write_text(body[:8192])
+        try:
+            data = json.loads(body)
+        except json.JSONDecodeError:
+            tried.append(f"{tmpl} -> non-JSON ({len(body)} bytes)")
+            continue
+        abbr, div, dr = extract_org_identity(data)
+        tried.append(f"{tmpl} -> JSON, identity=({abbr}, {div}, {dr})")
+        if div and "mathematical" in div.lower():
+            notes.append(f"detail endpoint SELECTED: {tmpl}")
+            notes.extend(f"detail probe: {t}" for t in tried)
+
+            def fetch_detail(aid, _tmpl=tmpl):
+                time.sleep(SLEEP)
+                return json.loads(get(_tmpl.replace("{id}", str(aid)),
+                                      ua=BROWSER_UA, timeout=60))
+            return fetch_detail
+    notes.extend(f"detail probe: {t}" for t in tried)
+    return None
 
 
 def parse_award_json(obj):
@@ -385,7 +548,8 @@ def main():
     # 3. Bulk downloads: NSF's own code -> division/directorate mapping.
     years = list(range(args.year_from, today.year + 1))
     bulk_notes = []
-    year_urls = resolve_bulk_urls(years, bulk_notes)
+    spa_candidates = scan_spa_for_endpoints(bulk_notes)
+    year_urls = resolve_bulk_urls(years, bulk_notes, extra=spa_candidates)
     by_award, code_stats, load_notes = load_bulk(year_urls)
     bulk_notes += load_notes
     report += ["## Bulk download source", "",
@@ -393,39 +557,125 @@ def main():
                f"{len(by_award)} awards parsed; {len(code_stats)} distinct org codes seen"]
     report += [f"- {n}" for n in bulk_notes] + [""]
 
-    # Ground truth gate #1: the bulk parse itself must reproduce DMS, both
-    # by code consensus and on known DMS award ids from our verified store.
-    dms_ident = code_identity(DMS_CODE, code_stats)
-    if not by_award:
-        fatal = "bulk download produced no parsed awards; cannot verify anything"
-    elif dms_ident is None or dms_ident[0] != DMS_ABBREV:
-        fatal = (f"ground truth violated: bulk records resolve {DMS_CODE} to "
-                 f"{dms_ident}, expected {DMS_ABBREV}")
-    else:
+    mode = None
+    fetch_detail = None
+    if by_award:
+        # Ground truth gate #1: the bulk parse must reproduce DMS, both by
+        # code consensus and on known DMS award ids from our verified store.
+        dms_ident = code_identity(DMS_CODE, code_stats)
+        if dms_ident is None or dms_ident[0] != DMS_ABBREV:
+            fatal = (f"ground truth violated: bulk records resolve {DMS_CODE} "
+                     f"to {dms_ident}, expected {DMS_ABBREV}")
+        else:
+            mode = "bulk"
+            store_csv = REPO_ROOT / "data" / "nsf" / "mps" / "dms" / "awards.csv"
+            if store_csv.exists():
+                import csv as _csv
+                with open(store_csv, newline="") as fh:
+                    store_ids = [row["id"] for row in _csv.DictReader(fh)]
+                hits = wrong = 0
+                for aid in store_ids:
+                    orgs = by_award.get(str(aid))
+                    if orgs is None:
+                        continue
+                    if any(o["code"] == DMS_CODE or o["div_abbr"] == DMS_ABBREV
+                           for o in orgs):
+                        hits += 1
+                    else:
+                        wrong += 1
+                report += [f"- DMS store cross-check: {hits} of {len(store_ids)} "
+                           f"verified store awards matched in bulk as DMS; "
+                           f"{wrong} matched with a DIFFERENT org", ""]
+                if hits < 100 or wrong > hits * 0.02:
+                    fatal = (f"ground truth violated: DMS store cross-check "
+                             f"hits={hits} wrong={wrong}")
+                    mode = None
+    if fatal is None and mode is None:
+        # No usable bulk source: fall back to a per-award detail endpoint,
+        # located empirically and gated on the DMS ground truth.
+        dms_sample = None
         store_csv = REPO_ROOT / "data" / "nsf" / "mps" / "dms" / "awards.csv"
         if store_csv.exists():
             import csv as _csv
             with open(store_csv, newline="") as fh:
-                store_ids = [row["id"] for row in _csv.DictReader(fh)]
-            hits = wrong = 0
-            for aid in store_ids:
-                orgs = by_award.get(str(aid))
-                if orgs is None:
-                    continue
-                if any(o["code"] == DMS_CODE or o["div_abbr"] == DMS_ABBREV
-                       for o in orgs):
-                    hits += 1
-                else:
-                    wrong += 1
-            report += [f"- DMS store cross-check: {hits} of {len(store_ids)} "
-                       f"verified store awards matched in bulk as DMS; "
-                       f"{wrong} matched with a DIFFERENT org", ""]
-            if hits < 100 or wrong > hits * 0.02:
-                fatal = (f"ground truth violated: DMS store cross-check "
-                         f"hits={hits} wrong={wrong}")
+                rows = list(_csv.DictReader(fh))
+            if rows:
+                dms_sample = rows[-1]["id"]
+        if dms_sample is None and DMS_CODE in live:
+            dms_sample = live[DMS_CODE][0]["id"]
+        fetch_detail = probe_detail_endpoints(dms_sample, spa_candidates,
+                                              bulk_notes)
+        if fetch_detail is None:
+            fatal = ("no bulk zips reachable and no award-detail endpoint "
+                     "exposing division info; see reference/discover_debug/")
+        else:
+            mode = "detail"
+    report += [f"**Verification source: {mode or 'NONE'}**", ""]
 
     verified, unresolved, anomalies = {}, [], []
-    if fatal is None:
+    not_queryable = []
+    if fatal is None and mode == "detail":
+        # Verify each API-live code by fetching a few of its own sample
+        # awards' detail records. Identity = value-pattern extraction,
+        # trusted only because the DMS ground-truth id resolved correctly.
+        for code, samples in sorted(live.items()):
+            ids = [str(a["id"]) for a in samples]
+            picks = list(dict.fromkeys(
+                [ids[0], ids[len(ids) // 3], ids[2 * len(ids) // 3], ids[-1]]))
+            idents, sem_ok = [], 0
+            for aid in picks:
+                try:
+                    data = fetch_detail(aid)
+                except Exception as e:
+                    print(f"  detail {aid} failed: {e}", file=sys.stderr)
+                    continue
+                abbr, div, dr = extract_org_identity(data)
+                if div or abbr:
+                    idents.append((abbr, div, dr))
+                if code in json.dumps(data):
+                    sem_ok += 1
+            names = Counter(i[1] for i in idents if i[1])
+            if not names:
+                unresolved.append({"code": code, "reason":
+                                   "no detail record exposed a division name",
+                                   "samples": picks})
+                continue
+            div_name, div_n = names.most_common(1)[0]
+            if div_n < max(1, len(idents) * 0.75):
+                anomalies.append(f"{code}: division consensus only "
+                                 f"{div_n}/{len(idents)}")
+            abbr = next((i[0] for i in idents if i[0]), None)
+            abbr_derived = abbr is None
+            if abbr_derived:
+                abbr = derived_abbrev(div_name) or f"U{code[:4]}"
+                anomalies.append(f"{code}: no abbreviation field; derived "
+                                 f"'{abbr}' from name initials")
+            dir_name = next((i[2] for i in idents if i[2]), "")
+            dir_ab = dir_abbr_from_name(dir_name) or "OD"
+            try:
+                recent = probe(code, RECENT, fields="id")
+            except Exception:
+                recent = []
+            verified[code] = {"abbrev": abbr, "name": clean_name(div_name),
+                              "dir_abbr": dir_ab,
+                              "dir_name": clean_name(dir_name) or "",
+                              "bulk_n": 0, "sem_ok": sem_ok,
+                              "active": bool(recent), "latest": "?"}
+            print(f"  verified {code} -> {abbr} ({div_name}) dir={dir_ab} "
+                  f"sem={sem_ok}/{len(picks)} active={bool(recent)}")
+        if DMS_CODE not in verified or \
+                "mathematical" not in verified[DMS_CODE]["name"].lower():
+            fatal = (f"ground truth violated (detail mode): {DMS_CODE} -> "
+                     f"{verified.get(DMS_CODE)}")
+        elif len(verified) < 15:
+            fatal = (f"only {len(verified)} codes verified via detail mode; "
+                     "refusing to write a mostly-empty registry")
+        else:
+            verified[DMS_CODE]["abbrev"] = DMS_ABBREV  # canonical, verified
+            anomalies.append("detail mode: bulk-side completeness check not "
+                             "available (no bulk code universe to compare)")
+
+    if fatal is None and mode == "bulk":
         # 4. Verify each API-live code: identity from bulk consensus, plus
         # the param-semantics check on the API's own sample award ids.
         for code, samples in sorted(live.items()):
@@ -543,8 +793,9 @@ def main():
                         "name": v["name"], "params": {"org_code_div": code},
                         "active": v["active"]}
                 if not v["active"]:
-                    leaf["note"] = (f"No awards after {v['latest']}; "
-                                    "likely renamed or dissolved.")
+                    leaf["note"] = ("No recent awards"
+                                    + (f" after {v['latest']}" if v["latest"] != "?" else "")
+                                    + "; likely renamed or dissolved.")
                 if code == DMS_CODE:
                     leaf["checks"] = DMS_CHECKS
                 if leaf["slug"] in seen_slugs:
