@@ -111,32 +111,31 @@ consequences already encoded:
         child summaries, `data/index.json`), `scripts/verify_dms_baseline.py`
         (exact-parity gate), `scripts/discover_orgs.py`, both workflows,
         `site/index.html` (multi-node port of the old page).
-      - In flight (kicked off 2026-08-07 ~22:32 UTC, on the phase branch):
-        run 31224153926 "Update data" = DMS full pull + exact baseline
-        verify (still pulling at 23:20 UTC — full history takes ~1h+).
-        Discovery run 31224153930 FAILED as anticipated: the API sweep
-        worked (59 live codes, 461 empty; unknown org codes return EMPTY,
-        so the adapter's bogus-code abort guard is fully armed), but the
-        blind-written showAward HTML parser parsed nothing and the
-        ground-truth gate refused to write. Reworked (commit 93779a9):
-        discovery now verifies identity via NSF bulk award XML downloads
-        (award records carry org Code + Division/Directorate names),
-        adds param-semantics + two-way completeness checks, always writes
-        the report, and the workflow commits diagnostics on failure.
-        Re-fired via trigger bump — check the newest "Discover NSF org
-        registry" run.
-      - Next session / check-in: (1) confirm DMS verify-dms job PASSED —
-        that is the Phase 1 release bar; (2) review the discovered
-        config/orgs.json against reference/org_registry_report.md (check
-        unresolved list, directorate grouping anomalies, parse-failure
-        debug dumps; sanity-check division count ~30-45 incl. defunct);
-        (3) fire the all-units backfill by committing
-        `.github/triggers/update.json` = {"units":"all","full_refresh":true}
-        (~35 division jobs, max-parallel 4, hours of wall-clock — check in
-        via send_later, never in-session); (4) after rollups land, eyeball
-        site with real data, then open the Phase 1 PR to main; owner
-        enables Pages (Settings → Pages → Source "GitHub Actions"); deploy
-        job only runs on main.
+      - **RELEASE BAR MET 2026-08-08 00:02 UTC**: run 31224153926 pull +
+        rollup + verify-dms ALL GREEN — fresh full pull = 11,508 awards,
+        0 warnings, exact parity with the hand-verified baseline. Owner
+        has enabled Pages (Settings done); deploy fires on merge to main.
+      - Discovery: run 1 (showAward HTML parser) failed → run 2 (bulk XML,
+        commit 93779a9) failed because NSF redesigned Award Search: the
+        legacy download endpoint serves a 128-byte meta-refresh stub to
+        non-browser clients, and bulk files converted XML→JSON 2025-01.
+        v3 (commit 4db7637, run 31229594989, started 00:15 UTC) resolves
+        zip URLs from download.jsp itself (browser UA, logged fallbacks),
+        parses JSON + XML entries, and cross-checks bulk records against
+        the baseline-exact DMS store. Sweep facts already established:
+        59 live org codes, 461 empty, unknown codes return EMPTY.
+      - Next session / check-in: (1) review discovery v3 output
+        (config/orgs.json vs reference/org_registry_report.md: unresolved
+        codes, "not queryable via the API" section = invisible awards,
+        directorate grouping, ~30-45 divisions incl. defunct, DMS entry
+        intact with checks block); if it failed again, diagnostics are in
+        reference/discover_debug/ + the report (committed even on
+        failure); (2) fire the all-units backfill by committing
+        `.github/triggers/update.json` = {"units":"all","full_refresh":true,
+        "verify_dms":true} (~35 division jobs, max-parallel 4, hours —
+        check in via send_later, never in-session); (3) after rollups
+        land, eyeball site with real data, then open the Phase 1 PR to
+        main and merge (owner already asked us to drive the merge).
       - Known open items: if bulk-XML discovery also fails, diagnose from
         reference/discover_debug/ dumps (now committed even on failure)
         and re-fire via `.github/triggers/discover.json`. Watch the
