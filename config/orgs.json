@@ -1,31 +1,656 @@
 {
-  "seriesStart": "2014-10-01",
-  "defaults": { "max_monthly": 1500, "min_total": 0, "max_total": 200000 },
-  "agencies": [
+ "seriesStart": "2014-10-01",
+ "defaults": {
+  "max_monthly": 1500,
+  "min_total": 0,
+  "max_total": 200000
+ },
+ "agencies": [
+  {
+   "slug": "nsf",
+   "abbrev": "NSF",
+   "name": "U.S. National Science Foundation",
+   "adapter": "nsf",
+   "directorates": [
     {
-      "slug": "nsf",
-      "abbrev": "NSF",
-      "name": "U.S. National Science Foundation",
-      "adapter": "nsf",
-      "directorates": [
-        {
-          "slug": "mps",
-          "abbrev": "MPS",
-          "name": "Directorate for Mathematical and Physical Sciences",
-          "divisions": [
-            {
-              "slug": "dms",
-              "abbrev": "DMS",
-              "name": "Division of Mathematical Sciences",
-              "params": { "org_code_div": "03040000" },
-              "checks": { "min_total": 9000, "max_total": 30000, "max_monthly": 600,
-                          "baseline": "reference/verified_baseline.json" },
-              "active": true
-            }
-          ]
-        }
-      ]
+     "slug": "bio",
+     "abbrev": "BIO",
+     "name": "Directorate for Biological Sciences",
+     "divisions": [
+      {
+       "slug": "deb",
+       "abbrev": "DEB",
+       "name": "Division of Environmental Biology",
+       "params": {
+        "org_code_div": "08010000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      },
+      {
+       "slug": "mcb",
+       "abbrev": "MCB",
+       "name": "Division of Molecular and Cellular Biosciences",
+       "params": {
+        "org_code_div": "08070000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      },
+      {
+       "slug": "dbi",
+       "abbrev": "DBI",
+       "name": "Division of Biological Infrastructure",
+       "params": {
+        "org_code_div": "08080000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      },
+      {
+       "slug": "ios",
+       "abbrev": "IOS",
+       "name": "Division of Integrative Organismal Systems",
+       "params": {
+        "org_code_div": "08090000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      }
+     ]
+    },
+    {
+     "slug": "cse",
+     "abbrev": "CSE",
+     "name": "Directorate for Computer and Information Science and Engineering",
+     "divisions": [
+      {
+       "slug": "ccf",
+       "abbrev": "CCF",
+       "name": "Division of Computing and Communication Foundations",
+       "params": {
+        "org_code_div": "05010000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      },
+      {
+       "slug": "iis",
+       "abbrev": "IIS",
+       "name": "Division of Information & Intelligent Systems",
+       "params": {
+        "org_code_div": "05020000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      },
+      {
+       "slug": "cns",
+       "abbrev": "CNS",
+       "name": "Division of Computer and Network Systems",
+       "params": {
+        "org_code_div": "05050000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      },
+      {
+       "slug": "oac",
+       "abbrev": "OAC",
+       "name": "Office of Advanced Cyberinfrastructure (OAC)",
+       "params": {
+        "org_code_div": "05090000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      },
+      {
+       "slug": "eccs",
+       "abbrev": "ECCS",
+       "name": "Division of Electrical, Communications and Cyber Systems",
+       "params": {
+        "org_code_div": "07010000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      },
+      {
+       "slug": "cbet",
+       "abbrev": "CBET",
+       "name": "Division of Chemical, Bioengineering, Environmental, and Transport Systems",
+       "params": {
+        "org_code_div": "07020000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      },
+      {
+       "slug": "cmmi",
+       "abbrev": "CMMI",
+       "name": "Division of Civil, Mechanical, and Manufacturing Innovation",
+       "params": {
+        "org_code_div": "07030000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      },
+      {
+       "slug": "efma",
+       "abbrev": "EFMA",
+       "name": "Office of Emerging Frontiers in Research and Innovation (efri)",
+       "params": {
+        "org_code_div": "07040000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      },
+      {
+       "slug": "eec",
+       "abbrev": "EEC",
+       "name": "Division of Engineering Education and Centers",
+       "params": {
+        "org_code_div": "07050000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      }
+     ]
+    },
+    {
+     "slug": "edu",
+     "abbrev": "EDU",
+     "name": "Directorate for STEM Education",
+     "divisions": [
+      {
+       "slug": "dge",
+       "abbrev": "DGE",
+       "name": "Division of Graduate Education",
+       "params": {
+        "org_code_div": "11010000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      },
+      {
+       "slug": "due",
+       "abbrev": "DUE",
+       "name": "Division of Undergraduate Education",
+       "params": {
+        "org_code_div": "11040000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      },
+      {
+       "slug": "drl",
+       "abbrev": "DRL",
+       "name": "Division of Research on Learning in Formal and Informal Settings (DRL)",
+       "params": {
+        "org_code_div": "11090000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      }
+     ]
+    },
+    {
+     "slug": "geo",
+     "abbrev": "GEO",
+     "name": "Directorate for Geosciences",
+     "divisions": [
+      {
+       "slug": "ags",
+       "abbrev": "AGS",
+       "name": "Division of Atmospheric and Geospace Sciences",
+       "params": {
+        "org_code_div": "06020000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      },
+      {
+       "slug": "ear",
+       "abbrev": "EAR",
+       "name": "Division of Earth Sciences",
+       "params": {
+        "org_code_div": "06030000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      },
+      {
+       "slug": "oce",
+       "abbrev": "OCE",
+       "name": "Division of Ocean Sciences",
+       "params": {
+        "org_code_div": "06040000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      },
+      {
+       "slug": "opp",
+       "abbrev": "OPP",
+       "name": "Office of Polar Programs (OPP)",
+       "params": {
+        "org_code_div": "06090000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      }
+     ]
+    },
+    {
+     "slug": "mps",
+     "abbrev": "MPS",
+     "name": "Directorate for Mathematical and Physical Sciences",
+     "divisions": [
+      {
+       "slug": "phy",
+       "abbrev": "PHY",
+       "name": "Division of Physics",
+       "params": {
+        "org_code_div": "03010000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      },
+      {
+       "slug": "dms",
+       "abbrev": "DMS",
+       "name": "Division of Mathematical Sciences",
+       "params": {
+        "org_code_div": "03040000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved.",
+       "checks": {
+        "min_total": 9000,
+        "max_total": 30000,
+        "max_monthly": 600,
+        "baseline": "reference/verified_baseline.json"
+       }
+      },
+      {
+       "slug": "osi",
+       "abbrev": "OSI",
+       "name": "Office of Strategic Initiatives (OSI)",
+       "params": {
+        "org_code_div": "03060000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      },
+      {
+       "slug": "dmr",
+       "abbrev": "DMR",
+       "name": "Division of Materials Research",
+       "params": {
+        "org_code_div": "03070000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      },
+      {
+       "slug": "che",
+       "abbrev": "CHE",
+       "name": "Division of Chemistry",
+       "params": {
+        "org_code_div": "03090000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      }
+     ]
+    },
+    {
+     "slug": "od",
+     "abbrev": "OD",
+     "name": "Office of the Director",
+     "divisions": [
+      {
+       "slug": "lpa",
+       "abbrev": "LPA",
+       "name": "Office of Legislative and Public Affiars",
+       "params": {
+        "org_code_div": "01050000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      },
+      {
+       "slug": "ocr",
+       "abbrev": "OCR",
+       "name": "Office of Civil Rights",
+       "params": {
+        "org_code_div": "01070000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      },
+      {
+       "slug": "oise",
+       "abbrev": "OISE",
+       "name": "Office of International Science and Engineering",
+       "params": {
+        "org_code_div": "01090000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      },
+      {
+       "slug": "crsp",
+       "abbrev": "CRSP",
+       "name": "Office of the Chief of Research Security Strategy and Policy (crsp)",
+       "params": {
+        "org_code_div": "01130000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      },
+      {
+       "slug": "irm",
+       "abbrev": "IRM",
+       "name": "Office of Information & Resource Management",
+       "params": {
+        "org_code_div": "02000000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      },
+      {
+       "slug": "hrm",
+       "abbrev": "HRM",
+       "name": "Office of Information & Resource Management",
+       "params": {
+        "org_code_div": "02040000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      },
+      {
+       "slug": "das",
+       "abbrev": "DAS",
+       "name": "Office of Information & Resource Management",
+       "params": {
+        "org_code_div": "02060000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      },
+      {
+       "slug": "dis",
+       "abbrev": "DIS",
+       "name": "Office of Information & Resource Management",
+       "params": {
+        "org_code_div": "02090000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      },
+      {
+       "slug": "ast",
+       "abbrev": "AST",
+       "name": "Division of Astronomical Sciences",
+       "params": {
+        "org_code_div": "03020000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      },
+      {
+       "slug": "bfa",
+       "abbrev": "BFA",
+       "name": "Office of Budget, Finance, & Award Management",
+       "params": {
+        "org_code_div": "10000000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      },
+      {
+       "slug": "dob",
+       "abbrev": "DOB",
+       "name": "Office of Budget, Finance, & Award Management",
+       "params": {
+        "org_code_div": "10010000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      },
+      {
+       "slug": "dfm",
+       "abbrev": "DFM",
+       "name": "Office of Budget, Finance, & Award Management",
+       "params": {
+        "org_code_div": "10020000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      },
+      {
+       "slug": "dacs",
+       "abbrev": "DACS",
+       "name": "Office of Budget, Finance, & Award Management",
+       "params": {
+        "org_code_div": "10040000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      },
+      {
+       "slug": "dias",
+       "abbrev": "DIAS",
+       "name": "Office of Budget, Finance, & Award Management",
+       "params": {
+        "org_code_div": "10050000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      },
+      {
+       "slug": "rio",
+       "abbrev": "RIO",
+       "name": "Office of Budget, Finance, & Award Management",
+       "params": {
+        "org_code_div": "10060000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      },
+      {
+       "slug": "des",
+       "abbrev": "DES",
+       "name": "Office of the Chief Information Officer",
+       "params": {
+        "org_code_div": "16020000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      }
+     ]
+    },
+    {
+     "slug": "sbe",
+     "abbrev": "SBE",
+     "name": "Directorate for Social, Behavioral and Economic Sciences",
+     "divisions": [
+      {
+       "slug": "bcs",
+       "abbrev": "BCS",
+       "name": "Division of Behavioral and Cognitive Sciences",
+       "params": {
+        "org_code_div": "04040000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      },
+      {
+       "slug": "ses",
+       "abbrev": "SES",
+       "name": "Division of Social and Economic Sciences",
+       "params": {
+        "org_code_div": "04050000"
+       },
+       "active": false,
+       "note": "No recent awards; likely renamed or dissolved."
+      }
+     ]
     }
-  ],
-  "unresolved": []
+   ]
+  }
+ ],
+ "unresolved": [
+  {
+   "code": "01000000",
+   "reason": "no detail record exposed a division name",
+   "samples": [
+    "1953025",
+    "1740507",
+    "2230096",
+    "2135810"
+   ]
+  },
+  {
+   "code": "01010000",
+   "reason": "no detail record exposed a division name",
+   "samples": [
+    "1928284",
+    "1634026",
+    "2149586",
+    "2037595"
+   ]
+  },
+  {
+   "code": "01060000",
+   "reason": "no detail record exposed a division name",
+   "samples": [
+    "1934968",
+    "1904154",
+    "2546641",
+    "2546677"
+   ]
+  },
+  {
+   "code": "04010000",
+   "reason": "no detail record exposed a division name",
+   "samples": [
+    "1912001",
+    "1852056",
+    "2550217",
+    "2447695"
+   ]
+  },
+  {
+   "code": "04030000",
+   "reason": "no detail record exposed a division name",
+   "samples": [
+    "1947524",
+    "1841971",
+    "2215606",
+    "2001846"
+   ]
+  },
+  {
+   "code": "05100000",
+   "reason": "no detail record exposed a division name",
+   "samples": [
+    "1540016"
+   ]
+  },
+  {
+   "code": "06010000",
+   "reason": "no detail record exposed a division name",
+   "samples": [
+    "1927845",
+    "1940218",
+    "2548511",
+    "2615438"
+   ]
+  },
+  {
+   "code": "08000000",
+   "reason": "no detail record exposed a division name",
+   "samples": [
+    "1744103"
+   ]
+  },
+  {
+   "code": "08040000",
+   "reason": "no detail record exposed a division name",
+   "samples": [
+    "1921585",
+    "1935226",
+    "2319597",
+    "2319427"
+   ]
+  },
+  {
+   "code": "11060000",
+   "reason": "no detail record exposed a division name",
+   "samples": [
+    "1937759",
+    "1935960",
+    "2451870",
+    "2444876"
+   ]
+  },
+  {
+   "code": "12000000",
+   "reason": "no detail record exposed a division name",
+   "samples": [
+    "1939165",
+    "1841071"
+   ]
+  },
+  {
+   "code": "13000000",
+   "reason": "no detail record exposed a division name",
+   "samples": [
+    "1944471",
+    "1841232",
+    "1747657",
+    "1540240"
+   ]
+  },
+  {
+   "code": "15010000",
+   "reason": "no detail record exposed a division name",
+   "samples": [
+    "2538883",
+    "2537092",
+    "2332572",
+    "2318858"
+   ]
+  },
+  {
+   "code": "15020000",
+   "reason": "no detail record exposed a division name",
+   "samples": [
+    "1937118",
+    "1936915",
+    "2607553",
+    "2607533"
+   ]
+  },
+  {
+   "code": "15030000",
+   "reason": "no detail record exposed a division name",
+   "samples": [
+    "1938405",
+    "1938676",
+    "2628986",
+    "2627411"
+   ]
+  },
+  {
+   "code": "15040000",
+   "reason": "no detail record exposed a division name",
+   "samples": [
+    "2552622",
+    "2538216",
+    "2533150"
+   ]
+  }
+ ]
 }
