@@ -52,7 +52,18 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 API = "https://api.nsf.gov/services/v1/awards.json"
-BULK = "https://www.nsf.gov/awardsearch/download?DownloadFileName={year}&All=true"
+# NSF redesigned Award Search in 2025 (bulk files converted XML -> JSON
+# 2025-01) and the legacy download endpoint now serves a redirect stub to
+# non-browser clients, so bulk zip URLs are RESOLVED at runtime from the
+# download page itself (see resolve_bulk_urls), with these as fallbacks.
+DOWNLOAD_PAGES = [
+    "https://www.nsf.gov/awardsearch/download.jsp",
+    "https://nsf.gov/awardsearch/download.jsp",
+    "https://www.nsf.gov/awardsearch/download",
+]
+BULK_FALLBACK = "https://www.nsf.gov/awardsearch/download?DownloadFileName={year}&All=true"
+BROWSER_UA = ("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+              "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36")
 SLEEP = 0.15
 
 WINDOWS = [("10/01/2014", "09/30/2019"), ("10/01/2019", "12/31/2026")]
@@ -82,11 +93,13 @@ DMS_CHECKS = {"min_total": 9000, "max_total": 30000, "max_monthly": 600,
 DEBUG_DIR = REPO_ROOT / "reference" / "discover_debug"
 
 
-def get(url, retries=4, timeout=300, binary=False):
+def get(url, retries=4, timeout=300, binary=False, ua=None):
     for attempt in range(retries):
         try:
-            req = urllib.request.Request(url, headers={"User-Agent":
-                "science-funding-dashboard org discovery (github.com/jpwolfson)"})
+            req = urllib.request.Request(url, headers={
+                "User-Agent": ua or "science-funding-dashboard org discovery "
+                                    "(github.com/jpwolfson)",
+                "Accept": "*/*"})
             with urllib.request.urlopen(req, timeout=timeout) as resp:
                 data = resp.read()
             return data if binary else data.decode("utf-8", "replace")
@@ -94,6 +107,40 @@ def get(url, retries=4, timeout=300, binary=False):
             if attempt == retries - 1:
                 raise
             time.sleep(2 ** attempt)
+
+
+def resolve_bulk_urls(years, notes):
+    """Locate the per-year bulk zip URLs from NSF's own download page.
+    Returns {year: url}. Every attempt is logged into notes."""
+    hrefs = []
+    for page_url in DOWNLOAD_PAGES:
+        try:
+            page = get(page_url, ua=BROWSER_UA, timeout=60)
+        except Exception as e:
+            notes.append(f"download page {page_url}: fetch failed ({e})")
+            continue
+        found = re.findall(r"""href=["']([^"']*(?:[Dd]ownload|\.zip)[^"']*)["']""",
+                           page)
+        notes.append(f"download page {page_url}: {len(page)} bytes, "
+                     f"{len(found)} download-ish hrefs")
+        if found:
+            hrefs = [urllib.parse.urljoin(page_url, h) for h in found]
+            break
+        DEBUG_DIR.mkdir(parents=True, exist_ok=True)
+        (DEBUG_DIR / f"download_page_{urllib.parse.quote(page_url, safe='')[:60]}.html"
+         ).write_text(page[:16384])
+    year_urls = {}
+    for y in years:
+        # Prefer a scraped link that names the year; else the legacy pattern.
+        candidates = [h for h in hrefs if str(y) in h]
+        year_urls[y] = candidates[0] if candidates else BULK_FALLBACK.format(year=y)
+    if hrefs:
+        sample = [h for h in hrefs[:8]]
+        notes.append("scraped hrefs sample: " + "; ".join(sample))
+    else:
+        notes.append("no hrefs scraped; using legacy URL pattern with "
+                     "browser User-Agent for all years")
+    return year_urls
 
 
 def api_awards(params):
@@ -160,54 +207,106 @@ def parse_award_xml(blob):
     return aid, eff, orgs
 
 
-def load_bulk(years):
+def parse_award_json(obj):
+    """One award record from a post-2025-01 bulk JSON file ->
+    (award_id, eff_date, [org dicts]) or None. Known schema keys:
+    awd_id, org_code, dir_abbr, org_dir_long_name, div_abbr,
+    org_div_long_name, awd_eff_date."""
+    if not isinstance(obj, dict):
+        return None
+    aid = str(obj.get("awd_id") or obj.get("AwardID") or "").strip()
+    if not aid:
+        return None
+    eff = None
+    for k in ("awd_eff_date", "awd_effective_date", "AwardEffectiveDate"):
+        v = obj.get(k)
+        if v:
+            try:
+                t = time.strptime(str(v).strip(), "%m/%d/%Y")
+                eff = date(t.tm_year, t.tm_mon, t.tm_mday)
+                break
+            except ValueError:
+                pass
+    org = {
+        "code": str(obj.get("org_code") or "").strip(),
+        "dir_abbr": str(obj.get("dir_abbr") or "").strip().replace("/", ""),
+        "dir_name": str(obj.get("org_dir_long_name") or "").strip(),
+        "div_abbr": str(obj.get("div_abbr") or "").strip().replace("/", ""),
+        "div_name": str(obj.get("org_div_long_name") or "").strip(),
+    }
+    if not any(org.values()):
+        return None
+    return aid, eff, [org]
+
+
+def parse_bulk_entry(name, blob):
+    """A zip member -> list of (award_id, eff, orgs). Handles per-award XML,
+    per-award JSON, and whole-year JSON arrays."""
+    low = name.lower()
+    if low.endswith(".xml"):
+        rec = parse_award_xml(blob)
+        return [rec] if rec else []
+    if low.endswith(".json"):
+        try:
+            data = json.loads(blob.decode("utf-8", "replace"))
+        except json.JSONDecodeError:
+            return []
+        objs = data if isinstance(data, list) else [data]
+        out = []
+        for obj in objs:
+            rec = parse_award_json(obj)
+            if rec:
+                out.append(rec)
+        return out
+    return []
+
+
+def load_bulk(year_urls):
     """Download + parse NSF bulk award zips. Returns
     (by_award: id -> [orgs], code_stats: code -> {...}, notes)."""
     by_award = {}
     code_stats = defaultdict(lambda: {"n": 0, "latest": None,
                                       "div": Counter(), "dir": Counter()})
     notes = []
-    for year in years:
-        url = BULK.format(year=year)
+    for year, url in sorted(year_urls.items()):
         try:
-            blob = get(url, binary=True)
+            blob = get(url, binary=True, ua=BROWSER_UA)
         except Exception as e:
-            notes.append(f"bulk {year}: download FAILED ({e})")
+            notes.append(f"bulk {year}: download FAILED ({e}) [{url}]")
             continue
         try:
             zf = zipfile.ZipFile(io.BytesIO(blob))
         except zipfile.BadZipFile:
-            notes.append(f"bulk {year}: not a zip ({len(blob)} bytes)")
+            notes.append(f"bulk {year}: not a zip ({len(blob)} bytes) [{url}]")
             DEBUG_DIR.mkdir(parents=True, exist_ok=True)
             (DEBUG_DIR / f"bulk_{year}_head.bin").write_bytes(blob[:4096])
             continue
         parsed = failed = 0
         for name in zf.namelist():
-            if not name.lower().endswith(".xml"):
-                continue
-            rec = parse_award_xml(zf.read(name))
-            if rec is None:
+            blob_e = zf.read(name)
+            recs = parse_bulk_entry(name, blob_e)
+            if not recs and name.lower().endswith((".xml", ".json")):
                 failed += 1
                 if failed == 1:
                     DEBUG_DIR.mkdir(parents=True, exist_ok=True)
-                    (DEBUG_DIR / f"bulk_{year}_{Path(name).name}").write_bytes(
-                        zf.read(name)[:8192])
+                    (DEBUG_DIR / f"bulk_{year}_{Path(name).name}"
+                     ).write_bytes(blob_e[:8192])
                 continue
-            aid, eff, orgs = rec
-            parsed += 1
-            by_award[aid] = orgs
-            for o in orgs:
-                if not o["code"]:
-                    continue
-                st = code_stats[o["code"]]
-                st["n"] += 1
-                if eff and (st["latest"] is None or eff > st["latest"]):
-                    st["latest"] = eff
-                if o["div_abbr"] or o["div_name"]:
-                    st["div"][(o["div_abbr"], o["div_name"])] += 1
-                if o["dir_abbr"] or o["dir_name"]:
-                    st["dir"][(o["dir_abbr"], o["dir_name"])] += 1
-        print(f"bulk {year}: {parsed} awards parsed, {failed} XML failures")
+            for aid, eff, orgs in recs:
+                parsed += 1
+                by_award[aid] = orgs
+                for o in orgs:
+                    if not o["code"]:
+                        continue
+                    st = code_stats[o["code"]]
+                    st["n"] += 1
+                    if eff and (st["latest"] is None or eff > st["latest"]):
+                        st["latest"] = eff
+                    if o["div_abbr"] or o["div_name"]:
+                        st["div"][(o["div_abbr"], o["div_name"])] += 1
+                    if o["dir_abbr"] or o["dir_name"]:
+                        st["dir"][(o["dir_abbr"], o["dir_name"])] += 1
+        print(f"bulk {year}: {parsed} awards parsed, {failed} entry failures")
         if parsed == 0:
             notes.append(f"bulk {year}: zip fetched but 0 awards parsed "
                          f"({failed} failures) - schema drift? sample dumped")
@@ -285,19 +384,45 @@ def main():
 
     # 3. Bulk downloads: NSF's own code -> division/directorate mapping.
     years = list(range(args.year_from, today.year + 1))
-    by_award, code_stats, bulk_notes = load_bulk(years)
+    bulk_notes = []
+    year_urls = resolve_bulk_urls(years, bulk_notes)
+    by_award, code_stats, load_notes = load_bulk(year_urls)
+    bulk_notes += load_notes
     report += ["## Bulk download source", "",
                f"- Years loaded: {years[0]}..{years[-1]}; "
                f"{len(by_award)} awards parsed; {len(code_stats)} distinct org codes seen"]
     report += [f"- {n}" for n in bulk_notes] + [""]
 
-    # Ground truth gate #1: the bulk parse itself must reproduce DMS.
+    # Ground truth gate #1: the bulk parse itself must reproduce DMS, both
+    # by code consensus and on known DMS award ids from our verified store.
     dms_ident = code_identity(DMS_CODE, code_stats)
     if not by_award:
         fatal = "bulk download produced no parsed awards; cannot verify anything"
     elif dms_ident is None or dms_ident[0] != DMS_ABBREV:
         fatal = (f"ground truth violated: bulk records resolve {DMS_CODE} to "
                  f"{dms_ident}, expected {DMS_ABBREV}")
+    else:
+        store_csv = REPO_ROOT / "data" / "nsf" / "mps" / "dms" / "awards.csv"
+        if store_csv.exists():
+            import csv as _csv
+            with open(store_csv, newline="") as fh:
+                store_ids = [row["id"] for row in _csv.DictReader(fh)]
+            hits = wrong = 0
+            for aid in store_ids:
+                orgs = by_award.get(str(aid))
+                if orgs is None:
+                    continue
+                if any(o["code"] == DMS_CODE or o["div_abbr"] == DMS_ABBREV
+                       for o in orgs):
+                    hits += 1
+                else:
+                    wrong += 1
+            report += [f"- DMS store cross-check: {hits} of {len(store_ids)} "
+                       f"verified store awards matched in bulk as DMS; "
+                       f"{wrong} matched with a DIFFERENT org", ""]
+            if hits < 100 or wrong > hits * 0.02:
+                fatal = (f"ground truth violated: DMS store cross-check "
+                         f"hits={hits} wrong={wrong}")
 
     verified, unresolved, anomalies = {}, [], []
     if fatal is None:
