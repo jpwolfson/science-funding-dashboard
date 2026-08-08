@@ -119,11 +119,16 @@ consequences already encoded:
         commit 93779a9) failed because NSF redesigned Award Search: the
         legacy download endpoint serves a 128-byte meta-refresh stub to
         non-browser clients, and bulk files converted XML→JSON 2025-01.
-        v3 (commit 4db7637, run 31229594989, started 00:15 UTC) resolves
-        zip URLs from download.jsp itself (browser UA, logged fallbacks),
-        parses JSON + XML entries, and cross-checks bulk records against
-        the baseline-exact DMS store. Sweep facts already established:
-        59 live org codes, 461 empty, unknown codes return EMPTY.
+        v3 (run 31229594989) proved the ENTIRE legacy /awardsearch/ path —
+        download.jsp included, browser UA or not — serves only the same
+        128-byte redirect stub; the zips moved somewhere only the new SPA
+        knows. v4 (commit 45b5760, fired ~01:15 UTC): scans the SPA's JS
+        bundles for endpoint candidates, feeds download/zip hits into bulk
+        URL resolution, and falls back to per-award detail-API
+        verification (candidates probed with a known DMS id, value-pattern
+        identity extraction, DMS ground-truth gated, derived abbrevs
+        flagged as anomalies). Sweep facts already established: 59 live
+        org codes, 461 empty, unknown codes return EMPTY.
       - Next session / check-in: (1) review discovery v3 output
         (config/orgs.json vs reference/org_registry_report.md: unresolved
         codes, "not queryable via the API" section = invisible awards,
