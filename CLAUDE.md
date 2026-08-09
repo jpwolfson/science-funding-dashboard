@@ -135,18 +135,24 @@ consequences already encoded:
         active:true (derive real flags from pulled data post-backfill).
         Sweep facts established: 59 live org codes, 461 empty, unknown
         codes return EMPTY.
-      - Next session / check-in: (1) review discovery v3 output
-        (config/orgs.json vs reference/org_registry_report.md: unresolved
-        codes, "not queryable via the API" section = invisible awards,
-        directorate grouping, ~30-45 divisions incl. defunct, DMS entry
-        intact with checks block); if it failed again, diagnostics are in
-        reference/discover_debug/ + the report (committed even on
-        failure); (2) fire the all-units backfill by committing
-        `.github/triggers/update.json` = {"units":"all","full_refresh":true,
-        "verify_dms":true} (~35 division jobs, max-parallel 4, hours —
-        check in via send_later, never in-session); (3) after rollups
-        land, eyeball site with real data, then open the Phase 1 PR to
-        main and merge (owner already asked us to drive the merge).
+      - REGISTRY DONE (v5, run committed ccb592a, reviewed 2026-08-09):
+        59/59 codes verified, 0 unresolved, param semantics exact via
+        orgCodeDiv, TIP + ENG + MPS grouping correct, DMS entry intact.
+        14 directorate-tier groups = 8 science + OD + 5 admin (BFA, IRM,
+        NCO, NNCO, OCIO — kept for completeness). All entries active:true;
+        real flags to be derived from pulled data post-backfill.
+      - BACKFILL FIRED 2026-08-09 22:43 UTC: run 31340113408, all 59
+        units, full_refresh + verify_dms, max-parallel 4 — expect several
+        hours; failed units keep old data and can be re-fired
+        individually via units="nsf/<dir>/<div>,...".
+      - Next check-in: (1) run 31340113408 — which pull jobs failed
+        (plausibility caps? volume?), verify-dms + rollup green, root
+        dashboard totals plausible (NSF-wide ~130-160k awards since
+        FY2015); (2) eyeball site with real multi-division data (fixture
+        test only so far); (3) derive active flags + notes from pulled
+        data (small script; commit registry update + rerun rollup);
+        (4) open the Phase 1 PR to main and merge (owner already asked us
+        to drive the merge; Pages enabled, deploy fires on main).
       - Known open items: if bulk-XML discovery also fails, diagnose from
         reference/discover_debug/ dumps (now committed even on failure)
         and re-fire via `.github/triggers/discover.json`. Watch the
