@@ -305,15 +305,34 @@ def strings_in(obj, path=""):
         yield path, obj
 
 
-def extract_org_identity(detail_json):
-    """Best-effort (div_abbr, div_name, dir_name) from an award-detail JSON
-    blob, using value patterns rather than assumed keys. Trust is decided
-    by the DMS ground-truth gate, not here."""
+def award_org_fields(detail_json):
+    """Org identity from an award-detail record. The api.nsf.gov detail
+    endpoint (confirmed from a committed raw dump, run 4) carries explicit
+    fields: divAbbr, dirAbbr, orgCodeDiv, orgCodeDir, orgLongName
+    (directorate), orgLongName2 (division). Falls back to value-pattern
+    scanning for unexpected shapes. Returns a dict or None."""
+    recs = detail_json
+    if isinstance(detail_json, dict):
+        recs = (detail_json.get("response", {}) or {}).get("award") or detail_json
+    if isinstance(recs, dict):
+        recs = [recs]
+    if not isinstance(recs, list) or not recs or not isinstance(recs[0], dict):
+        return None
+    a = recs[0]
+    out = {
+        "div_abbr": str(a.get("divAbbr") or "").strip().replace("/", "") or None,
+        "div_name": str(a.get("orgLongName2") or "").strip() or None,
+        "dir_abbr": str(a.get("dirAbbr") or "").strip().replace("/", "") or None,
+        "dir_name": str(a.get("orgLongName") or "").strip() or None,
+        "org_code_div": str(a.get("orgCodeDiv") or "").strip() or None,
+        "date": str(a.get("date") or "").strip() or None,
+    }
+    if out["div_abbr"] or out["div_name"] or out["org_code_div"]:
+        return out
+    # Fallback: value-pattern scan (kept for endpoint-shape drift).
     div_name = dir_name = div_abbr = None
     for path, s in strings_in(detail_json):
-        sv = s.strip()
-        low = sv.lower()
-        pl = path.lower()
+        sv, low, pl = s.strip(), s.strip().lower(), path.lower()
         if div_name is None and re.match(r"(division|office) of .{3,}", low) \
                 and "director" not in low:
             div_name = sv
@@ -324,7 +343,10 @@ def extract_org_identity(detail_json):
         if div_abbr is None and re.fullmatch(r"[A-Z]{2,5}", sv) \
                 and re.search(r"abbr|org|div", pl) and "dir" not in pl:
             div_abbr = sv
-    return div_abbr, div_name, dir_name
+    if div_abbr or div_name:
+        return {"div_abbr": div_abbr, "div_name": div_name, "dir_abbr": None,
+                "dir_name": dir_name, "org_code_div": None, "date": None}
+    return None
 
 
 def probe_detail_endpoints(sample_id, extra_candidates, notes):
@@ -355,9 +377,11 @@ def probe_detail_endpoints(sample_id, extra_candidates, notes):
         except json.JSONDecodeError:
             tried.append(f"{tmpl} -> non-JSON ({len(body)} bytes)")
             continue
-        abbr, div, dr = extract_org_identity(data)
-        tried.append(f"{tmpl} -> JSON, identity=({abbr}, {div}, {dr})")
-        if div and "mathematical" in div.lower():
+        f = award_org_fields(data) or {}
+        abbr, div = f.get("div_abbr"), f.get("div_name")
+        tried.append(f"{tmpl} -> JSON, identity=({abbr}, {div}, "
+                     f"{f.get('dir_abbr')}, code={f.get('org_code_div')})")
+        if abbr == DMS_ABBREV or (div and "mathematical" in div.lower()):
             notes.append(f"detail endpoint SELECTED: {tmpl}")
             notes.extend(f"detail probe: {t}" for t in tried)
 
@@ -622,48 +646,67 @@ def main():
             ids = [str(a["id"]) for a in samples]
             picks = list(dict.fromkeys(
                 [ids[0], ids[len(ids) // 3], ids[2 * len(ids) // 3], ids[-1]]))
-            idents, sem_ok = [], 0
+            fields, sem_ok, sem_bad, latest = [], 0, 0, None
             for aid in picks:
                 try:
                     data = fetch_detail(aid)
                 except Exception as e:
                     print(f"  detail {aid} failed: {e}", file=sys.stderr)
                     continue
-                abbr, div, dr = extract_org_identity(data)
-                if div or abbr:
-                    idents.append((abbr, div, dr))
-                if code in json.dumps(data):
+                f = award_org_fields(data)
+                if f is None:
+                    DEBUG_DIR.mkdir(parents=True, exist_ok=True)
+                    (DEBUG_DIR / f"unresolved_{code}_{aid}.json").write_text(
+                        json.dumps(data)[:8192])
+                    continue
+                fields.append(f)
+                if f["org_code_div"] == code:
                     sem_ok += 1
-            names = Counter(i[1] for i in idents if i[1])
+                elif f["org_code_div"]:
+                    sem_bad += 1
+                if f["date"]:
+                    latest = max(latest or f["date"][-4:] + f["date"][:5],
+                                 f["date"][-4:] + f["date"][:5])
+            names = Counter((f["div_abbr"], f["div_name"]) for f in fields
+                            if f["div_abbr"] or f["div_name"])
             if not names:
                 unresolved.append({"code": code, "reason":
-                                   "no detail record exposed a division name",
+                                   "no detail record exposed org fields "
+                                   "(raw samples dumped)", "samples": picks})
+                continue
+            if sem_ok == 0 and sem_bad > 0:
+                unresolved.append({"code": code, "reason":
+                                   f"param semantics FAILED: sampled awards "
+                                   f"carry orgCodeDiv != {code}",
                                    "samples": picks})
                 continue
-            div_name, div_n = names.most_common(1)[0]
-            if div_n < max(1, len(idents) * 0.75):
+            (div_abbr, div_name), div_n = names.most_common(1)[0]
+            if div_n < max(1, len(fields) * 0.75):
                 anomalies.append(f"{code}: division consensus only "
-                                 f"{div_n}/{len(idents)}")
-            abbr = next((i[0] for i in idents if i[0]), None)
-            abbr_derived = abbr is None
-            if abbr_derived:
-                abbr = derived_abbrev(div_name) or f"U{code[:4]}"
+                                 f"{div_n}/{len(fields)}")
+            if not div_abbr:
+                div_abbr = derived_abbrev(div_name) or f"U{code[:4]}"
                 anomalies.append(f"{code}: no abbreviation field; derived "
-                                 f"'{abbr}' from name initials")
-            dir_name = next((i[2] for i in idents if i[2]), "")
-            dir_ab = dir_abbr_from_name(dir_name) or "OD"
-            try:
-                recent = probe(code, RECENT, fields="id")
-            except Exception:
-                recent = []
-            verified[code] = {"abbrev": abbr, "name": clean_name(div_name),
+                                 f"'{div_abbr}' from name initials")
+            dir_ab = next((f["dir_abbr"] for f in fields if f["dir_abbr"]), None)
+            dir_name = next((f["dir_name"] for f in fields if f["dir_name"]), "")
+            if not dir_ab:
+                dir_ab = dir_abbr_from_name(dir_name) or "OD"
+            # Active flags cannot be derived reliably here (run 4's
+            # recent-window probes inexplicably returned empty for every
+            # code); ship all-active and derive flags from our own pulled
+            # award data after the backfill.
+            verified[code] = {"abbrev": div_abbr,
+                              "name": clean_name(div_name) or f"NSF org {code}",
                               "dir_abbr": dir_ab,
                               "dir_name": clean_name(dir_name) or "",
                               "bulk_n": 0, "sem_ok": sem_ok,
-                              "active": bool(recent), "latest": "?"}
-            print(f"  verified {code} -> {abbr} ({div_name}) dir={dir_ab} "
-                  f"sem={sem_ok}/{len(picks)} active={bool(recent)}")
+                              "active": True,
+                              "latest": latest or "?"}
+            print(f"  verified {code} -> {div_abbr} ({div_name}) dir={dir_ab} "
+                  f"sem={sem_ok}/{len(picks)} latest={latest}")
         if DMS_CODE not in verified or \
+                verified[DMS_CODE]["abbrev"] != DMS_ABBREV or \
                 "mathematical" not in verified[DMS_CODE]["name"].lower():
             fatal = (f"ground truth violated (detail mode): {DMS_CODE} -> "
                      f"{verified.get(DMS_CODE)}")
@@ -671,7 +714,9 @@ def main():
             fatal = (f"only {len(verified)} codes verified via detail mode; "
                      "refusing to write a mostly-empty registry")
         else:
-            verified[DMS_CODE]["abbrev"] = DMS_ABBREV  # canonical, verified
+            anomalies.append("detail mode: active flags NOT derived (set "
+                             "true everywhere); regenerate from pulled award "
+                             "data post-backfill")
             anomalies.append("detail mode: bulk-side completeness check not "
                              "available (no bulk code universe to compare)")
 
