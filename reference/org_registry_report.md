@@ -1,6 +1,6 @@
 # NSF org registry discovery report
 
-Generated 2026-08-08 by scripts/discover_orgs.py on CI.
+Generated 2026-08-09 by scripts/discover_orgs.py on CI.
 
 ## Unknown-code behavior
 
@@ -17,7 +17,7 @@ Generated 2026-08-08 by scripts/discover_orgs.py on CI.
 - bundle https://www.nsf.gov/awardsearch/assets/chunk.936.7f8ed5c5ebd943fdaefd.js: 671458 bytes, 1 endpoint-ish strings
 - bundle https://www.nsf.gov/awardsearch/assets/chunk.524.7c72181eafa2440e8b79.js: 4335 bytes, 0 endpoint-ish strings
 - bundle https://www.nsf.gov/awardsearch/assets/awardsearch-f30885e2c630bdc91fbcaec0c4953e34.js: 625304 bytes, 14 endpoint-ish strings
-- spa https://www.nsf.gov/funding/award-search: 88227 bytes
+- spa https://www.nsf.gov/funding/award-search: 88229 bytes
 - bundle https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=NSF&amp;dclink=true&amp;ver=true&amp;exts=doc,docx,xls,xlsx,xlsm,ppt,pptx,exe,zip,pdf,js,txt,csv,dxf,wmv,jpg,jpeg,gif,png,wma,mov,avi,mp3,mp4,csv&amp;sitetopic=2025-06-04: 30229 bytes, 1 endpoint-ish strings
 - bundle https://www.nsf.gov/sites/default/files/js/js_3_P8URk6a0qizEPAOk3sTwZNOBYbARx_E9oNqw9J6Zo.js?scope=header&amp;delta=0&amp;language=en&amp;theme=nsf_theme&amp;include=eJx9T9EOwjAI_KFu_aSFUcaqHTQtU-fXWxc10wcTcjmOy-WAEExBNg8v0k9FxRxqSpBrHJPi2aMWck9obMkqJFZ7qdNgMy3UdYDtGKLKP1MhW4t0pm2ywwL3jZj9mzhW5USDAXtu8Lv3cILbt7i4T7znpCOkgxAXYELI1mphoRBt_-XgqDGQwOWgmK44Z42tuVvrNVS_4wMzC3IC: 418 bytes, 0 endpoint-ish strings
 - bundle https://script.crazyegg.com/pages/scripts/0041/5508.js: 7793 bytes, 0 endpoint-ish strings
@@ -55,68 +55,69 @@ Generated 2026-08-08 by scripts/discover_orgs.py on CI.
 
 | code | abbrev | division | directorate | bulk awards | param-check | latest award | active |
 |---|---|---|---|---|---|---|---|
-| 01050000 | LPA | Office of Legislative and Public Affiars | OD | 0 | 2 | ? | False |
-| 01070000 | OCR | Office of Civil Rights | OD | 0 | 4 | ? | False |
-| 01090000 | OISE | Office of International Science and Engineering | OD | 0 | 4 | ? | False |
-| 01130000 | CRSP | Office of the Chief of Research Security Strategy and Policy (crsp) | OD | 0 | 4 | ? | False |
-| 02000000 | IRM | Office of Information & Resource Management | OD | 0 | 4 | ? | False |
-| 02040000 | HRM | Office of Information & Resource Management | OD | 0 | 4 | ? | False |
-| 02060000 | DAS | Office of Information & Resource Management | OD | 0 | 4 | ? | False |
-| 02090000 | DIS | Office of Information & Resource Management | OD | 0 | 4 | ? | False |
-| 03010000 | PHY | Division of Physics | MPS | 0 | 4 | ? | False |
-| 03020000 | AST | Division of Astronomical Sciences | OD | 0 | 4 | ? | False |
-| 03040000 | DMS | Division of Mathematical Sciences | MPS | 0 | 4 | ? | False |
-| 03060000 | OSI | Office of Strategic Initiatives (OSI) | MPS | 0 | 4 | ? | False |
-| 03070000 | DMR | Division of Materials Research | MPS | 0 | 4 | ? | False |
-| 03090000 | CHE | Division of Chemistry | MPS | 0 | 4 | ? | False |
-| 04040000 | BCS | Division of Behavioral and Cognitive Sciences | SBE | 0 | 4 | ? | False |
-| 04050000 | SES | Division of Social and Economic Sciences | SBE | 0 | 4 | ? | False |
-| 05010000 | CCF | Division of Computing and Communication Foundations | CSE | 0 | 4 | ? | False |
-| 05020000 | IIS | Division of Information & Intelligent Systems | CSE | 0 | 4 | ? | False |
-| 05050000 | CNS | Division of Computer and Network Systems | CSE | 0 | 4 | ? | False |
-| 05090000 | OAC | Office of Advanced Cyberinfrastructure (OAC) | CSE | 0 | 4 | ? | False |
-| 06020000 | AGS | Division of Atmospheric and Geospace Sciences | GEO | 0 | 4 | ? | False |
-| 06030000 | EAR | Division of Earth Sciences | GEO | 0 | 4 | ? | False |
-| 06040000 | OCE | Division of Ocean Sciences | GEO | 0 | 4 | ? | False |
-| 06090000 | OPP | Office of Polar Programs (OPP) | GEO | 0 | 4 | ? | False |
-| 07010000 | ECCS | Division of Electrical, Communications and Cyber Systems | CSE | 0 | 4 | ? | False |
-| 07020000 | CBET | Division of Chemical, Bioengineering, Environmental, and Transport Systems | CSE | 0 | 4 | ? | False |
-| 07030000 | CMMI | Division of Civil, Mechanical, and Manufacturing Innovation | CSE | 0 | 4 | ? | False |
-| 07040000 | EFMA | Office of Emerging Frontiers in Research and Innovation (efri) | CSE | 0 | 4 | ? | False |
-| 07050000 | EEC | Division of Engineering Education and Centers | CSE | 0 | 4 | ? | False |
-| 08010000 | DEB | Division of Environmental Biology | BIO | 0 | 4 | ? | False |
-| 08070000 | MCB | Division of Molecular and Cellular Biosciences | BIO | 0 | 4 | ? | False |
-| 08080000 | DBI | Division of Biological Infrastructure | BIO | 0 | 4 | ? | False |
-| 08090000 | IOS | Division of Integrative Organismal Systems | BIO | 0 | 4 | ? | False |
-| 10000000 | BFA | Office of Budget, Finance, & Award Management | OD | 0 | 4 | ? | False |
-| 10010000 | DOB | Office of Budget, Finance, & Award Management | OD | 0 | 4 | ? | False |
-| 10020000 | DFM | Office of Budget, Finance, & Award Management | OD | 0 | 4 | ? | False |
-| 10040000 | DACS | Office of Budget, Finance, & Award Management | OD | 0 | 1 | ? | False |
-| 10050000 | DIAS | Office of Budget, Finance, & Award Management | OD | 0 | 4 | ? | False |
-| 10060000 | RIO | Office of Budget, Finance, & Award Management | OD | 0 | 4 | ? | False |
-| 11010000 | DGE | Division of Graduate Education | EDU | 0 | 4 | ? | False |
-| 11040000 | DUE | Division of Undergraduate Education | EDU | 0 | 4 | ? | False |
-| 11090000 | DRL | Division of Research on Learning in Formal and Informal Settings (DRL) | EDU | 0 | 4 | ? | False |
-| 16020000 | DES | Office of the Chief Information Officer | OD | 0 | 4 | ? | False |
+| 01000000 | OD | Office of the Director | OD | 0 | 4 | 202205/17 | True |
+| 01010000 | OGC | General Counsel | OD | 0 | 4 | 202108/24 | True |
+| 01050000 | LPA | Office of Legislative and Public Affiars | OD | 0 | 2 | 201909/03 | True |
+| 01060000 | OIA | Oia-office of Integrative Activities | OD | 0 | 4 | 202607/16 | True |
+| 01070000 | OCR | Office of Civil Rights | OD | 0 | 4 | 202012/08 | True |
+| 01090000 | OISE | Office of International Science and Engineering | OD | 0 | 4 | 202601/12 | True |
+| 01130000 | CRSP | Office of the Chief of Research Security Strategy and Policy (crsp) | OD | 0 | 4 | 202608/07 | True |
+| 02000000 | IRM | Office of Information & Resource Management | IRM | 0 | 4 | 202001/09 | True |
+| 02040000 | HRM | Division of Human Resource Management | IRM | 0 | 4 | 202205/27 | True |
+| 02060000 | DAS | Division of Administrative Services | IRM | 0 | 4 | 202111/16 | True |
+| 02090000 | DIS | Division of Information Systems | IRM | 0 | 4 | 201909/16 | True |
+| 03010000 | PHY | Division of Physics | MPS | 0 | 4 | 202608/06 | True |
+| 03020000 | AST | Division of Astronomical Sciences | MPS | 0 | 4 | 202608/07 | True |
+| 03040000 | DMS | Division of Mathematical Sciences | MPS | 0 | 4 | 202608/07 | True |
+| 03060000 | OSI | Office of Strategic Initiatives (OSI) | MPS | 0 | 4 | 202509/03 | True |
+| 03070000 | DMR | Division of Materials Research | MPS | 0 | 4 | 202607/29 | True |
+| 03090000 | CHE | Division of Chemistry | MPS | 0 | 4 | 202608/06 | True |
+| 04010000 | SMA | SBE Office of Multidisciplinary Activities | SBE | 0 | 4 | 202511/24 | True |
+| 04030000 | NCSE | National Center for Science and Engineering Statistics. | SBE | 0 | 4 | 202207/11 | True |
+| 04040000 | BCS | Division of Behavioral and Cognitive Sciences | SBE | 0 | 4 | 202607/08 | True |
+| 04050000 | SES | Division of Social and Economic Sciences | SBE | 0 | 4 | 202602/25 | True |
+| 05010000 | CCF | Division of Computing and Communication Foundations | CSE | 0 | 4 | 202605/18 | True |
+| 05020000 | IIS | Division of Information & Intelligent Systems | CSE | 0 | 4 | 202607/30 | True |
+| 05050000 | CNS | Division of Computer and Network Systems | CSE | 0 | 4 | 202608/05 | True |
+| 05090000 | OAC | Office of Advanced Cyberinfrastructure (OAC) | CSE | 0 | 4 | 202606/30 | True |
+| 05100000 | ITR | CISE Information Technology Research | CSE | 0 | 1 | 201509/09 | True |
+| 06010000 | RISE | Integrative and Collaborative Education and Research (icer) | GEO | 0 | 4 | 202608/03 | True |
+| 06020000 | AGS | Division of Atmospheric and Geospace Sciences | GEO | 0 | 4 | 202608/04 | True |
+| 06030000 | EAR | Division of Earth Sciences | GEO | 0 | 4 | 202608/06 | True |
+| 06040000 | OCE | Division of Ocean Sciences | GEO | 0 | 4 | 202607/23 | True |
+| 06090000 | OPP | Office of Polar Programs (OPP) | GEO | 0 | 4 | 202608/05 | True |
+| 07010000 | ECCS | Division of Electrical, Communications and Cyber Systems | ENG | 0 | 4 | 202608/05 | True |
+| 07020000 | CBET | Division of Chemical, Bioengineering, Environmental, and Transport Systems | ENG | 0 | 4 | 202607/28 | True |
+| 07030000 | CMMI | Division of Civil, Mechanical, and Manufacturing Innovation | ENG | 0 | 4 | 202607/31 | True |
+| 07040000 | EFMA | Office of Emerging Frontiers in Research and Innovation (efri) | ENG | 0 | 4 | 202508/15 | True |
+| 07050000 | EEC | Division of Engineering Education and Centers | ENG | 0 | 4 | 202607/20 | True |
+| 08000000 | BIO | Directorate for Biological Sciences | BIO | 0 | 1 | 201705/19 | True |
+| 08010000 | DEB | Division of Environmental Biology | BIO | 0 | 4 | 202607/28 | True |
+| 08040000 | EF | Emerging Frontiers | BIO | 0 | 4 | 202308/07 | True |
+| 08070000 | MCB | Division of Molecular and Cellular Biosciences | BIO | 0 | 4 | 202607/16 | True |
+| 08080000 | DBI | Division of Biological Infrastructure | BIO | 0 | 4 | 202607/29 | True |
+| 08090000 | IOS | Division of Integrative Organismal Systems | BIO | 0 | 4 | 202602/23 | True |
+| 10000000 | BFA | Office of Budget, Finance, & Award Management | BFA | 0 | 4 | 202206/28 | True |
+| 10010000 | DOB | Budget Division | BFA | 0 | 4 | 202209/19 | True |
+| 10020000 | DFM | Division of Financial Management | BFA | 0 | 4 | 201607/28 | True |
+| 10040000 | DACS | Division of Acquisition & Cooperative Support | BFA | 0 | 1 | 201609/12 | True |
+| 10050000 | DIAS | Division of Institution & Award Support | BFA | 0 | 4 | 201809/21 | True |
+| 10060000 | RIO | Research Infrastructure Office | BFA | 0 | 4 | 202108/24 | True |
+| 11010000 | DGE | Division of Graduate Education | EDU | 0 | 4 | 202608/06 | True |
+| 11040000 | DUE | Division of Undergraduate Education | EDU | 0 | 4 | 202608/04 | True |
+| 11060000 | EES | Div. of Equity for Excellence in STEM | EDU | 0 | 4 | 202412/16 | True |
+| 11090000 | DRL | Division of Research on Learning in Formal and Informal Settings (DRL) | EDU | 0 | 4 | 202608/05 | True |
+| 12000000 | NCO | National Coordination Office | NCO | 0 | 2 | 201908/30 | True |
+| 13000000 | NNCO | National Nanotechnology Coordinating Office | NNCO | 0 | 4 | 201908/30 | True |
+| 15010000 | TF | Technology Frontiers | TIP | 0 | 4 | 202606/30 | True |
+| 15020000 | ITE | Innovation and Technology Ecosystems | TIP | 0 | 4 | 202607/27 | True |
+| 15030000 | TI | Translational Impacts | TIP | 0 | 4 | 202608/04 | True |
+| 15040000 | SPH | Strategic Partnerships Hub | TIP | 0 | 3 | 202509/23 | True |
+| 16020000 | DES | Division of Enterprise Services | OCIO | 0 | 4 | 202202/11 | True |
 
-## Unresolved codes (16)
+## Unresolved codes (0)
 
-- 01000000: no detail record exposed a division name (samples ['1953025', '1740507', '2230096', '2135810'])
-- 01010000: no detail record exposed a division name (samples ['1928284', '1634026', '2149586', '2037595'])
-- 01060000: no detail record exposed a division name (samples ['1934968', '1904154', '2546641', '2546677'])
-- 04010000: no detail record exposed a division name (samples ['1912001', '1852056', '2550217', '2447695'])
-- 04030000: no detail record exposed a division name (samples ['1947524', '1841971', '2215606', '2001846'])
-- 05100000: no detail record exposed a division name (samples ['1540016'])
-- 06010000: no detail record exposed a division name (samples ['1927845', '1940218', '2548511', '2615438'])
-- 08000000: no detail record exposed a division name (samples ['1744103'])
-- 08040000: no detail record exposed a division name (samples ['1921585', '1935226', '2319597', '2319427'])
-- 11060000: no detail record exposed a division name (samples ['1937759', '1935960', '2451870', '2444876'])
-- 12000000: no detail record exposed a division name (samples ['1939165', '1841071'])
-- 13000000: no detail record exposed a division name (samples ['1944471', '1841232', '1747657', '1540240'])
-- 15010000: no detail record exposed a division name (samples ['2538883', '2537092', '2332572', '2318858'])
-- 15020000: no detail record exposed a division name (samples ['1937118', '1936915', '2607553', '2607533'])
-- 15030000: no detail record exposed a division name (samples ['1938405', '1938676', '2628986', '2627411'])
-- 15040000: no detail record exposed a division name (samples ['2552622', '2538216', '2533150'])
+- none
 
 ## Bulk codes not queryable via the API (0)
 
@@ -125,11 +126,14 @@ Generated 2026-08-08 by scripts/discover_orgs.py on CI.
 ## Stats
 
 - Sweep: dd 01..20 x vv 00..25; 59 live, 461 empty
-- Verified into registry: 43
+- Verified into registry: 59
 
 ## Anomalies
 
-- 02040000: division consensus only 2/4
+- detail mode: active flags NOT derived (set true everywhere); regenerate from pulled award data post-backfill
 - detail mode: bulk-side completeness check not available (no bulk code universe to compare)
-- directorate CSE spans code prefixes ['05', '07']
-- directorate OD spans code prefixes ['01', '02', '03', '10', '16']
+- directorate 'BFA' not in the canonical name table; using bulk long name
+- directorate 'IRM' not in the canonical name table; using bulk long name
+- directorate 'NCO' not in the canonical name table; using bulk long name
+- directorate 'NNCO' not in the canonical name table; using bulk long name
+- directorate 'OCIO' not in the canonical name table; using bulk long name
