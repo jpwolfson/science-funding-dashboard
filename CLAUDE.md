@@ -119,16 +119,22 @@ consequences already encoded:
         commit 93779a9) failed because NSF redesigned Award Search: the
         legacy download endpoint serves a 128-byte meta-refresh stub to
         non-browser clients, and bulk files converted XML→JSON 2025-01.
-        v3 (run 31229594989) proved the ENTIRE legacy /awardsearch/ path —
-        download.jsp included, browser UA or not — serves only the same
-        128-byte redirect stub; the zips moved somewhere only the new SPA
-        knows. v4 (commit 45b5760, fired ~01:15 UTC): scans the SPA's JS
-        bundles for endpoint candidates, feeds download/zip hits into bulk
-        URL resolution, and falls back to per-award detail-API
-        verification (candidates probed with a known DMS id, value-pattern
-        identity extraction, DMS ground-truth gated, derived abbrevs
-        flagged as anomalies). Sweep facts already established: 59 live
-        org codes, 461 empty, unknown codes return EMPTY.
+        v3 proved the ENTIRE legacy /awardsearch/ path — download.jsp
+        included, browser UA or not — serves only a 128-byte redirect
+        stub; bulk zips remain unreachable. v4 SUCCEEDED via detail-API
+        fallback (44 divisions) but review found 3 defects: 16 unresolved
+        codes incl. all of TIP (value-pattern extraction missed names
+        without a "Division of" prefix), ENG grouped under CSE / AST
+        under OD (tie-break bug in name matcher), active=False everywhere
+        (recent-window probes inexplicably empty). KEY FACT from v4's
+        committed dump: api.nsf.gov/services/v1/awards/{id}.json returns
+        EXPLICIT fields divAbbr, dirAbbr, orgCodeDiv, orgCodeDir,
+        orgLongName (directorate), orgLongName2 (division). v5 (commit
+        fc41f7c, fired 2026-08-09 ~22:10 UTC) extracts by key, checks
+        param semantics via orgCodeDiv == swept code, ships all entries
+        active:true (derive real flags from pulled data post-backfill).
+        Sweep facts established: 59 live org codes, 461 empty, unknown
+        codes return EMPTY.
       - Next session / check-in: (1) review discovery v3 output
         (config/orgs.json vs reference/org_registry_report.md: unresolved
         codes, "not queryable via the API" section = invisible awards,
