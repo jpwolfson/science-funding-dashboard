@@ -164,10 +164,17 @@ consequences already encoded:
         API refuses means awards invisible to our pulls. Site review of a
         node with many children (root/agency) once real multi-division
         data exists. Weekly schedule only activates once merged to main.
-- [ ] Cumulative FY-to-date overlay charts on every node — fully spec'd in
-      `docs/handoff-cumulative-fy-charts.md` (port of fed-funding-dashboard
-      `1c1fba4`, already live there). Sized for one Sonnet implementation
-      pass + parallel Sonnet verification sweep; no API access needed.
+- [x] Cumulative FY-to-date overlay charts on every node (completed
+      2026-08-10 per `docs/handoff-cumulative-fy-charts.md`): `fyCumulative`
+      in `aggregate()`, `cumulativeChart` ×2 leading every node page,
+      `scripts/reaggregate.py` (offline re-aggregation path — reusable
+      whenever `aggregate()` gains keys). All acceptance checks green via
+      independent verification sweep: endpoint invariant exact on 256
+      year-series across 62 dashboards, DMS byte-parity with
+      fed-funding-dashboard@2c211a0 incl. mid-year points, light+dark
+      browser pass, awards.csv untouched. Known inherited behavior: FYs
+      with zero awards in the 5-year window are absent from fyCumulative
+      (fewer lines), not all-zero series.
 - [ ] Phase 2 — NIH via RePORTER API (institutes/centers as the
       directorate tier). Forces the year-shard/compression storage format
       at realistic volume.
