@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Offline re-aggregation: rewrite every leaf's dashboard.json (and then all
-rollups) from the already-committed awards.csv stores, with no API calls.
+rollups) from the already-committed award stores, with no API calls.
 
 Usage: python scripts/reaggregate.py
 
 For every division-tier leaf in config/orgs.json that has a
-data/<unit>/awards.csv, reloads the store and rewrites dashboard.json via the
+data/<unit> award store, reloads it and rewrites dashboard.json via the
 same write_dashboard() path scripts/pull_unit.py uses -- so any change to
 aggregate() (e.g. a new output key) reaches every leaf without a live pull.
 Each leaf's node/source metadata is preserved by reading it back from that
@@ -16,8 +16,7 @@ new information to warn about. Finishes by running scripts/rollup.py's build
 so directorate/agency/root dashboards and data/index.json stay consistent
 with the rewritten leaves.
 
-This script never reads or writes any awards.csv content other than loading
-it read-only via adapters.common.load_store -- the store itself is untouched.
+This script only loads award stores read-only -- the stores are untouched.
 
 `today` for offline re-aggregation is the date of this run (there is no pull
 date to inherit). The current partial fiscal year's series therefore reflect
@@ -39,7 +38,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from adapters.common import load_store, write_dashboard  # noqa: E402
+from adapters.common import load_store, store_exists, write_dashboard  # noqa: E402
 import rollup  # scripts/rollup.py, run after every leaf is rewritten  # noqa: E402
 
 DATA = REPO_ROOT / "data"
@@ -60,17 +59,21 @@ def main():
     reaggregated = 0
     for unit_path, _division in leaf_units(cfg):
         data_dir = DATA / unit_path
-        csv_path = data_dir / "awards.csv"
         dash_path = data_dir / "dashboard.json"
-        if not csv_path.exists():
+        if not store_exists(data_dir):
             continue  # leaf never pulled; nothing to re-aggregate offline
         if not dash_path.exists():
-            sys.exit(f"FATAL: {csv_path} exists but {dash_path} does not; "
+            sys.exit(f"FATAL: award store at {data_dir} exists but "
+                      f"{dash_path} does not; "
                       "cannot recover node/source metadata offline")
         prev = json.loads(dash_path.read_text())
-        awards = list(load_store(csv_path).values())
+        awards = list(load_store(data_dir).values())
+        metadata = {key: prev[key] for key in
+                    ("provider", "storeFormat", "amountNote", "mechanismLabels")
+                    if key in prev}
         warnings = write_dashboard(data_dir, prev["node"], prev["source"],
-                                    awards, prev.get("warnings", []), today)
+                                    awards, prev.get("warnings", []), today,
+                                    metadata=metadata)
         new_invariant_warnings = [w for w in warnings if w.startswith("invariant violated")]
         if new_invariant_warnings:
             sys.exit(

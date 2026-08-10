@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       units:
-        description: "Comma-separated unit paths (agency/dir/div) or 'all'"
+        description: "Comma-separated unit paths/prefixes (e.g. nih or nsf/mps/dms) or 'all'"
         default: "all"
       full_refresh:
         description: "Re-pull the full history (reconciles amendments)"
@@ -31,7 +31,10 @@ jobs:
   plan:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.plan.outputs.matrix }}
+      nsf_matrix: ${{ steps.plan.outputs.nsf_matrix }}
+      nih_matrix: ${{ steps.plan.outputs.nih_matrix }}
+      nsf_any: ${{ steps.plan.outputs.nsf_any }}
+      nih_any: ${{ steps.plan.outputs.nih_any }}
       full: ${{ steps.plan.outputs.full }}
       verify: ${{ steps.plan.outputs.verify }}
       any: ${{ steps.plan.outputs.any }}
@@ -64,32 +67,47 @@ jobs:
               full = datetime.date.today().day <= 7
 
           cfg = json.load(open("config/orgs.json"))
-          leaves = [f"{ag['slug']}/{dr['slug']}/{dv['slug']}"
-                    for ag in cfg["agencies"]
-                    for dr in ag["directorates"]
-                    for dv in dr["divisions"]]
+          entries = [{"unit": f"{ag['slug']}/{dr['slug']}/{dv['slug']}",
+                      "adapter": ag["adapter"]}
+                     for ag in cfg["agencies"]
+                     for dr in ag["directorates"]
+                     for dv in dr["divisions"]]
+          leaves = [entry["unit"] for entry in entries]
           if units != "all":
-              want = [u.strip().strip("/") for u in units.split(",") if u.strip()]
-              unknown = [u for u in want if u not in leaves]
+              selectors = [u.strip().strip("/") for u in units.split(",") if u.strip()]
+              unknown = [selector for selector in selectors
+                         if not any(unit == selector or unit.startswith(selector + "/")
+                                    for unit in leaves)]
               if unknown:
-                  raise SystemExit(f"unknown units (not in config/orgs.json): {unknown}")
-              leaves = want
+                  raise SystemExit(f"unknown unit paths/prefixes: {unknown}")
+              entries = [entry for entry in entries
+                         if any(entry["unit"] == selector
+                                or entry["unit"].startswith(selector + "/")
+                                for selector in selectors)]
+              leaves = [entry["unit"] for entry in entries]
+          nsf = [{"unit": entry["unit"]} for entry in entries
+                 if entry["adapter"] == "nsf"]
+          nih = [{"unit": entry["unit"]} for entry in entries
+                 if entry["adapter"] == "nih_reporter"]
           print(f"{len(leaves)} unit(s), full={full}, verify={verify}")
           with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
-              fh.write("matrix=" + json.dumps({"include": [{"unit": u} for u in leaves]}) + "\n")
+              fh.write("nsf_matrix=" + json.dumps({"include": nsf}) + "\n")
+              fh.write("nih_matrix=" + json.dumps({"include": nih}) + "\n")
+              fh.write(f"nsf_any={'true' if nsf else 'false'}\n")
+              fh.write(f"nih_any={'true' if nih else 'false'}\n")
               fh.write(f"full={'true' if full else 'false'}\n")
               fh.write(f"verify={'true' if verify else 'false'}\n")
               fh.write(f"any={'true' if leaves else 'false'}\n")
 
-  pull:
+  pull-nsf:
     needs: plan
-    if: needs.plan.outputs.any == 'true'
+    if: needs.plan.outputs.nsf_any == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 350
     strategy:
       fail-fast: false
       max-parallel: 4 # be polite to the NSF API
-      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+      matrix: ${{ fromJSON(needs.plan.outputs.nsf_matrix) }}
     env:
       BRANCH: ${{ github.ref_name }}
       PYTHONUNBUFFERED: "1"
@@ -129,10 +147,56 @@ jobs:
           done
           exit 1
 
+  pull-nih:
+    needs: plan
+    if: needs.plan.outputs.nih_any == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      # RePORTER recommends no more than one request/second. Each adapter
+      # process throttles itself too; serial jobs keep the shared runner IP
+      # within that rate.
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.plan.outputs.nih_matrix) }}
+    env:
+      BRANCH: ${{ github.ref_name }}
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Sync to branch tip
+        run: git pull --ff-only origin "$BRANCH" || git reset --hard "origin/$BRANCH"
+      - name: Pull ${{ matrix.unit }}
+        run: |
+          FLAG=""
+          if [ "${{ needs.plan.outputs.full }}" = "true" ]; then FLAG="--full"; fi
+          echo "mode flag: '$FLAG'"
+          python scripts/pull_unit.py --unit "${{ matrix.unit }}" $FLAG
+      - name: Commit this unit's data subtree
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "data/${{ matrix.unit }}"
+          if git diff --cached --quiet; then
+            echo "No data changes."
+            exit 0
+          fi
+          git commit -m "Refresh ${{ matrix.unit }} award data [skip ci]"
+          for i in 1 2 3 4 5; do
+            git push origin "HEAD:$BRANCH" && exit 0
+            git pull --rebase -X theirs origin "$BRANCH" || { git rebase --abort; exit 1; }
+          done
+          exit 1
+
   rollup:
     # Publish what we have even if some pulls failed: failed units keep
     # their previously committed data (stores are never deleted).
-    needs: [plan, pull]
+    needs: [plan, pull-nsf, pull-nih]
     if: ${{ !cancelled() && needs.plan.outputs.any == 'true' }}
     runs-on: ubuntu-latest
     env:
@@ -165,7 +229,7 @@ jobs:
           exit 1
 
   verify-dms:
-    needs: [plan, pull]
+    needs: [plan, pull-nsf]
     if: ${{ !cancelled() && needs.plan.outputs.verify == 'true' }}
     runs-on: ubuntu-latest
     env:

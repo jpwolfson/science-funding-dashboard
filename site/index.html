@@ -113,10 +113,11 @@
         stacked dollars chart separates the top&nbsp;3 from the rest &mdash; year-over-year
         swings in the total can track a handful of large awards rather than the broader
         research-grant base.</li>
-      <li><strong>Standard vs continuing grants.</strong> A shift in NSF practice from continuing
-        to standard grants lowers the new-continuing-award count without necessarily cutting
-        funding &mdash; interpret the mechanism chart before reading the headline count as a cut.</li>
-      <li><strong>Amendment bias.</strong> Intended totals are read as currently stated, including
+      <li><strong>Award mechanisms differ by agency.</strong> NSF reports standard and continuing
+        grants; NIH reports annual application records that this site groups as new/competing,
+        noncompeting continuation, fellowship, and other awards. Interpret the mechanism chart
+        before reading a headline count change as a funding cut.</li>
+      <li><strong>Amendment bias.</strong> Reported award totals are read as currently stated, including
         later upward amendments. Older cohorts have had longer to accumulate them, which biases
         recent years low by an unmeasured amount.</li>
       <li id="csvNote"><strong>Pagination fault, handled.</strong> The NSF API can silently drop
@@ -133,6 +134,18 @@
 "use strict";
 const BASE_FROM = 2015, BASE_TO = 2024; // fixed comparison baseline: FY15-24 average
 const LEVELS = ["root", "agency", "directorate", "division"];
+const DEFAULT_MECHANISMS = { std: "Standard grants", cont: "Continuing grants",
+  fell: "Fellowships", other: "Other awards" };
+
+function mechanismLabels(data) { return data.mechanismLabels || DEFAULT_MECHANISMS; }
+
+function awardUrl(id) {
+  const value = String(id || "");
+  if (value.startsWith("nih:")) {
+    return `https://reporter.nih.gov/project-details/${encodeURIComponent(value.slice(4))}`;
+  }
+  return `https://www.nsf.gov/awardsearch/showAward?AWD_ID=${encodeURIComponent(value)}`;
+}
 const $app = document.getElementById("app");
 
 const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -268,7 +281,8 @@ function renderBreadcrumb(found) {
   });
 }
 
-function childrenTierTitle(level) {
+function childrenTierTitle(level, provider) {
+  if (level === "agency" && provider === "nih") return "Institutes & centers";
   return { root: "Agencies", agency: "Directorates", directorate: "Divisions & offices" }[level] || "Units";
 }
 
@@ -295,7 +309,7 @@ function childrenCard(data) {
   if (!kids.length) return;
   const level = data.node?.level;
   const card = el("div", { class: "card" });
-  card.append(el("h2", { text: childrenTierTitle(level) }));
+  card.append(el("h2", { text: childrenTierTitle(level, data.provider) }));
   card.append(el("p", { class: "note", text: DRILL_NOTE }));
   const sorted = kids.slice().sort((a, b) => {
     if (a.hasData !== b.hasData) return a.hasData ? -1 : 1;
@@ -303,7 +317,7 @@ function childrenCard(data) {
   });
   const t = el("table");
   const trh = el("tr");
-  ["Unit", `New awards Oct–Jul FY${data.currentFY}`, "vs FY15–24 avg", "Intended $ Oct–Jul", "Total awards since 2014"]
+  ["Unit", `Awards Oct–Jul FY${data.currentFY}`, "vs FY15–24 avg", "Award $ Oct–Jul", "Total awards since 2014"]
     .forEach((h, i) => trh.append(el("th", { class: i > 0 ? "num" : "", text: h })));
   trh.append(el("th", { class: "chev" }));
   t.append(trh);
@@ -341,11 +355,12 @@ function childrenCardFromIndex(node, level) {
   const kids = node.children || [];
   if (!kids.length) return;
   const card = el("div", { class: "card" });
-  card.append(el("h2", { text: childrenTierTitle(level) }));
+  const provider = node.path === "nih" || node.path?.startsWith("nih/") ? "nih" : null;
+  card.append(el("h2", { text: childrenTierTitle(level, provider) }));
   card.append(el("p", { class: "note", text: DRILL_NOTE }));
   const t = el("table");
   const trh = el("tr");
-  ["Unit", "New awards Oct–Jul", "vs FY15–24 avg", "Intended $ Oct–Jul", "Total awards since 2014"]
+  ["Unit", "Awards Oct–Jul", "vs FY15–24 avg", "Award $ Oct–Jul", "Total awards since 2014"]
     .forEach((h, i) => trh.append(el("th", { class: i > 0 ? "num" : "", text: h })));
   trh.append(el("th", { class: "chev" }));
   t.append(trh);
@@ -365,18 +380,35 @@ function childrenCardFromIndex(node, level) {
   $app.append(card);
 }
 
-function renderCsvNote(level, path) {
+function renderCsvNote(level, path, data) {
   const li = document.getElementById("csvNote");
   if (!li) return;
-  li.replaceChildren(el("strong", { text: "Pagination fault, handled. " }));
-  li.append(document.createTextNode("The NSF API can silently drop or duplicate records on large paginated queries. The "));
+  const provider = data?.provider || (path === "nih" || path?.startsWith("nih/") ? "nih" : "nsf");
+  const nih = provider === "nih";
+  const mixed = provider === "mixed";
+  li.replaceChildren(el("strong", { text: nih ? "Pagination verified. " : mixed ? "Source checks enforced. " : "Pagination fault, handled. " }));
+  li.append(document.createTextNode(nih
+    ? "Each NIH institute and fiscal year is paged twice in opposite orders; both complete application-ID sets must match RePORTER's reported total. The "
+    : mixed
+      ? "Each source adapter applies its own completeness checks before data can enter the federal rollup. The "
+      : "The NSF API can silently drop or duplicate records on large paginated queries. The "));
   li.append(el("a", { href: "https://github.com/jpwolfson/science-funding-dashboard/tree/main/adapters", text: "pull adapters" }));
-  if (level === "division" && path) {
-    li.append(document.createTextNode(" keep every query window small (bisecting as needed) and cross-check against independently verified baselines. Data refreshes weekly via GitHub Actions; the award-level dataset for this division is in "));
-    li.append(el("a", { href: `data/${path}/awards.csv`, text: "awards.csv" }));
+  if ((level === "division" || data?.storePath) && path) {
+    const storePath = data?.storePath || path;
+    li.append(document.createTextNode(nih
+      ? " reject incomplete or inconsistent snapshots. Data refreshes weekly via GitHub Actions; this institute's award-level dataset is stored as "
+      : " keep every query window small (bisecting as needed) and cross-check against independently verified baselines. Data refreshes weekly via GitHub Actions; the award-level dataset for this division is in "));
+    li.append(el("a", {
+      href: nih ? `https://github.com/jpwolfson/science-funding-dashboard/tree/main/data/${storePath}/awards` : `data/${path}/awards.csv`,
+      text: nih ? "compressed fiscal-year CSV shards" : "awards.csv"
+    }));
     li.append(document.createTextNode("."));
   } else {
-    li.append(document.createTextNode(" keep every query window small (bisecting as needed) and cross-check against independently verified baselines. Data refreshes weekly via GitHub Actions; award-level CSVs live on each division's page."));
+    li.append(document.createTextNode(nih
+      ? " reject incomplete or inconsistent snapshots. Data refreshes weekly via GitHub Actions; compressed award-level CSV shards live on each institute's page."
+      : mixed
+        ? " refuse incomplete snapshots. Data refreshes weekly via GitHub Actions; award-level stores live on each source unit's page."
+        : " keep every query window small (bisecting as needed) and cross-check against independently verified baselines. Data refreshes weekly via GitHub Actions; award-level CSVs live on each division's page."));
   }
 }
 
@@ -385,18 +417,21 @@ function tiles(data) {
   // Units with no current-FY awards (dormant offices) still get the tile
   // row, showing zeros rather than silently omitting the summary.
   const cur = data.fiscalYears.find(f => f.fy === data.currentFY)
-    || { octJul: { awards: 0, dollars: 0, std: 0, cont: 0, fell: 0, other: 0 } };
+    || { fy: data.currentFY, octJul: { awards: 0, dollars: 0, std: 0, cont: 0, fell: 0, other: 0 } };
   const base = data.fiscalYears.filter(f => f.fy >= BASE_FROM && f.fy <= BASE_TO);
   const avg = key => base.length ? base.reduce((s, f) => s + f.octJul[key], 0) / base.length : 0;
   const gen = new Date(data.generated + "T12:00:00");
   const windowDone = gen >= new Date(data.currentFY, 7, 1); // Oct-Jul window complete once Aug arrives
   const suffix = windowDone ? "" : " to date";
+  const mechanisms = mechanismLabels(data);
+  const countLabel = data.provider === "nih" ? "Award records" : data.provider === "nsf" ? "New awards" : "Awards";
+  const dollarLabel = data.provider === "nsf" ? "Intended $" : "Award $";
   const row = el("div", { class: "tiles" });
   const specs = [
-    { label: `New awards, FY${cur.fy} Oct–Jul${suffix}`, val: fmtN(cur.octJul.awards), a: cur.octJul.awards, key: "awards" },
-    { label: `Intended $, FY${cur.fy} Oct–Jul${suffix}`, val: fmtM(cur.octJul.dollars), a: cur.octJul.dollars, key: "dollars" },
-    { label: `Standard grants, Oct–Jul${suffix}`, val: fmtN(cur.octJul.std), a: cur.octJul.std, key: "std" },
-    { label: `Continuing grants, Oct–Jul${suffix}`, val: fmtN(cur.octJul.cont), a: cur.octJul.cont, key: "cont" },
+    { label: `${countLabel}, FY${cur.fy} Oct–Jul${suffix}`, val: fmtN(cur.octJul.awards), a: cur.octJul.awards, key: "awards" },
+    { label: `${dollarLabel}, FY${cur.fy} Oct–Jul${suffix}`, val: fmtM(cur.octJul.dollars), a: cur.octJul.dollars, key: "dollars" },
+    { label: `${mechanisms.std}, Oct–Jul${suffix}`, val: fmtN(cur.octJul.std), a: cur.octJul.std, key: "std" },
+    { label: `${mechanisms.cont}, Oct–Jul${suffix}`, val: fmtN(cur.octJul.cont), a: cur.octJul.cont, key: "cont" },
   ];
   for (const s of specs) {
     const b = avg(s.key);
@@ -418,7 +453,7 @@ function tiles(data) {
 
 // ---------- chart 1: monthly line ----------
 function monthlyChart(data) {
-  const { card, plot, tip } = makeCard("New awards per month",
+  const { card, plot, tip } = makeCard("Awards per month",
     "Every month since October 2014. Months with zero awards are shown as zero.");
   const pts = data.monthly || [];
   function render() {
@@ -451,22 +486,22 @@ function monthlyChart(data) {
         cross.setAttribute("x1", x(i)); cross.setAttribute("x2", x(i)); cross.setAttribute("visibility", "visible");
         dot.setAttribute("cx", x(i)); dot.setAttribute("cy", y(p.awards)); dot.setAttribute("visibility", "visible");
         showTip(tip, plot, x(i) * scale(), y(p.awards) * scale(), monthName(p.month), [
-          { color: css("--s1"), val: fmtN(p.awards), lab: "new awards" },
-          { val: fmtMoney(p.dollars), lab: "intended" },
+          { color: css("--s1"), val: fmtN(p.awards), lab: "awards" },
+          { val: fmtMoney(p.dollars), lab: "award dollars" },
         ]);
       });
       f.svg.addEventListener("pointerleave", () => { tip.style.display = "none"; cross.setAttribute("visibility", "hidden"); dot.setAttribute("visibility", "hidden"); });
     }
   }
   render();
-  addTable(card, ["Month", "New awards", "Intended $"],
+  addTable(card, ["Month", "Awards", "Award $"],
     pts.map(p => [monthName(p.month), fmtN(p.awards), fmtMoney(p.dollars)]));
   return render;
 }
 
 // ---------- chart 2: FY awards columns ----------
 function fyAwardsChart(data, windowDone) {
-  const { card, plot, tip } = makeCard("New awards by fiscal year (Oct–Jul)",
+  const { card, plot, tip } = makeCard("Awards by fiscal year (Oct–Jul)",
     "October through July of each fiscal year, so the current year compares like-for-like. Hairline: FY15–24 average.");
   const rows = data.fiscalYears || [];
   const base = rows.filter(r => r.fy >= BASE_FROM && r.fy <= BASE_TO);
@@ -522,18 +557,19 @@ function fyAwardsChart(data, windowDone) {
 
 // ---------- chart 3: mechanism lines ----------
 function mechanismChart(data) {
-  const { card, plot, tip } = makeCard("New awards by mechanism (Oct–Jul)",
-    "Standard grants, continuing grants, and fellowships, Oct–Jul of each fiscal year. A shift in agency practice between standard and continuing grants can move the continuing-award count without reflecting a change in funding — see notes.");
+  const labels = mechanismLabels(data);
+  const { card, plot, tip } = makeCard("Awards by mechanism (Oct–Jul)",
+    `${labels.std}, ${labels.cont}, and ${labels.fell.toLowerCase()}, Oct–Jul of each fiscal year. Mechanism changes can move counts without reflecting the same change in funding — see notes.`);
   const rows = data.fiscalYears || [];
   const series = [
-    { key: "std", label: "Standard grants", v: "--s1" },
-    { key: "cont", label: "Continuing grants", v: "--s2" },
-    { key: "fell", label: "Fellowships", v: "--s3" },
+    { key: "std", label: labels.std, v: "--s1" },
+    { key: "cont", label: labels.cont, v: "--s2" },
+    { key: "fell", label: labels.fell, v: "--s3" },
   ];
   function render() {
     plot.querySelector("svg")?.remove();
     const f = frame(plot, 300, 46, 118);
-    const max = chartMax(rows, r => r.octJul.std);
+    const max = chartMax(rows, r => Math.max(r.octJul.std, r.octJul.cont, r.octJul.fell));
     yAxis(f.svg, f, max, fmtN);
     if (rows.length) {
       const x = i => f.L + (rows.length > 1 ? i / (rows.length - 1) : 0.5) * (f.R - f.L);
@@ -571,14 +607,14 @@ function mechanismChart(data) {
   }
   render();
   legend(card, series.map(s => ({ label: s.label, color: css(s.v) })), "line");
-  addTable(card, ["Fiscal year", "Standard", "Continuing", "Fellowships", "Other"],
+  addTable(card, ["Fiscal year", labels.std, labels.cont, labels.fell, labels.other],
     rows.map(r => [`FY${r.fy}`, fmtN(r.octJul.std), fmtN(r.octJul.cont), fmtN(r.octJul.fell), fmtN(r.octJul.other)]));
   return render;
 }
 
 // ---------- chart 4: dollars stacked ----------
 function dollarsChart(data) {
-  const { card, plot, tip } = makeCard("Intended dollars by fiscal year",
+  const { card, plot, tip } = makeCard("Award dollars by fiscal year",
     "Full fiscal years; the top-3 awards are split out because a handful of institute- or center-scale awards can drive much of the year-over-year swing in the total.");
   const rows = data.fiscalYears || [];
   function render() {
@@ -607,7 +643,7 @@ function dollarsChart(data) {
       hit.addEventListener("pointermove", () => {
         seg1.setAttribute("opacity", Math.min(1, op + .2)); seg2.setAttribute("opacity", Math.min(1, op + .2));
         showTip(tip, plot, cx * scale(), topY * scale(), `FY${r.fy}${partial ? " (to date)" : ""}`, [
-          { val: fmtM(r.dollars), lab: "total intended" },
+          { val: fmtM(r.dollars), lab: "total award dollars" },
           { color: css("--s2"), val: fmtM(r.dollars - r.exTop3Dollars), lab: "top 3 awards" },
           { color: css("--s1"), val: fmtM(r.exTop3Dollars), lab: "all other awards" },
           { val: fmtMoney(r.median), lab: "median award" },
@@ -619,7 +655,7 @@ function dollarsChart(data) {
   }
   render();
   legend(card, [{ label: "All other awards", color: css("--s1") }, { label: "Top 3 awards", color: css("--s2") }], "swatch");
-  addTable(card, ["Fiscal year", "Total intended", "Top 3 awards", "All other", "Median award"],
+  addTable(card, ["Fiscal year", "Total award $", "Top 3 awards", "All other", "Median award"],
     rows.map(r => [`FY${r.fy}${r.partial ? " (to date)" : ""}`, fmtM(r.dollars),
       fmtM(r.dollars - r.exTop3Dollars), fmtM(r.exTop3Dollars), fmtMoney(r.median)]));
   return render;
@@ -710,7 +746,7 @@ function topAwards(data) {
   if (!recent.some(r => r.top3?.length)) return;
   const card = el("div", { class: "card" });
   card.append(el("h2", { text: "Largest awards, last three fiscal years" }));
-  card.append(el("p", { class: "note", text: "The outliers behind the dollars chart. Award IDs link to NSF." }));
+  card.append(el("p", { class: "note", text: "The outliers behind the dollars chart. Award titles link to the source record." }));
   const t = el("table");
   const trh = el("tr");
   ["FY", "Award", "Institution", ""].forEach((h, i) => trh.append(el("th", { class: i === 3 ? "num" : "", text: h })));
@@ -719,7 +755,7 @@ function topAwards(data) {
     const tr = el("tr");
     tr.append(el("td", { text: `FY${r.fy}` }));
     const tdA = el("td");
-    tdA.append(el("a", { href: `https://www.nsf.gov/awardsearch/showAward?AWD_ID=${encodeURIComponent(a.id)}`, text: a.title || a.id }));
+    tdA.append(el("a", { href: awardUrl(a.id), text: a.title || a.id }));
     tr.append(tdA);
     tr.append(el("td", { text: a.awardee }), el("td", { class: "num", text: fmtMoney(a.amount) }));
     t.append(tr);
@@ -761,7 +797,7 @@ async function boot() {
       level = levelForDepth(found.chain.length - 1);
       childrenCardFromIndex(found.node, level);
     }
-    renderCsvNote(level, orgPath);
+    renderCsvNote(level, orgPath, null);
     return;
   }
 
@@ -770,7 +806,7 @@ async function boot() {
   document.title = title;
   document.getElementById("h1").textContent = title;
   document.getElementById("sub").textContent =
-    `${data.source || ""} Dollar figures are intended totals (estimatedTotalAmt), not outlays.`;
+    `${data.source || ""} ${data.amountNote || "Dollar figures are source-reported award totals, not outlays."}`;
 
   const gen = new Date(data.generated + "T12:00:00");
   document.getElementById("stamp").textContent =
@@ -779,6 +815,13 @@ async function boot() {
     const b = el("div", { class: "banner" });
     b.append(el("strong", { text: "Data quality warnings from the last pull: " }), document.createTextNode(data.warnings.join(" · ")));
     $app.append(b);
+  }
+  if (data.dataComplete === false && data.totalAwards === 0) {
+    document.getElementById("stamp").textContent =
+      "Initial data pull pending · refreshes weekly";
+    if (indexData) childrenCard(data);
+    renderCsvNote(node.level, node.path ?? orgPath, data);
+    return;
   }
   const windowDone = gen >= new Date(data.currentFY, 7, 1);
   tiles(data);
@@ -793,11 +836,11 @@ async function boot() {
   });
   if (cumHasData) {
     renders.push(
-      cumulativeChart(data, "awards", "Cumulative new awards through the fiscal year",
+      cumulativeChart(data, "awards", "Cumulative awards through the fiscal year",
         "Running FY-to-date total, October through September, one line per year. Read the endpoint of the year in progress against the other lines at the same point in the year — no visual integration needed. Minor ticks are weeks.",
         fmtN, fmtN),
-      cumulativeChart(data, "dollars", "Cumulative intended dollars through the fiscal year",
-        "Running FY-to-date intended dollars on the same axes. Institute-scale outlier awards arrive as visible steps. Minor ticks are weeks.",
+      cumulativeChart(data, "dollars", "Cumulative award dollars through the fiscal year",
+        "Running FY-to-date award dollars on the same axes. Institute-scale outlier awards arrive as visible steps. Minor ticks are weeks.",
         v => "$" + Math.round(v / 1e6) + "M", fmtM));
   }
   renders.push(monthlyChart(data), fyAwardsChart(data, windowDone), mechanismChart(data), dollarsChart(data));
@@ -809,7 +852,7 @@ async function boot() {
   window.addEventListener("resize", rerender);
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", rerender);
 
-  renderCsvNote(node.level, node.path ?? orgPath);
+  renderCsvNote(node.level, node.path ?? orgPath, data);
 }
 boot();
 </script>

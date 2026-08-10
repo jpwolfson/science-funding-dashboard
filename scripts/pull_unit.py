@@ -4,8 +4,9 @@
 Usage: python scripts/pull_unit.py --unit nsf/mps/dms [--full]
 
 Reads config/orgs.json, dispatches to the agency's adapter, and writes
-data/<unit>/awards.csv + data/<unit>/dashboard.json. Exits nonzero (writing
-nothing) on any plausibility failure inside the adapter.
+data/<unit>/awards.csv (or compressed fiscal-year shards) plus
+data/<unit>/dashboard.json. Exits nonzero on any plausibility failure inside
+the adapter.
 """
 
 import argparse
@@ -17,10 +18,10 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-from adapters import nsf  # noqa: E402
+from adapters import nih_reporter, nsf  # noqa: E402
 from adapters.common import write_dashboard, write_store  # noqa: E402
 
-ADAPTERS = {"nsf": nsf}
+ADAPTERS = {"nsf": nsf, "nih_reporter": nih_reporter}
 
 
 def load_config():
@@ -44,11 +45,13 @@ def find_unit(cfg, unit_path):
     sys.exit(f"unit not found in config/orgs.json: {unit_path}")
 
 
-def resolved_checks(cfg, division):
+def resolved_checks(cfg, agency, directorate, division):
     checks = dict(cfg.get("defaults", {}))
     checks.setdefault("max_monthly", 1500)
     checks.setdefault("min_total", 0)
     checks.setdefault("max_total", 200000)
+    checks.update(agency.get("checks", {}))
+    checks.update(directorate.get("checks", {}))
     checks.update(division.get("checks", {}))
     return checks
 
@@ -69,18 +72,21 @@ def main():
         sys.exit(f"unknown adapter: {agency['adapter']}")
 
     unit_cfg = dict(division)
-    unit_cfg["checks"] = resolved_checks(cfg, division)
+    unit_cfg["checks"] = resolved_checks(cfg, agency, directorate, division)
     today = date.today()
+    store_path = (data_dir / "awards" if agency.get("store") == "fiscal-year-gzip"
+                  else data_dir / "awards.csv")
 
-    awards, warnings, source = adapter.pull_unit(
-        unit_cfg, data_dir / "awards.csv", full=args.full, today=today,
+    awards, warnings, source, metadata = adapter.pull_unit(
+        unit_cfg, store_path, full=args.full, today=today,
         repo_root=REPO_ROOT)
 
     node = {"name": division["name"], "abbrev": division["abbrev"],
             "path": unit_path, "level": "division"}
-    write_store(data_dir / "awards.csv", awards)
-    all_warnings = write_dashboard(data_dir, node, source, awards, warnings, today)
-    print(f"Wrote {data_dir}/dashboard.json and awards.csv "
+    write_store(store_path, awards)
+    all_warnings = write_dashboard(data_dir, node, source, awards, warnings,
+                                   today, metadata=metadata)
+    print(f"Wrote {data_dir}/dashboard.json and {store_path.name} "
           f"({len(awards)} awards, {len(all_warnings)} warnings)")
 
 

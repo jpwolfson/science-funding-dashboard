@@ -65,8 +65,9 @@ baseline (`reference/verified_baseline.json`, 11,508 awards, 143/143 months).
 - `adapters/` — one module per source: `nsf.py` (generalize
   `reference/pull_nsf_dms.py`), `nih_reporter.py` (Phase 2),
   `usaspending.py` (Phase 3, also the cross-validation source).
-- `data/<agency>/<directorate>/<division>/` — per-leaf `awards.csv`
-  (year-sharded and/or gzipped once large) + `dashboard.json`; rollup
+- `data/<agency>/<directorate>/<division>/` — per-leaf store +
+  `dashboard.json`; NSF uses `awards.csv`, while high-volume NIH uses
+  deterministic `awards/FY####.csv.gz` shards plus a manifest. Rollup
   `dashboard.json` at directorate, agency, and root levels. Aggregates
   stay small; the site reads only JSON.
 - `site/` — static, one page template reading a node's `dashboard.json`,
@@ -178,6 +179,16 @@ consequences already encoded:
 - [ ] Phase 2 — NIH via RePORTER API (institutes/centers as the
       directorate tier). Forces the year-shard/compression storage format
       at realistic volume.
+      - Implementation complete on `claude/phase-2-nih`: 28 current RePORTER
+        administrative components in the registry; `adapters/nih_reporter.py`
+        with per-IC/per-FY pagination, opposite-order exact ID-set checks,
+        non-destructive merge, source-aware award links/labels, and
+        deterministic fiscal-year gzip shards. NIH CI runs serially and the
+        adapter throttles to the official one-request-per-second guidance.
+        Intramural (`IM`) records and subprojects are excluded to avoid
+        zero-dollar records and parent/subproject double counting.
+      - Pending release bar: CI full backfill for all 28 components, rollup,
+        zero unexpected warnings, browser verification, then merge/deploy.
 - [ ] Phase 3 — USAspending adapter for agencies without good native APIs
       (DOE SC, NASA SMD, DOD research offices, USDA NIFA, ...) plus the
       cross-validation layer for all existing units.
