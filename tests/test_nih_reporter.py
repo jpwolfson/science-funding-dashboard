@@ -50,6 +50,88 @@ class NihReporterTests(unittest.TestCase):
             fetched = puller.fetch_year(2025)
         self.assertEqual(set(fetched), set(range(1, 502)))
 
+    def test_duplicate_displacement_is_rejected(self):
+        rows = [row(i) for i in range(1, 502)]
+
+        def fake_post(payload, retries=5):
+            del retries
+            offset = payload["offset"]
+            if offset == 0:
+                page = rows[:500]
+            else:
+                # Reproduce the NSF defect class: a record from page one is
+                # repeated and silently displaces the final unique record.
+                page = [rows[499]]
+            return {"meta": {"total": len(rows)}, "results": page}
+
+        puller = NihReporterPull(
+            "NIGMS", {"min_total": 0, "max_total": 1000,
+                       "max_monthly": 1000}, Path("unused"),
+        )
+        with patch("adapters.nih_reporter.api_post", side_effect=fake_post):
+            with self.assertRaisesRegex(RuntimeError, "unique applications"):
+                puller.fetch_pass(2025, "asc")
+
+    def test_total_changing_between_pages_is_rejected(self):
+        rows = [row(i) for i in range(1, 502)]
+
+        def fake_post(payload, retries=5):
+            del retries
+            offset = payload["offset"]
+            total = len(rows) if offset == 0 else len(rows) + 1
+            return {"meta": {"total": total},
+                    "results": rows[offset:offset + payload["limit"]]}
+
+        puller = NihReporterPull(
+            "NIGMS", {"min_total": 0, "max_total": 1000,
+                       "max_monthly": 1000}, Path("unused"),
+        )
+        with patch("adapters.nih_reporter.api_post", side_effect=fake_post):
+            with self.assertRaisesRegex(RuntimeError, "total changed"):
+                puller.fetch_pass(2025, "asc")
+
+    def test_opposite_order_id_sets_must_match(self):
+        asc = [row(1), row(2)]
+        desc = [row(3), row(2)]
+
+        def fake_post(payload, retries=5):
+            del retries
+            rows = asc if payload["sort_order"] == "asc" else desc
+            return {"meta": {"total": 2}, "results": rows}
+
+        puller = NihReporterPull(
+            "NIGMS", {"min_total": 0, "max_total": 1000,
+                       "max_monthly": 1000}, Path("unused"),
+        )
+        with patch("adapters.nih_reporter.api_post", side_effect=fake_post), \
+             patch("adapters.nih_reporter.time.sleep"):
+            with self.assertRaisesRegex(RuntimeError, "ordered passes disagree"):
+                puller.fetch_year(2025)
+
+    def test_row_level_filter_mismatches_are_rejected(self):
+        cases = [
+            ({"fiscal_year": 2024}, "fiscal-year filter mismatch"),
+            ({"agency_ic_admin": {"abbreviation": "NCI"}},
+             "agency filter mismatch"),
+            ({"subproject_id": 123}, "subproject filter mismatch"),
+            ({"funding_mechanism": "Intramural"},
+             "funding-mechanism filter mismatch"),
+            ({"funding_mechanism": None}, "missing funding_mechanism"),
+        ]
+        puller = NihReporterPull(
+            "NIGMS", {"min_total": 0, "max_total": 1000,
+                       "max_monthly": 1000}, Path("unused"),
+        )
+        for changes, message in cases:
+            bad = row(1)
+            bad.update(changes)
+            with self.subTest(changes=changes):
+                with patch("adapters.nih_reporter.api_post", return_value={
+                    "meta": {"total": 1}, "results": [bad],
+                }):
+                    with self.assertRaisesRegex(RuntimeError, message):
+                        puller.fetch_pass(2025, "asc")
+
     def test_normalize_namespaces_ids_and_uses_award_notice_date(self):
         puller = NihReporterPull(
             "NIGMS", {"min_total": 0, "max_total": 1, "max_monthly": 1},
@@ -74,6 +156,32 @@ class NihReporterTests(unittest.TestCase):
             "NICHD", "NIDA", "NIDCD", "NIDCR", "NIDDK", "NIEHS", "NIGMS",
             "NIMH", "NIMHD", "NINDS", "NINR", "NLM", "OD",
         })
+
+    def test_every_nih_component_has_a_volume_range_containing_baseline(self):
+        baseline = {
+            "CLC": 0, "CSR": 0, "CIT": 0, "FIC": 4427,
+            "NCATS": 4447, "NCCIH": 3547, "NCI": 91300, "NEI": 19371,
+            "NHGRI": 6859, "NHLBI": 67357, "NIA": 46246,
+            "NIAAA": 12939, "NIAID": 73334, "NIAMS": 16988,
+            "NIBIB": 10741, "NICHD": 32351, "NIDA": 26835,
+            "NIDCD": 13408, "NIDCR": 10764, "NIDDK": 49914,
+            "NIEHS": 12632, "NIGMS": 80147, "NIMH": 38390,
+            "NIMHD": 6235, "NINDS": 52058, "NINR": 4055,
+            "NLM": 2275, "OD": 7823,
+        }
+        cfg = json.loads(
+            (Path(__file__).parents[1] / "config" / "orgs.json").read_text())
+        nih = next(agency for agency in cfg["agencies"] if agency["slug"] == "nih")
+        divisions = [division for directorate in nih["directorates"]
+                     for division in directorate["divisions"]]
+        for division in divisions:
+            code = division["params"]["reporter_agency"]
+            checks = division.get("checks") or {}
+            with self.subTest(code=code):
+                self.assertIn("min_total", checks)
+                self.assertIn("max_total", checks)
+                self.assertLessEqual(checks["min_total"], baseline[code])
+                self.assertGreaterEqual(checks["max_total"], baseline[code])
 
 
 if __name__ == "__main__":

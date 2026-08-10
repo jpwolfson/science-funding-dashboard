@@ -32,6 +32,7 @@ INCLUDE_FIELDS = [
     "ApplId", "FiscalYear", "ProjectNum", "AwardNoticeDate", "BudgetStart",
     "ProjectStartDate", "AwardAmount", "AwardType", "ActivityCode",
     "ProjectTitle", "Organization", "AgencyIcAdmin", "FundingMechanism",
+    "SubprojectId",
 ]
 MIN_REQUEST_INTERVAL = 1.05  # NIH recommends no more than one request/second.
 _last_request_at = 0.0
@@ -144,11 +145,39 @@ class NihReporterPull:
                 appl_id = row.get("appl_id")
                 if appl_id is None:
                     raise RuntimeError("RePORTER row is missing appl_id")
+                try:
+                    row_fy = int(row.get("fiscal_year"))
+                except (TypeError, ValueError) as exc:
+                    raise RuntimeError(
+                        f"application {appl_id} has invalid fiscal_year "
+                        f"{row.get('fiscal_year')!r}"
+                    ) from exc
+                if row_fy != fiscal_year_value:
+                    raise RuntimeError(
+                        f"fiscal-year filter mismatch: requested FY"
+                        f"{fiscal_year_value}, got FY{row_fy} for application "
+                        f"{appl_id}"
+                    )
                 admin = row.get("agency_ic_admin") or {}
                 if admin.get("abbreviation") != self.agency:
                     raise RuntimeError(
                         f"agency filter mismatch: requested {self.agency}, got "
                         f"{admin.get('abbreviation')!r} for application {appl_id}"
+                    )
+                if row.get("subproject_id") is not None:
+                    raise RuntimeError(
+                        f"subproject filter mismatch: application {appl_id} "
+                        f"has subproject_id={row.get('subproject_id')!r}"
+                    )
+                mechanism = str(row.get("funding_mechanism") or "").strip()
+                if not mechanism:
+                    raise RuntimeError(
+                        f"application {appl_id} is missing funding_mechanism"
+                    )
+                if "intramural" in mechanism.lower():
+                    raise RuntimeError(
+                        f"funding-mechanism filter mismatch: application "
+                        f"{appl_id} is {mechanism!r}"
                     )
                 by_id[int(appl_id)] = row
             offset += len(page)

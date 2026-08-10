@@ -27,7 +27,8 @@ NSF API defects the pipeline defends against.
 - `scripts/pull_unit.py` — pull one division; `scripts/rollup.py` — build
   directorate/agency/root dashboards plus the nav index;
   `scripts/verify_dms_baseline.py` — exact-parity gate against the
-  hand-verified DMS baseline.
+  hand-verified DMS baseline; `scripts/validate_nih.py` — shard, dedup,
+  rollup, plausibility, live-count, and NIH Data Book reconciliation gate.
 - `data/<agency>/<directorate>/<division>/` — per-leaf store of record plus
   `dashboard.json`. NSF retains a single `awards.csv`; NIH uses deterministic
   `awards/FY####.csv.gz` shards and a manifest. Stores are never pruned.
@@ -55,3 +56,7 @@ directions. Both unique ID sets must exactly match each other and RePORTER's
 `meta.total`; otherwise the pull retries and ultimately refuses to publish.
 Award IDs are namespaced (`nih:<application_id>`) in the common store so NIH
 and NSF identifiers cannot collide in federal rollups.
+
+See [`docs/nih-data-validation.md`](docs/nih-data-validation.md) for the
+fail-closed extraction contract, post-backfill checks, independent published
+benchmarks, tolerances, and reproducible validation commands.

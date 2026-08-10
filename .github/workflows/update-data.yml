@@ -212,6 +212,9 @@ jobs:
         run: git pull --ff-only origin "$BRANCH" || git reset --hard "origin/$BRANCH"
       - name: Build rollups and nav index
         run: python scripts/rollup.py
+      - name: Validate NIH stores and reconcile live source totals
+        if: needs.plan.outputs.nih_any == 'true'
+        run: python scripts/validate_nih.py --live
       - name: Commit rollups
         run: |
           git config user.name "github-actions[bot]"
