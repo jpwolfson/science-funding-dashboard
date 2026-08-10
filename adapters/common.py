@@ -138,11 +138,35 @@ def aggregate(awards, today, series_start=SERIES_START):
                       "amount": a["amount"]} for a in top3],
         })
 
+    # Cumulative FY-to-date overlays, last five fiscal years: weekly running
+    # totals aligned by day-of-fiscal-year (day 0 = Oct 1), so leap years and
+    # weekday drift never misalign the lines. Complete years end on Sep 30;
+    # the current year ends at today. Endpoints therefore equal the
+    # fiscal-year totals above exactly.
+    fy_cum = []
+    for fy in [f for f in sorted(fys) if current_fy - 5 < f <= current_fy]:
+        fy_start = date(fy - 1, 10, 1)
+        last_day = (min(date(fy, 9, 30), today) - fy_start).days
+        daily = [[0, 0] for _ in range(last_day + 1)]
+        for a in awards:
+            d = (date.fromisoformat(a["date"]) - fy_start).days
+            if 0 <= d <= last_day:
+                daily[d][0] += 1
+                daily[d][1] += a["amount"]
+        pts, ca, cd = [], 0, 0
+        for d in range(last_day + 1):
+            ca += daily[d][0]
+            cd += daily[d][1]
+            if d % 7 == 6 or d == last_day:
+                pts.append({"d": d, "awards": ca, "dollars": cd})
+        fy_cum.append({"fy": fy, "partial": fy == current_fy, "points": pts})
+
     return {
         "totalAwards": len(awards),
         "currentFY": current_fy,
         "monthly": monthly,
         "fiscalYears": fy_rows,
+        "fyCumulative": fy_cum,
     }
 
 
