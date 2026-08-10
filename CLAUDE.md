@@ -164,6 +164,10 @@ consequences already encoded:
         API refuses means awards invisible to our pulls. Site review of a
         node with many children (root/agency) once real multi-division
         data exists. Weekly schedule only activates once merged to main.
+- [ ] Cumulative FY-to-date overlay charts on every node — fully spec'd in
+      `docs/handoff-cumulative-fy-charts.md` (port of fed-funding-dashboard
+      `1c1fba4`, already live there). Sized for one Sonnet implementation
+      pass + parallel Sonnet verification sweep; no API access needed.
 - [ ] Phase 2 — NIH via RePORTER API (institutes/centers as the
       directorate tier). Forces the year-shard/compression storage format
       at realistic volume.
