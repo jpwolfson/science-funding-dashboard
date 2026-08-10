@@ -2,7 +2,7 @@
 
 Port of a feature built and shipped on fed-funding-dashboard (commit
 `1c1fba4`, live at https://jpwolfson.github.io/fed-funding-dashboard/ —
-look at the bottom two charts before starting). This document is the full
+look at the first two charts before starting). This document is the full
 spec plus every design decision and pitfall already paid for there, so
 implementation here is mechanical. **Intended execution: one Sonnet
 implementation pass + a parallel Sonnet verification sweep. Fable only for
@@ -11,7 +11,10 @@ re-aggregation of committed data plus front-end.
 
 ## What and why
 
-Two charts on every node page, below the existing charts:
+Two charts on every node page, leading the chart sequence — first and
+second cards after the summary tiles, with all existing charts following
+in their current order (owner-confirmed placement, fed-funding-dashboard
+commit `2c211a0`):
 
 1. **Cumulative new awards through the fiscal year**
 2. **Cumulative intended dollars through the fiscal year**
@@ -92,8 +95,10 @@ nearly verbatim. Decisions already settled there — keep them:
   column per FY. For the partial year print values only for months whose
   START day-of-FY ≤ its last data day, else `—` — so unstarted months
   read as em-dash and the current month row shows the through-today value.
-- **Wire into `boot()`** guarded by `data.fyCumulative?.length`, appended
-  to the `renders` array so resize/theme re-render works.
+- **Wire into `boot()`** guarded by `data.fyCumulative?.length`, as the
+  FIRST entries in the `renders` array (before the monthly chart) so the
+  two cards lead the page; keeping them in `renders` is what makes
+  resize/theme re-render work.
 
 ## Repo-specific adaptations (the only new thinking required)
 
