@@ -80,6 +80,9 @@
   details { margin-top: 8px; }
   summary { color: var(--muted); font-size: 13px; cursor: pointer; user-select: none; }
   table { border-collapse: collapse; margin-top: 8px; font-size: 13px; width: 100%; }
+  tr.nav-row { cursor: pointer; }
+  tr.nav-row:hover td { background: rgba(128,128,128,.08); }
+  th.chev, td.chev { width: 1.4em; text-align: right; color: var(--muted); font-size: 15px; }
   th { text-align: left; color: var(--ink-2); font-weight: 550; }
   th, td { padding: 4px 12px 4px 0; border-bottom: 1px solid var(--grid); }
   td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
@@ -273,12 +276,27 @@ function unitLabel(c) {
   return c.abbrev ? `${c.abbrev} — ${c.name}` : c.name;
 }
 
+// Row-as-link affordance for the children tables: whole row clickable, with
+// a trailing chevron as the signifier. The anchor in the first cell stays
+// the real link (keyboard focus, middle-click, copy-link all keep working).
+function navRow(tr, path) {
+  tr.classList.add("nav-row");
+  tr.addEventListener("click", e => {
+    if (e.target.closest("a") || getSelection()?.toString()) return;
+    location.href = `index.html?org=${path}`;
+  });
+  tr.append(el("td", { class: "chev", text: "›" }));
+}
+
+const DRILL_NOTE = "Each row links to that unit's own dashboard.";
+
 function childrenCard(data) {
   const kids = data.children || [];
   if (!kids.length) return;
   const level = data.node?.level;
   const card = el("div", { class: "card" });
   card.append(el("h2", { text: childrenTierTitle(level) }));
+  card.append(el("p", { class: "note", text: DRILL_NOTE }));
   const sorted = kids.slice().sort((a, b) => {
     if (a.hasData !== b.hasData) return a.hasData ? -1 : 1;
     return (b.octJulDollars || 0) - (a.octJulDollars || 0);
@@ -287,6 +305,7 @@ function childrenCard(data) {
   const trh = el("tr");
   ["Unit", `New awards Oct–Jul FY${data.currentFY}`, "vs FY15–24 avg", "Intended $ Oct–Jul", "Total awards since 2014"]
     .forEach((h, i) => trh.append(el("th", { class: i > 0 ? "num" : "", text: h })));
+  trh.append(el("th", { class: "chev" }));
   t.append(trh);
   for (const c of sorted) {
     const tr = el("tr");
@@ -311,6 +330,7 @@ function childrenCard(data) {
         el("td", { class: "num", text: fmtN(c.totalAwards) }),
       );
     }
+    navRow(tr, c.path);
     t.append(tr);
   }
   card.append(t);
@@ -322,10 +342,12 @@ function childrenCardFromIndex(node, level) {
   if (!kids.length) return;
   const card = el("div", { class: "card" });
   card.append(el("h2", { text: childrenTierTitle(level) }));
+  card.append(el("p", { class: "note", text: DRILL_NOTE }));
   const t = el("table");
   const trh = el("tr");
   ["Unit", "New awards Oct–Jul", "vs FY15–24 avg", "Intended $ Oct–Jul", "Total awards since 2014"]
     .forEach((h, i) => trh.append(el("th", { class: i > 0 ? "num" : "", text: h })));
+  trh.append(el("th", { class: "chev" }));
   t.append(trh);
   for (const c of kids) {
     const tr = el("tr");
@@ -336,6 +358,7 @@ function childrenCardFromIndex(node, level) {
       el("td", { class: "num", text: "—" }),
       el("td", { class: "num", text: "—" }),
       el("td", { class: "num", text: "—" }));
+    navRow(tr, c.path);
     t.append(tr);
   }
   card.append(t);
