@@ -359,8 +359,10 @@ function renderCsvNote(level, path) {
 
 // ---------- tiles ----------
 function tiles(data) {
-  const cur = data.fiscalYears.find(f => f.fy === data.currentFY);
-  if (!cur) return;
+  // Units with no current-FY awards (dormant offices) still get the tile
+  // row, showing zeros rather than silently omitting the summary.
+  const cur = data.fiscalYears.find(f => f.fy === data.currentFY)
+    || { octJul: { awards: 0, dollars: 0, std: 0, cont: 0, fell: 0, other: 0 } };
   const base = data.fiscalYears.filter(f => f.fy >= BASE_FROM && f.fy <= BASE_TO);
   const avg = key => base.length ? base.reduce((s, f) => s + f.octJul[key], 0) / base.length : 0;
   const gen = new Date(data.generated + "T12:00:00");
@@ -522,6 +524,10 @@ function mechanismChart(data) {
         f.svg.append(el("circle", { cx: x(rows.length - 1), cy: y(last), r: 4.5, fill: css(s.v), stroke: css("--surface"), "stroke-width": 2 }));
         let ly = y(last) + 4;
         while (endYs.some(v => Math.abs(v - ly) < 14)) ly += 14;
+        if (ly > f.B - 2) { // keep clear of the x-axis label row
+          ly = f.B - 2;
+          while (endYs.some(v => Math.abs(v - ly) < 14)) ly -= 14;
+        }
         endYs.push(ly);
         f.svg.append(el("text", { class: "dlabel", x: x(rows.length - 1) + 10, y: ly, text: `${last} ${s.label.split(" ")[0].toLowerCase()}` }));
       }
@@ -666,7 +672,7 @@ async function boot() {
 
   const gen = new Date(data.generated + "T12:00:00");
   document.getElementById("stamp").textContent =
-    `${fmtN(data.totalAwards)} awards since Oct 2014 · last updated ${gen.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })} · refreshes weekly`;
+    `${fmtN(data.totalAwards)} award${data.totalAwards === 1 ? "" : "s"} since Oct 2014 · last updated ${gen.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })} · refreshes weekly`;
   if (data.warnings?.length) {
     const b = el("div", { class: "banner" });
     b.append(el("strong", { text: "Data quality warnings from the last pull: " }), document.createTextNode(data.warnings.join(" · ")));

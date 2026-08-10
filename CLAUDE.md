@@ -101,8 +101,7 @@ consequences already encoded:
 
 - [x] Kickoff: repo created, regime + API lessons documented, DMS pipeline
       and verified baseline seeded under `reference/` (2026-08-07)
-- [~] Phase 1 — NSF-wide (code landed 2026-08-07 on `claude/phase-1-50i2eh`;
-      awaiting CI results):
+- [x] Phase 1 — NSF-wide (completed 2026-08-10):
       - Done: `adapters/common.py` (aggregation regression-verified EXACT
         against fed-funding-dashboard's committed dashboard.json),
         `adapters/nsf.py` (all API-defect workarounds + org-filter probe +
@@ -141,18 +140,23 @@ consequences already encoded:
         14 directorate-tier groups = 8 science + OD + 5 admin (BFA, IRM,
         NCO, NNCO, OCIO — kept for completeness). All entries active:true;
         real flags to be derived from pulled data post-backfill.
-      - BACKFILL FIRED 2026-08-09 22:43 UTC: run 31340113408, all 59
-        units, full_refresh + verify_dms, max-parallel 4 — expect several
-        hours; failed units keep old data and can be re-fired
-        individually via units="nsf/<dir>/<div>,...".
-      - Next check-in: (1) run 31340113408 — which pull jobs failed
-        (plausibility caps? volume?), verify-dms + rollup green, root
-        dashboard totals plausible (NSF-wide ~130-160k awards since
-        FY2015); (2) eyeball site with real multi-division data (fixture
-        test only so far); (3) derive active flags + notes from pulled
-        data (small script; commit registry update + rerun rollup);
-        (4) open the Phase 1 PR to main and merge (owner already asked us
-        to drive the merge; Pages enabled, deploy fires on main).
+      - BACKFILL COMPLETE 2026-08-10 01:35 UTC (run 31340113408): all 59
+        pulls green, 0 warnings in every unit, rollup green, verify-dms
+        exact-parity green post-re-pull. NSF-wide totals: 138,162 unique
+        awards since FY2015 (0 cross-division id dups); FY2024 = 11,687
+        awards / $8.0B intended (matches NSF's published annual volume);
+        FY2026 to date = 5,308 / $4.0B.
+      - Active flags derived from pulled data (scripts/derive_active_flags.py,
+        24-month window): 40 active, 19 dormant admin/legacy units with
+        last-award notes. Re-run after future backfills.
+      - Site verified against real data in-browser (9 pages, 0 console
+        errors, children tables exactly match rollup JSON). 3 sparse-unit
+        display bugs found and fixed (missing tile row on no-current-FY
+        units, mechanism-chart label/axis collision, "1 awards" plural);
+        fixes re-verified in-browser.
+      - Phase 1 exit: PR to main opened + merged by Claude (owner
+        pre-approved); Pages deploy fires from update-data runs on main
+        (weekly Mondays 09:13 UTC; dispatchable on demand).
       - Known open items: if bulk-XML discovery also fails, diagnose from
         reference/discover_debug/ dumps (now committed even on failure)
         and re-fire via `.github/triggers/discover.json`. Watch the
