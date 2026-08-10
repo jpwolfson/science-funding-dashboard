@@ -1,0 +1,65 @@
+name: Discover NSF org registry
+
+# The interactive dev environment cannot reach api.nsf.gov, so the org
+# registry is discovered and verified here, on a runner with full egress,
+# and committed back to the branch for review.
+
+on:
+  workflow_dispatch:
+    inputs:
+      dd_max:
+        description: "Directorate code sweep upper bound"
+        default: "20"
+      vv_max:
+        description: "Division code sweep upper bound"
+        default: "25"
+  push:
+    branches: ["claude/**"]
+    paths: [".github/triggers/discover.json"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: discover-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      BRANCH: ${{ github.ref_name }}
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Sync to branch tip
+        run: git pull --ff-only origin "$BRANCH" || git reset --hard "origin/$BRANCH"
+      - name: Discover and verify org codes
+        run: |
+          DD="${{ inputs.dd_max }}"; VV="${{ inputs.vv_max }}"
+          python scripts/discover_orgs.py --dd-max "${DD:-20}" --vv-max "${VV:-25}"
+      - name: Commit registry and report
+        # Runs even when discovery fails: the report and debug dumps ARE
+        # the diagnosis material and must survive the runner.
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add config/orgs.json reference/org_registry_report.md
+          [ -d reference/discover_debug ] && git add reference/discover_debug || true
+          if git diff --cached --quiet; then
+            echo "No registry changes."
+            exit 0
+          fi
+          git commit -m "Discover NSF org registry (empirically verified) [skip ci]"
+          for i in 1 2 3 4 5; do
+            git push origin "HEAD:$BRANCH" && exit 0
+            git pull --rebase -X theirs origin "$BRANCH" || { git rebase --abort; exit 1; }
+          done
+          exit 1

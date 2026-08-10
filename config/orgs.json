@@ -1,0 +1,672 @@
+{
+ "seriesStart": "2014-10-01",
+ "defaults": {
+  "max_monthly": 1500,
+  "min_total": 0,
+  "max_total": 200000
+ },
+ "agencies": [
+  {
+   "slug": "nsf",
+   "abbrev": "NSF",
+   "name": "U.S. National Science Foundation",
+   "adapter": "nsf",
+   "directorates": [
+    {
+     "slug": "bfa",
+     "abbrev": "BFA",
+     "name": "Office of Budget, Finance, & Award Management",
+     "divisions": [
+      {
+       "slug": "bfa",
+       "abbrev": "BFA",
+       "name": "Office of Budget, Finance, & Award Management",
+       "params": {
+        "org_code_div": "10000000"
+       },
+       "active": false,
+       "note": "No awards since 2022-09-12; unit appears dormant or reorganized (kept for its historical awards)."
+      },
+      {
+       "slug": "dob",
+       "abbrev": "DOB",
+       "name": "Budget Division",
+       "params": {
+        "org_code_div": "10010000"
+       },
+       "active": false,
+       "note": "No awards since 2022-09-19; unit appears dormant or reorganized (kept for its historical awards)."
+      },
+      {
+       "slug": "dfm",
+       "abbrev": "DFM",
+       "name": "Division of Financial Management",
+       "params": {
+        "org_code_div": "10020000"
+       },
+       "active": false,
+       "note": "No awards since 2016-07-28; unit appears dormant or reorganized (kept for its historical awards)."
+      },
+      {
+       "slug": "dacs",
+       "abbrev": "DACS",
+       "name": "Division of Acquisition & Cooperative Support",
+       "params": {
+        "org_code_div": "10040000"
+       },
+       "active": false,
+       "note": "No awards since 2016-09-12; unit appears dormant or reorganized (kept for its historical awards)."
+      },
+      {
+       "slug": "dias",
+       "abbrev": "DIAS",
+       "name": "Division of Institution & Award Support",
+       "params": {
+        "org_code_div": "10050000"
+       },
+       "active": false,
+       "note": "No awards since 2018-09-21; unit appears dormant or reorganized (kept for its historical awards)."
+      },
+      {
+       "slug": "rio",
+       "abbrev": "RIO",
+       "name": "Research Infrastructure Office",
+       "params": {
+        "org_code_div": "10060000"
+       },
+       "active": false,
+       "note": "No awards since 2021-08-24; unit appears dormant or reorganized (kept for its historical awards)."
+      }
+     ]
+    },
+    {
+     "slug": "bio",
+     "abbrev": "BIO",
+     "name": "Directorate for Biological Sciences",
+     "divisions": [
+      {
+       "slug": "bio",
+       "abbrev": "BIO",
+       "name": "Directorate for Biological Sciences",
+       "params": {
+        "org_code_div": "08000000"
+       },
+       "active": false,
+       "note": "No awards since 2017-05-19; unit appears dormant or reorganized (kept for its historical awards)."
+      },
+      {
+       "slug": "deb",
+       "abbrev": "DEB",
+       "name": "Division of Environmental Biology",
+       "params": {
+        "org_code_div": "08010000"
+       },
+       "active": true
+      },
+      {
+       "slug": "ef",
+       "abbrev": "EF",
+       "name": "Emerging Frontiers",
+       "params": {
+        "org_code_div": "08040000"
+       },
+       "active": true
+      },
+      {
+       "slug": "mcb",
+       "abbrev": "MCB",
+       "name": "Division of Molecular and Cellular Biosciences",
+       "params": {
+        "org_code_div": "08070000"
+       },
+       "active": true
+      },
+      {
+       "slug": "dbi",
+       "abbrev": "DBI",
+       "name": "Division of Biological Infrastructure",
+       "params": {
+        "org_code_div": "08080000"
+       },
+       "active": true
+      },
+      {
+       "slug": "ios",
+       "abbrev": "IOS",
+       "name": "Division of Integrative Organismal Systems",
+       "params": {
+        "org_code_div": "08090000"
+       },
+       "active": true
+      }
+     ]
+    },
+    {
+     "slug": "cse",
+     "abbrev": "CSE",
+     "name": "Directorate for Computer and Information Science and Engineering",
+     "divisions": [
+      {
+       "slug": "ccf",
+       "abbrev": "CCF",
+       "name": "Division of Computing and Communication Foundations",
+       "params": {
+        "org_code_div": "05010000"
+       },
+       "active": true
+      },
+      {
+       "slug": "iis",
+       "abbrev": "IIS",
+       "name": "Division of Information & Intelligent Systems",
+       "params": {
+        "org_code_div": "05020000"
+       },
+       "active": true
+      },
+      {
+       "slug": "cns",
+       "abbrev": "CNS",
+       "name": "Division of Computer and Network Systems",
+       "params": {
+        "org_code_div": "05050000"
+       },
+       "active": true
+      },
+      {
+       "slug": "oac",
+       "abbrev": "OAC",
+       "name": "Office of Advanced Cyberinfrastructure (OAC)",
+       "params": {
+        "org_code_div": "05090000"
+       },
+       "active": true
+      },
+      {
+       "slug": "itr",
+       "abbrev": "ITR",
+       "name": "CISE Information Technology Research",
+       "params": {
+        "org_code_div": "05100000"
+       },
+       "active": false,
+       "note": "No awards since 2015-09-09; unit appears dormant or reorganized (kept for its historical awards)."
+      }
+     ]
+    },
+    {
+     "slug": "edu",
+     "abbrev": "EDU",
+     "name": "Directorate for STEM Education",
+     "divisions": [
+      {
+       "slug": "dge",
+       "abbrev": "DGE",
+       "name": "Division of Graduate Education",
+       "params": {
+        "org_code_div": "11010000"
+       },
+       "active": true
+      },
+      {
+       "slug": "due",
+       "abbrev": "DUE",
+       "name": "Division of Undergraduate Education",
+       "params": {
+        "org_code_div": "11040000"
+       },
+       "active": true
+      },
+      {
+       "slug": "ees",
+       "abbrev": "EES",
+       "name": "Div. of Equity for Excellence in STEM",
+       "params": {
+        "org_code_div": "11060000"
+       },
+       "active": true
+      },
+      {
+       "slug": "drl",
+       "abbrev": "DRL",
+       "name": "Division of Research on Learning in Formal and Informal Settings (DRL)",
+       "params": {
+        "org_code_div": "11090000"
+       },
+       "active": true
+      }
+     ]
+    },
+    {
+     "slug": "eng",
+     "abbrev": "ENG",
+     "name": "Directorate for Engineering",
+     "divisions": [
+      {
+       "slug": "eccs",
+       "abbrev": "ECCS",
+       "name": "Division of Electrical, Communications and Cyber Systems",
+       "params": {
+        "org_code_div": "07010000"
+       },
+       "active": true
+      },
+      {
+       "slug": "cbet",
+       "abbrev": "CBET",
+       "name": "Division of Chemical, Bioengineering, Environmental, and Transport Systems",
+       "params": {
+        "org_code_div": "07020000"
+       },
+       "active": true
+      },
+      {
+       "slug": "cmmi",
+       "abbrev": "CMMI",
+       "name": "Division of Civil, Mechanical, and Manufacturing Innovation",
+       "params": {
+        "org_code_div": "07030000"
+       },
+       "active": true
+      },
+      {
+       "slug": "efma",
+       "abbrev": "EFMA",
+       "name": "Office of Emerging Frontiers in Research and Innovation (efri)",
+       "params": {
+        "org_code_div": "07040000"
+       },
+       "active": true
+      },
+      {
+       "slug": "eec",
+       "abbrev": "EEC",
+       "name": "Division of Engineering Education and Centers",
+       "params": {
+        "org_code_div": "07050000"
+       },
+       "active": true
+      }
+     ]
+    },
+    {
+     "slug": "geo",
+     "abbrev": "GEO",
+     "name": "Directorate for Geosciences",
+     "divisions": [
+      {
+       "slug": "rise",
+       "abbrev": "RISE",
+       "name": "Integrative and Collaborative Education and Research (icer)",
+       "params": {
+        "org_code_div": "06010000"
+       },
+       "active": true
+      },
+      {
+       "slug": "ags",
+       "abbrev": "AGS",
+       "name": "Division of Atmospheric and Geospace Sciences",
+       "params": {
+        "org_code_div": "06020000"
+       },
+       "active": true
+      },
+      {
+       "slug": "ear",
+       "abbrev": "EAR",
+       "name": "Division of Earth Sciences",
+       "params": {
+        "org_code_div": "06030000"
+       },
+       "active": true
+      },
+      {
+       "slug": "oce",
+       "abbrev": "OCE",
+       "name": "Division of Ocean Sciences",
+       "params": {
+        "org_code_div": "06040000"
+       },
+       "active": true
+      },
+      {
+       "slug": "opp",
+       "abbrev": "OPP",
+       "name": "Office of Polar Programs (OPP)",
+       "params": {
+        "org_code_div": "06090000"
+       },
+       "active": true
+      }
+     ]
+    },
+    {
+     "slug": "irm",
+     "abbrev": "IRM",
+     "name": "Office of Information & Resource Management",
+     "divisions": [
+      {
+       "slug": "irm",
+       "abbrev": "IRM",
+       "name": "Office of Information & Resource Management",
+       "params": {
+        "org_code_div": "02000000"
+       },
+       "active": false,
+       "note": "No awards since 2020-01-09; unit appears dormant or reorganized (kept for its historical awards)."
+      },
+      {
+       "slug": "hrm",
+       "abbrev": "HRM",
+       "name": "Division of Human Resource Management",
+       "params": {
+        "org_code_div": "02040000"
+       },
+       "active": false,
+       "note": "No awards since 2022-09-22; unit appears dormant or reorganized (kept for its historical awards)."
+      },
+      {
+       "slug": "das",
+       "abbrev": "DAS",
+       "name": "Division of Administrative Services",
+       "params": {
+        "org_code_div": "02060000"
+       },
+       "active": false,
+       "note": "No awards since 2022-07-08; unit appears dormant or reorganized (kept for its historical awards)."
+      },
+      {
+       "slug": "dis",
+       "abbrev": "DIS",
+       "name": "Division of Information Systems",
+       "params": {
+        "org_code_div": "02090000"
+       },
+       "active": false,
+       "note": "No awards since 2019-09-16; unit appears dormant or reorganized (kept for its historical awards)."
+      }
+     ]
+    },
+    {
+     "slug": "mps",
+     "abbrev": "MPS",
+     "name": "Directorate for Mathematical and Physical Sciences",
+     "divisions": [
+      {
+       "slug": "phy",
+       "abbrev": "PHY",
+       "name": "Division of Physics",
+       "params": {
+        "org_code_div": "03010000"
+       },
+       "active": true
+      },
+      {
+       "slug": "ast",
+       "abbrev": "AST",
+       "name": "Division of Astronomical Sciences",
+       "params": {
+        "org_code_div": "03020000"
+       },
+       "active": true
+      },
+      {
+       "slug": "dms",
+       "abbrev": "DMS",
+       "name": "Division of Mathematical Sciences",
+       "params": {
+        "org_code_div": "03040000"
+       },
+       "active": true,
+       "checks": {
+        "min_total": 9000,
+        "max_total": 30000,
+        "max_monthly": 600,
+        "baseline": "reference/verified_baseline.json"
+       }
+      },
+      {
+       "slug": "osi",
+       "abbrev": "OSI",
+       "name": "Office of Strategic Initiatives (OSI)",
+       "params": {
+        "org_code_div": "03060000"
+       },
+       "active": true
+      },
+      {
+       "slug": "dmr",
+       "abbrev": "DMR",
+       "name": "Division of Materials Research",
+       "params": {
+        "org_code_div": "03070000"
+       },
+       "active": true
+      },
+      {
+       "slug": "che",
+       "abbrev": "CHE",
+       "name": "Division of Chemistry",
+       "params": {
+        "org_code_div": "03090000"
+       },
+       "active": true
+      }
+     ]
+    },
+    {
+     "slug": "nco",
+     "abbrev": "NCO",
+     "name": "National Coordination Office",
+     "divisions": [
+      {
+       "slug": "nco",
+       "abbrev": "NCO",
+       "name": "National Coordination Office",
+       "params": {
+        "org_code_div": "12000000"
+       },
+       "active": false,
+       "note": "No awards since 2019-08-30; unit appears dormant or reorganized (kept for its historical awards)."
+      }
+     ]
+    },
+    {
+     "slug": "nnco",
+     "abbrev": "NNCO",
+     "name": "National Nanotechnology Coordinating Office",
+     "divisions": [
+      {
+       "slug": "nnco",
+       "abbrev": "NNCO",
+       "name": "National Nanotechnology Coordinating Office",
+       "params": {
+        "org_code_div": "13000000"
+       },
+       "active": false,
+       "note": "No awards since 2019-08-30; unit appears dormant or reorganized (kept for its historical awards)."
+      }
+     ]
+    },
+    {
+     "slug": "ocio",
+     "abbrev": "OCIO",
+     "name": "Office of the Chief Information Officer",
+     "divisions": [
+      {
+       "slug": "des",
+       "abbrev": "DES",
+       "name": "Division of Enterprise Services",
+       "params": {
+        "org_code_div": "16020000"
+       },
+       "active": false,
+       "note": "No awards since 2022-02-11; unit appears dormant or reorganized (kept for its historical awards)."
+      }
+     ]
+    },
+    {
+     "slug": "od",
+     "abbrev": "OD",
+     "name": "Office of the Director",
+     "divisions": [
+      {
+       "slug": "od",
+       "abbrev": "OD",
+       "name": "Office of the Director",
+       "params": {
+        "org_code_div": "01000000"
+       },
+       "active": false,
+       "note": "No awards since 2022-06-24; unit appears dormant or reorganized (kept for its historical awards)."
+      },
+      {
+       "slug": "ogc",
+       "abbrev": "OGC",
+       "name": "General Counsel",
+       "params": {
+        "org_code_div": "01010000"
+       },
+       "active": false,
+       "note": "No awards since 2022-09-06; unit appears dormant or reorganized (kept for its historical awards)."
+      },
+      {
+       "slug": "lpa",
+       "abbrev": "LPA",
+       "name": "Office of Legislative and Public Affiars",
+       "params": {
+        "org_code_div": "01050000"
+       },
+       "active": false,
+       "note": "No awards since 2019-09-03; unit appears dormant or reorganized (kept for its historical awards)."
+      },
+      {
+       "slug": "oia",
+       "abbrev": "OIA",
+       "name": "Oia-office of Integrative Activities",
+       "params": {
+        "org_code_div": "01060000"
+       },
+       "active": true
+      },
+      {
+       "slug": "ocr",
+       "abbrev": "OCR",
+       "name": "Office of Civil Rights",
+       "params": {
+        "org_code_div": "01070000"
+       },
+       "active": false,
+       "note": "No awards since 2021-12-14; unit appears dormant or reorganized (kept for its historical awards)."
+      },
+      {
+       "slug": "oise",
+       "abbrev": "OISE",
+       "name": "Office of International Science and Engineering",
+       "params": {
+        "org_code_div": "01090000"
+       },
+       "active": true
+      },
+      {
+       "slug": "crsp",
+       "abbrev": "CRSP",
+       "name": "Office of the Chief of Research Security Strategy and Policy (crsp)",
+       "params": {
+        "org_code_div": "01130000"
+       },
+       "active": true
+      }
+     ]
+    },
+    {
+     "slug": "sbe",
+     "abbrev": "SBE",
+     "name": "Directorate for Social, Behavioral and Economic Sciences",
+     "divisions": [
+      {
+       "slug": "sma",
+       "abbrev": "SMA",
+       "name": "SBE Office of Multidisciplinary Activities",
+       "params": {
+        "org_code_div": "04010000"
+       },
+       "active": true
+      },
+      {
+       "slug": "ncse",
+       "abbrev": "NCSE",
+       "name": "National Center for Science and Engineering Statistics.",
+       "params": {
+        "org_code_div": "04030000"
+       },
+       "active": true
+      },
+      {
+       "slug": "bcs",
+       "abbrev": "BCS",
+       "name": "Division of Behavioral and Cognitive Sciences",
+       "params": {
+        "org_code_div": "04040000"
+       },
+       "active": true
+      },
+      {
+       "slug": "ses",
+       "abbrev": "SES",
+       "name": "Division of Social and Economic Sciences",
+       "params": {
+        "org_code_div": "04050000"
+       },
+       "active": true
+      }
+     ]
+    },
+    {
+     "slug": "tip",
+     "abbrev": "TIP",
+     "name": "Directorate for Technology, Innovation and Partnerships",
+     "divisions": [
+      {
+       "slug": "tf",
+       "abbrev": "TF",
+       "name": "Technology Frontiers",
+       "params": {
+        "org_code_div": "15010000"
+       },
+       "active": true
+      },
+      {
+       "slug": "ite",
+       "abbrev": "ITE",
+       "name": "Innovation and Technology Ecosystems",
+       "params": {
+        "org_code_div": "15020000"
+       },
+       "active": true
+      },
+      {
+       "slug": "ti",
+       "abbrev": "TI",
+       "name": "Translational Impacts",
+       "params": {
+        "org_code_div": "15030000"
+       },
+       "active": true
+      },
+      {
+       "slug": "sph",
+       "abbrev": "SPH",
+       "name": "Strategic Partnerships Hub",
+       "params": {
+        "org_code_div": "15040000"
+       },
+       "active": true
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
