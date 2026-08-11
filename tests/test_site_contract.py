@@ -29,6 +29,13 @@ class SiteContractTests(unittest.TestCase):
                      "partial source history"):
             self.assertIn(text, self.html)
 
+    def test_obligation_schema_v2_and_render_gate_are_hard_requirements(self):
+        self.assertIn("data.schemaVersion !== 2", self.html)
+        self.assertIn("fileCToNetRatio", self.html)
+        self.assertNotIn("fileCCoverage", self.html)
+        self.assertIn('dataset.renderComplete = "true"', self.html)
+        self.assertIn("dataset.networkError", self.html)
+
     def test_charts_are_named_and_secondary_text_meets_contrast_target(self):
         self.assertIn('"aria-labelledby": plot.getAttribute("aria-labelledby")', self.html)
         self.assertIn("--muted: #73716b", self.html)
@@ -40,7 +47,7 @@ class SiteContractTests(unittest.TestCase):
         self.assertIn("Largest award-attributed gross flows", self.html)
 
     def test_obligation_ledger_is_discoverable_from_award_root(self):
-        for text in ("renderViewNav(obligationRoot)",
+        for text in ("renderViewNav(obligationRoot, sentinelRoot)",
                      "Appropriations obligation dashboards",
                      "data/obligations/dashboard.json",
                      "measures are not additive or directly comparable"):
@@ -54,6 +61,40 @@ class SiteContractTests(unittest.TestCase):
                      "not additive to, the award totals above",
                      "not new awards",
                      "sign alone does not establish a cancellation"):
+            self.assertIn(text, self.html)
+
+    def test_obligation_reporting_periods_use_a_signed_line_chart(self):
+        chart = self.html.split("function obligationPeriodsChart(data) {", 1)[1]
+        chart = chart.split("function obligationFYChart(data) {", 1)[0]
+        self.assertIn("the line is not cumulative", chart)
+        self.assertIn('const line = rows.map', chart)
+        self.assertIn('f.svg.append(el("path"', chart)
+        self.assertIn('f.svg.addEventListener("pointermove"', chart)
+        self.assertNotIn("const bar =", chart)
+
+    def test_sentinel_is_discoverable_and_has_a_hard_schema_gate(self):
+        for text in ('label: "Funding-action sentinel"',
+                     'href: "index.html?org=sentinel"',
+                     'if (kind === "sentinel")',
+                     "data.schemaVersion !== 1",
+                     "renderSentinel(data)"):
+            self.assertIn(text, self.html)
+
+    def test_sentinel_copy_keeps_evidence_and_states_separate(self):
+        for text in ("A signal is not a cancellation",
+                     "Unreviewed signal", "Source-confirmed event",
+                     "Reviewed finding", "Superseded", "Restored",
+                     "not overdue", "gross negative activity",
+                     "net activity", "Attributed source event",
+                     "Optional review finding"):
+            self.assertIn(text, self.html)
+
+    def test_sentinel_publishes_limits_costs_and_source_staleness(self):
+        for text in ("Coverage and interpretation limits",
+                     "Estimated pilot burden",
+                     "Replace them with measured figures after eight weeks",
+                     "retains its last accepted records",
+                     "Other dashboards and deployments continue independently"):
             self.assertIn(text, self.html)
 
 

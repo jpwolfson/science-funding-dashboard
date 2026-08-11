@@ -5,7 +5,11 @@ on:
     branches: ["main"]
     paths:
       - "site/**"
-      - "data/**"
+      - "data/dashboard.json"
+      - "data/index.json"
+      - "data/nsf/**"
+      - "data/nih/**"
+      - "data/sentinel/**"
       - ".github/workflows/deploy-pages.yml"
   workflow_dispatch:
 

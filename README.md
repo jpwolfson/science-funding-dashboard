@@ -17,15 +17,18 @@ NSF API defects the pipeline defends against.
 
 Phase 3.2b records a dated, reviewed AAAS FY 2026 R&D Appropriations
 crosswalk as reference-only research. Federal accounts remain canonical, AAAS
-labels are retained as alternate framing, and integration waits for Phase
-3.2a's schema-v2/workflow contract. See
+labels are retained as alternate framing, and the completed Phase 3.2a
+technical prerequisite does not authorize automatic account onboarding or
+production remapping. See
 [`docs/aaas-federal-account-crosswalk.md`](docs/aaas-federal-account-crosswalk.md).
 
-Phase 3.2c plans a non-blocking funding-action sentinel to surface material
-downward activity and source-confirmed terminations or restorations for optional
-review. It will not make data refreshes or publication depend on a reviewer.
-See [`docs/funding-action-sentinel.md`](docs/funding-action-sentinel.md) for the
-proposed source, labeling, review, limitation, and maintenance-cost contract.
+Phase 3.2c-1 implements a non-blocking funding-action sentinel that surfaces
+material gross-negative File C activity without calling it a cancellation.
+Its versioned financial-observation, sourced-event, optional-review, and episode
+stores publish durable unreviewed/confirmed/reviewed/superseded/restored states.
+The structured NSF and DOE source pilots remain scoped to Phase 3.2c-2. See
+[`docs/funding-action-sentinel.md`](docs/funding-action-sentinel.md) for the
+labeling, review, limitation, and maintenance-cost contract.
 
 ## Layout
 
@@ -50,27 +53,37 @@ proposed source, labeling, review, limitation, and maintenance-cost contract.
   `data/obligations/` — a physically separate appropriation-obligation ledger.
   Canonical dollars come from File B reporting-period deltas; File C provides
   award-linked recipient/flow detail and the residual remains visible.
+- `config/funding_sentinel.json`, `adapters/funding_sentinel.py`, and
+  `data/sentinel/` — the separate funding-action signal/status layer. The
+  detector reads gross-negative File C components, excludes File B residuals,
+  and joins every signal back to stable obligation event IDs.
 - `site/index.html` — the single static page that renders any node
-  (`?org=nsf/mps/dms`), deployed via GitHub Pages.
+  (`?org=nsf/mps/dms`, `?org=obligations`, or `?org=sentinel`), deployed via
+  GitHub Pages.
 - `.github/workflows/update-data.yml` — weekly incremental matrices (full
   reconciliation the first Monday of each month), rollups, deploy. NSF runs
   four leaves in parallel; NIH runs serially and the adapter enforces NIH's
   recommended one-request-per-second ceiling.
-- `.github/workflows/update-obligations.yml` — account-level File B/File C
-  backfill, exact GTAS reconciliation, Program Activity fan-out, and separate
-  obligation navigation. It never passes obligation events through award-ID
-  deduplication.
+- `.github/workflows/update-obligations.yml` — registry-driven weekly current-FY
+  refresh plus rotating historical reconciliation, exact GTAS checks, Program
+  Activity fan-out, and atomic obligation publication. It never passes
+  obligation events through award-ID deduplication.
+- `.github/workflows/update-sentinel.yml` — independent weekly downstream build,
+  validation, rendered-browser check, and commit. It has no dependency edge
+  from award or obligation refreshes and no review queue.
+- `scripts/plan_obligation_refresh.py` and
+  `scripts/reconcile_obligation_artifacts.py` — account × FY planning and
+  provenance-preserving atomic snapshot assembly.
 - `reference/aaas_rd_appropriations_2026-08-11.json` and
   `reference/aaas_federal_account_crosswalk.{json,csv}` — dated AAAS source
   inventory and reviewed reference-only federal-account mappings; neither is a
   production registry or ingestion input.
 - `docs/aaas-federal-account-crosswalk.md` — Phase 3.2b source provenance,
   classification rules, many-to-many review results, evidence model, and the
-  Phase 3.2a integration/drift gate.
-- `docs/funding-action-sentinel.md` — Phase 3.2c specification for a planned
-  non-blocking signal/status layer, optional review process, boundaries of
-  automation, and estimated operating burden. The sentinel is not implemented
-  yet.
+  reviewed account-onboarding boundary.
+- `docs/funding-action-sentinel.md` and `docs/phase-3.2c1-handoff.md` — the
+  sentinel contract, implemented core, boundaries of automation, source-pilot
+  handoff, and estimated operating burden.
 
 ## NIH data semantics
 

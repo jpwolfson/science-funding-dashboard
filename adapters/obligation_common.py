@@ -29,6 +29,7 @@ LOCAL_AWARD_URL_RE = re.compile(
     r"^(?:https?://)?localhost(?::\d+)?/award/([^/?#]+)/?",
     re.IGNORECASE,
 )
+PROVENANCE_SUFFIX = ".provenance.json"
 
 
 def cents(value):
@@ -117,7 +118,123 @@ def _write_csv(fh, events):
         writer.writerow(row)
 
 
-def write_store(path, events, metadata=None):
+def event_fingerprint(events):
+    """Hash normalized event content, not only stable IDs.
+
+    Stable IDs deliberately survive corrections.  A fingerprint used for
+    replacement lineage therefore has to include every persisted field so a
+    same-ID amount or metadata correction is visible.
+    """
+    rows = []
+    for event in sorted((normalize_event(e) for e in events), key=lambda e: e["id"]):
+        rows.append(json.dumps(
+            {key: event.get(key, "") for key in CSV_HEADER},
+            sort_keys=True, separators=(",", ":"), ensure_ascii=False,
+        ))
+    return hashlib.sha256("\n".join(rows).encode()).hexdigest()
+
+
+def file_sha256(path):
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as fh:
+        for chunk in iter(lambda: fh.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def partition_diff(previous, current):
+    """Return a compact, committed diff summary for a replaced partition."""
+    before = {e["id"]: normalize_event(e) for e in previous}
+    after = {e["id"]: normalize_event(e) for e in current}
+    added = sorted(set(after) - set(before))
+    removed = sorted(set(before) - set(after))
+    changed = sorted(
+        event_id for event_id in set(before) & set(after)
+        if any(before[event_id].get(key, "") != after[event_id].get(key, "")
+               for key in CSV_HEADER)
+    )
+
+    def ids_sha(values):
+        return hashlib.sha256("\n".join(values).encode()).hexdigest()
+
+    return {
+        "previousRecordCount": len(before),
+        "recordCount": len(after),
+        "addedCount": len(added),
+        "removedCount": len(removed),
+        "changedCount": len(changed),
+        "netAmountChangeCents": (
+            sum(e["amountCents"] for e in after.values())
+            - sum(e["amountCents"] for e in before.values())
+        ),
+        "addedIdsSha256": ids_sha(added),
+        "removedIdsSha256": ids_sha(removed),
+        "changedIdsSha256": ids_sha(changed),
+    }
+
+
+def provenance_path(store, fiscal_year):
+    return Path(store) / f"FY{int(fiscal_year)}{PROVENANCE_SUFFIX}"
+
+
+def load_partition_provenance(store, fiscal_year):
+    path = provenance_path(store, fiscal_year)
+    return json.loads(path.read_text()) if path.exists() else None
+
+
+def write_partition_provenance(store, fiscal_year, value):
+    value = dict(value)
+    value.setdefault("schemaVersion", 2)
+    value.setdefault("fiscalYear", int(fiscal_year))
+    path = provenance_path(store, fiscal_year)
+    path.write_text(json.dumps(value, indent=1, sort_keys=True) + "\n")
+    return path
+
+
+def rebuild_manifest(path, events=None, metadata=None):
+    """Rebuild the schema-v2 manifest from committed shards and provenance."""
+    path = Path(path)
+    normalized = load_store(path) if events is None else [normalize_event(e) for e in events]
+    by_fy = defaultdict(list)
+    for event in normalized:
+        by_fy[event["fiscalYear"]].append(event)
+    partitions = []
+    accepted_by_fy = {}
+    for fy in sorted(by_fy):
+        shard = path / f"FY{fy}.csv.gz"
+        provenance = load_partition_provenance(path, fy)
+        row = {
+            "fiscalYear": fy,
+            "file": shard.name,
+            "recordCount": len(by_fy[fy]),
+            "sha256": file_sha256(shard),
+            "eventFingerprint": event_fingerprint(by_fy[fy]),
+            "provenance": provenance_path(path, fy).name if provenance else None,
+            "collectionStatus": (
+                provenance.get("collectionStatus") if provenance else "missing"
+            ),
+        }
+        partitions.append(row)
+        if (provenance and provenance.get("collectionStatus") == "accepted"
+                and provenance.get("acceptedAt")):
+            accepted_by_fy[fy] = provenance["acceptedAt"]
+    manifest = {
+        "schemaVersion": 2,
+        "format": "obligation-events-csv-gzip-v2",
+        "recordCount": len(normalized),
+        "fiscalYears": sorted(by_fy),
+        "eventFingerprint": event_fingerprint(normalized),
+        "partitions": partitions,
+        "latestAcceptedAt": accepted_by_fy.get(max(by_fy)) if by_fy else None,
+        **(metadata or {}),
+    }
+    (path / "manifest.json").write_text(
+        json.dumps(manifest, indent=1, sort_keys=True) + "\n"
+    )
+    return manifest
+
+
+def write_store(path, events, metadata=None, partition_metadata=None):
     path = Path(path)
     path.mkdir(parents=True, exist_ok=True)
     normalized = [normalize_event(e) for e in events]
@@ -134,15 +251,9 @@ def write_store(path, events, metadata=None):
             with gzip.GzipFile(filename="", mode="wb", fileobj=raw, mtime=0) as zipped:
                 with io.TextIOWrapper(zipped, encoding="utf-8", newline="") as fh:
                     _write_csv(fh, by_fy.get(fy, []))
-    manifest = {
-        "format": "obligation-events-csv-gzip-v1",
-        "recordCount": len(normalized),
-        "fiscalYears": sorted(by_fy),
-        "sha256": hashlib.sha256("\n".join(sorted(ids)).encode()).hexdigest(),
-        **(metadata or {}),
-    }
-    (path / "manifest.json").write_text(json.dumps(manifest, indent=1) + "\n")
-    return manifest
+    for fy, value in (partition_metadata or {}).items():
+        write_partition_provenance(path, fy, value)
+    return rebuild_manifest(path, normalized, metadata)
 
 
 def load_store(path):
@@ -181,7 +292,7 @@ def _metrics(events):
         "deobligationsCents": sum(e["grossNegativeCents"] for e in events),
         "deobligations": dollars(sum(e["grossNegativeCents"] for e in events)),
         "distinctLinkedAwards": len({e["awardId"] for e in linked if e["awardId"]}),
-        "fileCCoverage": (file_c / net) if net else None,
+        "fileCToNetRatio": (file_c / net) if net else None,
     }
 
 
@@ -285,7 +396,8 @@ def aggregate(events, current_fy=None, covered_periods=None, partial_fys=None):
 def write_dashboard(data_dir, node, source, events, warnings=None, children=None,
                     current_fy=None, metadata=None, covered_periods=None,
                     partial_fys=None):
-    out = {"kind": "obligations", "generated": date.today().isoformat(),
+    out = {"schemaVersion": 2, "kind": "obligations",
+           "generated": date.today().isoformat(),
            "node": node, "source": source, "warnings": list(warnings or []),
            "dataComplete": not warnings,
            **aggregate(events, current_fy, covered_periods, partial_fys),

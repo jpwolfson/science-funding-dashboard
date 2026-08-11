@@ -1,0 +1,51 @@
+name: Update funding-action sentinel
+
+on:
+  schedule:
+    - cron: "17 12 * * 2" # Independent weekly downstream rebuild
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: funding-sentinel-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      BRANCH: ${{ github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build from committed File C activity and accepted source stores
+        run: python scripts/build_funding_sentinel.py
+      - name: Validate stores, stable ledger joins, episodes, and public contract
+        run: python scripts/validate_funding_sentinel.py
+      - name: Run unit and site contract tests
+        run: python -m unittest discover -s tests -v
+      - name: Render the sentinel in Chrome
+        run: python scripts/smoke_sentinel_page.py
+      - name: Commit the independently validated sentinel snapshot
+        shell: python
+        run: |
+          import os, subprocess
+
+          subprocess.run(["git", "config", "user.name", "github-actions[bot]"], check=True)
+          subprocess.run(["git", "config", "user.email",
+                          "41898282+github-actions[bot]@users.noreply.github.com"], check=True)
+          subprocess.run(["git", "add", "data/sentinel"], check=True)
+          if subprocess.run(["git", "diff", "--cached", "--quiet"]).returncode == 0:
+              print("No sentinel snapshot changes.")
+          else:
+              subprocess.run(["git", "commit", "-m",
+                              "Refresh funding-action sentinel snapshot"], check=True)
+              branch = os.environ["BRANCH"]
+              subprocess.run(["git", "push", "origin", f"HEAD:{branch}"], check=True)

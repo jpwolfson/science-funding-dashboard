@@ -1,10 +1,10 @@
 # AAAS-to-federal-account crosswalk review
 
-Status: Phase 3.2b research complete on 2026-08-11. Reference-only; integration is deferred until Phase 3.2a publishes the schema-v2 and workflow contract.
+Status: Phase 3.2b research complete on 2026-08-11. The schema-v2/workflow prerequisite is complete; the crosswalk remains reference-only pending reviewed account onboarding.
 
 ## Outcome
 
-The dated snapshot preserves **45 AAAS grouping fields and 237 distinct displayed labels** from the public FY 2026 Power BI model. The reviewed crosswalk classifies **185 resolved**, **10 provisional**, and **42 unresolved** labels. Resolved rows are independently usable after the Phase 3.2a integration gate; provisional and unresolved rows do not block them.
+The dated snapshot preserves **45 AAAS grouping fields and 237 distinct displayed labels** from the public FY 2026 Power BI model. The reviewed crosswalk classifies **185 resolved**, **10 provisional**, and **42 unresolved** labels. Resolved rows are independently usable for reviewed account onboarding; provisional and unresolved rows do not block them.
 
 The federal-account hierarchy is canonical. AAAS labels are preserved verbatim as an alternate framing layer, including source spelling (`Integrated Activites`) and leading spaces on totals. No account registry, ingestion workflow, dashboard schema, or generated dashboard data changed in this phase.
 
@@ -49,9 +49,9 @@ Every crosswalk row references the AAAS snapshot evidence plus either the exact 
 
 The mapping of an AAAS program line to its parent account is an explicit inference from two observations: the line appears under an account-specific AAAS field, and the official directory confirms that field's federal-account title. The rationale on each row makes this inference inspectable.
 
-## Deferred integration and drift contract
+## Account onboarding and drift contract
 
-Phase 3.2a owns the schema-v2 and workflow contract. After that lands, integration should:
+The schema-v2 and registry-driven workflow contract is implemented. Any future account onboarding should:
 
 1. translate, not copy, these reference rows into the schema-v2 account model;
 2. retain `aaas_label` and grouping metadata while joining through canonical federal-account codes;
@@ -59,7 +59,9 @@ Phase 3.2a owns the schema-v2 and workflow contract. After that lands, integrati
 4. accept resolved rows independently of provisional/unresolved review;
 5. require review for any changed source row before onboarding or remapping.
 
-Automated drift checks are also deferred. The future check should compare the source page/report identity, model refresh time, 45-field inventory, and exact `aaas_row_key` set against this snapshot. Drift may fail or open a review issue, but it must never auto-onboard a new label, delete a missing row, or silently change a mapping.
+Schema v2 does not define a crosswalk integration-state vocabulary, so every row uses `reference_only_pending_account_onboarding`. This state describes the production boundary, not mapping quality; `resolved`, `provisional`, and `unresolved` remain the independent evidence classifications.
+
+The completed technical prerequisite does not authorize automatic registry onboarding, production remapping, workflow changes, or drift enforcement. A future drift check should compare the source page/report identity, model refresh time, 45-field inventory, and exact `aaas_row_key` set against this snapshot. Drift may fail or open a review issue, but it must never auto-onboard a new label, delete a missing row, or silently change a mapping.
 
 ## Acceptance review
 
@@ -69,4 +71,4 @@ Automated drift checks are also deferred. The future check should compare the so
 - `resolved` / `provisional` / `unresolved` on every row: complete.
 - Evidence IDs and rationale on every row: complete.
 - Account registry, ingestion, schema, and generated data untouched: verified by repository diff.
-- Schema-v2 integration and drift automation: explicitly deferred to the Phase 3.2a contract.
+- Account onboarding and drift automation: not implemented; each remains a separate reviewed change.

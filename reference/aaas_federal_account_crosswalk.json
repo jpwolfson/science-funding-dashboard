@@ -4,7 +4,7 @@
   "status": "reviewed_reference_only",
   "canonical_hierarchy": "federal_account",
   "alternate_grouping": "AAAS FY 2026 R&D Appropriations Dashboard",
-  "integration_gate": "Wait for Phase 3.2a schema-v2 and workflow contract; do not import these rows into config/orgs.json or an ingestion workflow yet.",
+  "integration_gate": "The schema-v2/workflow prerequisite is complete, but these rows remain reference-only pending reviewed account onboarding. Do not auto-import them into config/obligation_accounts.json, config/orgs.json, or any workflow, and do not remap production accounts; resolved rows may be evaluated independently of provisional and unresolved rows.",
   "classification_definitions": {
     "resolved": "Account identity is supported by an exact official title/code match or by an AAAS field that unambiguously scopes program lines to that account; explicit totals may map to several accounts.",
     "provisional": "The cited account candidates are defensible, but the AAAS label lacks a service, program-element, or historical split needed for final integration.",
@@ -956,7 +956,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:089-0222"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DOESC::Adv Sci Computing Res (ASCR)",
@@ -979,7 +979,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:089-0222"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DOESC::Basic Energy Sciences (BES)",
@@ -1002,7 +1002,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:089-0222"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DOESC::Bio and Environ Research (BER)",
@@ -1025,7 +1025,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:089-0222"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DOESC::Fusion Energy Sciences (FES)",
@@ -1048,7 +1048,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:089-0222"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DOESC::High-Energy Physics (HEP)",
@@ -1071,7 +1071,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:089-0222"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DOESC::Nuclear Physics",
@@ -1094,7 +1094,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:089-0222"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DOEEERE1:: TOTAL",
@@ -1117,7 +1117,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:089-0321"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DOEEERE1::Bioenergy Tech",
@@ -1140,7 +1140,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:089-0321"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DOEEERE1::Hydrogen & Fuel Cells",
@@ -1163,7 +1163,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:089-0321"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DOEEERE1::Solar Energy",
@@ -1186,7 +1186,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:089-0321"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DOEEERE1::Wind Energy",
@@ -1209,7 +1209,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:089-0321"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DOEEERE2::Advanced Manufacturing",
@@ -1232,7 +1232,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:089-0321"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DOEEERE2::Building Tech",
@@ -1255,7 +1255,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:089-0321"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DOEEERE2::Geothermal Tech",
@@ -1278,7 +1278,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:089-0321"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DOEEERE2::Vehicle Tech",
@@ -1301,7 +1301,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:089-0321"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DOEEERE2::Water Power",
@@ -1324,7 +1324,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:089-0321"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DOEFossil:: Total Budget",
@@ -1347,7 +1347,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:089-0213"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DOEFossil::CCUS",
@@ -1370,7 +1370,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:089-0213"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DOEFossil::Natural Gas Tech",
@@ -1393,7 +1393,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:089-0213"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DOEFossil::Other Advanced Coal R&D",
@@ -1416,7 +1416,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:089-0213"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DOEFossil::Unconventional Tech",
@@ -1439,7 +1439,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:089-0213"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DOENuc:: Total Budget",
@@ -1462,7 +1462,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:089-0319"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DOENuc::Adv. Reactor Demonstration",
@@ -1485,7 +1485,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:089-0319"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DOENuc::Nuclear Enabling Tech",
@@ -1508,7 +1508,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:089-0319"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DOENuc::Reactor Concepts RD&D",
@@ -1531,7 +1531,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:089-0319"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DOEOther::ARPA-E",
@@ -1554,7 +1554,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:089-0337"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DOEOther::Cybersecurity and Response",
@@ -1577,7 +1577,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:089-2250"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DOEOther::Electricity Delivery",
@@ -1600,7 +1600,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:089-0318"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DOEOther::Energy Information Administration",
@@ -1623,7 +1623,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:089-0216"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DOEDemo::Clean Energy Demonstration",
@@ -1646,7 +1646,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:089-2297"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DOENNSA:: RDT&E Total",
@@ -1674,7 +1674,7 @@
         "usaspending:089-0240",
         "usaspending:089-0309"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DOENNSA::Nonproliferation and Forensics R&D",
@@ -1697,7 +1697,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:089-0309"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DOENNSA::RDT&E: Academic Programs",
@@ -1720,7 +1720,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:089-0240"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DOENNSA::RDT&E: Adv Sim & Computing",
@@ -1743,7 +1743,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:089-0240"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DOENNSA::RDT&E: Engineering",
@@ -1766,7 +1766,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:089-0240"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DOENNSA::RDT&E: IC Fusion",
@@ -1789,7 +1789,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:089-0240"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DOENNSA::RDT&E: Manufacturing",
@@ -1812,7 +1812,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:089-0240"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DOENNSA::RDT&E: Science Assessment",
@@ -1835,7 +1835,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:089-0240"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DODS&Taccounts:: S&T (6.1-6.3)",
@@ -1878,7 +1878,7 @@
         "usaspending:057-3620",
         "usaspending:097-0400"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DODS&Taccounts::Adv Technology Development (6.3)",
@@ -1921,7 +1921,7 @@
         "usaspending:057-3620",
         "usaspending:097-0400"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DODS&Taccounts::Applied Research (6.2)",
@@ -1964,7 +1964,7 @@
         "usaspending:057-3620",
         "usaspending:097-0400"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DODS&Taccounts::Basic Research (6.1)",
@@ -2007,7 +2007,7 @@
         "usaspending:057-3620",
         "usaspending:097-0400"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DODS&Taccounts::R&D (6.1-6.6)",
@@ -2050,7 +2050,7 @@
         "usaspending:057-3620",
         "usaspending:097-0400"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DODBasicMil::Air Force",
@@ -2073,7 +2073,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:057-3600"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DODBasicMil::Army",
@@ -2096,7 +2096,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:021-2040"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DODBasicMil::Defense Agencies",
@@ -2119,7 +2119,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:097-0400"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DODBasicMil::Navy",
@@ -2142,7 +2142,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:017-1319"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DODBasicMil::Space Force",
@@ -2165,7 +2165,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:057-3620"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DODBasicProgs::Defense Research Sciences",
@@ -2208,7 +2208,7 @@
         "usaspending:057-3620",
         "usaspending:097-0400"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DODBasicProgs::Minority Institutions",
@@ -2231,7 +2231,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:097-0400"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DODBasicProgs::National Defense Education Program",
@@ -2254,7 +2254,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:097-0400"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DODBasicProgs::OSD Initiatives",
@@ -2277,7 +2277,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:097-0400"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DODBasicProgs::Univ Research Initiatives",
@@ -2320,7 +2320,7 @@
         "usaspending:057-3620",
         "usaspending:097-0400"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DODBasicProgs::University / Industry Research Centers",
@@ -2363,7 +2363,7 @@
         "usaspending:057-3620",
         "usaspending:097-0400"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DODOther::Defense Medical Research",
@@ -2386,7 +2386,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:097-0130"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DODOther::Defense-Wide Manufacturing S&T",
@@ -2409,7 +2409,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:097-0400"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DODOther::DIU",
@@ -2432,7 +2432,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:097-0400"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DODOther::National Security Innovation Network",
@@ -2455,7 +2455,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:097-0400"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DODOther::SERDP",
@@ -2478,7 +2478,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:097-0400"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DODMil:: Total",
@@ -2521,7 +2521,7 @@
         "usaspending:057-3620",
         "usaspending:097-0400"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DODMil::Air Force",
@@ -2544,7 +2544,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:057-3600"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DODMil::Army",
@@ -2567,7 +2567,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:021-2040"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DODMil::Defense Agencies",
@@ -2590,7 +2590,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:097-0400"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DODMil::Navy",
@@ -2613,7 +2613,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:017-1319"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "DODMil::Space Force",
@@ -2636,7 +2636,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:057-3620"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIHAccts1:: Total NIH",
@@ -2789,7 +2789,7 @@
         "usaspending:075-0897",
         "usaspending:075-0898"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIHAccts1::Aging",
@@ -2812,7 +2812,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:075-0843"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIHAccts1::Alcohol Abuse and Alcoholism",
@@ -2835,7 +2835,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:075-0894"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIHAccts1::Allergy and Infectious Diseases",
@@ -2858,7 +2858,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:075-0885"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIHAccts1::Arthritis / Musculoskeletal",
@@ -2881,7 +2881,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:075-0888"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIHAccts1::Biomedical Imaging / Bioengineering",
@@ -2904,7 +2904,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:075-0898"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIHAccts2::Cancer Institute",
@@ -2927,7 +2927,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:075-0849"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIHAccts2::Child Health & Human Dev",
@@ -2950,7 +2950,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:075-0844"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIHAccts2::Complementary and Integrative Health",
@@ -2973,7 +2973,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:075-0896"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIHAccts2::Deafness and Communication",
@@ -2996,7 +2996,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:075-0890"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIHAccts2::Dental Research",
@@ -3019,7 +3019,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:075-0873"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIHAccts2::Diabetes, Digestive, and Kidney",
@@ -3042,7 +3042,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:075-0884"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIHAccts3::Drug Abuse",
@@ -3065,7 +3065,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:075-0893"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIHAccts3::Environmental Health Sciences",
@@ -3088,7 +3088,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:075-0862"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIHAccts3::Eye Institute",
@@ -3111,7 +3111,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:075-0887"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIHAccts3::Fogarty International Center",
@@ -3134,7 +3134,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:075-0819"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIHAccts3::General Medical Sciences",
@@ -3157,7 +3157,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:075-0851"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIHAccts3::Heart, Lung, and Blood",
@@ -3180,7 +3180,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:075-0872"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIHAccts4::Human Genome",
@@ -3203,7 +3203,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:075-0891"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIHAccts4::Mental Health",
@@ -3226,7 +3226,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:075-0892"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIHAccts4::Minority Health / Disparities",
@@ -3249,7 +3249,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:075-0897"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIHAccts4::National Library of Medicine",
@@ -3272,7 +3272,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:075-0807"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIHAccts4::Natl Center for Advancing Translational Sci",
@@ -3295,7 +3295,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:075-0875"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIHAccts4::Neurological Disorders",
@@ -3318,7 +3318,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:075-0886"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIHAccts5::ARPA-H",
@@ -3341,7 +3341,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:075-0837"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIHAccts5::Buildings and Facilities",
@@ -3364,7 +3364,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:075-0838"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIHAccts5::Nursing Research",
@@ -3387,7 +3387,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:075-0889"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIHAccts5::Office of the Director",
@@ -3410,7 +3410,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:075-0846"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIHARPA::ARPA Health",
@@ -3433,7 +3433,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:075-0837"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIHARPA::ARPA-Health",
@@ -3456,7 +3456,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:075-0837"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIH Reorg1::Allergy and Infectious Disease",
@@ -3474,7 +3474,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIH Reorg1::Body Systems",
@@ -3492,7 +3492,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIH Reorg1::Cancer",
@@ -3510,7 +3510,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIH Reorg1::Neuroscience and Brain",
@@ -3528,7 +3528,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIH Reorg2::Aging",
@@ -3546,7 +3546,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIH Reorg2::Behavioral Health",
@@ -3564,7 +3564,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIH Reorg2::Child and Women's Health, Sensory Disorders and Communication",
@@ -3582,7 +3582,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIH Reorg2::General Medicine",
@@ -3600,7 +3600,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIH Reorg Del::Complementary and Integrative Health",
@@ -3623,7 +3623,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:075-0896"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIH Reorg Del::Fogarty International Center",
@@ -3646,7 +3646,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:075-0819"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIH Reorg Del::Minority Health/ Disparities",
@@ -3669,7 +3669,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:075-0897"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIH Reorg Del::Nursing",
@@ -3692,7 +3692,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:075-0889"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIH Reorg Moved::ARPA-Health",
@@ -3715,7 +3715,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:075-0837"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIH Reorg Moved::Environmental Health Sciences",
@@ -3738,7 +3738,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:075-0862"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NIH Reorg Moved::Natl Center for Advancing Translational Sci",
@@ -3761,7 +3761,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:075-0875"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NSFAccounts:: NSF Total",
@@ -3799,7 +3799,7 @@
         "usaspending:049-0180",
         "usaspending:049-0551"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NSFAccounts::Agency Ops & Award Mgmt",
@@ -3822,7 +3822,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:049-0180"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NSFAccounts::Major Equipment & Facilities",
@@ -3845,7 +3845,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:049-0551"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NSFAccounts::Research & Related Activities",
@@ -3868,7 +3868,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:049-0100"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NSFAccounts::STEM Education",
@@ -3891,7 +3891,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:049-0106"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NASA Accounts:: NASA Total",
@@ -3939,7 +3939,7 @@
         "usaspending:080-0131",
         "usaspending:080-0128"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NASA Accounts::Aeronautics Research",
@@ -3962,7 +3962,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:080-0126"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NASA Accounts::Deep Space Exploration Systems",
@@ -3985,7 +3985,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:080-0124"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NASA Accounts::LEO and Spaceflight Operations",
@@ -4008,7 +4008,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:080-0115"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NASA Accounts::Science",
@@ -4031,7 +4031,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:080-0120"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NASA Accounts::Space Technology",
@@ -4054,7 +4054,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:080-0131"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NASA Accounts::STEM Engagement",
@@ -4077,7 +4077,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:080-0128"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NASA Explor:: Total Deep Space Exploration",
@@ -4100,7 +4100,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:080-0124"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NASA Explor::ACD: Cislunar, Surface, Lander",
@@ -4123,7 +4123,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:080-0124"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NASA Explor::ACD: Gateway",
@@ -4146,7 +4146,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:080-0124"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NASA Explor::Artemis Campaign Development",
@@ -4169,7 +4169,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:080-0124"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NASA Explor::Exploration Ground Systems",
@@ -4192,7 +4192,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:080-0124"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NASA Explor::Orion Program",
@@ -4215,7 +4215,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:080-0124"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NASA Explor::Space Launch System (SLS)",
@@ -4238,7 +4238,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:080-0124"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NASA SMD:: Science Total",
@@ -4261,7 +4261,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:080-0120"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NASA SMD::Astrophysics",
@@ -4284,7 +4284,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:080-0120"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NASA SMD::Bio and Physical Sciences",
@@ -4307,7 +4307,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:080-0120"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NASA SMD::Earth Science",
@@ -4330,7 +4330,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:080-0120"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NASA SMD::Heliophysics",
@@ -4353,7 +4353,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:080-0120"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NASA SMD::Planetary Science",
@@ -4376,7 +4376,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:080-0120"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NASA Miss::Astrophysics Research",
@@ -4399,7 +4399,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:080-0120"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NASA Miss::Discovery",
@@ -4422,7 +4422,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:080-0120"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NASA Miss::Earth Science Research",
@@ -4445,7 +4445,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:080-0120"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NASA Miss::Heliophysics Research",
@@ -4468,7 +4468,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:080-0120"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NASA Miss::Lunar Exploration",
@@ -4491,7 +4491,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:080-0120"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NASA Miss::Mars Exploration",
@@ -4514,7 +4514,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:080-0120"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NASA Miss::Mars Sample Return",
@@ -4537,7 +4537,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:080-0120"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "Stats1::Bureau of Economic Analysis",
@@ -4560,7 +4560,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:013-1500"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "Stats1::Bureau of Labor Statistics",
@@ -4583,7 +4583,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:016-0200"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "Stats1::Bureau of the Census",
@@ -4611,7 +4611,7 @@
         "usaspending:013-0401",
         "usaspending:013-0450"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "Stats1::Economic Research Service",
@@ -4634,7 +4634,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:012-1701"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "Stats1::Natl Agricultural Statistics Service",
@@ -4657,7 +4657,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:012-1801"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "Stats2::Bureau of Justice Statistics",
@@ -4680,7 +4680,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:015-0401"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "Stats2::Bureau of Transportation Stats",
@@ -4704,7 +4704,7 @@
         "usaspending:069-1730",
         "dot:ost-r-programs"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "Stats2::Energy Information Admin",
@@ -4727,7 +4727,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:089-0216"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "Stats2::Natl Center for Education Stats",
@@ -4750,7 +4750,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:091-1100"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "Stats2::Natl Center for Health Statistics",
@@ -4773,7 +4773,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:075-0959"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "Stats2::Natl Ctr for Science and Eng Stats, NSF",
@@ -4796,7 +4796,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:049-0100"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "USDAARS:: Total Budget",
@@ -4824,7 +4824,7 @@
         "usaspending:012-1400",
         "usaspending:012-1401"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "USDAARS::ARS: Buildings and Facilities",
@@ -4847,7 +4847,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:012-1401"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "USDAARS::ARS: Salaries and Expenses",
@@ -4870,7 +4870,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:012-1400"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "USDAAccts::Economic Research Service",
@@ -4893,7 +4893,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:012-1701"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "USDAAccts::Forest Service: Rangeland Research",
@@ -4916,7 +4916,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:012-1104"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "USDAAccts::National Ag Statistics Service",
@@ -4939,7 +4939,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:012-1801"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "USDA NIFA:: Total Budget",
@@ -4972,7 +4972,7 @@
         "usaspending:012-1500",
         "usaspending:012-1502"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "USDA NIFA::1890 Research",
@@ -4995,7 +4995,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:012-1500"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "USDA NIFA::AFRI",
@@ -5018,7 +5018,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:012-1500"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "USDA NIFA::Extension Activities",
@@ -5041,7 +5041,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:012-0502"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "USDA NIFA::Hatch Act",
@@ -5064,7 +5064,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:012-1500"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "USDA NIFA::Integrated Activites",
@@ -5087,7 +5087,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:012-1502"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "USDA NIFA::Research and Education",
@@ -5110,7 +5110,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:012-1500"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "EPAST:: Total Science & Technology",
@@ -5133,7 +5133,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:068-0107"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "EPAST::Air, Climate, and Energy",
@@ -5156,7 +5156,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:068-0107"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "EPAST::Chemical Safety and Sustainability",
@@ -5179,7 +5179,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:068-0107"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "EPAST::Clean Air",
@@ -5202,7 +5202,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:068-0107"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "EPAST::Homeland Security",
@@ -5225,7 +5225,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:068-0107"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "EPAST::Safe and Sustainable Water Resources",
@@ -5248,7 +5248,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:068-0107"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "EPAST::Sustainable Communities",
@@ -5271,7 +5271,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:068-0107"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "USGS:: USGS Total",
@@ -5294,7 +5294,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:014-0804"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "USGS::Core Science Systems",
@@ -5317,7 +5317,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:014-0804"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "USGS::Ecosystems",
@@ -5340,7 +5340,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:014-0804"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "USGS::Energy and Minerals",
@@ -5363,7 +5363,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:014-0804"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "USGS::Natural Hazards",
@@ -5386,7 +5386,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:014-0804"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "USGS::Science Support",
@@ -5409,7 +5409,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:014-0804"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "USGS::Water Resources",
@@ -5432,7 +5432,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:014-0804"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "OtherVA::Medical & Prosthetic Research",
@@ -5455,7 +5455,7 @@
         "aaas:fy2026-powerbi",
         "govinfo:va-fy2026"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "OtherNIST:: Total",
@@ -5483,7 +5483,7 @@
         "usaspending:013-0500",
         "usaspending:013-0525"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "OtherNIST::Industrial Tech Services",
@@ -5506,7 +5506,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:013-0525"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "OtherNIST::NIST Labs",
@@ -5529,7 +5529,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:013-0500"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NOAA::NOAA Total",
@@ -5557,7 +5557,7 @@
         "usaspending:013-1450",
         "usaspending:013-1460"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NOAA::OAR: Climate Research",
@@ -5580,7 +5580,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:013-1450"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NOAA::OAR: High Performance Computing Initiatives",
@@ -5603,7 +5603,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:013-1450"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NOAA::OAR: Ocean, Coastal, and Great Lakes Research",
@@ -5626,7 +5626,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:013-1450"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NOAA::OAR: Weather and Air Chemistry Research",
@@ -5649,7 +5649,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:013-1450"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NOAA::Office of Oceanic & Atmospheric Research (OAR)",
@@ -5672,7 +5672,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:013-1450"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "NOAA::Weather Satellites",
@@ -5695,7 +5695,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:013-1460"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "OtherDHS::Countering Weapons of Mass Destruction",
@@ -5718,7 +5718,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:070-0860"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "OtherDHS::Cybersecurity and Infrastructure R&D",
@@ -5741,7 +5741,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:070-0805"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "OtherDHS::Science & Technology",
@@ -5764,7 +5764,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:070-0803"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "OtherHHS::Agency for Healthcare Research and Quality",
@@ -5787,7 +5787,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:075-1700"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "OtherHHS::Biomedical Advanced R&D Authority",
@@ -5810,7 +5810,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:075-1000"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "OtherHHS::Centers for Disease Control and Prevention",
@@ -5829,7 +5829,7 @@
         "usaspending:account-definition",
         "usaspending:hhs-account-tree"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "OtherHHS::Project BioShield",
@@ -5857,7 +5857,7 @@
         "usaspending:075-0140",
         "usaspending:075-1000"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "OtherIES::Institute of Education Sciences",
@@ -5880,7 +5880,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:091-1100"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "OtherDOT::ARPA-I",
@@ -5904,7 +5904,7 @@
         "usaspending:069-1730",
         "dot:fy2026-budget-highlights"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "OtherDOT::FAA Research, Eng & Dev",
@@ -5927,7 +5927,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:069-8108"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "OtherDOT::Railroad Administration R&D",
@@ -5950,7 +5950,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:069-0745"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "OtherDOT::Research & Technology",
@@ -5973,7 +5973,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:069-1730"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "AggTot:: Total R&D",
@@ -5991,7 +5991,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "AggTot::Applied Research",
@@ -6009,7 +6009,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "AggTot::Basic Research",
@@ -6027,7 +6027,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "AggTot::Development",
@@ -6045,7 +6045,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "AggTot::R&D Facilities",
@@ -6063,7 +6063,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "AggAgcy::All Other",
@@ -6081,7 +6081,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "AggAgcy::Dept. of Agriculture",
@@ -6099,7 +6099,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "AggAgcy::Dept. of Commerce",
@@ -6117,7 +6117,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "AggAgcy::Dept. of Defense",
@@ -6135,7 +6135,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "AggAgcy::Dept. of Energy",
@@ -6153,7 +6153,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "AggAgcy::NASA",
@@ -6171,7 +6171,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "AggAgcy::NIH",
@@ -6189,7 +6189,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "AggAgcy::NSF",
@@ -6207,7 +6207,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "PBRFunc::Agriculture",
@@ -6225,7 +6225,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "PBRFunc::Community Development",
@@ -6243,7 +6243,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "PBRFunc::Defense",
@@ -6261,7 +6261,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "PBRFunc::Education and Training",
@@ -6279,7 +6279,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "PBRFunc::Energy",
@@ -6297,7 +6297,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "PBRFunc::General Science",
@@ -6315,7 +6315,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "PBRFunc::Health",
@@ -6333,7 +6333,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "PBRFunc::Income Security",
@@ -6351,7 +6351,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "PBRFunc::International Affairs",
@@ -6369,7 +6369,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "PBRFunc::Justice",
@@ -6387,7 +6387,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "PBRFunc::Medicaid",
@@ -6405,7 +6405,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "PBRFunc::Medicare",
@@ -6423,7 +6423,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "PBRFunc::Natural Resources",
@@ -6441,7 +6441,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "PBRFunc::Net Interest",
@@ -6459,7 +6459,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "PBRFunc::Other Mandatory Spending",
@@ -6477,7 +6477,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "PBRFunc::Other Nondefense Discretionary",
@@ -6495,7 +6495,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "PBRFunc::Social Security",
@@ -6513,7 +6513,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "PBRFunc::Space",
@@ -6531,7 +6531,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "PBRFunc::Transportation",
@@ -6549,7 +6549,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     },
     {
       "aaas_row_key": "PBRFunc::Veterans Programs",
@@ -6567,7 +6567,7 @@
         "aaas:fy2026-powerbi",
         "usaspending:account-definition"
       ],
-      "integration_state": "reference_only_pending_phase_3_2a_contract"
+      "integration_state": "reference_only_pending_account_onboarding"
     }
   ]
 }

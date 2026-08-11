@@ -1,17 +1,27 @@
-name: Backfill obligation ledger
+name: Update obligation ledger
 
 on:
+  schedule:
+    - cron: "37 10 * * 1" # Weekly; every account current FY + one historical FY
   workflow_dispatch:
     inputs:
+      mode:
+        description: Refresh plan
+        type: choice
+        options: [weekly, full, custom]
+        default: weekly
+      accounts:
+        description: "Comma-separated account paths/prefixes or 'all'"
+        default: "all"
       from_fy:
-        description: First fiscal year (Files A/B/C begin FY2017 Q2)
-        default: "2017"
+        description: First FY (custom mode only)
+        required: false
       to_fy:
-        description: Last fiscal year
-        default: "2026"
+        description: Last FY (custom mode only)
+        required: false
       current_period:
-        description: Last available period for the final fiscal year
-        default: "9"
+        description: Final FY period (custom mode only)
+        required: false
   push:
     branches: ["codex/**", "claude/**"]
     paths: [".github/triggers/update-obligations.json"]
@@ -20,7 +30,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: obligation-backfill-${{ github.ref }}
+  group: obligation-refresh-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -28,66 +38,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.plan.outputs.matrix }}
-      to_fy: ${{ steps.plan.outputs.to_fy }}
-      current_period: ${{ steps.plan.outputs.current_period }}
-    steps:
-      - uses: actions/checkout@v4
-      - id: plan
-        shell: python
-        run: |
-          import json, os
-          if os.environ["GITHUB_EVENT_NAME"] == "workflow_dispatch":
-              values = json.load(open(os.environ["GITHUB_EVENT_PATH"])).get("inputs") or {}
-              first = int(values.get("from_fy", 2017))
-              last = int(values.get("to_fy", 2026))
-              period = int(values.get("current_period", 9))
-          else:
-              values = json.load(open(".github/triggers/update-obligations.json"))
-              first, last = int(values["from_fy"]), int(values["to_fy"])
-              period = int(values["current_period"])
-          if first < 2017 or last < first or not 2 <= period <= 12:
-              raise SystemExit("invalid fiscal-year/period scope")
-          with open(os.environ["GITHUB_OUTPUT"], "a") as out:
-              out.write("matrix=" + json.dumps({"fy": list(range(first, last + 1))}) + "\n")
-              out.write(f"to_fy={last}\ncurrent_period={period}\n")
-
-  pull-year:
-    needs: plan
-    runs-on: ubuntu-latest
-    timeout-minutes: 350
-    strategy:
-      # Let independent years finish even if one USAspending archive request
-      # exhausts retries. A failed year still blocks reconcile; re-running
-      # failed jobs can then reuse all successful artifacts from the attempt.
-      fail-fast: false
-      # USAspending's custom-account generator drops bursty connections;
-      # serialize account-year jobs and also throttle POSTs in the adapter.
-      max-parallel: 1
-      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Pull exact File B and File C data for FY${{ matrix.fy }}
-        env:
-          FINAL_FY: ${{ needs.plan.outputs.to_fy }}
-          FINAL_PERIOD: ${{ needs.plan.outputs.current_period }}
-        run: |
-          PERIOD=12
-          if [ "${{ matrix.fy }}" = "$FINAL_FY" ]; then PERIOD="$FINAL_PERIOD"; fi
-          python scripts/pull_obligation_account.py --account doe/sc \
-            --from-fy "${{ matrix.fy }}" --to-fy "${{ matrix.fy }}" \
-            --current-period "$PERIOD" --no-rollup
-      - uses: actions/upload-artifact@v4
-        with:
-          name: obligation-fy-${{ matrix.fy }}
-          path: data/obligations/doe/sc/events/FY${{ matrix.fy }}.csv.gz
-          if-no-files-found: error
-
-  reconcile:
-    needs: [plan, pull-year]
-    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
@@ -95,30 +45,151 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - id: plan
+        name: Plan account × fiscal-year matrix from the registry
+        shell: python
+        run: |
+          import json, os, subprocess
+
+          event = os.environ["GITHUB_EVENT_NAME"]
+          values = {}
+          if event == "workflow_dispatch":
+              values = json.load(open(os.environ["GITHUB_EVENT_PATH"])).get("inputs") or {}
+          elif event == "push":
+              values = json.load(open(".github/triggers/update-obligations.json"))
+          mode = values.get("mode") or "weekly"
+          accounts = values.get("accounts") or "all"
+          command = ["python", "scripts/plan_obligation_refresh.py",
+                     "--mode", mode, "--accounts", accounts]
+          for option, key in (("--from-fy", "from_fy"), ("--to-fy", "to_fy"),
+                              ("--current-period", "current_period")):
+              if values.get(key) not in (None, ""):
+                  command.extend([option, str(values[key])])
+          matrix = subprocess.check_output(command, text=True).strip()
+          print(matrix)
+          with open(os.environ["GITHUB_OUTPUT"], "a") as output:
+              output.write("matrix=" + matrix + "\n")
+
+  pull-account-year:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      # The custom-account generator drops bursty connections. Serialize all
+      # registry entries as well as requests within an account-year pull.
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Pull ${{ matrix.account }} FY${{ matrix.fiscalYear }} through P${{ matrix.period }}
+        run: |
+          python scripts/pull_obligation_account.py \
+            --account "${{ matrix.account }}" \
+            --from-fy "${{ matrix.fiscalYear }}" \
+            --to-fy "${{ matrix.fiscalYear }}" \
+            --current-period "${{ matrix.period }}" \
+            --raw-archive-dir _raw \
+            --partition-output _partition \
+            --no-rollup
+      - name: Retain normalized account-year artifact for reconciliation
+        uses: actions/upload-artifact@v4
+        with:
+          name: obligation-partition-${{ matrix.artifact }}-FY${{ matrix.fiscalYear }}
+          path: _partition
+          if-no-files-found: error
+          retention-days: 1
+      - name: Retain raw source ZIPs for bounded audit/debugging
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: obligation-raw-${{ matrix.artifact }}-FY${{ matrix.fiscalYear }}
+          path: _raw
+          if-no-files-found: warn
+          retention-days: 14
+
+  reconcile:
+    needs: [plan, pull-account-year]
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      BRANCH: ${{ github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Sync the candidate workspace to the branch tip
+        run: git pull --ff-only origin "$BRANCH"
       - uses: actions/download-artifact@v4
         with:
-          pattern: obligation-fy-*
-          path: data/obligations/doe/sc/events
-          merge-multiple: true
-      - name: Rebuild manifest and all obligation dashboards
-        run: |
-          python - <<'PY'
-          from adapters.obligation_common import load_store, write_store
-          path = "data/obligations/doe/sc/events"
-          write_store(path, load_store(path), {"federalAccount": "089-0222", "backfill": "FY2017-present"})
-          PY
-          python scripts/rollup_obligations.py
-      - name: Exact GTAS, partition, and dashboard validation
-        run: python scripts/validate_obligations.py
+          pattern: obligation-partition-*
+          path: _partitions
+      - name: Reconcile every account into one candidate snapshot
+        run: python scripts/reconcile_obligation_artifacts.py --staging _partitions
+      - name: Validate all account stores, baselines, provenance, freshness, and dashboards
+        run: >-
+          python scripts/validate_obligations.py
+          --check-freshness --require-current-provenance
       - name: Unit and site contract tests
         run: python -m unittest discover -s tests -v
-      - name: Commit reconciled obligation ledger
-        env:
-          BRANCH: ${{ github.ref_name }}
+      - name: Render obligation release matrix in Chrome
+        run: python scripts/smoke_obligation_pages.py
+      - name: Commit the validated atomic snapshot
+        shell: python
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/obligations
-          if git diff --cached --quiet; then exit 0; fi
-          git commit -m "Backfill DOE Science obligation ledger [skip ci]"
-          git push origin "HEAD:$BRANCH"
+          import json, os, subprocess
+
+          subprocess.run(["git", "config", "user.name", "github-actions[bot]"], check=True)
+          subprocess.run(["git", "config", "user.email",
+                          "41898282+github-actions[bot]@users.noreply.github.com"], check=True)
+          config = json.load(open("config/obligation_accounts.json"))
+          paths = ["data/obligations"] + [row["baseline"] for row in config["accounts"]]
+          subprocess.run(["git", "add", *paths], check=True)
+          if subprocess.run(["git", "diff", "--cached", "--quiet"]).returncode == 0:
+              print("No obligation snapshot changes.")
+          else:
+              subprocess.run(["git", "commit", "-m",
+                              "Refresh obligation ledger atomic snapshot [skip ci]"], check=True)
+              branch = os.environ["BRANCH"]
+              subprocess.run(["git", "push", "origin", f"HEAD:{branch}"], check=True)
+      - name: Assemble the exact validated Pages snapshot
+        if: github.ref_name == 'main'
+        run: |
+          mkdir -p _site
+          cp site/index.html _site/
+          cp -r data _site/data
+      - name: Upload the exact validated Pages snapshot
+        if: github.ref_name == 'main'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: reconcile
+    if: github.ref_name == 'main'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+      contents: read
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - name: Publish the validated obligation snapshot
+        id: deployment
+        uses: actions/deploy-pages@v4
