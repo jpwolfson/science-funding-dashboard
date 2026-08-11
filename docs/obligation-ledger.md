@@ -85,10 +85,12 @@ uses “reported in submission period” and never invents action-month precisio
 ## Persistence and corrections
 
 Stores are deterministic `FY####.csv.gz` shards plus a manifest. A materialized
-partition is replaceable because agency submissions can be corrected; raw
-archive hashes, row counts, normalized fingerprints, and prior manifests make
-the replacement auditable. No row is silently omitted from a completed
-download.
+partition is replaceable because agency submissions can be corrected. The
+pilot manifest retains normalized record count, covered fiscal years, account,
+and event-ID fingerprint. Request scope and status row counts are validated
+during ingestion, but raw-archive hashes and replacement lineage do not yet
+survive the CI artifact boundary; persisting them is a Phase 3.2a release gate.
+No row is silently omitted from a completed download.
 
 ## Dashboard contract
 
@@ -97,7 +99,8 @@ to mean `awards`. Obligation dashboards publish:
 
 - signed File B totals by reporting period and fiscal year;
 - cumulative FYTD totals at submission-period endpoints;
-- File C award-linked dollars, residual dollars, and File C coverage;
+- File C dollars, residual dollars, and the signed File C/net ratio (account-
+  level coverage is a special case; PA ratios may fall outside 0–100%);
 - distinct linked awards with activity, using set unions at parents;
 - top recipients and positive/negative flows from File C only;
 - child Program Activities whose canonical dollars add exactly to the parent.

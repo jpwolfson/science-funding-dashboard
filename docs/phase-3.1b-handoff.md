@@ -1,8 +1,11 @@
 # Phase 3.1b handoff
 
-Status: the historical backfill, exact reconciliation, light/dark browser
-release gate, and award-link normalization CI are complete. Calibration is
-ready; only the readiness commit's head-specific CI and merge remain.
+Status: the base Phase 3.1b release is merged and deployed. A post-deploy QA
+patch has completed local implementation and validation but is not deployed
+until its branch CI, merge, and Pages smoke check pass. The historical backfill,
+exact reconciliation, award-link normalization, and calibration-ready gate are
+complete. Current live deployment:
+https://jpwolfson.github.io/science-funding-dashboard/?org=obligations
 
 ## What changed
 
@@ -23,7 +26,8 @@ ready; only the readiness commit's head-specific CI and merge remain.
   exact-cent offline validation, pinned GTAS/File A baselines, and a parallel
   FY2017-present GitHub Actions backfill.
 - Added a separate `data/obligations/index.json` tree and site rendering for
-  signed totals, submission-period steps, de-obligations, File C coverage,
+  signed totals, submission-period steps, positive/negative ledger entries,
+  File C/net share,
   distinct linked awards, recipients, and positive/negative flows. Existing
   award dashboards still default to `kind=awards`.
 - Formalized the NSF DMS USAspending count diagnostic as a ≥99.5% calibration
@@ -60,7 +64,7 @@ synthesized for the unavailable years.
 
 ## Validation completed
 
-- Full Python unit suite: 47 tests green.
+- Full Python unit suite: 56 tests green after the post-deploy QA additions.
 - Live account resolver: DOE `089-0222` dynamically resolved to internal ID
   5778 and the requested account scope echoed correctly.
 - Live File B P02 probe: 146 rows, $1,123,055,113.69 cumulative obligations.
@@ -72,18 +76,39 @@ synthesized for the unavailable years.
   the full unit/site contract suite.
 - Light/dark browser smoke passed for the obligation root, DOE, Office of
   Science account, Basic Energy Sciences Program Activity, and legacy award
-  root with zero console errors. Signed de-obligations and residuals remained
+  root with zero console errors. Signed negative activity and residuals remained
   visible and the legacy award dashboard was unchanged.
 - The browser gate found USAspending-internal `localhost:3000/award/...`
   permalinks in File C. The adapter/store boundary and site now normalize them
   to public `https://www.usaspending.gov/award/.../` URLs. The browser check
   confirms no internal links remain and offline validation rejects regressions.
 
-## Remaining gate and takeover steps
+## Post-deploy QA findings and fixes
 
-1. Require the readiness commit's own CI run to pass.
-2. Merge, confirm the Pages deployment, and record the deploy link in this
-   handoff and the Phase 3.1b roadmap entry.
+- FY2017 was correctly pinned as partial-source history but the dashboard
+  renderer marked only the latest FY as partial. Rollups now consume the
+  account baseline statuses, so FY2017 and FY2026 are both visibly partial.
+- Program Activity dashboards previously omitted account-covered periods with
+  no event. Their period charts therefore compressed time and zero-current-year
+  pages appeared stale. Child rollups now materialize the account's complete
+  reporting-period spine with exact zero buckets.
+- Validation now rejects missing required fiscal years, corrupt/stale manifests,
+  missing File B residual buckets, stale dashboards, incomplete child timelines,
+  invalid signed gross decomposition, and unmapped nonblank Program Activities.
+- Site copy now scopes every summary tile to the current FY, translates the
+  latest submission period to a calendar month, distinguishes the signed
+  File C/net ratio from a bounded completeness score, and states that recipient
+  tables use only linked File C rows. The current-year top rows remain visible;
+  the remaining three-year recipient/flow detail is disclosure-controlled.
+- Chart accessible names, visible keyboard focus, and compliant light-theme
+  secondary-text contrast were added. The award-ledger path remains backward
+  compatible.
+
+The QA patch's remaining release steps are branch CI, merge, and a deployed
+Pages smoke check; no new data backfill is required. Phase 3.2 must begin with
+workflow platformization: the current backfill is hardcoded to DOE, is not
+scheduled, relies on a separate push-triggered deploy, and drops request/archive
+provenance at the artifact boundary. See the revised roadmap in `CLAUDE.md`.
 
 The separate NIH full re-pull is complete: all 28 IC shards carry structured
 activity/mechanism detail, exact live RePORTER reconciliation passes, the
@@ -94,7 +119,7 @@ Do not replace canonical File B dollars with File C-only totals, do not route
 events through `adapters/common.py` or `scripts/rollup.py`, and do not fabricate
 monthly or FY2015–16 data.
 
-## CI run history and current blockers
+## CI run history and resolved blockers
 
 - Obligation backfill run `31462254962` proved the original quarterly File C
   labels (`FY2017Q2`) needed canonical period-end normalization (`P06`). That

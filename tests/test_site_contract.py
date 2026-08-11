@@ -14,9 +14,30 @@ class SiteContractTests(unittest.TestCase):
     def test_obligation_namespace_and_signed_copy(self):
         for text in ("data/obligations/index.json", "renderObligationNotes",
                      "fmtSignedMoney", "Reported in submission periods",
-                     "File C is award-linked enrichment",
+                     "File C is award-financial enrichment",
                      "publicUSAspendingAwardUrl(flow.awardUrl)"):
             self.assertIn(text, self.html)
+
+    def test_obligation_copy_identifies_time_and_ratio_scopes(self):
+        for text in ("File C / net", "File B − File C residual",
+                     "submissionPeriodDisplay(asOf)",
+                     "Distinct linked awards, FY${data.currentFY} to date",
+                     "Positive ledger entries, FY${data.currentFY} to date",
+                     "Negative ledger entries, FY${data.currentFY} to date",
+                     "negative reconciliation residuals",
+                     "sign alone does not establish cancellation",
+                     "partial source history"):
+            self.assertIn(text, self.html)
+
+    def test_charts_are_named_and_secondary_text_meets_contrast_target(self):
+        self.assertIn('"aria-labelledby": plot.getAttribute("aria-labelledby")', self.html)
+        self.assertIn("--muted: #73716b", self.html)
+
+    def test_long_flow_tables_have_a_current_year_summary(self):
+        self.assertIn("rank < 10", self.html)
+        self.assertIn("rank < 5", self.html)
+        self.assertIn("more flow rows", self.html)
+        self.assertIn("Largest award-attributed gross flows", self.html)
 
     def test_obligation_ledger_is_discoverable_from_award_root(self):
         for text in ("renderViewNav(obligationRoot)",

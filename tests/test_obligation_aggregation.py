@@ -37,6 +37,45 @@ class ObligationAggregationTests(unittest.TestCase):
         self.assertEqual(-900, fy["negativeFlows"][0]["amountCents"])
         self.assertEqual(1, len(fy["positiveFlows"]))
 
+    def test_top_flows_use_gross_components_before_same_event_netting(self):
+        row = ev("mixed", 600, "FY2024P02", award="A", recipient="U1")
+        row["grossPositiveCents"] = 1000
+        row["grossNegativeCents"] = -400
+        fy = aggregate([row], 2024)["fiscalYears"][0]
+        self.assertEqual(1000, fy["positiveFlows"][0]["amountCents"])
+        self.assertEqual(-400, fy["negativeFlows"][0]["amountCents"])
+        self.assertEqual(600, fy["positiveFlows"][0]["netAmountCents"])
+        self.assertEqual(600, fy["negativeFlows"][0]["netAmountCents"])
+
+    def test_coverage_contract_marks_historical_partial_year(self):
+        rows = [ev("1", 100, "FY2017P06")]
+        out = aggregate(
+            rows, current_fy=2026,
+            covered_periods={"FY2017P06", "FY2017P12", "FY2026P02"},
+            partial_fys={2017, 2026},
+        )
+        by_fy = {row["fy"]: row for row in out["fiscalYears"]}
+        self.assertTrue(by_fy[2017]["partial"])
+        self.assertTrue(by_fy[2026]["partial"])
+        self.assertEqual(0, by_fy[2026]["netObligationsCents"])
+        self.assertEqual("FY2026P02", out["asOfPeriod"])
+
+    def test_zero_activity_periods_are_materialized_for_child_charts(self):
+        out = aggregate(
+            [ev("1", 100, "FY2024P02")], current_fy=2024,
+            covered_periods={"FY2024P02", "FY2024P03", "FY2024P04"},
+            partial_fys=set(),
+        )
+        self.assertEqual(
+            ["FY2024P02", "FY2024P03", "FY2024P04"],
+            [row["submissionPeriod"] for row in out["reportingPeriods"]],
+        )
+        self.assertEqual(
+            [100, 0, 0],
+            [row["netObligationsCents"] for row in out["reportingPeriods"]],
+        )
+        self.assertFalse(out["fiscalYears"][0]["partial"])
+
 
 if __name__ == "__main__":
     unittest.main()

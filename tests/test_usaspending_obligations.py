@@ -4,7 +4,8 @@ import unittest
 from unittest.mock import patch
 
 from adapters.usaspending_obligations import (
-    _json, combine_file_b_file_c, file_b_period_events, parse_file_c,
+    _json, combine_file_b_file_c, file_b_period_events, parse_file_b_snapshot,
+    parse_file_c,
 )
 
 
@@ -14,6 +15,15 @@ ALIASES = {"0001": {"code": "0001", "name": "BES", "park": "PARK1"},
 
 
 class USAspendingObligationTests(unittest.TestCase):
+    def test_unmapped_nonblank_program_activity_fails_closed(self):
+        with self.assertRaisesRegex(ValueError, "unmapped Program Activity"):
+            parse_file_b_snapshot([{
+                "federal_account_symbol": "089-0222",
+                "program_activity_code": "0099",
+                "program_activity_name": "New unmapped activity",
+                "obligations_incurred": "1.00",
+            }], "089-0222", ALIASES)
+
     def test_remote_disconnect_is_retried(self):
         response = io.BytesIO(b'{"ok": true}')
         with patch(

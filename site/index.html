@@ -8,7 +8,7 @@
   :root {
     color-scheme: light;
     --page: #f9f9f7; --surface: #fcfcfb;
-    --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+    --ink: #0b0b0b; --ink-2: #52514e; --muted: #73716b;
     --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,.10);
     --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100; --s5: #e87ba4;
     --good: #006300; --bad: #b33636;
@@ -44,6 +44,9 @@
   }
   .view-nav a, .view-nav span { padding: 0 0 7px; text-decoration: none; }
   .view-nav a:hover { text-decoration: underline; }
+  a:focus-visible, summary:focus-visible {
+    outline: 2px solid var(--s1); outline-offset: 3px; border-radius: 2px;
+  }
   .view-nav .active {
     color: var(--ink); font-weight: 620; border-bottom: 2px solid var(--s1);
   }
@@ -88,6 +91,7 @@
   .tip .t-val { font-weight: 620; }
   .tip .t-lab { color: var(--ink-2); }
   details { margin-top: 8px; }
+  details.detail-table { margin-top: 12px; }
   summary { color: var(--muted); font-size: 13px; cursor: pointer; user-select: none; }
   table {
     border-collapse: collapse; display: block; margin-top: 8px;
@@ -169,6 +173,7 @@ function publicUSAspendingAwardUrl(value) {
   return "";
 }
 const $app = document.getElementById("app");
+let chartSequence = 0;
 
 const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 const el = (tag, attrs = {}, ...kids) => {
@@ -196,9 +201,37 @@ const fmtSignedAxisMoney = v => {
   return (v < 0 ? "−" : "") +
     (absolute < 1e6 ? "$" + Math.round(absolute / 1e3) + "K" : fmtAxisM(absolute));
 };
-const fmtCoverage = v => v == null ? "—" : (Number(v) * 100).toFixed(1) + "%";
+const fmtCoverage = v => {
+  if (v == null) return "—";
+  const n = Number(v);
+  return (n < 0 ? "−" : "") + Math.abs(n * 100).toFixed(1) + "%";
+};
 const fmtPct = v => (v > 0 ? "+" : "−") + Math.abs(v * 100).toFixed(1) + "%";
 const monthName = m => new Date(m + "-15").toLocaleString("en-US", { month: "short", year: "numeric" });
+const sentenceJoin = (source, note) => {
+  source = String(source || "").trim();
+  note = String(note || "").trim();
+  if (!source) return note;
+  return source + (/[.!?]$/.test(source) ? " " : ". ") + note;
+};
+const submissionPeriodDisplay = value => {
+  const match = String(value || "").match(/^FY(\d{4})P(\d{2})$/);
+  if (!match) return value;
+  const fy = Number(match[1]), period = Number(match[2]);
+  const month = ((period + 8) % 12) + 1;
+  const year = month >= 10 ? fy - 1 : fy;
+  const label = new Date(year, month - 1, 15).toLocaleString("en-US", {
+    month: "long", year: "numeric",
+  });
+  return `${value} (${label})`;
+};
+const compactLabel = (value, limit = 140) => {
+  value = String(value || "");
+  return value.length <= limit ? value : value.slice(0, limit - 1).trimEnd() + "…";
+};
+const fiscalYearStatus = (fy, partial, currentFY) => !partial
+  ? ""
+  : (fy === currentFY ? " (to date)" : " (partial source history)");
 
 function niceTicks(max) {
   const raw = max / 4;
@@ -219,9 +252,10 @@ function chartMax(rows, get) {
 // ---------- shared chart scaffolding ----------
 function makeCard(title, note) {
   const card = el("div", { class: "card" });
-  card.append(el("h2", { text: title }));
+  const headingId = `chart-title-${++chartSequence}`;
+  card.append(el("h2", { id: headingId, text: title }));
   if (note) card.append(el("p", { class: "note", text: note }));
-  const plot = el("div", { class: "plot" });
+  const plot = el("div", { class: "plot", "aria-labelledby": headingId });
   const tip = el("div", { class: "tip" });
   plot.append(tip);
   card.append(plot);
@@ -231,7 +265,8 @@ function makeCard(title, note) {
 
 function frame(plot, H, padL, padR) {
   const W = Math.max(560, Math.min(1000, plot.clientWidth || 1000));
-  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img" });
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img",
+    "aria-labelledby": plot.getAttribute("aria-labelledby") });
   plot.append(svg);
   return { svg, W, H, L: padL, R: W - padR, T: 14, B: H - 26 };
 }
@@ -419,11 +454,11 @@ function obligationChildrenCard(data, title = null, note = null) {
   const card = el("div", { class: "card" });
   card.append(el("h2", { text: title || obligationChildrenTierTitle(data.node?.level) }));
   card.append(el("p", { class: "note", text: note ||
-    "Dollar columns add to the parent. Distinct linked-award counts do not: one award may receive obligations in more than one program activity." }));
+    "Dollar columns add to the parent. Distinct linked-award counts do not. File C / net is a signed ratio and can fall outside 0–100% when File C and residual activity offset." }));
   const sorted = kids.slice().sort((a, b) =>
     (b.currentFYNetObligations || 0) - (a.currentFYNetObligations || 0));
   const t = el("table"), trh = el("tr");
-  ["Unit", `Net obligations FY${data.currentFY} to date`, "File C coverage", "Distinct linked awards"]
+  ["Unit", `Net obligations FY${data.currentFY} to date`, "File C / net", "Distinct linked awards"]
     .forEach((h, i) => trh.append(el("th", { class: i > 0 ? "num" : "", text: h })));
   trh.append(el("th", { class: "chev" }));
   t.append(trh);
@@ -485,7 +520,7 @@ function obligationChildrenCardFromIndex(node, level) {
   card.append(el("h2", { text: obligationChildrenTierTitle(level) }));
   card.append(el("p", { class: "note", text: DRILL_NOTE }));
   const t = el("table"), trh = el("tr");
-  ["Unit", "Net obligations FY to date", "File C coverage", "Distinct linked awards"]
+  ["Unit", "Net obligations FY to date", "File C / net", "Distinct linked awards"]
     .forEach((h, i) => trh.append(el("th", { class: i > 0 ? "num" : "", text: h })));
   trh.append(el("th", { class: "chev" }));
   t.append(trh);
@@ -848,7 +883,10 @@ function cumulativeChart(data, key, title, note, fmtVal, fmtEnd) {
     f.svg.addEventListener("pointerleave", () => { tip.style.display = "none"; cross.setAttribute("visibility", "hidden"); });
   }
   render();
-  legend(card, series.map(s => ({ label: `FY${s.fy}${s.partial ? " (to date)" : ""}`, color: css(s.v) })), "line");
+  legend(card, series.map(s => ({
+    label: `FY${s.fy}${fiscalYearStatus(s.fy, s.partial, data.currentFY)}`,
+    color: css(s.v),
+  })), "line");
   // Table rows: cumulative at each month end (for the year in progress, its
   // started months only — the last shows the total through the latest data).
   addTable(card, ["Through end of", ...series.map(s => `FY${s.fy}${s.partial ? " (to date)" : ""}`)],
@@ -926,12 +964,12 @@ function obligationTiles(data) {
   };
   const specs = [
     [ `Net obligations, FY${data.currentFY} to date`, fmtSignedMoney(cur.netObligations) ],
-    [ "Distinct linked awards with activity", fmtN(cur.distinctLinkedAwards || 0) ],
-    [ `Award-linked File C (${fmtCoverage(cur.fileCCoverage ?? (cur.netObligations ? cur.awardLinkedObligations / cur.netObligations : null))})`,
+    [ `Distinct linked awards, FY${data.currentFY} to date`, fmtN(cur.distinctLinkedAwards || 0) ],
+    [ `File C portion, FY${data.currentFY} to date (${fmtCoverage(cur.fileCCoverage ?? (cur.netObligations ? cur.awardLinkedObligations / cur.netObligations : null))} of net)`,
       fmtSignedMoney(cur.awardLinkedObligations || 0) ],
-    [ "Non-award residual", fmtSignedMoney(cur.residualObligations || 0) ],
-    [ "Gross positive obligations", fmtSignedMoney(cur.grossObligations || 0) ],
-    [ "De-obligations", fmtSignedMoney(cur.deobligations || 0) ],
+    [ `File B − File C residual, FY${data.currentFY} to date`, fmtSignedMoney(cur.residualObligations || 0) ],
+    [ `Positive ledger entries, FY${data.currentFY} to date`, fmtSignedMoney(cur.grossObligations || 0) ],
+    [ `Negative ledger entries, FY${data.currentFY} to date`, fmtSignedMoney(cur.deobligations || 0) ],
   ];
   const row = el("div", { class: "tiles" });
   for (const [label, value] of specs) {
@@ -945,7 +983,7 @@ function obligationTiles(data) {
 
 function obligationCumulativeChart(data) {
   const { card, plot, tip } = makeCard("Cumulative net obligations through the fiscal year",
-    "Signed File B obligations reported through each submission period. File C identifies award-linked flows; the residual is spending not attributable to File C awards.");
+    "Signed File B obligations reported through each submission period. File C supplies award-financial detail; the residual is the signed File B − File C difference.");
   const series = (data.fyCumulative || []).slice().sort((a, b) => b.fy - a.fy)
     .map((s, i) => ({ ...s, v: ["--s1", "--s2", "--s3", "--s4", "--s5"][i] }));
   function render() {
@@ -1001,13 +1039,16 @@ function obligationCumulativeChart(data) {
     f.svg.addEventListener("pointerleave", () => { tip.style.display = "none"; cross.setAttribute("visibility", "hidden"); });
   }
   render();
-  legend(card, series.map(s => ({ label: `FY${s.fy}${s.partial ? " (to date)" : ""}`, color: css(s.v) })), "line");
+  legend(card, series.map(s => ({
+    label: `FY${s.fy}${fiscalYearStatus(s.fy, s.partial, data.currentFY)}`,
+    color: css(s.v),
+  })), "line");
   const rows = [];
   for (const s of series) for (const p of s.points)
     rows.push([`FY${s.fy} · ${p.submissionPeriod}`, fmtSignedMoney(p.netObligations || 0),
       fmtSignedMoney(p.awardLinkedObligations || 0), fmtSignedMoney(p.residualObligations || 0),
       fmtN(p.distinctLinkedAwards || 0)]);
-  addTable(card, ["Reporting period", "Net obligations", "Award-linked", "Residual", "Distinct linked awards"], rows);
+  addTable(card, ["Reporting period", "Net obligations", "File C portion", "Residual", "Distinct linked awards"], rows);
   return render;
 }
 
@@ -1034,8 +1075,8 @@ function obligationPeriodsChart(data) {
       hit.addEventListener("pointermove", () => showTip(tip, plot, cx * scale(), Math.min(yy, zero) * scale(),
         r.submissionPeriod, [
           { val: fmtSignedMoney(r.netObligations || 0), lab: "net obligations" },
-          { val: fmtSignedMoney(r.awardLinkedObligations || 0), lab: "award-linked File C" },
-          { val: fmtSignedMoney(r.residualObligations || 0), lab: "non-award residual" },
+          { val: fmtSignedMoney(r.awardLinkedObligations || 0), lab: "File C portion" },
+          { val: fmtSignedMoney(r.residualObligations || 0), lab: "File B − File C residual" },
           { val: fmtN(r.distinctLinkedAwards || 0), lab: "distinct linked awards" },
         ]));
       hit.addEventListener("pointerleave", () => { tip.style.display = "none"; });
@@ -1043,7 +1084,7 @@ function obligationPeriodsChart(data) {
     });
   }
   render();
-  addTable(card, ["Reporting period", "Net obligations", "Award-linked", "Residual", "Gross positive", "De-obligations", "Distinct linked awards"],
+  addTable(card, ["Reporting period", "Net obligations", "File C portion", "Residual", "Positive entries", "Negative entries", "Distinct linked awards"],
     rows.map(r => [r.submissionPeriod, fmtSignedMoney(r.netObligations || 0),
       fmtSignedMoney(r.awardLinkedObligations || 0), fmtSignedMoney(r.residualObligations || 0),
       fmtSignedMoney(r.grossObligations || 0), fmtSignedMoney(r.deobligations || 0),
@@ -1053,7 +1094,7 @@ function obligationPeriodsChart(data) {
 
 function obligationFYChart(data) {
   const { card, plot, tip } = makeCard("Net obligations by fiscal year",
-    "File B totals reconcile to GTAS. Award-linked File C coverage is shown in the table and tooltip; it is not assumed to represent the full account.");
+    "File B totals reconcile to GTAS. File C / net is a signed ratio, not a completeness score; at Program Activity level it can fall outside 0–100% when File C and the residual offset.");
   const rows = data.fiscalYears || [];
   function render() {
     plot.querySelector("svg")?.remove();
@@ -1068,9 +1109,10 @@ function obligationFYChart(data) {
         "text-anchor": "middle", text: "'" + String(r.fy).slice(2) + (r.partial ? "*" : "") }));
       const hit = el("rect", { x: cx - band / 2, y: f.T, width: band, height: f.B - f.T, fill: "transparent" });
       const scale = () => plot.clientWidth / f.W;
-      hit.addEventListener("pointermove", () => showTip(tip, plot, cx * scale(), Math.min(yy, zero) * scale(), `FY${r.fy}`, [
+      hit.addEventListener("pointermove", () => showTip(tip, plot, cx * scale(), Math.min(yy, zero) * scale(),
+        `FY${r.fy}${fiscalYearStatus(r.fy, r.partial, data.currentFY)}`, [
         { val: fmtSignedMoney(r.netObligations || 0), lab: "net obligations" },
-        { val: fmtCoverage(r.netObligations ? r.awardLinkedObligations / r.netObligations : null), lab: "File C coverage" },
+        { val: fmtCoverage(r.netObligations ? r.awardLinkedObligations / r.netObligations : null), lab: "File C / net" },
         { val: fmtN(r.distinctLinkedAwards || 0), lab: "distinct linked awards" },
       ]));
       hit.addEventListener("pointerleave", () => { tip.style.display = "none"; });
@@ -1078,8 +1120,8 @@ function obligationFYChart(data) {
     });
   }
   render();
-  addTable(card, ["Fiscal year", "Net obligations", "Award-linked", "Residual", "File C coverage", "Distinct linked awards"],
-    rows.map(r => [`FY${r.fy}${r.partial ? " (to date)" : ""}`, fmtSignedMoney(r.netObligations || 0),
+  addTable(card, ["Fiscal year", "Net obligations", "File C portion", "Residual", "File C / net", "Distinct linked awards"],
+    rows.map(r => [`FY${r.fy}${fiscalYearStatus(r.fy, r.partial, data.currentFY)}`, fmtSignedMoney(r.netObligations || 0),
       fmtSignedMoney(r.awardLinkedObligations || 0), fmtSignedMoney(r.residualObligations || 0),
       fmtCoverage(r.netObligations ? r.awardLinkedObligations / r.netObligations : null),
       fmtN(r.distinctLinkedAwards || 0)]));
@@ -1088,44 +1130,86 @@ function obligationFYChart(data) {
 
 function obligationFlowTables(data) {
   const years = (data.fiscalYears || []).slice(-3).reverse();
-  const recipientRows = [];
-  for (const fy of years) for (const r of (fy.topRecipients || []))
-    recipientRows.push([`FY${fy.fy}`, r.recipient || r.name || "Unknown recipient",
-      fmtSignedMoney(r.netObligations ?? r.amount ?? 0)]);
-  if (recipientRows.length) {
+  const yearRange = years.length > 1
+    ? `FY${years.at(-1).fy}–FY${years[0].fy}`
+    : (years[0] ? `FY${years[0].fy}` : "recent fiscal years");
+  const recipients = [];
+  years.forEach((fy, yearIndex) => (fy.topRecipients || []).forEach((r, rank) =>
+    recipients.push({ fy: fy.fy, rank: rank + 1, recipient: r,
+      primary: yearIndex === 0 && rank < 10 })));
+  const recipientTable = entries => {
+    const t = el("table"), h = el("tr");
+    ["FY", "Rank", "Recipient", "Net award-linked obligations"].forEach((x, i) =>
+      h.append(el("th", { class: i === 1 || i === 3 ? "num" : "", text: x })));
+    t.append(h);
+    entries.forEach(({ fy, rank, recipient }) => {
+      const tr = el("tr");
+      tr.append(el("td", { text: `FY${fy}` }), el("td", { class: "num", text: String(rank) }),
+        el("td", { text: recipient.recipient || recipient.name || "Unknown recipient" }),
+        el("td", { class: "num", text: fmtSignedMoney(recipient.netObligations ?? recipient.amount ?? 0) }));
+      t.append(tr);
+    });
+    return t;
+  };
+  if (recipients.length) {
     const card = el("div", { class: "card" });
     card.append(el("h2", { text: "Top recipients of award-attributed obligations" }),
-      el("p", { class: "note", text: "Recipient rankings use award-linked File C only; they exclude the residual not attributable to File C awards." }));
-    const t = el("table"), h = el("tr");
-    ["FY", "Recipient", "Net award-linked obligations"].forEach((x, i) => h.append(el("th", { class: i === 2 ? "num" : "", text: x })));
-    t.append(h);
-    recipientRows.forEach(r => { const tr = el("tr"); r.forEach((x, i) => tr.append(el("td", { class: i === 2 ? "num" : "", text: x }))); t.append(tr); });
-    card.append(t); $app.append(card);
+      el("p", { class: "note", text: `The ten leading recipients for FY${years[0].fy} are shown first. Rankings use linked File C only and exclude the File B − File C residual.` }));
+    const primary = recipients.filter(row => row.primary);
+    const overflow = recipients.filter(row => !row.primary);
+    card.append(recipientTable(primary));
+    if (overflow.length) {
+      const details = el("details", { class: "detail-table" });
+      details.append(el("summary", { text: `Show ${overflow.length} more recipient rows (${yearRange})` }),
+        recipientTable(overflow));
+      card.append(details);
+    }
+    $app.append(card);
   }
   const flows = [];
-  for (const fy of years) {
-    for (const flow of (fy.positiveFlows || [])) flows.push([fy.fy, flow, "Obligation"]);
-    for (const flow of (fy.negativeFlows || [])) flows.push([fy.fy, flow, "De-obligation"]);
-  }
+  years.forEach((fy, yearIndex) => {
+    (fy.positiveFlows || []).forEach((flow, rank) =>
+      flows.push({ fy: fy.fy, flow, direction: "Positive entry",
+        primary: yearIndex === 0 && rank < 5 }));
+    (fy.negativeFlows || []).forEach((flow, rank) =>
+      flows.push({ fy: fy.fy, flow, direction: "Negative entry",
+        primary: yearIndex === 0 && rank < 5 }));
+  });
   if (!flows.length) return;
   const card = el("div", { class: "card" });
-  card.append(el("h2", { text: "Largest award-attributed flows" }),
-    el("p", { class: "note", text: "Largest positive and negative File C flows. Negative values are de-obligations, terminations, or other downward adjustments." }));
-  const t = el("table"), h = el("tr");
-  ["FY / period", "Award", "Recipient", "Direction", "Amount"].forEach((x, i) => h.append(el("th", { class: i === 4 ? "num" : "", text: x })));
-  t.append(h);
-  for (const [fy, flow, direction] of flows) {
-    const tr = el("tr");
-    tr.append(el("td", { text: `FY${fy}${flow.submissionPeriod ? " · " + flow.submissionPeriod : ""}` }));
-    const award = el("td"), label = flow.title || flow.awardId || "Unlinked flow";
-    const flowUrl = publicUSAspendingAwardUrl(flow.awardUrl);
-    if (flowUrl) award.append(el("a", { href: flowUrl, text: label })); else award.textContent = label;
-    const amount = flow.amount ?? flow.netObligations ?? flow.obligations ?? 0;
-    tr.append(award, el("td", { text: flow.recipient || "Unknown recipient" }),
-      el("td", { text: direction }), el("td", { class: `num ${amount < 0 ? "negative" : ""}`.trim(), text: fmtSignedMoney(amount) }));
-    t.append(tr);
+  card.append(el("h2", { text: "Largest award-attributed gross flows" }),
+    el("p", { class: "note", text: `The five largest positive and negative linked File C entries for FY${years[0].fy} are shown first, before same-award entries are netted within a reporting period. A negative entry may be a de-obligation or another downward adjustment; sign alone does not establish cancellation.` }));
+  const flowTable = entries => {
+    const t = el("table"), h = el("tr");
+    ["FY / period", "Award", "Recipient", "Direction", "Amount"].forEach((x, i) =>
+      h.append(el("th", { class: i === 4 ? "num" : "", text: x })));
+    t.append(h);
+    for (const { fy, flow, direction } of entries) {
+      const tr = el("tr");
+      tr.append(el("td", { text: `FY${fy}${flow.submissionPeriod ? " · " + flow.submissionPeriod : ""}` }));
+      const award = el("td"), fullLabel = flow.title || flow.awardId || "Unlinked flow";
+      const label = compactLabel(fullLabel), flowUrl = publicUSAspendingAwardUrl(flow.awardUrl);
+      if (flowUrl) award.append(el("a", { href: flowUrl, text: label,
+        title: fullLabel, "aria-label": fullLabel }));
+      else award.append(el("span", { text: label, title: fullLabel }));
+      const amount = flow.amount ?? flow.netObligations ?? flow.obligations ?? 0;
+      tr.append(award, el("td", { text: flow.recipient || "Unknown recipient" }),
+        el("td", { text: direction }), el("td", {
+          class: `num ${amount < 0 ? "negative" : ""}`.trim(), text: fmtSignedMoney(amount),
+        }));
+      t.append(tr);
+    }
+    return t;
+  };
+  const primary = flows.filter(row => row.primary), overflow = flows.filter(row => !row.primary);
+  card.append(flowTable(primary));
+  if (overflow.length) {
+    const details = el("details", { class: "detail-table" });
+    details.append(el("summary", { text: `Show ${overflow.length} more flow rows (${yearRange})` }),
+      flowTable(overflow));
+    card.append(details);
   }
-  card.append(t); $app.append(card);
+  $app.append(card);
 }
 
 function renderObligationNotes(data) {
@@ -1135,8 +1219,8 @@ function renderObligationNotes(data) {
   const entries = [
     ["Obligations, not appropriations or outlays. ", "The dollar series measures signed obligations charged to this federal account. Congress's appropriation is the starting authority; outlays occur later."],
     ["Reported in submission periods. ", "Values are attributed to agency reporting periods, not reconstructed award-action dates. The first P02 bucket covers the first reporting window, and historical quarterly submissions appear only at quarter ends."],
-    ["De-obligations stay negative. ", "Downward adjustments, terminations, and clawbacks reduce period and cumulative totals instead of disappearing from the history."],
-    ["File C is award-linked enrichment. ", `Award and recipient tables describe only the ${fmtCoverage((data.totalNetObligations ?? data.netObligations) ? (data.totalAwardLinkedObligations ?? data.awardLinkedObligations) / (data.totalNetObligations ?? data.netObligations) : null)} of obligations linked through File C for this view. The residual remains in every canonical dollar total.`],
+    ["Negative activity stays negative. ", "Downward adjustments, terminations, clawbacks, and negative reconciliation residuals reduce period and cumulative totals instead of disappearing from the history. A negative entry alone does not establish cancellation; that classification requires separate source evidence."],
+    ["File C is award-financial enrichment. ", `Across the full displayed history, File C / net is ${fmtCoverage((data.totalNetObligations ?? data.netObligations) ? (data.totalAwardLinkedObligations ?? data.awardLinkedObligations) / (data.totalNetObligations ?? data.netObligations) : null)}. Award and recipient tables include only File C rows linked to public awards; the residual remains in every canonical File B dollar total.`],
     ["Distinct linked awards are not additive. ", "The same award may receive obligations in multiple periods or program activities. Parent counts are set unions; child counts should never be summed."],
   ];
   for (const [head, body] of entries) {
@@ -1200,13 +1284,15 @@ async function boot() {
       : `${node.name || "Unit"} — obligation dashboard`;
     document.title = title;
     document.getElementById("h1").textContent = title;
-    document.getElementById("sub").textContent =
-      `${data.source || ""} ${data.amountNote || "Signed obligations attributed by reporting period — not award totals, appropriations, or outlays."}`;
+    document.getElementById("sub").textContent = sentenceJoin(
+      data.source,
+      data.amountNote || "Signed obligations attributed by reporting period — not award totals, appropriations, or outlays.",
+    );
     const gen = new Date(data.generated + "T12:00:00");
     const asOf = data.asOfPeriod || data.reportingPeriods?.at(-1)?.submissionPeriod || "latest available period";
     const totalNet = data.totalNetObligations ?? data.netObligations ?? 0;
     document.getElementById("stamp").textContent =
-      `${fmtSignedMoney(totalNet)} net obligations across ${fmtN(data.distinctLinkedAwards || 0)} distinct linked awards · through ${asOf} · last updated ${gen.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}`;
+      `${fmtSignedMoney(totalNet)} net obligations across ${fmtN(data.distinctLinkedAwards || 0)} distinct linked awards · through ${submissionPeriodDisplay(asOf)} · last updated ${gen.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}`;
     if (data.warnings?.length) {
       const b = el("div", { class: "banner" });
       b.append(el("strong", { text: "Data quality warnings from the last pull: " }),
@@ -1227,7 +1313,7 @@ async function boot() {
     if (data.reportingPeriods?.length) renders.push(obligationPeriodsChart(data));
     if (data.fiscalYears?.length) renders.push(obligationFYChart(data));
     obligationFlowTables(data);
-    const foot = el("p", { class: "stamp", text: "* fiscal year in progress · values are reported by submission period" });
+    const foot = el("p", { class: "stamp", text: "* partial fiscal year (source history or year in progress) · values are reported by submission period" });
     $app.append(foot);
     let raf;
     const rerender = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => renders.forEach(r => r())); };
@@ -1241,8 +1327,10 @@ async function boot() {
   const title = node.level === "root" ? "Federal science funding dashboard" : `${node.name || "Unit"} — funding dashboard`;
   document.title = title;
   document.getElementById("h1").textContent = title;
-  document.getElementById("sub").textContent =
-    `${data.source || ""} ${data.amountNote || "Dollar figures are source-reported award totals, not outlays."}`;
+  document.getElementById("sub").textContent = sentenceJoin(
+    data.source,
+    data.amountNote || "Dollar figures are source-reported award totals, not outlays.",
+  );
 
   const gen = new Date(data.generated + "T12:00:00");
   document.getElementById("stamp").textContent =
@@ -1267,8 +1355,10 @@ async function boot() {
     try { obligationSummary = await fetchJSON("data/obligations/dashboard.json"); }
     catch (e) { obligationSummary = null; }
     if (obligationSummary?.kind === "obligations") {
+      const obligationGenerated = new Date(obligationSummary.generated + "T12:00:00");
+      const obligationAsOf = obligationSummary.asOfPeriod || "latest available period";
       obligationChildrenCard(obligationSummary, "Appropriations obligation dashboards",
-        "Account-level signed obligations are shown separately from award totals because the measures are not additive or directly comparable. Each row links to that obligation ledger.");
+        `Account-level signed obligations are separate from award totals because the measures are not additive or directly comparable. Data through ${submissionPeriodDisplay(obligationAsOf)}; updated ${obligationGenerated.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}.`);
     }
   }
   const renders = [];

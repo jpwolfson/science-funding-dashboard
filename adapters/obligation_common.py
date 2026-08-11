@@ -205,34 +205,58 @@ def _top_recipients(events):
 
 
 def _top_flows(events, positive):
-    rows = [e for e in events if e["source"] == "file_c" and e["linked"] and
-            (e["amountCents"] > 0 if positive else e["amountCents"] < 0)]
-    rows.sort(key=lambda e: (-abs(e["amountCents"]), e["id"]))
+    amount_key = "grossPositiveCents" if positive else "grossNegativeCents"
+    rows = [
+        e for e in events
+        if e["source"] == "file_c" and e["linked"] and e[amount_key] != 0
+    ]
+    rows.sort(key=lambda e: (-abs(e[amount_key]), e["id"]))
     return [{"id": e["id"], "awardId": e["awardId"], "title": e["title"],
-             "recipient": e["recipient"], "amountCents": e["amountCents"],
-             "amount": dollars(e["amountCents"]), "submissionPeriod": e["submissionPeriod"],
+             "recipient": e["recipient"], "amountCents": e[amount_key],
+             "amount": dollars(e[amount_key]),
+             "netAmountCents": e["amountCents"],
+             "netAmount": dollars(e["amountCents"]),
+             "submissionPeriod": e["submissionPeriod"],
              "awardUrl": e["awardUrl"]} for e in rows[:20]]
 
 
-def aggregate(events, current_fy=None):
+def aggregate(events, current_fy=None, covered_periods=None, partial_fys=None):
     events = [normalize_event(e) for e in events]
+    covered_periods = {
+        canonical_period(label) for label in (covered_periods or [])
+    }
+    covered_fys = {period_info(label)[0] for label in covered_periods}
     if current_fy is None:
-        current_fy = max((e["fiscalYear"] for e in events), default=date.today().year)
+        current_fy = max(
+            {e["fiscalYear"] for e in events} | covered_fys,
+            default=date.today().year,
+        )
+    # Callers that do not have an external availability contract retain the
+    # historical behavior. Obligation rollups pass baseline-derived statuses
+    # so an incomplete historical year cannot masquerade as complete.
+    partial_fys = {current_fy} if partial_fys is None else set(partial_fys)
     by_period, by_fy = defaultdict(list), defaultdict(list)
     for event in events:
         by_period[event["submissionPeriod"]].append(event)
         by_fy[event["fiscalYear"]].append(event)
+    # A Program Activity with no event in a covered period had zero activity;
+    # it did not skip forward in time. Materialize those zero buckets so child
+    # charts share the account timeline and current-year zeroes remain visible.
+    for label in covered_periods:
+        by_period[label]
+        by_fy[period_info(label)[0]]
 
     periods = []
     for label in sorted(by_period, key=lambda p: (period_info(p)[0], period_info(p)[1])):
         period_events = by_period[label]
-        periods.append({"submissionPeriod": label, "month": period_events[0]["date"][:7],
+        periods.append({"submissionPeriod": label,
+                        "month": period_info(label)[2].isoformat()[:7],
                         **_metrics(period_events)})
 
     fiscal_years, cumulative = [], []
     for fy in sorted(by_fy):
         fy_events = by_fy[fy]
-        fiscal_years.append({"fy": fy, "partial": fy == current_fy,
+        fiscal_years.append({"fy": fy, "partial": fy in partial_fys,
                              **_metrics(fy_events),
                              "topRecipients": _top_recipients(fy_events),
                              "positiveFlows": _top_flows(fy_events, True),
@@ -243,7 +267,7 @@ def aggregate(events, current_fy=None):
             end = period_info(row["submissionPeriod"])[2]
             day = (end - date(fy - 1, 10, 1)).days
             running.append({"d": day, "submissionPeriod": row["submissionPeriod"], **_metrics(through)})
-        cumulative.append({"fy": fy, "partial": fy == current_fy, "points": running})
+        cumulative.append({"fy": fy, "partial": fy in partial_fys, "points": running})
     totals = _metrics(events)
     return {**totals,
             "totalNetObligationsCents": totals["netObligationsCents"],
@@ -259,10 +283,12 @@ def aggregate(events, current_fy=None):
 
 
 def write_dashboard(data_dir, node, source, events, warnings=None, children=None,
-                    current_fy=None, metadata=None):
+                    current_fy=None, metadata=None, covered_periods=None,
+                    partial_fys=None):
     out = {"kind": "obligations", "generated": date.today().isoformat(),
            "node": node, "source": source, "warnings": list(warnings or []),
-           "dataComplete": not warnings, **aggregate(events, current_fy),
+           "dataComplete": not warnings,
+           **aggregate(events, current_fy, covered_periods, partial_fys),
            "children": children or []}
     if metadata:
         out.update(metadata)
