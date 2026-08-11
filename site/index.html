@@ -162,7 +162,10 @@ const el = (tag, attrs = {}, ...kids) => {
   return n;
 };
 const fmtN = v => v.toLocaleString("en-US");
-const fmtM = v => "$" + (v / 1e6 >= 100 ? (v / 1e6).toFixed(0) : (v / 1e6).toFixed(1)) + "M";
+const fmtM = v => v >= 1e9
+  ? "$" + (v / 1e9 >= 100 ? (v / 1e9).toFixed(0) : (v / 1e9).toFixed(1)) + "B"
+  : "$" + (v / 1e6 >= 100 ? (v / 1e6).toFixed(0) : (v / 1e6).toFixed(1)) + "M";
+const fmtAxisM = v => v >= 1e9 ? "$" + +(v / 1e9).toFixed(1) + "B" : "$" + Math.round(v / 1e6) + "M";
 const fmtMoney = v => v >= 1e6 ? fmtM(v) : "$" + Math.round(v / 1e3) + "K";
 const fmtPct = v => (v > 0 ? "+" : "−") + Math.abs(v * 100).toFixed(1) + "%";
 const monthName = m => new Date(m + "-15").toLocaleString("en-US", { month: "short", year: "numeric" });
@@ -624,7 +627,7 @@ function dollarsChart(data) {
     plot.querySelector("svg")?.remove();
     const f = frame(plot, 300, 56, 14);
     const max = chartMax(rows, r => r.dollars);
-    yAxis(f.svg, f, max, v => "$" + Math.round(v / 1e6) + "M");
+    yAxis(f.svg, f, max, fmtAxisM);
     const band = rows.length ? (f.R - f.L) / rows.length : 0;
     const bw = Math.min(24, band - 8);
     const hOf = v => (v / max) * (f.B - f.T);
@@ -844,7 +847,7 @@ async function boot() {
         fmtN, fmtN),
       cumulativeChart(data, "dollars", "Cumulative award dollars through the fiscal year",
         "Running FY-to-date award dollars on the same axes. Institute-scale outlier awards arrive as visible steps. Minor ticks are weeks.",
-        v => "$" + Math.round(v / 1e6) + "M", fmtM));
+        fmtAxisM, fmtM));
   }
   renders.push(monthlyChart(data), fyAwardsChart(data, windowDone), mechanismChart(data), dollarsChart(data));
   topAwards(data);
