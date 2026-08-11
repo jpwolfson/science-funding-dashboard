@@ -37,6 +37,12 @@ API by default:
 - monthly counts remain under the plausibility cap; and
 - published dashboard warnings fail validation unless explicitly allowed.
 
+Each normalized row also persists the RePORTER funding mechanism, activity
+code, and award type in the existing `transType` detail. This makes external
+benchmark scope reproducible from the committed store. Legacy rows without
+that structured detail fail validation and require a full re-pull; the
+validator never guesses a mechanism from the dashboard's broader award bin.
+
 The pull itself is non-destructive. An ID omitted by a later full pull remains
 in the store and produces a visible warning. Deterministic shard rewrites also
 prevent a corrected date from leaving one ID in two fiscal-year files.
@@ -52,16 +58,25 @@ an independent source.
 Independent reasonableness gates use NIH Data Book reports 400 and 401. Those
 reports are produced through NIH's monthly extramural-awards publication path,
 while RePORTER refreshes weekly. FY2022-FY2025 award counts must remain within
-2% and award dollars within 15% of the pinned values in
-`reference/nih_databook_baseline.json`. The dollar tolerance reflects a known
-scope difference: the dashboard includes R&D contracts and interagency
-agreements, while the Data Book benchmark excludes them.
+2% and award dollars within 2% of the pinned values in
+`reference/nih_databook_baseline.json`.
+
+This comparison is deliberately like-for-like rather than a check of the
+dashboard's complete product total. The benchmark subset contains parent
+grants and Other Transactions with non-zero award dollars and excludes R&D
+contracts, interagency agreements, intramural projects, and loan-repayment
+activity codes. The dashboard and its RePORTER exact-count gate continue to
+include contracts and interagency agreements. The machine-readable validation
+report publishes both `fiscalYears` (complete product scope) and
+`dataBookScopeFiscalYears` (benchmark scope), so the exclusion is auditable.
 
 Sources:
 
 - <https://report.nih.gov/nihdatabook/report/400>
 - <https://report.nih.gov/nihdatabook/report/401>
 - <https://report.nih.gov/faqs>
+- <https://report.nih.gov/exporter-data-dictionary>
+- <https://grants.nih.gov/funding/activity-codes>
 
 ## Commands
 

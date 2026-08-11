@@ -65,6 +65,13 @@ directions. Both unique ID sets must exactly match each other and RePORTER's
 Award IDs are namespaced (`nih:<application_id>`) in the common store so NIH
 and NSF identifiers cannot collide in federal rollups.
 
+The complete product includes R&D contracts and interagency agreements. Its
+independent NIH Data Book gate compares a derived grants/Other-Transactions
+subset at the same 2% count and dollar tolerance, matching the benchmark's
+published exclusions instead of weakening the tolerance to absorb a scope
+difference. Funding mechanism and activity code are persisted on every NIH
+row so that subset remains reproducible offline.
+
 See [`docs/nih-data-validation.md`](docs/nih-data-validation.md) for the
 fail-closed extraction contract, post-backfill checks, independent published
 benchmarks, tolerances, and reproducible validation commands.

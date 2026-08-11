@@ -28,6 +28,11 @@ historical backfill/release gate pending.
 - Formalized the NSF DMS USAspending count diagnostic as a ≥99.5% calibration
   invariant; the pinned result is 1,006/1,008 (99.80%) with the two known IAA
   residuals. Dollars remain intentionally non-comparable.
+- Corrected the NIH Data Book gate after a separate full re-pull recovered
+  13,790 records that the old funding-mechanism whitelist had excluded. The
+  product still retains contracts and IAAs; each row now persists mechanism
+  and activity, and the independent benchmark derives the Data Book's
+  grants/OT, non-zero-dollar scope at the original tight 2% tolerance.
 
 ## Evidence and decisions
 
@@ -54,7 +59,7 @@ synthesized for the unavailable years.
 
 ## Validation completed locally
 
-- Full Python unit suite: 38 tests green.
+- Full Python unit suite: 41 tests green.
 - Live account resolver: DOE `089-0222` dynamically resolved to internal ID
   5778 and the requested account scope echoed correctly.
 - Live File B P02 probe: 146 rows, $1,123,055,113.69 cumulative obligations.
@@ -82,6 +87,12 @@ synthesized for the unavailable years.
    validator rejects an early flip.
 5. Merge, confirm the Pages deployment, and record run/PR/deploy links in this
    handoff and the Phase 3.1b roadmap entry.
+
+The NIH grants-scope adapter/validator change requires one more full 28-IC
+re-pull so every deterministic shard carries the new structured mechanism
+detail. Until that run validates and rebuilds rollups, NIH leaf data may show
+the corrected 708,233-record universe while NIH/root rollups still show the
+old 694,443 total. This mixed state is intentionally blocked from publication.
 
 Do not replace canonical File B dollars with File C-only totals, do not route
 events through `adapters/common.py` or `scripts/rollup.py`, and do not fabricate

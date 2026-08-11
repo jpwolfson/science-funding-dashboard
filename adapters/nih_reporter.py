@@ -13,6 +13,7 @@ grants, cooperative agreements, contracts, and interagency agreements.
 """
 
 import json
+import re
 import sys
 import time
 import urllib.error
@@ -85,6 +86,26 @@ def _award_kind(activity_code, award_type):
     if award_type in {"1", "2", "3", "4", "4C"}:
         return "Standard/new award"
     return "Other award"
+
+
+_TRANS_TYPE_RE = re.compile(
+    r"^(?P<kind>.+?) \(award type=(?P<award_type>[^;]*); "
+    r"activity=(?P<activity>[^;]*); funding mechanism=(?P<mechanism>.*)\)$"
+)
+
+
+def encode_trans_type(kind, award_type, activity, mechanism):
+    """Persist NIH benchmark dimensions in the existing detail field."""
+    return (
+        f"{kind} (award type={award_type}; activity={activity}; "
+        f"funding mechanism={mechanism})"
+    )
+
+
+def parse_trans_type(value):
+    """Return persisted NIH dimensions, or ``None`` for a legacy row."""
+    match = _TRANS_TYPE_RE.fullmatch(str(value or ""))
+    return match.groupdict() if match else None
 
 
 class NihReporterPull:
@@ -225,8 +246,11 @@ class NihReporterPull:
             award_day = fy_start
         activity = row.get("activity_code") or ""
         award_type = row.get("award_type") or ""
+        mechanism = str(row.get("funding_mechanism") or "").strip()
+        if not mechanism:
+            raise RuntimeError(
+                f"application {row.get('appl_id')} is missing funding_mechanism")
         kind = _award_kind(activity, award_type)
-        detail = ", ".join(x for x in [str(award_type), activity] if x)
         organization = row.get("organization") or {}
         return {
             "id": f"nih:{row['appl_id']}",
@@ -235,7 +259,8 @@ class NihReporterPull:
             "amount": int(round(float(row.get("award_amount") or 0))),
             "type": {"Fellowship": "fell", "Continuing award": "cont",
                      "Standard/new award": "std"}.get(kind, "other"),
-            "transType": f"{kind} ({detail})" if detail else kind,
+            "transType": encode_trans_type(
+                kind, str(award_type), activity, mechanism),
             "title": row.get("project_title") or row.get("project_num") or "",
             "awardee": organization.get("org_name") or "",
         }, used_fallback
