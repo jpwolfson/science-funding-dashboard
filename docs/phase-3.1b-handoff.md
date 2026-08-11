@@ -113,3 +113,13 @@ monthly or FY2015–16 data.
   It must rewrite all 28 IC shards with structured activity/mechanism detail,
   pass exact live RePORTER reconciliation, pass the like-for-like Data Book
   subset at 2%, and rebuild NIH/root rollups before publication.
+- NIH completed those gates at 708,233 unique awards. PR conflicts against
+  `main` were limited to 22 NLM/OD gzip shards from the earlier repull; merge
+  commit `5edae8c` retains the newer structured-mechanism shards, records
+  `main` as the second parent, and passed the complete local CI command set.
+- Obligation attempt 4 completed 9/10 account-years. FY2020 downloaded every
+  File B period and all 27,301 File C rows, then correctly surfaced one File C
+  unknown-PA bucket (`FY2020P03`, `0000`) with no File B bucket. The adapter
+  now retains that File C overlay and offsets it with an equal negative
+  residual in visible `0000`, so canonical File B net remains zero. Known-PA
+  orphan buckets still fail. Attempt 5 is the next full reconciliation run.

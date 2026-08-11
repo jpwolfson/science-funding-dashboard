@@ -279,8 +279,35 @@ def combine_file_b_file_c(file_b_events, file_c_events, account):
         event["id"] = stable_id("file_b_residual", account,
                                 event["programActivityCode"], event["submissionPeriod"])
         residuals.append(normalize_event(event))
-    if c_by_bucket:
-        raise ValueError(f"File C contains PA-period buckets absent from File B: {sorted(c_by_bucket)[:3]}")
+    # File C requires an award identifier but may omit Program Activity. If
+    # File B has no matching unknown-PA bucket, preserve the award-linked
+    # overlay in visible 0000 and offset it with a residual against a
+    # canonical File B value of zero. Known-PA mismatches remain fatal because
+    # they indicate a real scope/alias defect rather than missing attribution.
+    invalid = sorted(key for key in c_by_bucket if key[1] != "0000")
+    if invalid:
+        raise ValueError(
+            f"File C contains PA-period buckets absent from File B: {invalid[:3]}")
+    for (submission_period, code), file_c_amount in sorted(c_by_bucket.items()):
+        amount = -file_c_amount
+        event = {
+            "submissionPeriod": submission_period,
+            "federalAccount": account,
+            "programActivityCode": code,
+            "programActivityName": "Unknown / other",
+            "programActivityReportingKey": "",
+            "source": "file_b_residual",
+            "amountCents": amount,
+            "awardId": "",
+            "linked": False,
+            "title": "Offset for File C activity without a File B Program Activity bucket",
+            "sourceRowCount": 1,
+            "grossPositiveCents": max(0, amount),
+            "grossNegativeCents": min(0, amount),
+        }
+        event["id"] = stable_id(
+            "file_b_residual", account, code, submission_period)
+        residuals.append(normalize_event(event))
     combined = list(file_c_events) + residuals
     if sum(e["amountCents"] for e in combined) != sum(e["amountCents"] for e in file_b_events):
         raise AssertionError("File B/File C residual identity failed")

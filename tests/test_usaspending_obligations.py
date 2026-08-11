@@ -57,6 +57,37 @@ class USAspendingObligationTests(unittest.TestCase):
         self.assertEqual(1000, sum(e["amountCents"] for e in both))
         self.assertEqual(300, next(e["amountCents"] for e in both if e["source"] == "file_b_residual"))
 
+    def test_unknown_file_c_bucket_without_file_b_anchor_nets_to_zero(self):
+        c_parts = {"Assistance.csv": [{
+            "submission_period": "FY2020P03",
+            "federal_account_symbol": "089-0222",
+            "program_activity_code": "",
+            "program_activity_name": "",
+            "award_unique_key": "A",
+            "transaction_obligated_amount": "7.00",
+        }], "Contracts.csv": [], "Unlinked.csv": []}
+        c = parse_file_c(c_parts, "089-0222", ALIASES)
+        both = combine_file_b_file_c([], c, "089-0222")
+        self.assertEqual(0, sum(e["amountCents"] for e in both))
+        self.assertEqual(["0000", "0000"],
+                         [e["programActivityCode"] for e in both])
+        self.assertEqual(-700, next(
+            e["amountCents"] for e in both
+            if e["source"] == "file_b_residual"))
+
+    def test_known_file_c_bucket_without_file_b_anchor_still_fails(self):
+        c_parts = {"Assistance.csv": [{
+            "submission_period": "FY2020P03",
+            "federal_account_symbol": "089-0222",
+            "program_activity_code": "0001",
+            "program_activity_name": "BES",
+            "award_unique_key": "A",
+            "transaction_obligated_amount": "7.00",
+        }], "Contracts.csv": [], "Unlinked.csv": []}
+        c = parse_file_c(c_parts, "089-0222", ALIASES)
+        with self.assertRaisesRegex(ValueError, "absent from File B"):
+            combine_file_b_file_c([], c, "089-0222")
+
     def test_quarterly_file_c_joins_period_ending_file_b(self):
         parts = {"Assistance.csv": [{"submission_period": "FY2017Q2",
             "federal_account_symbol": "089-0222", "program_activity_code": "0001",

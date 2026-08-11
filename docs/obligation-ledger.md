@@ -72,6 +72,11 @@ account, Program Activity code/name/PARK, signed integer cents, award/recipient
 metadata where present, source-row count, and gross positive/negative cents.
 Unlinked File C rows retain dollars but never inflate `distinctLinkedAwards`.
 Missing Program Activities go to visible code `0000` instead of being dropped.
+When File C reports non-zero `0000` activity for a period in which File B has
+no unknown-PA bucket, the ledger retains that award-linked overlay and creates
+an equal opposite `file_b_residual` event in `0000`. The canonical File B net
+for that bucket is therefore exactly zero. A File C bucket for any known PA
+that is absent from File B remains a fatal scope/alias error.
 
 Period 2 is the first supported monthly window and can include October and
 November. Historical quarterly submissions remain quarterly. The dashboard
