@@ -107,10 +107,10 @@ synthesized for the unavailable years.
 The Phase 3.1b release has no remaining steps. PR #8 released the QA hardening;
 PR #9 corrected the landing-page asymmetry by adding parallel DOE obligation
 summary tiles for net, gross positive, gross negative, and File C-linked award
-coverage. Phase 3.2 must begin with workflow platformization: the current
-backfill is hardcoded to DOE, is not scheduled, relies on a separate
-push-triggered deploy, and drops request/archive provenance at the artifact
-boundary. See the revised roadmap in `CLAUDE.md`.
+coverage. That handoff's required workflow platformization is now complete in
+Phase 3.2a: refresh planning is registry-driven and scheduled, publication is
+atomic, and request/archive/replacement provenance survives reconciliation.
+See `docs/phase-3.2a-handoff.md` and the revised roadmap in `CLAUDE.md`.
 
 The separate NIH full re-pull is complete: all 28 IC shards carry structured
 activity/mechanism detail, exact live RePORTER reconciliation passes, the

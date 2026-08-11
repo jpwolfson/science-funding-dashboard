@@ -11,7 +11,7 @@ on:
       - "config/obligation_accounts.json"
       - "reference/nih_databook_baseline.json"
       - "reference/usaspending_calibration.json"
-      - "reference/doe_sc_obligation_baseline.json"
+      - "reference/*_obligation_baseline.json"
       - "site/index.html"
       - ".github/workflows/**"
   pull_request:
@@ -43,3 +43,5 @@ jobs:
         run: python scripts/validate_usaspending_calibration.py
       - name: Obligation ledger contract (data backfills in its dedicated workflow)
         run: python scripts/validate_obligations.py --allow-empty
+      - name: Rendered obligation page matrix
+        run: python scripts/smoke_obligation_pages.py

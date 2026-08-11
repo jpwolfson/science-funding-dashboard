@@ -479,7 +479,7 @@ function obligationChildrenCard(data, title = null, note = null) {
       const value = c.currentFYNetObligations || 0;
       tr.append(el("td", { class: `num ${value < 0 ? "negative" : ""}`.trim(),
         text: fmtSignedMoney(value) }),
-      el("td", { class: "num", text: fmtCoverage(c.fileCCoverage) }),
+      el("td", { class: "num", text: fmtCoverage(c.fileCToNetRatio) }),
       el("td", { class: "num", text: fmtN(c.distinctLinkedAwards || 0) }));
     }
     navRow(tr, path);
@@ -988,7 +988,7 @@ function obligationTiles(data, options = {}) {
     [ `Distinct File C-linked awards, FY${data.currentFY} to date (not new awards)`, fmtN(cur.distinctLinkedAwards || 0) ],
   ];
   const reconciliationSpecs = [
-    [ `File C portion, FY${data.currentFY} to date (${fmtCoverage(cur.fileCCoverage ?? (cur.netObligations ? cur.awardLinkedObligations / cur.netObligations : null))} of net)`,
+    [ `File C portion, FY${data.currentFY} to date (${fmtCoverage(cur.fileCToNetRatio)} of net)`,
       fmtSignedMoney(cur.awardLinkedObligations || 0) ],
     [ `File B − File C residual, FY${data.currentFY} to date`, fmtSignedMoney(cur.residualObligations || 0) ],
   ];
@@ -1253,9 +1253,14 @@ function renderObligationNotes(data) {
 
 // ---------- boot ----------
 async function fetchJSON(path) {
-  const res = await fetch(path, { cache: "no-store" });
-  if (!res.ok) throw new Error("HTTP " + res.status);
-  return res.json();
+  try {
+    const res = await fetch(path, { cache: "no-store" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return res.json();
+  } catch (error) {
+    document.documentElement.dataset.networkError = `${path}: ${error}`;
+    throw error;
+  }
 }
 
 async function boot() {
@@ -1301,6 +1306,8 @@ async function boot() {
 
   const kind = data.kind || "awards";
   if (kind === "obligations") {
+    if (data.schemaVersion !== 2)
+      throw new Error(`Unsupported obligation dashboard schema: ${data.schemaVersion}`);
     const node = data.node || {};
     const title = node.level === "root" ? "Federal science obligation dashboard"
       : `${node.name || "Unit"} — obligation dashboard`;
@@ -1426,7 +1433,18 @@ async function boot() {
 
   renderCsvNote(node.level, node.path ?? orgPath, data);
 }
-boot();
+window.addEventListener("error", event => {
+  document.documentElement.dataset.renderError = event.message || "window error";
+});
+window.addEventListener("unhandledrejection", event => {
+  document.documentElement.dataset.renderError = String(event.reason || "unhandled rejection");
+});
+boot().then(() => {
+  document.documentElement.dataset.renderComplete = "true";
+}).catch(error => {
+  document.documentElement.dataset.renderError = String(error?.stack || error);
+  throw error;
+});
 </script>
 </body>
 </html>

@@ -269,31 +269,28 @@ consequences already encoded:
         negative sign alone does not establish cancellation.
       - Detailed contract and release evidence:
         `docs/obligation-ledger.md`, `docs/phase-3.1b-handoff.md`.
-- [ ] Phase 3.2a — platformize before account fan-out (new release gate).
-      The pilot workflow is still a DOE-specific historical backfill: account
-      path, artifact path, matrix, and manifest metadata are hardcoded; it has
-      no schedule and relies on the separate push-triggered Pages workflow for
-      publication. Do not batch additional accounts until:
-      - the workflow plans an account × FY matrix from the registry, supports a
-        cheap weekly current-FY refresh for every account plus a rotating
-        historical reconciliation, validates all accounts together, and
-        publishes one atomic snapshot;
-      - each account owns its baseline path and availability statuses; missing
-        required shards, stale dashboards, and new PA codes fail before deploy;
-      - request scope, status row counts, archive SHA-256, normalized event
-        fingerprint, and replacement lineage survive the artifact/reconcile
-        boundary (the pilot currently keeps only the normalized shard hash);
-      - normalized signed events, manifests, hashes, and diffs remain in Git;
-        raw source ZIPs use 14-day GitHub Actions artifacts and intermediate
-        account-year artifacts use one-day retention, with no external storage
-        service or standing human download step;
-      - make one hard schema-v2 migration: rename the misleading
-        `fileCCoverage` output to `fileCToNetRatio`, regenerate every obligation
-        dashboard JSON, and do not carry a temporary duplicate compatibility
-        field (there are no external schema consumers);
-      - a scheduled freshness SLA and an automated rendered-page matrix cover
-        light/dark, narrow/wide, empty/negative/out-of-range File C/net cases,
-        keyboard access, public links, and console/network failures.
+- [x] Phase 3.2a — platformize before account fan-out (completed 2026-08-11).
+      - Registry-driven account × FY planning now supports weekly current-FY
+        refreshes for every account, one rotating historical reconciliation per
+        account, and full/custom dispatches. Baseline paths, availability, and
+        the ten-day freshness SLA are account-owned contracts.
+      - Per-FY schema-v2 provenance persists accepted request scopes, status and
+        parsed row counts, raw ZIP hashes, normalized content fingerprints,
+        compact diffs, and replacement lineage across one-day reconcile
+        artifacts. Raw ZIPs retain for 14 days; normalized stores and audit
+        records remain in Git. Pre-v2 shards are honestly marked
+        `legacy-migrated` until rotation replaces them.
+      - Reconciliation validates every registered account and renders one
+        candidate snapshot before the same tree is committed and uploaded to
+        Pages. Obligation-only commits no longer rely on the generic deploy.
+      - The hard dashboard migration removed `fileCCoverage` in favor of only
+        `fileCToNetRatio`. All obligation JSON was regenerated at schema v2.
+      - Fail-closed checks cover required shards, manifests, provenance,
+        freshness, dashboard staleness, PA drift, public links, and a five-case
+        Chrome matrix across themes, widths, empty/negative/out-of-range ratio
+        states, keyboard focus, and console/network failures.
+      - Local release evidence: 64 tests plus all offline validators and the
+        rendered matrix pass. Detailed contract: `docs/phase-3.2a-handoff.md`.
 - [ ] Phase 3.2b — build and review the AAAS-to-federal-account crosswalk.
       Treat the AAAS R&D Appropriations Dashboard as the scope/framing source,
       not as an unattended production registry. Commit a dated source snapshot

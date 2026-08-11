@@ -1,5 +1,9 @@
 {
- "schemaVersion": 1,
+ "schemaVersion": 2,
+ "refreshDefaults": {
+  "freshnessMaxDays": 10,
+  "reportingLagMonths": 2
+ },
  "accounts": [
   {
    "path": "doe/sc",
@@ -10,6 +14,11 @@
    "agencyIdentifier": "089",
    "adapter": "usaspending_obligations",
    "baseline": "reference/doe_sc_obligation_baseline.json",
+   "availability": {
+    "firstFiscalYear": 2017,
+    "firstFiscalYearPeriod": 6,
+    "regularFirstPeriod": 2
+   },
    "programActivities": [
     {"slug": "basic-energy-sciences", "code": "0001", "park": "5ZCQYAMXBY9", "name": "Basic Energy Sciences", "abbrev": "BES"},
     {"slug": "advanced-scientific-computing-research", "code": "0002", "park": "5ZCQYAMXBYA", "name": "Advanced Scientific Computing Research", "abbrev": "ASCR"},

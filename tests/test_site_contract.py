@@ -29,6 +29,13 @@ class SiteContractTests(unittest.TestCase):
                      "partial source history"):
             self.assertIn(text, self.html)
 
+    def test_obligation_schema_v2_and_render_gate_are_hard_requirements(self):
+        self.assertIn("data.schemaVersion !== 2", self.html)
+        self.assertIn("fileCToNetRatio", self.html)
+        self.assertNotIn("fileCCoverage", self.html)
+        self.assertIn('dataset.renderComplete = "true"', self.html)
+        self.assertIn("dataset.networkError", self.html)
+
     def test_charts_are_named_and_secondary_text_meets_contrast_target(self):
         self.assertIn('"aria-labelledby": plot.getAttribute("aria-labelledby")', self.html)
         self.assertIn("--muted: #73716b", self.html)

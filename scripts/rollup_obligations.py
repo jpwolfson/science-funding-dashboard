@@ -17,7 +17,7 @@ def child_summary(path, name, abbrev, events, current_fy, covered_periods,
     fy = next((row for row in stats["fiscalYears"] if row["fy"] == current_fy), None)
     return {"path": path, "name": name, "abbrev": abbrev, "hasData": bool(events),
             "currentFYNetObligations": fy["netObligations"] if fy else 0,
-            "fileCCoverage": fy["fileCCoverage"] if fy else None,
+            "fileCToNetRatio": fy["fileCToNetRatio"] if fy else None,
             "distinctLinkedAwards": fy["distinctLinkedAwards"] if fy else 0}
 
 
@@ -26,6 +26,8 @@ def account_availability(repo, account):
     if not baseline_path:
         raise ValueError(f"{account['path']}: missing baseline path")
     baseline = json.loads((repo / baseline_path).read_text())
+    if baseline.get("schemaVersion") != 2:
+        raise ValueError(f"{account['path']}: baseline schema must be v2")
     if baseline.get("federalAccount") != account["federalAccount"]:
         raise ValueError(f"{account['path']}: baseline account mismatch")
     return {
@@ -38,7 +40,11 @@ def build(repo=REPO):
     repo = Path(repo)
     config = json.loads((repo / "config" / "obligation_accounts.json").read_text())
     data_root = repo / "data" / "obligations"
+    freshness_max_days = int(config.get("refreshDefaults", {}).get(
+        "freshnessMaxDays", 10
+    ))
     account_rows = []
+    account_freshness = {}
     agency_events = {}
     for account in config["accounts"]:
         base = data_root / account["path"]
@@ -48,6 +54,12 @@ def build(repo=REPO):
         current_fy = max(e["fiscalYear"] for e in events)
         covered_periods = {e["submissionPeriod"] for e in events}
         partial_fys = account_availability(repo, account)
+        manifest = json.loads((base / "events" / "manifest.json").read_text())
+        freshness = {
+            "latestAcceptedAt": manifest.get("latestAcceptedAt"),
+            "maxAgeDays": int(account.get("freshnessMaxDays", freshness_max_days)),
+        }
+        account_freshness[account["path"]] = freshness
         pa_children = []
         for pa in account["programActivities"]:
             pa_events = [e for e in events if e["programActivityCode"] == pa["code"]]
@@ -57,7 +69,8 @@ def build(repo=REPO):
                  "abbrev": pa.get("abbrev", "")}, "USAspending File B and File C",
                 pa_events, current_fy=current_fy,
                 metadata={"federalAccount": account["federalAccount"],
-                          "programActivityCode": pa["code"]},
+                          "programActivityCode": pa["code"],
+                          "freshness": freshness},
                 covered_periods=covered_periods, partial_fys=partial_fys)
             pa_children.append(child_summary(path, pa["name"], pa.get("abbrev", ""),
                                              pa_events, current_fy,
@@ -70,7 +83,9 @@ def build(repo=REPO):
         write_dashboard(base, {"level": "account", "path": account_path,
             "name": account["name"], "abbrev": account["abbrev"]},
             "USAspending File B and File C", events, children=pa_children,
-            current_fy=current_fy, metadata={"federalAccount": account["federalAccount"]},
+            current_fy=current_fy,
+            metadata={"federalAccount": account["federalAccount"],
+                      "freshness": freshness},
             covered_periods=covered_periods, partial_fys=partial_fys)
         agency_slug = account["path"].split("/")[0]
         agency_events.setdefault(agency_slug, []).extend(events)
@@ -92,12 +107,17 @@ def build(repo=REPO):
                                   ev, fy, periods, partial)
                     for a, ev, fy, periods, partial in accounts]
         agency_name = accounts[0][0]["agency"]
+        accepted = [account_freshness[a["path"]].get("latestAcceptedAt")
+                    for a, _, _, _, _ in accounts
+                    if account_freshness[a["path"]].get("latestAcceptedAt")]
         write_dashboard(data_root / agency_slug,
             {"level": "agency", "path": f"obligations/{agency_slug}",
             "name": agency_name, "abbrev": agency_slug.upper()},
             "USAspending File B and File C", events, children=children,
             current_fy=current_fy, covered_periods=covered_periods,
-            partial_fys=partial_fys)
+            partial_fys=partial_fys,
+            metadata={"freshness": {"latestAcceptedAt": min(accepted) if accepted else None,
+                                     "maxAgeDays": freshness_max_days}})
         agency_children.append(child_summary(f"obligations/{agency_slug}", agency_name,
                                              agency_slug.upper(), events, current_fy,
                                              covered_periods, partial_fys))
@@ -110,10 +130,15 @@ def build(repo=REPO):
         current_fy = max(e["fiscalYear"] for e in all_events)
         covered_periods = {e["submissionPeriod"] for e in all_events}
         partial_fys = set().union(*(partial for _, _, _, _, partial in account_rows))
+        accepted = [row.get("latestAcceptedAt")
+                    for row in account_freshness.values()
+                    if row.get("latestAcceptedAt")]
         write_dashboard(data_root, {"level": "root", "path": "obligations",
             "name": "Appropriations obligations"}, "USAspending File B and File C",
             all_events, children=agency_children, current_fy=current_fy,
-            covered_periods=covered_periods, partial_fys=partial_fys)
+            covered_periods=covered_periods, partial_fys=partial_fys,
+            metadata={"freshness": {"latestAcceptedAt": min(accepted) if accepted else None,
+                                     "maxAgeDays": freshness_max_days}})
 
     index_children = []
     for agency_slug, events in agency_events.items():
@@ -133,7 +158,8 @@ def build(repo=REPO):
         index_children.append({"slug": agency_slug, "name": agency_name,
                                "abbrev": agency_slug.upper(), "path": agency_slug,
                                "children": account_nodes})
-    index = {"generated": __import__("datetime").date.today().isoformat(),
+    index = {"schemaVersion": 2,
+             "generated": __import__("datetime").date.today().isoformat(),
              "root": {"slug": "", "abbrev": "", "name": "Appropriations obligations",
                       "path": "", "children": index_children}}
     data_root.mkdir(parents=True, exist_ok=True)

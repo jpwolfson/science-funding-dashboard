@@ -1,0 +1,39 @@
+{
+ "accountPath": "doe/sc",
+ "asOfPeriod": 12,
+ "baselinePin": {
+  "obligationsCents": 734144267264,
+  "status": "complete"
+ },
+ "collectionStatus": "legacy-migrated",
+ "diff": {
+  "addedCount": 3154,
+  "addedIdsSha256": "d6123d10851d4285113531e02fe5ea78beffe82138696af07bd0304eba6d46fa",
+  "changedCount": 0,
+  "changedIdsSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "kind": "schema-v2-migration",
+  "netAmountChangeCents": 734144267264,
+  "previousRecordCount": 0,
+  "recordCount": 3154,
+  "removedCount": 0,
+  "removedIdsSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+ },
+ "downloads": [],
+ "federalAccount": "089-0222",
+ "fiscalYear": 2019,
+ "migratedAt": "2026-08-11T12:00:00+00:00",
+ "migration": {
+  "note": "Pre-v2 normalized shard; raw request/status/archive facts were not retained and are not reconstructed.",
+  "sourceManifestSha256": "2f5f02d0878b3c3d1bd903eb104af39d94aeb8f46618b4eeb06f5170a73beeb0"
+ },
+ "normalized": {
+  "eventFingerprint": "4c919929bebdf903a3c934534b26855c71cb1d516aa28837de2b5fea1c8f29a2",
+  "netObligationsCents": 734144267264,
+  "recordCount": 3154
+ },
+ "replacement": {
+  "previousEventFingerprint": null,
+  "previousProvenanceSha256": null
+ },
+ "schemaVersion": 2
+}
