@@ -44,6 +44,14 @@ class USAspendingObligationTests(unittest.TestCase):
         self.assertEqual(1000, sum(e["amountCents"] for e in both))
         self.assertEqual(300, next(e["amountCents"] for e in both if e["source"] == "file_b_residual"))
 
+    def test_quarterly_file_c_joins_period_ending_file_b(self):
+        parts = {"Assistance.csv": [{"submission_period": "FY2017Q2",
+            "federal_account_symbol": "089-0222", "program_activity_code": "0001",
+            "program_activity_name": "BES", "award_unique_key": "A",
+            "transaction_obligated_amount": "1.00"}], "Contracts.csv": [], "Unlinked.csv": []}
+        c = parse_file_c(parts, "089-0222", ALIASES)
+        self.assertEqual("FY2017P06", c[0]["submissionPeriod"])
+
 
 if __name__ == "__main__":
     unittest.main()

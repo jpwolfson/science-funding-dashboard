@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from adapters.obligation_common import load_store, normalize_event, period_info, write_store
+from adapters.obligation_common import canonical_period, load_store, normalize_event, period_info, write_store
 
 
 def event(event_id="e1", amount=123, period="FY2024P02", source="file_c"):
@@ -19,6 +19,7 @@ class ObligationStoreTests(unittest.TestCase):
                          (period_info("FY2024P02")[0], period_info("FY2024P02")[1],
                           period_info("FY2024P02")[2].isoformat()))
         self.assertEqual("2024-03-31", period_info("FY2024Q2")[2].isoformat())
+        self.assertEqual("FY2024P06", canonical_period("FY2024Q2"))
         with self.assertRaises(ValueError):
             period_info("FY2024P01")
 

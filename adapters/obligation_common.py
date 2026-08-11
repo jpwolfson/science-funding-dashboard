@@ -48,6 +48,12 @@ def period_info(label):
     return fy, period, end
 
 
+def canonical_period(label):
+    """Canonicalize quarterly labels to their period-ending month."""
+    fy, period, _ = period_info(label)
+    return f"FY{fy}P{period:02}"
+
+
 def stable_id(source, account, pa_code, submission_period, award_id=""):
     raw = "\x1f".join(("obligation-v1", source, account, pa_code,
                        submission_period, award_id))
@@ -56,6 +62,7 @@ def stable_id(source, account, pa_code, submission_period, award_id=""):
 
 def normalize_event(event):
     event = dict(event)
+    event["submissionPeriod"] = canonical_period(event["submissionPeriod"])
     fy, period, end = period_info(event["submissionPeriod"])
     event.setdefault("fiscalYear", fy)
     event.setdefault("fiscalPeriod", period)

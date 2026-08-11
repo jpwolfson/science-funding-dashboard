@@ -12,7 +12,7 @@ import zipfile
 from collections import defaultdict
 from decimal import Decimal
 
-from adapters.obligation_common import cents, normalize_event, stable_id
+from adapters.obligation_common import canonical_period, cents, normalize_event, stable_id
 
 
 API = "https://api.usaspending.gov/api/v2"
@@ -171,7 +171,7 @@ def parse_file_c(members, account, aliases):
             amount = cents(raw)
             if amount == 0:
                 continue
-            period = _first(row, "submission_period")
+            period = canonical_period(_first(row, "submission_period"))
             row_account = _first(row, "federal_account_symbol")
             if row_account and row_account != account:
                 raise ValueError(f"File C account mismatch: {row_account}")
