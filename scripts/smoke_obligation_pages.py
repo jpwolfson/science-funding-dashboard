@@ -5,6 +5,7 @@ import argparse
 import base64
 import json
 import os
+import signal
 import shutil
 import socket
 import struct
@@ -142,7 +143,8 @@ def render_page(executable, url, width, height, theme):
             "--disable-dev-shm-usage", "--hide-scrollbars",
             f"--user-data-dir={profile}", f"--remote-debugging-port={port}",
             "--remote-allow-origins=*", "about:blank",
-        ], stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True)
+        ], stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True,
+           start_new_session=True)
         client = None
         try:
             endpoint = f"http://127.0.0.1:{port}"
@@ -199,12 +201,21 @@ def render_page(executable, url, width, height, theme):
             return document, "\n".join(diagnostics)
         finally:
             if client:
-                client.close()
-            process.terminate()
+                try:
+                    client.close()
+                except OSError:
+                    pass
+            try:
+                os.killpg(process.pid, signal.SIGTERM)
+            except ProcessLookupError:
+                pass
             try:
                 process.wait(timeout=5)
             except subprocess.TimeoutExpired:
-                process.kill()
+                try:
+                    os.killpg(process.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
                 process.wait(timeout=5)
 
 
