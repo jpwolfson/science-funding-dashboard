@@ -26,7 +26,8 @@ PAGE_SIZE = 500
 MAX_RESULTS = 15000
 RECENT_FYS = 2
 FUNDING_MECHANISMS = [
-    "SB", "RP", "RC", "OR", "TR", "TI", "CO", "IAA", "SRDC", "Other",
+    "SB", "RP", "RC", "OR", "TR", "TI", "CO", "IAA", "RDC", "SRDC",
+    "OTHER",
 ]
 INCLUDE_FIELDS = [
     "ApplId", "FiscalYear", "ProjectNum", "AwardNoticeDate", "BudgetStart",

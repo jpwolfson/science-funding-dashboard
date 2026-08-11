@@ -18,10 +18,11 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-from adapters import nih_reporter, nsf  # noqa: E402
+from adapters import nih_reporter, nsf, usaspending  # noqa: E402
 from adapters.common import write_dashboard, write_store  # noqa: E402
 
-ADAPTERS = {"nsf": nsf, "nih_reporter": nih_reporter}
+ADAPTERS = {"nsf": nsf, "nih_reporter": nih_reporter,
+            "usaspending": usaspending}
 
 
 def load_config():

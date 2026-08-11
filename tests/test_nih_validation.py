@@ -2,9 +2,11 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from adapters.common import write_store
-from scripts.validate_nih import read_store, within_relative
+from scripts.validate_nih import (live_mechanism_partition, read_store,
+                                  within_relative)
 
 
 def award(award_id="nih:1", day="2024-09-30"):
@@ -21,6 +23,19 @@ def award(award_id="nih:1", day="2024-09-30"):
 
 
 class NihValidationTests(unittest.TestCase):
+    def test_mechanism_partition_reconciles_whitelist_plus_intramural(self):
+        totals = iter([8858, 8087, 771])
+
+        def fake_post(payload):
+            self.assertEqual(payload["criteria"]["agencies"], ["NCI"])
+            return {"meta": {"total": next(totals)}}
+
+        with patch("scripts.validate_nih.api_post", side_effect=fake_post):
+            result = live_mechanism_partition("NCI", 2025)
+        self.assertEqual(result, {
+            "unfiltered": 8858, "extramural": 8087, "intramural": 771,
+        })
+
     def test_clean_sharded_store_reconciles_to_manifest(self):
         with tempfile.TemporaryDirectory() as tmp:
             leaf = Path(tmp) / "nih" / "nci" / "nci"

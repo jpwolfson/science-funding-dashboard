@@ -9,6 +9,7 @@ on:
       - "tests/**"
       - "config/orgs.json"
       - "reference/nih_databook_baseline.json"
+      - "reference/usaspending_calibration.json"
       - "site/index.html"
       - ".github/workflows/**"
   pull_request:
@@ -31,5 +32,8 @@ jobs:
           python -m compileall -q adapters scripts tests
           python -m json.tool config/orgs.json >/dev/null
           python -m json.tool reference/nih_databook_baseline.json >/dev/null
+          python -m json.tool reference/usaspending_calibration.json >/dev/null
       - name: Offline NIH data integrity and external benchmark checks
         run: python scripts/validate_nih.py
+      - name: USAspending calibration and onboarding gate
+        run: python scripts/validate_usaspending_calibration.py

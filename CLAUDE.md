@@ -215,6 +215,22 @@ consequences already encoded:
 - [ ] Phase 3.1 — USAspending adapter, calibrated against known truth,
       plus one pilot agency. One Fable-led session. Do these IN ORDER —
       the ordering is the risk control:
+      - **CALIBRATION STOP GATE TRIGGERED 2026-08-10 — DOE NOT ONBOARDED.**
+        Core award-search adapter and fail-closed pagination checks are built;
+        the Phase 2 NIH mechanism tripwire is also built (and exposed missing
+        `RDC` / uppercase `OTHER`, now fixed). DMS FY2024 count coverage is
+        99.80%, but NIGMS demonstrates that RePORTER application-year records
+        cannot be reconciled to USAspending base awards. More decisively, DOE
+        089-0222 FY2024 is $9.282B in authoritative account obligations versus
+        $3.397B for new awards/current whole-award totals and $37.342B for an
+        account-filtered transaction series. Program Activity award filters
+        overlap (660 memberships / 575 distinct awards across eight science
+        programs), so program-office rollups double-count. Per the ordered risk
+        control below, no DOE registry/data/workflow was added. Evidence and
+        owner choices: `docs/usaspending-calibration.md` and
+        `reference/usaspending_calibration.json`; CI prevents USAspending
+        registry onboarding while status is blocked. Recommended next phase:
+        redesign around File C account/PARK allocation events.
       1. `adapters/usaspending.py` core. The hard, one-time problem is
          semantics: USAspending records TRANSACTIONS (modifications,
          amendments, de-obligations) layered on base awards. Decide and

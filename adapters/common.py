@@ -22,6 +22,12 @@ CSV_HEADER = ["id", "date", "estimatedTotalAmt", "transType", "title", "awardeeN
 
 def norm_type(t):
     t = (t or "").lower()
+    if t.startswith("grant or cooperative agreement"):
+        return "std"
+    if t.startswith("contract"):
+        return "cont"
+    if t.startswith("other financial assistance"):
+        return "fell"
     if t.startswith("standard"):
         return "std"
     if t.startswith("continuing"):

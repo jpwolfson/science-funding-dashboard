@@ -1,0 +1,99 @@
+{
+ "schemaVersion": 1,
+ "calibratedAt": "2026-08-10",
+ "status": "blocked",
+ "onboardingAllowed": false,
+ "selectedAwardSemantics": {
+  "identity": "one prime base award keyed by generated_internal_id",
+  "amount": "Award Amount: the prime award's current total obligation across the whole award",
+  "date": "Base Obligation Date",
+  "timeFilter": "date_type=new_awards_only",
+  "scopeWarning": "A federal-account or program-activity filter selects awards associated with that scope; it does not allocate Award Amount to that scope."
+ },
+ "calibrations": {
+  "nsfDmsFy2024": {
+   "method": "Exact DMS award-ID comparison; USAspending grants, new-awards-only",
+   "dashboardRecords": 1008,
+   "usaspendingBaseAwards": 1006,
+   "countCoverage": 0.998015873,
+   "dashboardIntendedDollars": 246750913,
+   "usaspendingCurrentObligations": 201315006,
+   "dollarRatio": 0.815863267,
+   "residuals": [
+    {
+     "awardId": "2220320",
+     "dashboardAmount": 102300,
+     "reason": "NSF Interagency Agreement not returned in any supported USAspending assistance group"
+    },
+    {
+     "awardId": "2409819",
+     "dashboardAmount": 159553,
+     "reason": "NSF Interagency Agreement not returned in any supported USAspending assistance group"
+    }
+   ],
+   "assessment": "Count coverage is suitable as a diagnostic, but the amount definitions are not like-for-like."
+  },
+  "nihNigmsFy2024": {
+   "method": "NIGMS RePORTER application-year records versus USAspending base awards touching federal account 075-0851",
+   "dashboardRecords": 7450,
+   "dashboardDollars": 3097641181,
+   "usaspendingBaseAwards": 1266,
+   "usaspendingCurrentObligations": 1379968923.61,
+   "countRatio": 0.169932886,
+   "dollarRatio": 0.445490243,
+   "usaspendingMechanisms": {
+    "contracts": 67,
+    "grants": 1171,
+    "directPayments": 28,
+    "otherFinancialAssistance": 0
+   },
+   "assessment": "Not reconcilable by a defensible tolerance: RePORTER is application-year data, while USAspending is one base award with a current whole-award total."
+  }
+ },
+ "doeScienceGate": {
+  "federalAccount": "089-0222",
+  "fiscalYear": 2024,
+  "gtasAccountObligations": 9281791000,
+  "newBaseAwards": 1022,
+  "newBaseAwardCurrentObligations": 3397464000,
+  "newAwardToAccountRatio": 0.366035391,
+  "accountFilteredTransactionObligations": 37342000000,
+  "transactionToAccountRatio": 4.023145964,
+  "programActivityProbe": {
+   "sciencePrograms": 8,
+   "memberships": 660,
+   "distinctAwards": 575,
+   "multiProgramAwards": 33,
+   "maximumProgramsOnOneAward": 8,
+   "membershipToUniqueRatio": 1.147826087
+  },
+  "grantsOnlyProbe": {
+   "memberships": 558,
+   "distinctAwards": 545,
+   "multiProgramAwards": 12,
+   "sumOfProgramCurrentObligations": 489310000,
+   "uniqueCurrentObligations": 457701000,
+   "doubleCountRatio": 1.069060369
+  },
+  "assessment": "Neither a new-base-award cohort nor account-filtered whole transactions measures FY2024 Office of Science account obligations. Program-activity award memberships are non-exclusive, so leaf rollups also double-count."
+ },
+ "decisionRequired": {
+  "recommended": "Redesign the USAspending source and canonical store around File C financial-account/program-activity allocation events before onboarding DOE.",
+  "alternatives": [
+   "Publish whole-award exposure and explicitly abandon account-flow comparability.",
+   "Publish a grants-only extramural subset, accepting program overlap and omission of national-laboratory contracts."
+  ],
+  "prohibitedUntilResolved": [
+   "Add an agency using the usaspending adapter to config/orgs.json",
+   "Compare whole-award totals to GTAS account obligations or enacted budget authority",
+   "Sum program-activity-filtered whole awards into DOE Office of Science rollups"
+  ]
+ },
+ "sources": [
+  "https://api.usaspending.gov/api/v2/search/spending_by_award/",
+  "https://api.usaspending.gov/api/v2/search/spending_by_award_count/",
+  "https://api.usaspending.gov/api/v2/federal_accounts/089-0222/?fiscal_year=2024",
+  "https://api.usaspending.gov/api/v2/federal_accounts/089-0222/program_activities/",
+  "https://github.com/fedspendingtransparency/usaspending-api/blob/master/usaspending_api/api_contracts/contracts/v2/search/spending_by_award.md"
+ ]
+}
