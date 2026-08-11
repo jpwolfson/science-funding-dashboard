@@ -8,7 +8,10 @@ Award record shape used everywhere in this repo (the "store" shape):
 """
 
 import csv
+import gzip
+import io
 import json
+import re
 from datetime import date, timedelta
 from pathlib import Path
 
@@ -57,37 +60,98 @@ def median(xs):
     return 0 if n == 0 else (xs[n // 2] if n % 2 else (xs[n // 2 - 1] + xs[n // 2]) // 2)
 
 
-def load_store(csv_path):
-    """awards.csv is the committed store of record from prior runs."""
-    csv_path = Path(csv_path)
-    if not csv_path.exists():
-        return {}
+def _store_files(store_path):
+    """Return committed CSV store files in deterministic merge order.
+
+    Phase 1 leaves use one ``awards.csv``.  High-volume adapters use an
+    ``awards/`` directory of deterministic ``FY####.csv.gz`` shards.  A
+    caller may pass either the store itself or the containing leaf directory.
+    """
+    path = Path(store_path)
+    if path.is_dir() and (path / "awards.csv").exists():
+        return [path / "awards.csv"]
+    if path.is_dir() and (path / "awards").is_dir():
+        path = path / "awards"
+    if path.is_file():
+        return [path]
+    if path.is_dir():
+        return sorted((*path.glob("FY*.csv.gz"), *path.glob("FY*.csv")))
+    return []
+
+
+def store_exists(store_path):
+    path = Path(store_path)
+    if path.is_dir() and (path / "awards").is_dir():
+        path = path / "awards"
+    return bool(_store_files(path)) or (path / "manifest.json").exists()
+
+
+def load_store(store_path):
+    """Load a legacy CSV or a directory of fiscal-year gzip CSV shards."""
     store = {}
-    with open(csv_path, newline="") as fh:
-        for row in csv.DictReader(fh):
-            date.fromisoformat(row["date"])  # validate before trusting the row
-            store[row["id"]] = {
-                "id": row["id"],
-                "date": row["date"],
-                "month": row["date"][:7],
-                "amount": int(row["estimatedTotalAmt"]),
-                "type": norm_type(row["transType"]),
-                "transType": row["transType"],
-                "title": row["title"],
-                "awardee": row["awardeeName"],
-            }
+    for csv_path in _store_files(store_path):
+        opener = gzip.open if csv_path.suffix == ".gz" else open
+        with opener(csv_path, "rt", newline="") as fh:
+            for row in csv.DictReader(fh):
+                date.fromisoformat(row["date"])  # validate before trusting the row
+                store[row["id"]] = {
+                    "id": row["id"],
+                    "date": row["date"],
+                    "month": row["date"][:7],
+                    "amount": int(row["estimatedTotalAmt"]),
+                    "type": norm_type(row["transType"]),
+                    "transType": row["transType"],
+                    "title": row["title"],
+                    "awardee": row["awardeeName"],
+                }
     return store
 
 
-def write_store(csv_path, awards):
-    csv_path = Path(csv_path)
-    csv_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(csv_path, "w", newline="") as fh:
-        w = csv.writer(fh)
-        w.writerow(CSV_HEADER)
-        for a in sorted(awards, key=lambda a: (a["date"], a["id"])):
-            w.writerow([a["id"], a["date"], a["amount"], a["transType"],
-                        a["title"], a["awardee"]])
+def _write_rows(fh, awards):
+    w = csv.writer(fh)
+    w.writerow(CSV_HEADER)
+    for a in sorted(awards, key=lambda a: (a["date"], a["id"])):
+        w.writerow([a["id"], a["date"], a["amount"], a["transType"],
+                    a["title"], a["awardee"]])
+
+
+def write_store(store_path, awards):
+    """Write a legacy CSV file or deterministic fiscal-year gzip shards.
+
+    A path ending in ``.csv`` selects the Phase 1 format.  Any other path is
+    a shard directory.  Existing shard years are rewritten even when empty,
+    which prevents a record whose corrected date crosses a fiscal-year
+    boundary from surviving in both files, while never deleting a stored ID.
+    """
+    path = Path(store_path)
+    if path.suffix == ".csv":
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with open(path, "w", newline="") as fh:
+            _write_rows(fh, awards)
+        return
+
+    path.mkdir(parents=True, exist_ok=True)
+    by_fy = {}
+    for award in awards:
+        fy = fiscal_year(date.fromisoformat(award["date"]))
+        by_fy.setdefault(fy, []).append(award)
+    existing_years = set()
+    for old in _store_files(path):
+        match = re.fullmatch(r"FY(\d{4})\.csv(?:\.gz)?", old.name)
+        if match:
+            existing_years.add(int(match.group(1)))
+    for fy in sorted(existing_years | set(by_fy)):
+        shard = path / f"FY{fy}.csv.gz"
+        with open(shard, "wb") as raw:
+            with gzip.GzipFile(filename="", mode="wb", fileobj=raw, mtime=0) as zipped:
+                with io.TextIOWrapper(zipped, encoding="utf-8", newline="") as fh:
+                    _write_rows(fh, by_fy.get(fy, []))
+    manifest = {
+        "format": "fiscal-year-csv-gzip-v1",
+        "recordCount": len(awards),
+        "fiscalYears": sorted(by_fy),
+    }
+    (path / "manifest.json").write_text(json.dumps(manifest, indent=1) + "\n")
 
 
 def aggregate(awards, today, series_start=SERIES_START):
@@ -171,7 +235,7 @@ def aggregate(awards, today, series_start=SERIES_START):
 
 
 def write_dashboard(data_dir, node, source, awards, warnings, today,
-                    children=None, series_start=SERIES_START):
+                    children=None, series_start=SERIES_START, metadata=None):
     """Aggregate and write dashboard.json for one node (leaf or rollup).
 
     Invariant check: per-unit monthly counts may only grow. The store is
@@ -202,6 +266,8 @@ def write_dashboard(data_dir, node, source, awards, warnings, today,
         **agg,
         "children": children if children is not None else [],
     }
+    if metadata:
+        out.update(metadata)
     data_dir.mkdir(parents=True, exist_ok=True)
     (data_dir / "dashboard.json").write_text(json.dumps(out, indent=1))
     return warnings

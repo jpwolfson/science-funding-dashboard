@@ -667,6 +667,131 @@
      ]
     }
    ]
+  },
+  {
+   "slug": "nih",
+   "abbrev": "NIH",
+   "name": "National Institutes of Health",
+   "adapter": "nih_reporter",
+   "store": "fiscal-year-gzip",
+   "checks": {
+    "max_monthly": 5000,
+    "max_total": 200000
+   },
+   "directorates": [
+    {
+     "slug": "cc", "abbrev": "CC", "name": "NIH Clinical Center",
+     "divisions": [{"slug": "cc", "abbrev": "CC", "name": "NIH Clinical Center", "params": {"reporter_agency": "CLC"}, "checks": {"min_total": 0, "max_total": 500}, "active": true}]
+    },
+    {
+     "slug": "csr", "abbrev": "CSR", "name": "Center for Scientific Review",
+     "divisions": [{"slug": "csr", "abbrev": "CSR", "name": "Center for Scientific Review", "params": {"reporter_agency": "CSR"}, "checks": {"min_total": 0, "max_total": 500}, "active": true}]
+    },
+    {
+     "slug": "cit", "abbrev": "CIT", "name": "Center for Information Technology",
+     "divisions": [{"slug": "cit", "abbrev": "CIT", "name": "Center for Information Technology", "params": {"reporter_agency": "CIT"}, "checks": {"min_total": 0, "max_total": 500}, "active": true}]
+    },
+    {
+     "slug": "fic", "abbrev": "FIC", "name": "John E. Fogarty International Center",
+     "divisions": [{"slug": "fic", "abbrev": "FIC", "name": "John E. Fogarty International Center", "params": {"reporter_agency": "FIC"}, "checks": {"min_total": 3000, "max_total": 10000}, "active": true}]
+    },
+    {
+     "slug": "ncats", "abbrev": "NCATS", "name": "National Center for Advancing Translational Sciences",
+     "divisions": [{"slug": "ncats", "abbrev": "NCATS", "name": "National Center for Advancing Translational Sciences", "params": {"reporter_agency": "NCATS"}, "checks": {"min_total": 3000, "max_total": 12000}, "active": true}]
+    },
+    {
+     "slug": "nccih", "abbrev": "NCCIH", "name": "National Center for Complementary and Integrative Health",
+     "divisions": [{"slug": "nccih", "abbrev": "NCCIH", "name": "National Center for Complementary and Integrative Health", "params": {"reporter_agency": "NCCIH"}, "checks": {"min_total": 2400, "max_total": 9000}, "active": true}]
+    },
+    {
+     "slug": "nci", "abbrev": "NCI", "name": "National Cancer Institute",
+     "divisions": [{"slug": "nci", "abbrev": "NCI", "name": "National Cancer Institute", "params": {"reporter_agency": "NCI"}, "checks": {"min_total": 65000, "max_total": 180000}, "active": true}]
+    },
+    {
+     "slug": "nei", "abbrev": "NEI", "name": "National Eye Institute",
+     "divisions": [{"slug": "nei", "abbrev": "NEI", "name": "National Eye Institute", "params": {"reporter_agency": "NEI"}, "checks": {"min_total": 13000, "max_total": 40000}, "active": true}]
+    },
+    {
+     "slug": "nhgri", "abbrev": "NHGRI", "name": "National Human Genome Research Institute",
+     "divisions": [{"slug": "nhgri", "abbrev": "NHGRI", "name": "National Human Genome Research Institute", "params": {"reporter_agency": "NHGRI"}, "checks": {"min_total": 4500, "max_total": 16000}, "active": true}]
+    },
+    {
+     "slug": "nhlbi", "abbrev": "NHLBI", "name": "National Heart, Lung, and Blood Institute",
+     "divisions": [{"slug": "nhlbi", "abbrev": "NHLBI", "name": "National Heart, Lung, and Blood Institute", "params": {"reporter_agency": "NHLBI"}, "checks": {"min_total": 45000, "max_total": 135000}, "active": true}]
+    },
+    {
+     "slug": "nia", "abbrev": "NIA", "name": "National Institute on Aging",
+     "divisions": [{"slug": "nia", "abbrev": "NIA", "name": "National Institute on Aging", "params": {"reporter_agency": "NIA"}, "checks": {"min_total": 30000, "max_total": 95000}, "active": true}]
+    },
+    {
+     "slug": "niaaa", "abbrev": "NIAAA", "name": "National Institute on Alcohol Abuse and Alcoholism",
+     "divisions": [{"slug": "niaaa", "abbrev": "NIAAA", "name": "National Institute on Alcohol Abuse and Alcoholism", "params": {"reporter_agency": "NIAAA"}, "checks": {"min_total": 8500, "max_total": 28000}, "active": true}]
+    },
+    {
+     "slug": "niaid", "abbrev": "NIAID", "name": "National Institute of Allergy and Infectious Diseases",
+     "divisions": [{"slug": "niaid", "abbrev": "NIAID", "name": "National Institute of Allergy and Infectious Diseases", "params": {"reporter_agency": "NIAID"}, "checks": {"min_total": 48000, "max_total": 150000}, "active": true}]
+    },
+    {
+     "slug": "niams", "abbrev": "NIAMS", "name": "National Institute of Arthritis and Musculoskeletal and Skin Diseases",
+     "divisions": [{"slug": "niams", "abbrev": "NIAMS", "name": "National Institute of Arthritis and Musculoskeletal and Skin Diseases", "params": {"reporter_agency": "NIAMS"}, "checks": {"min_total": 11000, "max_total": 36000}, "active": true}]
+    },
+    {
+     "slug": "nibib", "abbrev": "NIBIB", "name": "National Institute of Biomedical Imaging and Bioengineering",
+     "divisions": [{"slug": "nibib", "abbrev": "NIBIB", "name": "National Institute of Biomedical Imaging and Bioengineering", "params": {"reporter_agency": "NIBIB"}, "checks": {"min_total": 7000, "max_total": 24000}, "active": true}]
+    },
+    {
+     "slug": "nichd", "abbrev": "NICHD", "name": "Eunice Kennedy Shriver National Institute of Child Health and Human Development",
+     "divisions": [{"slug": "nichd", "abbrev": "NICHD", "name": "Eunice Kennedy Shriver National Institute of Child Health and Human Development", "params": {"reporter_agency": "NICHD"}, "checks": {"min_total": 21000, "max_total": 70000}, "active": true}]
+    },
+    {
+     "slug": "nida", "abbrev": "NIDA", "name": "National Institute on Drug Abuse",
+     "divisions": [{"slug": "nida", "abbrev": "NIDA", "name": "National Institute on Drug Abuse", "params": {"reporter_agency": "NIDA"}, "checks": {"min_total": 17500, "max_total": 58000}, "active": true}]
+    },
+    {
+     "slug": "nidcd", "abbrev": "NIDCD", "name": "National Institute on Deafness and Other Communication Disorders",
+     "divisions": [{"slug": "nidcd", "abbrev": "NIDCD", "name": "National Institute on Deafness and Other Communication Disorders", "params": {"reporter_agency": "NIDCD"}, "checks": {"min_total": 8500, "max_total": 29000}, "active": true}]
+    },
+    {
+     "slug": "nidcr", "abbrev": "NIDCR", "name": "National Institute of Dental and Craniofacial Research",
+     "divisions": [{"slug": "nidcr", "abbrev": "NIDCR", "name": "National Institute of Dental and Craniofacial Research", "params": {"reporter_agency": "NIDCR"}, "checks": {"min_total": 7000, "max_total": 24000}, "active": true}]
+    },
+    {
+     "slug": "niddk", "abbrev": "NIDDK", "name": "National Institute of Diabetes and Digestive and Kidney Diseases",
+     "divisions": [{"slug": "niddk", "abbrev": "NIDDK", "name": "National Institute of Diabetes and Digestive and Kidney Diseases", "params": {"reporter_agency": "NIDDK"}, "checks": {"min_total": 33000, "max_total": 105000}, "active": true}]
+    },
+    {
+     "slug": "niehs", "abbrev": "NIEHS", "name": "National Institute of Environmental Health Sciences",
+     "divisions": [{"slug": "niehs", "abbrev": "NIEHS", "name": "National Institute of Environmental Health Sciences", "params": {"reporter_agency": "NIEHS"}, "checks": {"min_total": 8000, "max_total": 28000}, "active": true}]
+    },
+    {
+     "slug": "nigms", "abbrev": "NIGMS", "name": "National Institute of General Medical Sciences",
+     "divisions": [{"slug": "nigms", "abbrev": "NIGMS", "name": "National Institute of General Medical Sciences", "params": {"reporter_agency": "NIGMS"}, "checks": {"min_total": 52000, "max_total": 165000}, "active": true}]
+    },
+    {
+     "slug": "nimh", "abbrev": "NIMH", "name": "National Institute of Mental Health",
+     "divisions": [{"slug": "nimh", "abbrev": "NIMH", "name": "National Institute of Mental Health", "params": {"reporter_agency": "NIMH"}, "checks": {"min_total": 25000, "max_total": 80000}, "active": true}]
+    },
+    {
+     "slug": "nimhd", "abbrev": "NIMHD", "name": "National Institute on Minority Health and Health Disparities",
+     "divisions": [{"slug": "nimhd", "abbrev": "NIMHD", "name": "National Institute on Minority Health and Health Disparities", "params": {"reporter_agency": "NIMHD"}, "checks": {"min_total": 4000, "max_total": 15000}, "active": true}]
+    },
+    {
+     "slug": "ninds", "abbrev": "NINDS", "name": "National Institute of Neurological Disorders and Stroke",
+     "divisions": [{"slug": "ninds", "abbrev": "NINDS", "name": "National Institute of Neurological Disorders and Stroke", "params": {"reporter_agency": "NINDS"}, "checks": {"min_total": 34000, "max_total": 110000}, "active": true}]
+    },
+    {
+     "slug": "ninr", "abbrev": "NINR", "name": "National Institute of Nursing Research",
+     "divisions": [{"slug": "ninr", "abbrev": "NINR", "name": "National Institute of Nursing Research", "params": {"reporter_agency": "NINR"}, "checks": {"min_total": 2600, "max_total": 10000}, "active": true}]
+    },
+    {
+     "slug": "nlm", "abbrev": "NLM", "name": "National Library of Medicine",
+     "divisions": [{"slug": "nlm", "abbrev": "NLM", "name": "National Library of Medicine", "params": {"reporter_agency": "NLM"}, "checks": {"min_total": 1400, "max_total": 6500}, "active": true}]
+    },
+    {
+     "slug": "od", "abbrev": "OD", "name": "Office of the NIH Director",
+     "divisions": [{"slug": "od", "abbrev": "OD", "name": "Office of the NIH Director", "params": {"reporter_agency": "OD"}, "checks": {"min_total": 5000, "max_total": 20000}, "active": true}]
+    }
+   ]
   }
  ]
 }

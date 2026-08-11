@@ -312,4 +312,17 @@ def pull_unit(unit_cfg, store_path, full, today, repo_root):
     awards, warnings = p.pull(full=full, today=today, repo_root=repo_root)
     source = (f"{API}?org_code_div={code} (NSF Award Search API), "
               "month-by-month on Original Award Date")
-    return awards, warnings, source
+    metadata = {
+        "provider": "nsf",
+        "dataComplete": True,
+        "storeFormat": "csv",
+        "amountNote": ("Dollar figures are intended totals "
+                       "(estimatedTotalAmt), not outlays."),
+        "mechanismLabels": {
+            "std": "Standard grants",
+            "cont": "Continuing grants",
+            "fell": "Fellowships",
+            "other": "Other awards",
+        },
+    }
+    return awards, warnings, source, metadata

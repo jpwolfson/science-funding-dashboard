@@ -1,0 +1,20 @@
+{
+ "asOf": "2026-08-10",
+ "source": {
+  "counts": "https://report.nih.gov/nihdatabook/report/400",
+  "dollars": "https://report.nih.gov/nihdatabook/report/401",
+  "definitions": "https://report.nih.gov/faqs"
+ },
+ "scope": "NIH Data Book extramural competing and non-competing grants and OTs; parent awards; non-zero award dollars; excludes R&D contracts, interagency agreements, intramural projects, and loan repayments",
+ "comparison": {
+  "countRelativeTolerance": 0.02,
+  "dollarRelativeTolerance": 0.15,
+  "notes": "Dashboard scope additionally includes R&D contracts and interagency agreements, so dollars use a wider reasonableness tolerance. Counts are empirically within 0.4% for FY2022-FY2025."
+ },
+ "fiscalYears": {
+  "2022": {"awards": 64510, "dollars": 34777000000},
+  "2023": {"awards": 65426, "dollars": 35675000000},
+  "2024": {"awards": 64451, "dollars": 35260000000},
+  "2025": {"awards": 59008, "dollars": 35395000000}
+ }
+}

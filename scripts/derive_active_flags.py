@@ -35,7 +35,7 @@ def main():
         for dr in ag["directorates"]:
             for dv in dr["divisions"]:
                 path = REPO_ROOT / "data" / ag["slug"] / dr["slug"] / dv["slug"]
-                store = load_store(path / "awards.csv")
+                store = load_store(path)
                 if not store:
                     print(f"  {dv['abbrev']:6s} no data yet; leaving "
                           f"active={dv.get('active', True)}")
