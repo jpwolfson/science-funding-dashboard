@@ -34,12 +34,20 @@ NSF API defects the pipeline defends against.
   `awards/FY####.csv.gz` shards and a manifest. Stores are never pruned.
   Rollup `dashboard.json` files exist at every level, with `data/index.json`
   for navigation.
+- `config/obligation_accounts.json`, `adapters/usaspending_obligations.py`, and
+  `data/obligations/` — a physically separate appropriation-obligation ledger.
+  Canonical dollars come from File B reporting-period deltas; File C provides
+  award-linked recipient/flow detail and the residual remains visible.
 - `site/index.html` — the single static page that renders any node
   (`?org=nsf/mps/dms`), deployed via GitHub Pages.
 - `.github/workflows/update-data.yml` — weekly incremental matrices (full
   reconciliation the first Monday of each month), rollups, deploy. NSF runs
   four leaves in parallel; NIH runs serially and the adapter enforces NIH's
   recommended one-request-per-second ceiling.
+- `.github/workflows/update-obligations.yml` — account-level File B/File C
+  backfill, exact GTAS reconciliation, Program Activity fan-out, and separate
+  obligation navigation. It never passes obligation events through award-ID
+  deduplication.
 
 ## NIH data semantics
 
@@ -56,6 +64,13 @@ directions. Both unique ID sets must exactly match each other and RePORTER's
 `meta.total`; otherwise the pull retries and ultimately refuses to publish.
 Award IDs are namespaced (`nih:<application_id>`) in the common store so NIH
 and NSF identifiers cannot collide in federal rollups.
+
+The complete product includes R&D contracts and interagency agreements. Its
+independent NIH Data Book gate compares a derived grants/Other-Transactions
+subset at the same 2% count and dollar tolerance, matching the benchmark's
+published exclusions instead of weakening the tolerance to absorb a scope
+difference. Funding mechanism and activity code are persisted on every NIH
+row so that subset remains reproducible offline.
 
 See [`docs/nih-data-validation.md`](docs/nih-data-validation.md) for the
 fail-closed extraction contract, post-backfill checks, independent published

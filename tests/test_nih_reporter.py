@@ -3,7 +3,8 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from adapters.nih_reporter import NihReporterPull, _award_kind
+from adapters.nih_reporter import (NihReporterPull, _award_kind,
+                                   parse_trans_type)
 
 
 def row(appl_id, agency="NIGMS"):
@@ -143,6 +144,12 @@ class NihReporterTests(unittest.TestCase):
         self.assertEqual(normalized["date"], "2025-01-15")
         self.assertEqual(normalized["amount"], 123456)
         self.assertEqual(normalized["type"], "cont")
+        self.assertEqual(parse_trans_type(normalized["transType"]), {
+            "kind": "Continuing award",
+            "award_type": "5",
+            "activity": "R01",
+            "mechanism": "Non-SBIR/STTR",
+        })
 
     def test_config_has_all_current_reporter_nih_admin_components(self):
         cfg = json.loads((Path(__file__).parents[1] / "config" / "orgs.json").read_text())

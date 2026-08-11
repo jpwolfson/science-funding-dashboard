@@ -25,6 +25,13 @@ class USAspendingCalibrationTests(unittest.TestCase):
                 "accountFilteredTransactionObligations": 1,
                 "programActivityProbe": {}, "assessment": "blocked",
             },
+            "obligationLedger": {
+                "status": "implementation-complete-backfill-pending",
+                "canonicalSource": "File B cumulative CPE deltas",
+                "awardEnrichmentSource": "File C reporting-period transaction obligated amounts",
+                "federalAccount": "089-0222", "fileCFy2024ObligationsCents": 1,
+                "gtasFy2024ObligationsCents": 1, "fileCCoverage": 1,
+            },
         }
         (root / "reference" / "usaspending_calibration.json").write_text(
             json.dumps(calibration))
@@ -44,6 +51,21 @@ class USAspendingCalibrationTests(unittest.TestCase):
             self.fixture(root, adapter="usaspending")
             self.assertTrue(any("registry agencies" in error
                                 for error in validate(root)))
+
+    def test_ready_gate_requires_passed_obligation_ledger(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.fixture(root)
+            path = root / "reference" / "usaspending_calibration.json"
+            calibration = json.loads(path.read_text())
+            calibration["status"] = "ready"
+            calibration["onboardingAllowed"] = True
+            path.write_text(json.dumps(calibration))
+            self.assertTrue(any("passed obligation-ledger" in error
+                                for error in validate(root)))
+            calibration["obligationLedger"]["status"] = "passed"
+            path.write_text(json.dumps(calibration))
+            self.assertEqual([], validate(root))
 
 
 if __name__ == "__main__":

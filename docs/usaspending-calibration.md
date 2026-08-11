@@ -1,6 +1,6 @@
 # USAspending Phase 3.1 calibration decision
 
-Status: **BLOCKED before agency onboarding** (2026-08-10).
+Status: **READY for obligation-ledger onboarding** (2026-08-11).
 
 Phase 3.1 deliberately required calibration against known NSF and NIH data
 before USAspending became any agency's sole source. That gate worked: the
@@ -65,17 +65,30 @@ Consequently, summing award records into DOE program offices would materially
 double-count dollars, while annual account totals would be neither the new
 award cohort nor the filtered whole-transaction series.
 
-## Owner decision required
+## Phase 3.1b resolution
 
-The recommended path is to redesign the source/store around USAspending File C
-financial-account and Program Activity allocation events, then decide how
-award counts and allocation-flow dollars coexist in the UI. That preserves the
-AAAS-account-structured, ex-post framing.
+The owner selected the separate obligation-ledger design. Live FY2024 custom-
+account testing then established a second critical boundary: File C totals
+$8,527,849,368.87, only 91.8772% of the exact $9,281,790,861.20 File A/GTAS
+account total. USAspending documents File C as prime-award spending, a subset
+of account spending. It therefore cannot be the canonical ledger by itself.
 
-The alternatives are to change the product definition to “whole-award
-exposure touching this account,” or publish a grants-only extramural subset.
-Neither alternative is equivalent to Office of Science funding, and neither
-should be compared directly with GTAS obligations or enacted budgets.
+Phase 3.1b uses File B cumulative Program Activity balances, differenced by
+submission period, for canonical dollars. File C supplies award-linked
+recipient and flow detail. A visible residual (`File B - File C`) retains all
+non-award account activity and makes both identities exact. See
+`docs/obligation-ledger.md`.
+
+The dedicated FY2017-present backfill completed in
+[run 31498087792](https://github.com/jpwolfson/science-funding-dashboard/actions/runs/31498087792).
+All available years were ingested; FY2018–25 reconcile to pinned GTAS/File A
+totals at exact cents, while FY2017 and FY2026 reconcile to their pinned
+partial periods. Offline invariants and light/dark browser checks passed for
+the obligation root, DOE, account, a Program Activity with signed flows, and
+the legacy award root. The calibration is therefore ready for the separate
+File B/File C obligation adapter. It does not authorize award-search totals as
+account-flow dollars. FY2015–16 remain officially unavailable; FY2017 begins
+with the first DATA Act submission.
 
 Official references:
 
@@ -83,3 +96,5 @@ Official references:
 - [Award-count contract](https://github.com/fedspendingtransparency/usaspending-api/blob/master/usaspending_api/api_contracts/contracts/v2/search/spending_by_award_count.md)
 - [DOE Science federal account](https://api.usaspending.gov/api/v2/federal_accounts/089-0222/?fiscal_year=2024)
 - [DOE Science Program Activities](https://api.usaspending.gov/api/v2/federal_accounts/089-0222/program_activities/)
+- [Custom Account download contract](https://github.com/fedspendingtransparency/usaspending-api/blob/master/usaspending_api/api_contracts/contracts/v2/download/accounts.md)
+- [USAspending About the Data](https://www.usaspending.gov/data/about-the-data-download.pdf)

@@ -23,11 +23,15 @@ sys.path.insert(0, str(REPO_ROOT))
 from adapters.common import SERIES_START, fiscal_year  # noqa: E402
 from adapters.nih_reporter import (  # noqa: E402
     FUNDING_MECHANISMS, INCLUDE_FIELDS, NihReporterPull, api_post,
+    parse_trans_type,
 )
 
 DATA = REPO_ROOT / "data"
 CONFIG = REPO_ROOT / "config" / "orgs.json"
 DATA_BOOK_BASELINE = REPO_ROOT / "reference" / "nih_databook_baseline.json"
+DATA_BOOK_EXCLUDED_MECHANISMS = {
+    "r and d contracts", "interagency agreements", "intramural",
+}
 
 
 def nih_units(cfg):
@@ -115,6 +119,22 @@ def within_relative(actual, expected, tolerance):
     return abs(actual - expected) <= abs(expected) * tolerance
 
 
+def in_data_book_scope(row):
+    """Match NIH Data Book reports 400/401 without narrowing the product."""
+    detail = parse_trans_type(row.get("transType"))
+    if detail is None:
+        raise ValueError(
+            "missing structured NIH funding-mechanism detail; full re-pull required")
+    mechanism = detail["mechanism"].strip().lower()
+    activity = detail["activity"].strip().upper()
+    amount = int(row["estimatedTotalAmt"])
+    return (
+        amount != 0
+        and mechanism not in DATA_BOOK_EXCLUDED_MECHANISMS
+        and not activity.startswith("L")
+    )
+
+
 def live_reporter_total(agency, first_fy, last_fy):
     puller = NihReporterPull(agency, {}, Path("unused"))
     payload = {
@@ -184,6 +204,7 @@ def validate(repo_root=REPO_ROOT, live=False, allow_warnings=False):
     errors, notes = [], []
     global_ids = {}
     fy_counts, fy_dollars = Counter(), Counter()
+    databook_fy_counts, databook_fy_dollars = Counter(), Counter()
     first_fy = fiscal_year(SERIES_START)
     last_fy = fiscal_year(date.today())
 
@@ -205,10 +226,19 @@ def validate(repo_root=REPO_ROOT, live=False, allow_warnings=False):
             global_ids[aid] = unit["path"]
             try:
                 fy = fiscal_year(date.fromisoformat(row["date"]))
-                fy_counts[fy] += 1
-                fy_dollars[fy] += int(row["estimatedTotalAmt"])
+                amount = int(row["estimatedTotalAmt"])
             except (KeyError, TypeError, ValueError):
-                pass  # already reported by read_store
+                continue  # already reported by read_store
+            fy_counts[fy] += 1
+            fy_dollars[fy] += amount
+            try:
+                benchmark_row = in_data_book_scope(row)
+            except ValueError as exc:
+                errors.append(f"{unit['path']}: {aid}: {exc}")
+                continue
+            if benchmark_row:
+                databook_fy_counts[fy] += 1
+                databook_fy_dollars[fy] += amount
 
         checks = unit["checks"]
         if not checks["min_total"] <= len(rows) <= checks["max_total"]:
@@ -277,20 +307,22 @@ def validate(repo_root=REPO_ROOT, live=False, allow_warnings=False):
     comparison = baseline["comparison"]
     for fy_text, expected in baseline["fiscalYears"].items():
         fy = int(fy_text)
-        actual_count = fy_counts[fy]
-        actual_dollars = fy_dollars[fy]
+        actual_count = databook_fy_counts[fy]
+        actual_dollars = databook_fy_dollars[fy]
         if not within_relative(
                 actual_count, expected["awards"],
                 comparison["countRelativeTolerance"]):
             errors.append(
-                f"FY{fy}: {actual_count} awards differs from NIH Data Book "
+                f"FY{fy}: {actual_count} Data Book-scope awards differs from "
+                f"NIH Data Book "
                 f"{expected['awards']} by more than "
                 f"{comparison['countRelativeTolerance']:.0%}")
         if not within_relative(
                 actual_dollars, expected["dollars"],
                 comparison["dollarRelativeTolerance"]):
             errors.append(
-                f"FY{fy}: ${actual_dollars:,} differs from NIH Data Book "
+                f"FY{fy}: ${actual_dollars:,} in Data Book scope differs from "
+                f"NIH Data Book "
                 f"${expected['dollars']:,} by more than "
                 f"{comparison['dollarRelativeTolerance']:.0%}")
 
@@ -302,6 +334,13 @@ def validate(repo_root=REPO_ROOT, live=False, allow_warnings=False):
         "fiscalYears": {
             str(fy): {"awards": fy_counts[fy], "dollars": fy_dollars[fy]}
             for fy in sorted(fy_counts)
+        },
+        "dataBookScopeFiscalYears": {
+            str(fy): {
+                "awards": databook_fy_counts[fy],
+                "dollars": databook_fy_dollars[fy],
+            }
+            for fy in sorted(databook_fy_counts)
         },
         "errors": errors,
         "notes": notes,

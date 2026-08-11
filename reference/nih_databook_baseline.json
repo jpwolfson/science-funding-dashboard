@@ -8,8 +8,8 @@
  "scope": "NIH Data Book extramural competing and non-competing grants and OTs; parent awards; non-zero award dollars; excludes R&D contracts, interagency agreements, intramural projects, and loan repayments",
  "comparison": {
   "countRelativeTolerance": 0.02,
-  "dollarRelativeTolerance": 0.15,
-  "notes": "Dashboard scope additionally includes R&D contracts and interagency agreements, so dollars use a wider reasonableness tolerance. Counts are empirically within 0.4% for FY2022-FY2025."
+  "dollarRelativeTolerance": 0.02,
+  "notes": "The validator derives a like-for-like grants/OT subset from the complete dashboard store: non-zero parent awards, excluding R&D contracts, interagency agreements, intramural projects, and loan repayments. The dashboard itself retains contracts and interagency agreements."
  },
  "fiscalYears": {
   "2022": {"awards": 64510, "dollars": 34777000000},

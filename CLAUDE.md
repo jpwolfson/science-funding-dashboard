@@ -188,7 +188,7 @@ consequences already encoded:
         parent/subproject double counting. Layered fail-closed validation
         (`scripts/validate_nih.py`, `docs/nih-data-validation.md`): offline
         shard/manifest/dedup/range/warning gates in the Test workflow, NIH
-        Data Book benchmarks (counts ±2%, dollars ±15%), and `--live`
+        like-for-like Data Book benchmarks (counts and dollars ±2%), and `--live`
         same-source reconciliation gating every NIH data refresh.
       - RELEASE BAR MET: backfill run 31426718058 (28/28 ICs green, merged
         via PR #4); Test green on main incl. offline validation; production
@@ -212,6 +212,14 @@ consequences already encoded:
         filtered+IM-total comparison inside `validate_nih.py --live`;
         (2) cosmetic: NIH-scale dollar tiles render "$23314M" — wants a
         billions formatter in the site's `fmtM`.
+      - Phase 3.1b follow-up (2026-08-11): a corrected mechanism whitelist
+        recovered 13,790 intentionally in-scope contract/IAA records. The
+        former Data Book comparison accidentally measured that complete
+        product against a grants-only benchmark. NIH rows now persist funding
+        mechanism and activity code; the validator derives the Data Book's
+        non-zero grant/OT subset while retaining the complete 708,233-record
+        product universe. A fresh 28-IC full pull and rollup are the release
+        gate; legacy shards without structured mechanism detail fail closed.
 - [x] Phase 3.1 — USAspending award-search adapter + calibration gate
       (completed at its designed STOP 2026-08-11 via PR #5; reviewed by
       Fable, verdict: correct execution, real blocker, sound diagnosis).
@@ -237,6 +245,16 @@ consequences already encoded:
 - [ ] Phase 3.1b — the OBLIGATION LEDGER: File C allocation events + DOE
       Office of Science pilot. One Fable-led session; the design decisions
       below are OWNER-APPROVED (2026-08-11) — implement, don't relitigate.
+      - EXECUTION NOTE (2026-08-11): live official data established that File
+        C is structurally incomplete for this product: FY2024 File C is
+        $8.528B versus $9.282B in File A/GTAS (91.8772% coverage). The official
+        disclosure calls File C prime-award spending a subset of account
+        spending. The implemented ledger therefore uses File B PA CPE deltas
+        for canonical dollars, File C for award-linked enrichment, and an
+        explicit File B-minus-File C residual. Files A/B/C begin FY2017 Q2, so
+        FY2015–16 are unavailable rather than synthesized. Code/local tests are
+        complete; remote historical backfill, browser smoke, ready flip, and
+        deploy remain the release gate. See `docs/phase-3.1b-handoff.md`.
       **Architecture: two ledgers, both kept, clearly labeled.**
       - AWARD ledger (exists; unchanged): NSF + NIH native-API pipelines.
         Answers "how many new awards were made and how much was committed."

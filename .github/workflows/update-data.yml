@@ -17,7 +17,7 @@ on:
         type: boolean
         default: false
   push:
-    branches: ["claude/**"]
+    branches: ["claude/**", "codex/**"]
     paths: [".github/triggers/update.json"]
 
 permissions:
