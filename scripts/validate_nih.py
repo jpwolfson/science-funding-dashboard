@@ -138,6 +138,40 @@ def live_reporter_total(agency, first_fy, last_fy):
     return int((body.get("meta") or {}).get("total") or 0)
 
 
+def live_mechanism_partition(agencies, fy):
+    """Return unfiltered, supported extramural, and intramural totals.
+
+    This tripwire detects new RePORTER funding-mechanism values before the
+    adapter's explicit extramural whitelist can silently omit them.
+    """
+    if isinstance(agencies, str):
+        agencies = [agencies]
+    base = {
+        "fiscal_years": [fy],
+        "agencies": list(agencies),
+        "is_agency_admin": True,
+        "exclude_subprojects": True,
+    }
+
+    def total(extra=None):
+        criteria = dict(base)
+        if extra:
+            criteria.update(extra)
+        body = api_post({
+            "criteria": criteria,
+            "include_fields": [INCLUDE_FIELDS[0]],
+            "offset": 0,
+            "limit": 1,
+        })
+        return int((body.get("meta") or {}).get("total") or 0)
+
+    return {
+        "unfiltered": total(),
+        "extramural": total({"funding_mechanism": FUNDING_MECHANISMS}),
+        "intramural": total({"funding_mechanism": ["IM"]}),
+    }
+
+
 def validate(repo_root=REPO_ROOT, live=False, allow_warnings=False):
     global DATA, CONFIG, DATA_BOOK_BASELINE
     repo_root = Path(repo_root)
@@ -213,6 +247,20 @@ def validate(repo_root=REPO_ROOT, live=False, allow_warnings=False):
             else:
                 notes.append(
                     f"{unit['path']}: live RePORTER total reconciled ({len(rows)})")
+
+    # Funding-mechanism values are global, so one union query over all current
+    # administrative ICs detects drift without multiplying requests by 28.
+    if live:
+        agencies = [unit["agency"] for unit in units]
+        for fy in range(first_fy, last_fy + 1):
+            partition = live_mechanism_partition(agencies, fy)
+            classified = partition["extramural"] + partition["intramural"]
+            if classified != partition["unfiltered"]:
+                errors.append(
+                    f"NIH FY{fy}: RePORTER has {partition['unfiltered']} "
+                    f"unfiltered records but the extramural whitelist + IM "
+                    f"classify {classified}; a funding-mechanism value may be "
+                    "unrecognized")
 
     nih_dashboard_path = DATA / "nih" / "dashboard.json"
     if not nih_dashboard_path.exists():
