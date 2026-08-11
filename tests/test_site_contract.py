@@ -91,6 +91,9 @@ class SiteContractTests(unittest.TestCase):
 
     def test_sentinel_publishes_limits_costs_and_source_staleness(self):
         for text in ("Coverage and interpretation limits",
+                     "Current automated financial coverage",
+                     "Current authoritative-source coverage",
+                     "Absence from this page is not evidence that no funding action occurred",
                      "Estimated pilot burden",
                      "Replace them with measured figures after eight weeks",
                      "retains its last accepted records",

@@ -3,6 +3,7 @@ import unittest
 from adapters.funding_sentinel import (
     accept_source_snapshot,
     apply_source_freshness,
+    build_coverage,
     build_episodes,
     detect_financial_observations,
     episode_id,
@@ -42,6 +43,20 @@ DETECTOR = {
 
 
 class FundingSentinelTests(unittest.TestCase):
+    def test_coverage_contract_comes_from_both_registries(self):
+        accounts = {"089-0222": {
+            "path": "doe/sc", "agency": "Department of Energy",
+            "name": "Office of Science", "abbrev": "DOE SC",
+            "federalAccount": "089-0222",
+        }}
+        coverage = build_coverage(accounts, [{
+            "id": "doe-actions", "name": "DOE portfolio actions",
+        }])
+        self.assertEqual("089-0222", coverage["financialAccounts"][0]
+                         ["federalAccount"])
+        self.assertEqual("doe-actions", coverage["authoritativeSources"][0]["id"])
+        self.assertIn("not evidence", coverage["disclaimer"])
+
     def test_gross_negative_triggers_when_net_is_positive_and_residual_never_does(self):
         mixed = ledger_event(
             "mixed", 7_500, gross_positive=10_000, gross_negative=-2_500

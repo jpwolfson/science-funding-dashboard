@@ -47,11 +47,14 @@ SEPARATE_AMOUNT_FIELDS = (
     "eliminatedFutureValueCents",
     "restoredValueCents",
 )
+COVERAGE_DISCLAIMER = (
+    "Absence from this page is not evidence that no funding action occurred."
+)
 
 LIMITATIONS = [
     {
         "title": "Incomplete discovery",
-        "text": "There is no complete federal feed of terminations, suspensions, appeals, settlements, and reinstatements. This page covers registered sources and financial rules only.",
+        "text": "There is no complete federal feed of terminations, suspensions, appeals, settlements, and reinstatements. The financial detector covers only the registered accounts shown above, and sourced-event discovery covers only registered authoritative sources.",
     },
     {
         "title": "No motive inference",
@@ -184,6 +187,32 @@ def load_ledger_events(repo):
         if store.exists():
             rows.extend(load_store(store))
     return rows, accounts
+
+
+def build_coverage(accounts, registered_sources):
+    """Publish the exact registries that bound automated sentinel discovery."""
+    financial_accounts = []
+    for account in accounts.values():
+        financial_accounts.append({
+            "path": account["path"],
+            "agency": account.get("agency", ""),
+            "name": account.get("name", account["path"]),
+            "abbrev": account.get("abbrev", ""),
+            "federalAccount": account["federalAccount"],
+        })
+    authoritative_sources = [{
+        "id": source["id"],
+        "name": source.get("name", source["id"]),
+    } for source in registered_sources]
+    return {
+        "financialAccounts": sorted(
+            financial_accounts, key=lambda row: (row["path"], row["federalAccount"])
+        ),
+        "authoritativeSources": sorted(
+            authoritative_sources, key=lambda row: row["id"]
+        ),
+        "disclaimer": COVERAGE_DISCLAIMER,
+    }
 
 
 def _observation_payload(rows, rules, observation_id, episode_key,
@@ -616,6 +645,7 @@ def build(repo, as_of=None):
             "stateCounts": counts,
         },
         "detector": config["financialDetector"],
+        "coverage": build_coverage(accounts, config.get("sources", [])),
         "episodes": episodes,
         "sourceStatuses": sources,
         "limitations": LIMITATIONS,

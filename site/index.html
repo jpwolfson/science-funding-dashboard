@@ -1314,6 +1314,33 @@ const sentinelStateClass = state => ({
 
 const fmtCents = value => fmtSignedMoney(Number(value || 0) / 100);
 
+function sentinelCoverageText(items, kind) {
+  if (!items.length) return kind === "financial"
+    ? "no registered obligation accounts"
+    : "no registered authoritative source adapters";
+  const label = item => kind === "financial"
+    ? `${item.agency ? `${item.agency} — ` : ""}${item.name || item.path} (${item.federalAccount})`
+    : (item.name || item.id);
+  if (items.length === 1) return `${label(items[0])} only`;
+  if (items.length <= 3) return items.map(label).join("; ");
+  return `${fmtN(items.length)} registered ${kind === "financial" ? "obligation accounts" : "authoritative source adapters"}`;
+}
+
+function sentinelCoverageBanner(data) {
+  const coverage = data.coverage || {};
+  const financial = coverage.financialAccounts || [];
+  const sources = coverage.authoritativeSources || [];
+  const banner = el("div", { class: "banner", "aria-label": "Current sentinel coverage" });
+  banner.append(
+    el("strong", { text: "Current automated financial coverage: " }),
+    document.createTextNode(`${sentinelCoverageText(financial, "financial")}. `),
+    el("strong", { text: "Current authoritative-source coverage: " }),
+    document.createTextNode(`${sentinelCoverageText(sources, "source")}. `),
+    document.createTextNode(coverage.disclaimer || "Absence from this page is not evidence that no funding action occurred."),
+  );
+  $app.append(banner);
+}
+
 function sentinelTiles(data) {
   const summary = data.summary || {}, states = summary.stateCounts || {};
   const rows = [
@@ -1336,8 +1363,11 @@ function sentinelSourceCard(data) {
   const card = el("div", { class: "card" });
   card.append(el("h2", { text: "Authoritative source freshness" }));
   const statuses = data.sourceStatuses || [];
+  const registered = data.coverage?.authoritativeSources || [];
   if (!statuses.length) {
-    card.append(el("p", { class: "note", text: "No authoritative source pilot is registered in the 3.2c-1 core. The first structured NSF and DOE source adapters are scoped to 3.2c-2; financial signals remain available meanwhile." }));
+    card.append(el("p", { class: "note", text: registered.length
+      ? "Registered authoritative source adapters have no accepted snapshot yet; financial signals remain available meanwhile."
+      : "No authoritative source pilot is registered in the 3.2c-1 core. The first structured NSF and DOE source adapters are scoped to 3.2c-2; financial signals remain available meanwhile." }));
   } else {
     const table = el("table"), head = el("tr");
     ["Source", "Status", "Last accepted", "Last attempt"].forEach(text =>
@@ -1435,6 +1465,7 @@ function renderSentinel(data) {
   banner.append(el("strong", { text: "A signal is not a cancellation. " }),
     document.createTextNode(data.classificationPolicy || "Negative activity is a financial observation until an accepted source says more."));
   $app.append(banner);
+  sentinelCoverageBanner(data);
   sentinelTiles(data);
   sentinelSourceCard(data);
   (data.episodes || []).forEach(sentinelEpisodeCard);

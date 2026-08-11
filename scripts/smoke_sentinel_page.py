@@ -64,6 +64,9 @@ def run(repo=REPO, chrome=None):
                 case_errors.append("page recorded a render/network error")
             for marker in (
                 "Funding-action sentinel", "A signal is not a cancellation",
+                "Current automated financial coverage",
+                "Current authoritative-source coverage",
+                "Absence from this page is not evidence that no funding action occurred",
                 "Unreviewed signal", "Coverage and interpretation limits",
                 "Estimated pilot burden", "not overdue",
             ):
