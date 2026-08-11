@@ -16,9 +16,10 @@ from adapters.obligation_common import cents, normalize_event, stable_id
 
 
 API = "https://api.usaspending.gov/api/v2"
+_LAST_DOWNLOAD_REQUEST = 0.0
 
 
-def _json(url, payload=None, attempts=6):
+def _json(url, payload=None, attempts=10):
     body = None if payload is None else json.dumps(payload).encode()
     request = urllib.request.Request(url, data=body,
                                      headers={"Content-Type": "application/json",
@@ -58,12 +59,20 @@ def resolve_account(account, fiscal_year):
 
 
 def request_download(account_id, fiscal_year, period, submission_type, columns):
+    global _LAST_DOWNLOAD_REQUEST
+    # Custom-account generation is resource-intensive and the public service
+    # drops bursty connections instead of always returning 429. Keep POSTs
+    # serialized and spaced even after the previous archive finishes.
+    elapsed = time.monotonic() - _LAST_DOWNLOAD_REQUEST
+    if elapsed < 5:
+        time.sleep(5 - elapsed)
     payload = {"account_level": "federal_account", "file_format": "csv",
                "filters": {"fy": fiscal_year, "period": period,
                            "submission_types": [submission_type],
                            "federal_account": str(account_id)},
                "columns": columns}
     result = _json(f"{API}/download/accounts/", payload)
+    _LAST_DOWNLOAD_REQUEST = time.monotonic()
     echoed = result.get("download_request") or {}
     filters = echoed.get("filters", {})
     if echoed and (filters.get("federal_account") != str(account_id)

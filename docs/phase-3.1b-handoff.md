@@ -54,7 +54,7 @@ synthesized for the unavailable years.
 
 ## Validation completed locally
 
-- Full Python unit suite: 34 tests green before the final documentation pass.
+- Full Python unit suite: 38 tests green.
 - Live account resolver: DOE `089-0222` dynamically resolved to internal ID
   5778 and the requested account scope echoed correctly.
 - Live File B P02 probe: 146 rows, $1,123,055,113.69 cumulative obligations.

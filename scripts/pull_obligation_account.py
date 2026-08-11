@@ -32,6 +32,7 @@ FILE_C_COLUMNS = [
 
 
 def _download(account_id, fy, period, kind, columns):
+    print(f"requesting FY{fy} P{period:02} {kind}", flush=True)
     request, _ = request_download(account_id, fy, period, kind, columns)
     payload, status = finish_download(request)
     members = archive_rows(payload)
@@ -39,6 +40,7 @@ def _download(account_id, fy, period, kind, columns):
     parsed = sum(len(rows) for rows in members.values())
     if expected is not None and parsed != int(expected):
         raise ValueError(f"FY{fy} P{period:02} {kind}: parsed {parsed} rows, status says {expected}")
+    print(f"accepted FY{fy} P{period:02} {kind}: {parsed:,} rows", flush=True)
     return members
 
 

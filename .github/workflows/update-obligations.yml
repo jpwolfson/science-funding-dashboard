@@ -57,7 +57,9 @@ jobs:
     timeout-minutes: 350
     strategy:
       fail-fast: true
-      max-parallel: 3
+      # USAspending's custom-account generator drops bursty connections;
+      # serialize account-year jobs and also throttle POSTs in the adapter.
+      max-parallel: 1
       matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
