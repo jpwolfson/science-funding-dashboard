@@ -1,6 +1,7 @@
 {
- "format": "obligation-events-csv-gzip-v1",
- "recordCount": 34387,
+ "baseline": "reference/doe_sc_obligation_baseline.json",
+ "eventFingerprint": "848dd0332b08a87a37a112fd0543a752255982ab0c673308e5a3f55ced5a0476",
+ "federalAccount": "089-0222",
  "fiscalYears": [
   2017,
   2018,
@@ -13,7 +14,100 @@
   2025,
   2026
  ],
- "sha256": "df7cb22bb70f1d5da4310d024da27ad129610df3606b661d11b868fe37feeb59",
- "federalAccount": "089-0222",
- "backfill": "FY2017-present"
+ "format": "obligation-events-csv-gzip-v2",
+ "latestAcceptedAt": null,
+ "partitions": [
+  {
+   "collectionStatus": "legacy-migrated",
+   "eventFingerprint": "8602c8816b5a55c5a1a1cf5751188ff220b19681150c359d763125ca9e2ef35a",
+   "file": "FY2017.csv.gz",
+   "fiscalYear": 2017,
+   "provenance": "FY2017.provenance.json",
+   "recordCount": 2712,
+   "sha256": "80b63a2c0b84a4449f38f4f72fb5ad662fd5751bb7157049164fe7cc5bd019fb"
+  },
+  {
+   "collectionStatus": "legacy-migrated",
+   "eventFingerprint": "a1d91d7846314a3b1eb51c93906b4e649e5e9a3859000624fd468d92cfeffe9e",
+   "file": "FY2018.csv.gz",
+   "fiscalYear": 2018,
+   "provenance": "FY2018.provenance.json",
+   "recordCount": 3288,
+   "sha256": "ee511ebf2e12904961098acfb64c9a08effbba131391a2fd1193d7d35da01154"
+  },
+  {
+   "collectionStatus": "legacy-migrated",
+   "eventFingerprint": "4c919929bebdf903a3c934534b26855c71cb1d516aa28837de2b5fea1c8f29a2",
+   "file": "FY2019.csv.gz",
+   "fiscalYear": 2019,
+   "provenance": "FY2019.provenance.json",
+   "recordCount": 3154,
+   "sha256": "8178a5f69532bd105f27cd7eb19c676ff219c70ea485f806b6907022ecd011ba"
+  },
+  {
+   "collectionStatus": "legacy-migrated",
+   "eventFingerprint": "810c15beac463f7996215bed5799a1b8a8d1d27bda750851132cc820b8c72c20",
+   "file": "FY2020.csv.gz",
+   "fiscalYear": 2020,
+   "provenance": "FY2020.provenance.json",
+   "recordCount": 3499,
+   "sha256": "5f41fd23aa8b0854fe88c056a7233120b0ca2271419750e867b0558401642d00"
+  },
+  {
+   "collectionStatus": "legacy-migrated",
+   "eventFingerprint": "27738d343f3e98009cb74a9968edbd24f56e95ce17493e310790d98c56a1c4e8",
+   "file": "FY2021.csv.gz",
+   "fiscalYear": 2021,
+   "provenance": "FY2021.provenance.json",
+   "recordCount": 3727,
+   "sha256": "f8f80aa9ab67942b07741df1bb51e613ea3f14dd0644cb2541bb46307fff0904"
+  },
+  {
+   "collectionStatus": "legacy-migrated",
+   "eventFingerprint": "a84d38b87b6715b2895574df080e6ac3225a36e943e1e651a0f57aee258185bc",
+   "file": "FY2022.csv.gz",
+   "fiscalYear": 2022,
+   "provenance": "FY2022.provenance.json",
+   "recordCount": 4077,
+   "sha256": "a30110bf92ae32fefbcf6953e8fdb1974c4e4c44bfee339c20565381cfee7dca"
+  },
+  {
+   "collectionStatus": "legacy-migrated",
+   "eventFingerprint": "1a468b06966422a70adf01ca9bbb59a9e132351dcf8a4d3e6b862eaa8fe97bf2",
+   "file": "FY2023.csv.gz",
+   "fiscalYear": 2023,
+   "provenance": "FY2023.provenance.json",
+   "recordCount": 4340,
+   "sha256": "01a2e67b6cdb88a7a35017affcfc1deb38ef2bc239094266a30847b3bc6b5038"
+  },
+  {
+   "collectionStatus": "legacy-migrated",
+   "eventFingerprint": "58c6a9d494c3d0a4c23ef9e606ba131b498dc5c11adb026b80548ddcb4e15aeb",
+   "file": "FY2024.csv.gz",
+   "fiscalYear": 2024,
+   "provenance": "FY2024.provenance.json",
+   "recordCount": 4207,
+   "sha256": "ae6af1290ac73b78469590f8e486755497840e1aae47eae0c03b8782fcacf18e"
+  },
+  {
+   "collectionStatus": "legacy-migrated",
+   "eventFingerprint": "abd4263d9cecc302bf9586c454ef08d06e48cbd9ea1f4e2c452bfc9ec7bbdb40",
+   "file": "FY2025.csv.gz",
+   "fiscalYear": 2025,
+   "provenance": "FY2025.provenance.json",
+   "recordCount": 3525,
+   "sha256": "8563ebab71ffc26cbb0c699d21f2bbd9758f0d2369d470f4d3aa735ca8521a2e"
+  },
+  {
+   "collectionStatus": "legacy-migrated",
+   "eventFingerprint": "1e03980d236162a05be39ed22e167a7a12718dda6f57f8b6d6b985f8c4774928",
+   "file": "FY2026.csv.gz",
+   "fiscalYear": 2026,
+   "provenance": "FY2026.provenance.json",
+   "recordCount": 1858,
+   "sha256": "6d1a567acdeec0f0cc0b1eb2a948a2b0e8f5630a329a22077d656a38a3ee0963"
+  }
+ ],
+ "recordCount": 34387,
+ "schemaVersion": 2
 }

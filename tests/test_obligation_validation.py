@@ -3,7 +3,9 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from adapters.obligation_common import normalize_event, write_store
+from adapters.obligation_common import (
+    event_fingerprint, normalize_event, partition_diff, write_store,
+)
 from scripts.validate_obligations import validate
 
 
@@ -14,10 +16,13 @@ class ObligationValidationTests(unittest.TestCase):
         (root / "config").mkdir()
         (root / "reference").mkdir()
         (root / "config" / "obligation_accounts.json").write_text(json.dumps({
+            "schemaVersion": 2,
+            "refreshDefaults": {"freshnessMaxDays": 10},
             "accounts": [{"path": "doe/sc", "federalAccount": "089-0222",
                           "baseline": "reference/doe_sc_obligation_baseline.json",
                           "programActivities": [{"code": "0001"}]}]}))
         (root / "reference" / "doe_sc_obligation_baseline.json").write_text(json.dumps({
+            "schemaVersion": 2,
             "federalAccount": "089-0222",
             "fiscalYears": {"2024": {"status": "complete", "obligationsCents": expected}}}))
         row = normalize_event({"id": "one", "source": "file_b_residual",
@@ -26,7 +31,20 @@ class ObligationValidationTests(unittest.TestCase):
             "amountCents": 100, "awardId": "", "linked": False})
         write_store(
             root / "data" / "obligations" / "doe" / "sc" / "events",
-            [row], {"federalAccount": "089-0222"},
+            [row], {"federalAccount": "089-0222"}, partition_metadata={2024: {
+                "schemaVersion": 2, "collectionStatus": "legacy-migrated",
+                "migratedAt": "2024-10-01T00:00:00+00:00",
+                "accountPath": "doe/sc", "federalAccount": "089-0222",
+                "fiscalYear": 2024, "asOfPeriod": 12, "downloads": [],
+                "normalized": {"recordCount": 1,
+                               "eventFingerprint": event_fingerprint([row]),
+                               "netObligationsCents": 100},
+                "replacement": {"previousEventFingerprint": None,
+                                "previousProvenanceSha256": None},
+                "diff": {**partition_diff([], [row]), "kind": "schema-v2-migration"},
+                "baselinePin": {"status": "complete", "obligationsCents": expected},
+                "migration": {"note": "test legacy migration"},
+            }},
         )
         return temp, root
 
@@ -68,7 +86,7 @@ class ObligationValidationTests(unittest.TestCase):
         try:
             manifest = root / "data" / "obligations" / "doe" / "sc" / "events" / "manifest.json"
             value = json.loads(manifest.read_text())
-            value["sha256"] = "bad"
+            value["eventFingerprint"] = "bad"
             manifest.write_text(json.dumps(value))
             self.assertTrue(any("manifest fingerprint mismatch" in e
                                 for e in validate(root, require_data=False)))

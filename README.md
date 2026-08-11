@@ -50,10 +50,13 @@ proposed source, labeling, review, limitation, and maintenance-cost contract.
   reconciliation the first Monday of each month), rollups, deploy. NSF runs
   four leaves in parallel; NIH runs serially and the adapter enforces NIH's
   recommended one-request-per-second ceiling.
-- `.github/workflows/update-obligations.yml` — account-level File B/File C
-  backfill, exact GTAS reconciliation, Program Activity fan-out, and separate
-  obligation navigation. It never passes obligation events through award-ID
-  deduplication.
+- `.github/workflows/update-obligations.yml` — registry-driven weekly current-FY
+  refresh plus rotating historical reconciliation, exact GTAS checks, Program
+  Activity fan-out, and atomic obligation publication. It never passes
+  obligation events through award-ID deduplication.
+- `scripts/plan_obligation_refresh.py` and
+  `scripts/reconcile_obligation_artifacts.py` — account × FY planning and
+  provenance-preserving atomic snapshot assembly.
 - `docs/funding-action-sentinel.md` — Phase 3.2c specification for a planned
   non-blocking signal/status layer, optional review process, boundaries of
   automation, and estimated operating burden. The sentinel is not implemented

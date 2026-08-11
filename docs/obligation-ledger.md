@@ -84,13 +84,21 @@ uses “reported in submission period” and never invents action-month precisio
 
 ## Persistence and corrections
 
-Stores are deterministic `FY####.csv.gz` shards plus a manifest. A materialized
-partition is replaceable because agency submissions can be corrected. The
-pilot manifest retains normalized record count, covered fiscal years, account,
-and event-ID fingerprint. Request scope and status row counts are validated
-during ingestion, but raw-archive hashes and replacement lineage do not yet
-survive the CI artifact boundary; persisting them is a Phase 3.2a release gate.
-No row is silently omitted from a completed download.
+Stores are deterministic `FY####.csv.gz` shards plus a schema-v2 manifest and a
+committed `FY####.provenance.json` record. A materialized partition is
+replaceable because agency submissions can be corrected. Provenance retains
+every accepted request scope, source-status and parsed row counts, raw-archive
+SHA-256, normalized event-content fingerprint, a compact added/removed/changed
+diff, and the fingerprint of the partition it replaced. No row is silently
+omitted from a completed download.
+
+The pre-v2 DOE shards are explicitly marked `legacy-migrated`: their normalized
+event and shard hashes are committed, but request/status/archive facts that the
+pilot discarded are not reconstructed. The weekly rotation replaces those
+markers with fully sourced provenance. Raw source ZIPs are retained as 14-day
+GitHub Actions artifacts; one-day account-year artifacts carry normalized
+shards and provenance into the atomic reconcile job. Normalized events,
+manifests, provenance, hashes, and diffs remain in Git.
 
 ## Dashboard contract
 
@@ -99,7 +107,7 @@ to mean `awards`. Obligation dashboards publish:
 
 - signed File B totals by reporting period and fiscal year;
 - cumulative FYTD totals at submission-period endpoints;
-- File C dollars, residual dollars, and the signed File C/net ratio (account-
+- File C dollars, residual dollars, and `fileCToNetRatio`, the signed File C/net ratio (account-
   level coverage is a special case; PA ratios may fall outside 0–100%);
 - distinct linked awards with activity, using set unions at parents;
 - top recipients and positive/negative flows from File C only;
@@ -124,6 +132,27 @@ partitions, warnings, or a difference outside an explicitly documented
 provisional-period tolerance fail CI. Completed snapshots reconcile to exact
 cents. USAspending calibration cannot become `ready` until the full DOE run,
 offline invariants, site smoke test, and browser release bar are green.
+
+## Refresh, freshness, and publication
+
+The account registry owns each account's baseline path and source-availability
+contract. The scheduled workflow plans an account × fiscal-year matrix from
+that registry: every account refreshes the newest source-available fiscal year
+weekly and reconciles one historical fiscal year on a rotating basis. A full or
+bounded custom plan remains dispatchable.
+
+All account-year jobs must succeed before reconciliation. The reconcile job
+applies every replacement to one candidate tree, updates partial baseline pins,
+rebuilds all manifests and dashboards, validates every registered account, and
+runs the rendered browser matrix. Only that exact validated tree is committed
+and uploaded as the Pages artifact. The ordinary award deployment workflow
+does not independently redeploy obligation-only commits.
+
+The default freshness SLA is ten days. Production publication fails if the
+newest required partition lacks accepted schema-v2 provenance, if its source
+acceptance time exceeds the SLA, or if dashboard freshness metadata does not
+match the store manifest. Source-unavailable years remain explicit baseline
+statuses and are never synthesized.
 
 Official references:
 

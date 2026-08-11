@@ -60,7 +60,7 @@ def validate(repo_root=REPO_ROOT):
     obligation = calibration.get("obligationLedger") or {}
     for key in ("canonicalSource", "awardEnrichmentSource", "federalAccount",
                 "fileCFy2024ObligationsCents", "gtasFy2024ObligationsCents",
-                "fileCCoverage", "status"):
+                "fileCToNetRatio", "status"):
         if key not in obligation:
             errors.append(f"obligation ledger calibration is missing {key}")
     if obligation and obligation.get("canonicalSource") != "File B cumulative CPE deltas":
