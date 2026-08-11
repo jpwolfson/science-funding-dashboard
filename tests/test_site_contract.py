@@ -63,6 +63,15 @@ class SiteContractTests(unittest.TestCase):
                      "sign alone does not establish a cancellation"):
             self.assertIn(text, self.html)
 
+    def test_obligation_reporting_periods_use_a_signed_line_chart(self):
+        chart = self.html.split("function obligationPeriodsChart(data) {", 1)[1]
+        chart = chart.split("function obligationFYChart(data) {", 1)[0]
+        self.assertIn("the line is not cumulative", chart)
+        self.assertIn('const line = rows.map', chart)
+        self.assertIn('f.svg.append(el("path"', chart)
+        self.assertIn('f.svg.addEventListener("pointermove"', chart)
+        self.assertNotIn("const bar =", chart)
+
 
 if __name__ == "__main__":
     unittest.main()

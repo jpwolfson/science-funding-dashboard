@@ -1076,34 +1076,65 @@ function obligationCumulativeChart(data) {
 
 function obligationPeriodsChart(data) {
   const { card, plot, tip } = makeCard("Obligations by reporting period",
-    "Signed activity in each agency submission period. The first P02 bucket covers the first reporting window; quarterly reporters appear only in quarter-ending periods.");
+    "Each point is signed activity in one agency submission period; the line is not cumulative. The first P02 point covers the first reporting window; quarterly reporters appear only at quarter end.");
   const rows = (data.reportingPeriods || []).slice(-48);
   function render() {
     plot.querySelector("svg")?.remove();
     const f = frame(plot, 310, 62, 14);
     const domain = signedDomain(rows.map(r => Number(r.netObligations || 0)));
-    const y = signedYAxis(f.svg, f, domain, fmtSignedAxisMoney), zero = y(0);
-    const band = rows.length ? (f.R - f.L) / rows.length : 0, bw = Math.max(2, Math.min(18, band - 2));
-    rows.forEach((r, i) => {
-      const cx = f.L + band * (i + .5), yy = y(r.netObligations || 0);
-      const bar = el("rect", { x: cx - bw / 2, y: Math.min(yy, zero), width: bw,
-        height: Math.max(1, Math.abs(zero - yy)), fill: (r.netObligations || 0) < 0 ? css("--s2") : css("--s1") });
-      f.svg.append(bar);
-      if (i % Math.max(1, Math.ceil(rows.length / 10)) === 0)
-        f.svg.append(el("text", { class: "axis-text", x: cx, y: f.B + 18,
-          "text-anchor": "middle", text: String(r.submissionPeriod || "").replace("FY", "") }));
-      const hit = el("rect", { x: cx - band / 2, y: f.T, width: band, height: f.B - f.T, fill: "transparent" });
+    const y = signedYAxis(f.svg, f, domain, fmtSignedAxisMoney);
+    if (rows.length) {
+      const last = rows.length - 1;
+      const x = i => f.L + (rows.length > 1 ? i / last : 0.5) * (f.R - f.L);
+      const targetLabels = (plot.clientWidth || f.W) < 520 ? 5 : 10;
+      const labelStep = Math.max(1, Math.ceil(rows.length / targetLabels));
+      rows.forEach((r, i) => {
+        if (i === last || (i % labelStep === 0 && last - i >= labelStep))
+          f.svg.append(el("text", { class: "axis-text", x: x(i), y: f.B + 18,
+            "text-anchor": i === last ? "end" : "middle",
+            text: String(r.submissionPeriod || "").replace("FY", "") }));
+      });
+      const line = rows.map((r, i) =>
+        `${i ? "L" : "M"}${x(i).toFixed(1)},${y(r.netObligations || 0).toFixed(1)}`).join("");
+      f.svg.append(el("path", { d: line, fill: "none", stroke: css("--s1"),
+        "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+      const end = rows[last], endY = y(end.netObligations || 0);
+      f.svg.append(el("circle", { cx: x(last), cy: endY, r: 4.5,
+        fill: (end.netObligations || 0) < 0 ? css("--s2") : css("--s1"),
+        stroke: css("--surface"), "stroke-width": 2 }));
+      f.svg.append(el("text", { class: "dlabel", x: x(last) - 7,
+        y: Math.max(f.T + 12, Math.min(f.B - 8, endY - 10)), "text-anchor": "end",
+        text: fmtSignedMoney(end.netObligations || 0) }));
+      const cross = el("line", { y1: f.T, y2: f.B, stroke: css("--axis"),
+        "stroke-width": 1, visibility: "hidden" });
+      const dot = el("circle", { r: 4.5, stroke: css("--surface"),
+        "stroke-width": 2, visibility: "hidden" });
+      f.svg.append(cross, dot);
       const scale = () => plot.clientWidth / f.W;
-      hit.addEventListener("pointermove", () => showTip(tip, plot, cx * scale(), Math.min(yy, zero) * scale(),
-        r.submissionPeriod, [
+      f.svg.addEventListener("pointermove", e => {
+        const bounds = f.svg.getBoundingClientRect();
+        const vx = (e.clientX - bounds.left) / scale();
+        const i = rows.length > 1
+          ? Math.max(0, Math.min(last, Math.round((vx - f.L) / (f.R - f.L) * last))) : 0;
+        const r = rows[i], value = r.netObligations || 0, yy = y(value);
+        cross.setAttribute("x1", x(i)); cross.setAttribute("x2", x(i));
+        cross.setAttribute("visibility", "visible");
+        dot.setAttribute("cx", x(i)); dot.setAttribute("cy", yy);
+        dot.setAttribute("fill", value < 0 ? css("--s2") : css("--s1"));
+        dot.setAttribute("visibility", "visible");
+        showTip(tip, plot, x(i) * scale(), yy * scale(), r.submissionPeriod, [
           { val: fmtSignedMoney(r.netObligations || 0), lab: "net obligations" },
           { val: fmtSignedMoney(r.awardLinkedObligations || 0), lab: "File C portion" },
           { val: fmtSignedMoney(r.residualObligations || 0), lab: "File B − File C residual" },
           { val: fmtN(r.distinctLinkedAwards || 0), lab: "distinct linked awards" },
-        ]));
-      hit.addEventListener("pointerleave", () => { tip.style.display = "none"; });
-      f.svg.append(hit);
-    });
+        ]);
+      });
+      f.svg.addEventListener("pointerleave", () => {
+        tip.style.display = "none";
+        cross.setAttribute("visibility", "hidden");
+        dot.setAttribute("visibility", "hidden");
+      });
+    }
   }
   render();
   addTable(card, ["Reporting period", "Net obligations", "File C portion", "Residual", "Positive entries", "Negative entries", "Distinct linked awards"],
