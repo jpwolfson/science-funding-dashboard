@@ -163,7 +163,7 @@ const el = (tag, attrs = {}, ...kids) => {
 };
 const fmtN = v => v.toLocaleString("en-US");
 const fmtM = v => v >= 1e9
-  ? "$" + (v / 1e9 >= 100 ? (v / 1e9).toFixed(0) : (v / 1e9).toFixed(1)) + "B"
+  ? "$" + (v / 1e9).toFixed(3) + "B"  // three decimals: keep millions visible at B scale
   : "$" + (v / 1e6 >= 100 ? (v / 1e6).toFixed(0) : (v / 1e6).toFixed(1)) + "M";
 const fmtAxisM = v => v >= 1e9 ? "$" + +(v / 1e9).toFixed(1) + "B" : "$" + Math.round(v / 1e6) + "M";
 const fmtMoney = v => v >= 1e6 ? fmtM(v) : "$" + Math.round(v / 1e3) + "K";
@@ -681,7 +681,7 @@ function cumulativeChart(data, key, title, note, fmtVal, fmtEnd) {
   const DAYS = 365;
   function render() {
     plot.querySelector("svg")?.remove();
-    const f = frame(plot, 340, 56, 122);
+    const f = frame(plot, 340, 56, 140);
     const max = chartMax(series, s => s.points.at(-1)[key]);
     yAxis(f.svg, f, max, fmtVal);
     const x = d => f.L + (Math.min(d, DAYS - 1) / (DAYS - 1)) * (f.R - f.L);
@@ -726,7 +726,7 @@ function cumulativeChart(data, key, title, note, fmtVal, fmtEnd) {
       cross.setAttribute("x1", x(cd)); cross.setAttribute("x2", x(cd)); cross.setAttribute("visibility", "visible");
       showTip(tip, plot, x(cd) * scale(), f.T * scale() + 40, `Week ${wi + 1} · through ${fyDayLabel(cd)}`,
         series.filter(s => wi < s.points.length)
-          .map(s => ({ color: css(s.v), val: fmtVal(s.points[Math.min(wi, s.points.length - 1)][key]),
+          .map(s => ({ color: css(s.v), val: fmtEnd(s.points[Math.min(wi, s.points.length - 1)][key]),
                        lab: `FY${s.fy}` })));
     });
     f.svg.addEventListener("pointerleave", () => { tip.style.display = "none"; cross.setAttribute("visibility", "hidden"); });
@@ -740,7 +740,7 @@ function cumulativeChart(data, key, title, note, fmtVal, fmtEnd) {
       const bd = (MONTH_OFFSETS[m + 1] ?? 365) - 1;
       return [MONTH_ABBR[m], ...series.map(s => {
         if (mo > s.points.at(-1).d) return "—";
-        return fmtVal(s.points.filter(p => p.d <= bd).at(-1)[key]);
+        return fmtEnd(s.points.filter(p => p.d <= bd).at(-1)[key]);
       })];
     }));
   return render;
