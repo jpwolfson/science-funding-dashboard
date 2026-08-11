@@ -176,19 +176,42 @@ consequences already encoded:
       browser pass, awards.csv untouched. Known inherited behavior: FYs
       with zero awards in the 5-year window are absent from fyCumulative
       (fewer lines), not all-zero series.
-- [ ] Phase 2 — NIH via RePORTER API (institutes/centers as the
-      directorate tier). Forces the year-shard/compression storage format
-      at realistic volume.
-      - Implementation complete on `claude/phase-2-nih`: 28 current RePORTER
-        administrative components in the registry; `adapters/nih_reporter.py`
-        with per-IC/per-FY pagination, opposite-order exact ID-set checks,
-        non-destructive merge, source-aware award links/labels, and
-        deterministic fiscal-year gzip shards. NIH CI runs serially and the
-        adapter throttles to the official one-request-per-second guidance.
-        Intramural (`IM`) records and subprojects are excluded to avoid
-        zero-dollar records and parent/subproject double counting.
-      - Pending release bar: CI full backfill for all 28 components, rollup,
-        zero unexpected warnings, browser verification, then merge/deploy.
+- [x] Phase 2 — NIH via RePORTER API (completed 2026-08-11, reviewed by
+      Fable + independent Sonnet verification sweep):
+      - Implementation: 28 current RePORTER administrative components in the
+        registry; `adapters/nih_reporter.py` with per-IC/per-FY pagination,
+        opposite-order exact ID-set checks, non-destructive merge,
+        source-aware award links/labels, and deterministic fiscal-year gzip
+        shards. NIH CI runs serially and the adapter throttles to the
+        official one-request-per-second guidance. Intramural (`IM`) records
+        and subprojects are excluded to avoid zero-dollar records and
+        parent/subproject double counting. Layered fail-closed validation
+        (`scripts/validate_nih.py`, `docs/nih-data-validation.md`): offline
+        shard/manifest/dedup/range/warning gates in the Test workflow, NIH
+        Data Book benchmarks (counts ±2%, dollars ±15%), and `--live`
+        same-source reconciliation gating every NIH data refresh.
+      - RELEASE BAR MET: backfill run 31426718058 (28/28 ICs green, merged
+        via PR #4); Test green on main incl. offline validation; production
+        chain exercised end-to-end on main by run 31448155904 (2026-08-11
+        01:23 UTC): incremental pull ×28 → rollup → validate --live (28/28
+        exact live reconciliations in 29 s) → data commits → Pages deploy,
+        ALL GREEN. 694,443 NIH awards FY2015–present, zero warnings in all
+        28 stores; Data Book agreement FY2022 +0.12% / FY2025 −0.16%; root
+        = 832,616 awards = NSF 138,173 + NIH 694,443 exactly. Sweep: 15
+        tests + 33 subtests green, 58/58 dashboards invariant-exact
+        (monthly ≡ FY ≡ total; fyCumulative endpoints exact), browser pass
+        7 pages × light+dark with 0 console errors, NIH links →
+        reporter.nih.gov. Oct–Nov 2025 award collapse (7 / 154 vs ~800 /
+        ~2,000 historically) verified as the real shutdown signal, not a
+        pull artifact (Oct-1 date-fallback rows are only 0.9% and October
+        is NIH's quietest month).
+      - Open hardening items (non-blocking, from review): (1) the
+        FUNDING_MECHANISMS whitelist would silently exclude a future new
+        RePORTER mechanism value, invisible in FYs with no pinned Data Book
+        benchmark — cheap tripwire: per-FY unfiltered-total vs
+        filtered+IM-total comparison inside `validate_nih.py --live`;
+        (2) cosmetic: NIH-scale dollar tiles render "$23314M" — wants a
+        billions formatter in the site's `fmtM`.
 - [ ] Phase 3 — USAspending adapter for agencies without good native APIs
       (DOE SC, NASA SMD, DOD research offices, USDA NIFA, ...) plus the
       cross-validation layer for all existing units.
