@@ -15,6 +15,12 @@ ever deleting stored history.
 See `CLAUDE.md` for architecture, roadmap, and the empirically confirmed
 NSF API defects the pipeline defends against.
 
+Phase 3.2c plans a non-blocking funding-action sentinel to surface material
+downward activity and source-confirmed terminations or restorations for optional
+review. It will not make data refreshes or publication depend on a reviewer.
+See [`docs/funding-action-sentinel.md`](docs/funding-action-sentinel.md) for the
+proposed source, labeling, review, limitation, and maintenance-cost contract.
+
 ## Layout
 
 - `config/orgs.json` — org registry (agency → directorate → division), each
@@ -48,6 +54,10 @@ NSF API defects the pipeline defends against.
   backfill, exact GTAS reconciliation, Program Activity fan-out, and separate
   obligation navigation. It never passes obligation events through award-ID
   deduplication.
+- `docs/funding-action-sentinel.md` — Phase 3.2c specification for a planned
+  non-blocking signal/status layer, optional review process, boundaries of
+  automation, and estimated operating burden. The sentinel is not implemented
+  yet.
 
 ## NIH data semantics
 

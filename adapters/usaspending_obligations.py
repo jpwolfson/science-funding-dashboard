@@ -148,11 +148,23 @@ def _first(row, *names):
 
 def _pa(row, aliases):
     park = _first(row, "program_activity_reporting_key")
-    code = _first(row, "program_activity_code").zfill(4) or "0000"
-    name = _first(row, "program_activity_name") or "Unknown / other"
+    raw_code = _first(row, "program_activity_code")
+    code = raw_code.zfill(4) if raw_code else "0000"
+    raw_name = _first(row, "program_activity_name")
+    name = raw_name or "Unknown / other"
     identity = aliases.get(park) or aliases.get(code) or aliases.get(f"{code}:{name.lower()}")
     if not identity:
-        identity = aliases.get("0000", {"code": "0000", "name": "Unknown / other", "park": ""})
+        # Truly missing attribution belongs in the explicit unknown bucket.
+        # A nonblank, unregistered code/PARK is schema drift and must stop the
+        # pull instead of being silently laundered into 0000.
+        if raw_code or park:
+            raise ValueError(
+                "unmapped Program Activity: "
+                f"code={raw_code!r}, PARK={park!r}, name={raw_name!r}"
+            )
+        identity = aliases.get(
+            "0000", {"code": "0000", "name": "Unknown / other", "park": ""}
+        )
     return identity["code"], identity["name"], identity.get("park", "") or park
 
 
