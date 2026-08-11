@@ -205,13 +205,9 @@ consequences already encoded:
         ~2,000 historically) verified as the real shutdown signal, not a
         pull artifact (Oct-1 date-fallback rows are only 0.9% and October
         is NIH's quietest month).
-      - Open hardening items (non-blocking, from review): (1) the
-        FUNDING_MECHANISMS whitelist would silently exclude a future new
-        RePORTER mechanism value, invisible in FYs with no pinned Data Book
-        benchmark — cheap tripwire: per-FY unfiltered-total vs
-        filtered+IM-total comparison inside `validate_nih.py --live`;
-        (2) cosmetic: NIH-scale dollar tiles render "$23314M" — wants a
-        billions formatter in the site's `fmtM`.
+      - Review hardening follow-ups are complete: live NIH validation checks
+        the mechanism partition, and NIH-scale dollar tiles use the site's
+        billions formatter rather than rendering values such as "$23314M".
       - Phase 3.1b follow-up (2026-08-11): a corrected mechanism whitelist
         recovered 13,790 intentionally in-scope contract/IAA records. The
         former Data Book comparison accidentally measured that complete
@@ -242,100 +238,113 @@ consequences already encoded:
         `reference/usaspending_calibration.json`; CI prevents USAspending
         registry onboarding while status is blocked. Recommended next phase:
         redesign around File C account/PARK allocation events.
-- [ ] Phase 3.1b — the OBLIGATION LEDGER: File C allocation events + DOE
-      Office of Science pilot. One Fable-led session; the design decisions
-      below are OWNER-APPROVED (2026-08-11) — implement, don't relitigate.
-      - EXECUTION NOTE (2026-08-11): live official data established that File
-        C is structurally incomplete for this product: FY2024 File C is
-        $8.528B versus $9.282B in File A/GTAS (91.8772% coverage). The official
-        disclosure calls File C prime-award spending a subset of account
-        spending. The implemented ledger therefore uses File B PA CPE deltas
-        for canonical dollars, File C for award-linked enrichment, and an
-        explicit File B-minus-File C residual. Files A/B/C begin FY2017 Q2, so
-        FY2015–16 are unavailable rather than synthesized. Code/local tests are
-        complete; remote historical backfill, browser smoke, ready flip, and
-        deploy remain the release gate. See `docs/phase-3.1b-handoff.md`.
-      **Architecture: two ledgers, both kept, clearly labeled.**
-      - AWARD ledger (exists; unchanged): NSF + NIH native-API pipelines.
-        Answers "how many new awards were made and how much was committed."
-      - OBLIGATION ledger (this phase): AAAS-account agencies. Answers
-        "how many dollars were obligated from this appropriations account,
-        when" — the ex post complement of an AAAS appropriations row.
-        Award-filtered representations are PROVEN WRONG for this (Phase
-        3.1: 36.6% under / 402% over on DOE 089-0222) — the atom is the
-        File C allocation event: award × federal account × program
-        activity × period × obligated dollars. File C rows allocate
-        dollars per row, so account- and PA-tier rollups are exact by
-        construction, and de-obligations appear as negative events —
-        terminations/clawbacks become visible, which the award ledger
-        structurally cannot show. Agencies may eventually carry BOTH views
-        (e.g. NSF award pages + an NSF R&RA account page); numbers will
-        differ because the ledgers answer different questions — label,
-        don't reconcile.
-      Ordered steps:
-      1. Store contract design (document in docs/ before coding): event
-         rows keyed by (award id, federal account, program activity,
-         submission period); append-only by reporting period with
-         de-obligations kept as negative events (the never-delete rule,
-         adapted); fiscal-year attribution by submission period; award
-         metadata (recipient, title, link id) joined from award ids for
-         top-flows tables. Ingestion source: File C via the USAspending
-         custom-account bulk download or equivalent API — verify which
-         surface is complete and paginate fail-closed per the house rules.
-      2. Aggregation flavor: dashboard.json kind "obligations" — monthly
-         obligated dollars, cumulative FY-to-date obligations (the
-         centerpiece chart: the direct ex post mirror of appropriations),
-         distinct-awards-obligated count clearly labeled as such, top
-         recipients/flows. Site branches on node kind (the provider/
-         metadata branching pattern from Phase 2).
-      3. Reconciliation gate, exact-by-construction: per-account per-FY
-         File C sums vs pinned GTAS account obligations (Phase 3.1 pinned
-         089-0222 FY2024 = $9,281,791,000). Characterize and document the
-         known small File C↔GTAS reporting gaps; pin tolerances per
-         account-FY in reference/. This replaces plausibility guesswork —
-         every fan-out account gets its baseline from GTAS mechanically.
-      4. Pilot: DOE Office of Science = account 089-0222, program
-         activities as the sub-tier (File C rows are per-PA, so PA rollups
-         are exact — this resolves the overlap that blocked award-filtered
-         program offices). Backfill FY2015-present on CI, reconcile every
-         FY against GTAS, site pages, browser verification — Phase 2
-         release bar (zero warnings, invariants exact, deploy green).
-      5. Flip reference/usaspending_calibration.json to
-         status "ready" / onboardingAllowed true ONLY after the DOE SC
-         reconciliation gate is green; the CI gate from PR #5 enforces
-         this.
-      6. Cross-validation wrap-up for the award ledger: formalize the NSF
-         count-coverage validator (award-ID match vs USAspending, 99.80%
-         proven on DMS FY2024) as a wired CI gate with the two known IAA
-         residuals documented; record dollars as intentionally
-         non-comparable (intended totals ≠ obligations to date — 81.6%
-         observed and expected); NIH external check remains the Data Book
-         (RePORTER application-years ≠ base awards, structurally).
-- [ ] Phase 3.2+ — account fan-out on the obligation ledger. Cheap,
-      parallel, Sonnet-executed with Fable review only; batch several
-      accounts per session once 3.1b's pipeline is green.
-      OWNER DIRECTIVE (2026-08-11) — scope and framing:
-      - Coverage matches the AAAS R&D Appropriations Dashboard
-        (https://www.aaas.org/news/fy-2027-rd-appropriations-dashboard):
-        this dashboard is its EX POST complement — AAAS tracks what
-        Congress appropriates per account; we track obligations of those
-        appropriated funds as they actually flow. Mirror AAAS's agency/
-        account structure (DOD S&T accounts, DOE SC/ARPA-E/applied
-        energy, NASA science accounts, NSF, USDA ARS/NIFA, NOAA, NIST,
-        USGS, EPA S&T, VA research, DHS S&T, etc.) — extract the exact
-        current account list from the AAAS page on CI (aaas.org is
-        proxy-blocked in dev; discover-orgs pattern), map each row to
-        federal account codes, commit under reference/.
-      - Each account = registry entry + GTAS-pinned per-FY baselines
-        (mechanical, from step 3.1b.3) + CI backfill + reconciliation +
-        verification sweep (store integrity, invariants, browser, links).
-      - Instrument scope: ALL obligation instruments (grants, cooperative
-        agreements, contracts, IAAs) — DOD RDT&E is contract-dominated;
-        filtering would break the AAAS correspondence. Where USAspending
-        award-level coverage is known-incomplete (e.g. classified DOD
-        work), surface a per-account caveat rather than silently
-        under-reporting; the GTAS reconciliation gate quantifies any gap
-        per account-FY.
-      - Site: add a "by appropriations account" navigation view aligned
-        row-for-row with AAAS's dashboard, alongside the existing
-        by-agency org tree.
+- [x] Phase 3.1b — obligation ledger + DOE Office of Science pilot
+      (base release completed 2026-08-11 via PRs #6 and #7; deployed to Pages;
+      post-deploy QA patch pending branch CI/merge/deployed smoke).
+      - Two ledgers remain physically separate and clearly labeled. The award
+        ledger answers how many source-native awards/applications were made and
+        their reported totals. The obligation ledger answers how signed dollars
+        moved through an appropriations account by agency submission period.
+      - Canonical dollars are File B Program Activity CPE deltas. File C is the
+        award-financial subset used for recipient/flow detail; an explicit
+        signed File B-minus-File C residual makes every PA-period and account
+        total exact. File C is not substituted for GTAS/File B.
+      - FY2015–16 are unavailable, FY2017 begins at P06 and is partial-source
+        history, FY2018–25 reconcile to GTAS/File A at exact cents, and FY2026 is
+        pinned through P09. Correctable fiscal-year partitions are replaceable;
+        negative activity remains negative.
+      - DOE `089-0222` is live at the account and Program Activity tiers.
+        Calibration is `ready`; the NSF DMS count diagnostic and like-for-like
+        NIH Data Book gate remain separate award-ledger checks.
+      - Post-deploy QA hardening: baselines now drive partial-year rendering;
+        zero-activity PA periods are materialized instead of compressing time;
+        unmapped nonblank Program Activities fail closed; manifest, required-
+        year, residual-bucket, dashboard-freshness, and child-timeline checks
+        are enforced. UI copy distinguishes File C/net from a bounded coverage
+        score, scopes every current-FY tile, exposes freshness, names charts for
+        assistive technology, improves light-theme contrast, and collapses the
+        180-row recipient/flow tail behind current-year summaries.
+      - Detailed contract and release evidence:
+        `docs/obligation-ledger.md`, `docs/phase-3.1b-handoff.md`.
+- [ ] Phase 3.2a — platformize before account fan-out (new release gate).
+      The pilot workflow is still a DOE-specific historical backfill: account
+      path, artifact path, matrix, and manifest metadata are hardcoded; it has
+      no schedule and relies on the separate push-triggered Pages workflow for
+      publication. Do not batch additional accounts until:
+      - the workflow plans an account × FY matrix from the registry, supports a
+        cheap weekly current-FY refresh for every account plus a rotating
+        historical reconciliation, validates all accounts together, and
+        publishes one atomic snapshot;
+      - each account owns its baseline path and availability statuses; missing
+        required shards, stale dashboards, and new PA codes fail before deploy;
+      - request scope, status row counts, archive SHA-256, normalized event
+        fingerprint, and replacement lineage survive the artifact/reconcile
+        boundary (the pilot currently keeps only the normalized shard hash);
+      - normalized signed events, manifests, hashes, and diffs remain in Git;
+        raw source ZIPs use 14-day GitHub Actions artifacts and intermediate
+        account-year artifacts use one-day retention, with no external storage
+        service or standing human download step;
+      - make one hard schema-v2 migration: rename the misleading
+        `fileCCoverage` output to `fileCToNetRatio`, regenerate every obligation
+        dashboard JSON, and do not carry a temporary duplicate compatibility
+        field (there are no external schema consumers);
+      - a scheduled freshness SLA and an automated rendered-page matrix cover
+        light/dark, narrow/wide, empty/negative/out-of-range File C/net cases,
+        keyboard access, public links, and console/network failures.
+- [ ] Phase 3.2b — build and review the AAAS-to-federal-account crosswalk.
+      Treat the AAAS R&D Appropriations Dashboard as the scope/framing source,
+      not as an unattended production registry. Commit a dated source snapshot
+      and a reviewed, possibly many-to-many mapping to federal accounts; CI may
+      detect AAAS drift but must not auto-onboard or silently remap an account.
+      Preserve AAAS-facing labels while making the federal-account identity and
+      any aggregation explicit. Each row must be `resolved`, `provisional`, or
+      `unresolved`, with evidence. Resolved rows may proceed without waiting for
+      optional review of the others. Federal-account hierarchy is canonical;
+      AAAS is an alternate grouping/framing view. Source discovery and mapping
+      may run in parallel with 3.2a in a separate worktree if it touches only
+      reference/crosswalk artifacts; registry integration and onboarding wait
+      for the 3.2a schema/workflow contract.
+- [ ] Phase 3.2c — non-blocking funding-action sentinel pilot.
+      Implement the signal/status/review contract in
+      `docs/funding-action-sentinel.md` as two sequential goal-sized tasks:
+      - 3.2c-1 core: generic financial-signal, sourced-event, episode, and
+        optional-review stores; gross-negative/cluster detection; stable ledger
+        joins; public unreviewed/confirmed/reviewed/restored states; stale-source
+        behavior; validation, site rendering, and tests;
+      - 3.2c-2 source pilots: NSF's structured termination list and a DOE
+        portfolio-action example, including award matching where supported and
+        separate announced value, observed deobligation, eliminated future
+        value, and restoration fields.
+      Financial observations, source-confirmed status events, and optional
+      review findings remain separate. Unreviewed signals are a durable public
+      state: no data pull, rollup, validation job, or deploy may wait for a human
+      or agent. Review issues and agent-prepared PRs are optional conveniences.
+      Publish the limits of automated discovery, motive/legal interpretation,
+      award mapping, and announced-value/deobligation comparison, plus
+      maintenance-cost estimates at launch. Replace estimates with measured
+      figures after eight weeks as a non-blocking operational follow-up; do not
+      keep an agent goal open or delay account fan-out while the clock runs.
+- [ ] Phase 3.2d+ — fan out in bounded agency batches after
+      3.2a/3.2b and the 3.2c launch are green.
+      Use one goal-mode task per batch, each adding registry entries, baselines,
+      backfill, exact reconciliation, Program Activity aliases, site pages,
+      tests, and rendered-browser QA:
+      1. DOE expansion, beginning with ARPA-E and applied/clean-energy accounts;
+      2. NSF and other grant-heavy civilian science accounts;
+      3. remaining resolved civilian R&D accounts (NASA Science, NOAA, NIST,
+         USGS, USDA, EPA, VA, and DHS as the crosswalk supports);
+      4. DOD and classified/intramural-heavy accounts last, with the standard
+         disclosure that canonical File B totals remain complete while public
+         File C award attribution may be limited.
+      - Retain all File C instrument classes (grants, cooperative agreements,
+        contracts, IAAs, and unlinked rows) while File B remains canonical.
+      - At account level, report the File C portion and residual. At PA level,
+        label File C/net as a signed ratio that may be negative or exceed 100%
+        when File C and residual activity offset; never call that a completeness
+        percentage without qualification.
+      - Low File C attribution for classified or intramural work is an award-
+        detail limitation, not under-reporting of canonical File B obligations.
+      - Gross positive/negative File C activity is retained as a financial fact
+        and feeds the separate sentinel without being labeled a cancellation on
+        amount or sign alone. Unresolved crosswalk rows and optional sentinel
+        review never block ready accounts or unrelated publication.
