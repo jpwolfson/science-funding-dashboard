@@ -2,7 +2,14 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from adapters.obligation_common import canonical_period, load_store, normalize_event, period_info, write_store
+from adapters.obligation_common import (
+    canonical_period,
+    load_store,
+    normalize_award_url,
+    normalize_event,
+    period_info,
+    write_store,
+)
 
 
 def event(event_id="e1", amount=123, period="FY2024P02", source="file_c"):
@@ -38,6 +45,14 @@ class ObligationStoreTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             with self.assertRaises(ValueError):
                 write_store(Path(tmp), [event(), event()])
+
+    def test_internal_usaspending_permalink_becomes_public(self):
+        expected = "https://www.usaspending.gov/award/CONT_AWD_123/"
+        self.assertEqual(expected, normalize_award_url(
+            "localhost:3000/award/CONT_AWD_123/"))
+        self.assertEqual(expected, normalize_award_url(
+            "http://localhost:3000/award/CONT_AWD_123/"))
+        self.assertEqual(expected, normalize_award_url(expected))
 
 
 if __name__ == "__main__":

@@ -33,6 +33,10 @@ def validate(repo=REPO, require_data=True):
             errors.append(f"{account['path']}: unmapped Program Activities {unknown}")
         by_fy = defaultdict(list)
         for event in events:
+            if (event["source"] == "file_c" and event["linked"] and
+                    not event["awardUrl"].startswith(
+                        "https://www.usaspending.gov/award/")):
+                errors.append(f"{event['id']}: invalid public USAspending award URL")
             fy, period, end = period_info(event["submissionPeriod"])
             if (fy, period, end.isoformat()) != (
                     event["fiscalYear"], event["fiscalPeriod"], event["date"]):

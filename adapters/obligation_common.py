@@ -14,6 +14,7 @@ from calendar import monthrange
 from collections import defaultdict
 from datetime import date
 from pathlib import Path
+from urllib.parse import quote, unquote
 
 
 CSV_HEADER = [
@@ -24,6 +25,10 @@ CSV_HEADER = [
     "grossPositiveCents", "grossNegativeCents",
 ]
 PERIOD_RE = re.compile(r"^FY(\d{4})(?:P(0[2-9]|1[0-2])|Q([1-4]))$")
+LOCAL_AWARD_URL_RE = re.compile(
+    r"^(?:https?://)?localhost(?::\d+)?/award/([^/?#]+)/?",
+    re.IGNORECASE,
+)
 
 
 def cents(value):
@@ -60,6 +65,16 @@ def stable_id(source, account, pa_code, submission_period, award_id=""):
     return hashlib.sha256(raw.encode()).hexdigest()
 
 
+def normalize_award_url(value):
+    """Replace USAspending's internal download permalink with its public URL."""
+    value = str(value or "").strip()
+    match = LOCAL_AWARD_URL_RE.match(value)
+    if match:
+        award_id = quote(unquote(match.group(1)), safe="")
+        return f"https://www.usaspending.gov/award/{award_id}/"
+    return value
+
+
 def normalize_event(event):
     event = dict(event)
     event["submissionPeriod"] = canonical_period(event["submissionPeriod"])
@@ -76,7 +91,7 @@ def normalize_event(event):
     event.setdefault("title", "")
     event.setdefault("recipientUEI", "")
     event.setdefault("recipient", "")
-    event.setdefault("awardUrl", "")
+    event["awardUrl"] = normalize_award_url(event.get("awardUrl", ""))
     event.setdefault("sourceRowCount", 1)
     event.setdefault("grossPositiveCents", max(0, int(event["amountCents"])))
     event.setdefault("grossNegativeCents", min(0, int(event["amountCents"])))

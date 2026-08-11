@@ -1,7 +1,8 @@
 # Phase 3.1b handoff
 
-Status at PR creation: implementation and local validation complete; remote
-historical backfill/release gate pending.
+Status: the historical backfill, exact reconciliation, and light/dark browser
+release gates are complete. Calibration remains fail-closed until the
+award-link normalization commit passes its head-specific CI run.
 
 ## What changed
 
@@ -57,42 +58,43 @@ FY2017 Q2, so FY2015–16 are recorded as unavailable, FY2017 as partial-source
 history, and FY2018 as the first full fiscal year. No award-search values are
 synthesized for the unavailable years.
 
-## Validation completed locally
+## Validation completed
 
-- Full Python unit suite: 42 tests green.
+- Full Python unit suite: 46 tests green.
 - Live account resolver: DOE `089-0222` dynamically resolved to internal ID
   5778 and the requested account scope echoed correctly.
 - Live File B P02 probe: 146 rows, $1,123,055,113.69 cumulative obligations.
 - Live File C FY2024 archive: 52,749 source rows, 4,036 canonical events,
   $8,527,849,368.87, including negative and unlinked rows.
-- JavaScript syntax and whitespace checks passed. Local Playwright could not
-  launch Chrome inside the desktop sandbox, so browser layout remains part of
-  the remote release bar.
+- [Backfill run 31498087792](https://github.com/jpwolfson/science-funding-dashboard/actions/runs/31498087792)
+  completed FY2017–26, rebuilt 34,387 canonical events, reconciled every
+  completed GTAS year at exact cents, validated partial-year pins, and passed
+  the full unit/site contract suite.
+- Light/dark browser smoke passed for the obligation root, DOE, Office of
+  Science account, Basic Energy Sciences Program Activity, and legacy award
+  root with zero console errors. Signed de-obligations and residuals remained
+  visible and the legacy award dashboard was unchanged.
+- The browser gate found USAspending-internal `localhost:3000/award/...`
+  permalinks in File C. The adapter/store boundary and site now normalize them
+  to public `https://www.usaspending.gov/award/.../` URLs. The browser check
+  confirms no internal links remain and offline validation rejects regressions.
 
 ## Remaining gate and takeover steps
 
-1. Let `Backfill obligation ledger` complete on the PR branch. It fans out one
-   fiscal year per job, rebuilds the unified store, and must reconcile every
-   pinned year exactly.
-2. Review any live schema drift or USAspending transient-download failure. The
-   adapter retries 429/5xx/disconnects and refuses unknown status states,
-   archive hosts, row-count mismatches, scope mismatches, unmapped Program
-   Activities, or cent differences.
-3. Run the browser smoke against obligation root, DOE, account, and at least
-   one positive/negative Program Activity in light and dark mode; require zero
-   console errors and verify the legacy award root is unchanged.
-4. Only after those checks pass, change
+1. Require the head-specific CI run for the award-link normalization commit to
+   pass; the earlier green checks do not cover the newer `[skip ci]` data head.
+2. Only after that check passes, change
    `reference/usaspending_calibration.json` to `status=ready`,
    `onboardingAllowed=true`, and `obligationLedger.status=passed`. The
    validator rejects an early flip.
-5. Merge, confirm the Pages deployment, and record run/PR/deploy links in this
+3. Require the readiness commit's own CI run to pass.
+4. Merge, confirm the Pages deployment, and record run/PR/deploy links in this
    handoff and the Phase 3.1b roadmap entry.
 
-The NIH grants-scope adapter/validator change requires one more full 28-IC
-re-pull so every deterministic shard carries the new structured mechanism
-detail. Until that run validates and rebuilds rollups, NIH leaf data may show
-the corrected 708,233-record universe while NIH/root rollups still show the
-old 694,443 total. This mixed state is intentionally blocked from publication.
+The separate NIH full re-pull is complete: all 28 IC shards carry structured
+activity/mechanism detail, exact live RePORTER reconciliation passes, the
+like-for-like Data Book subset remains within 2%, and NIH/root rollups contain
+708,233 unique awards.
 
 Do not replace canonical File B dollars with File C-only totals, do not route
 events through `adapters/common.py` or `scripts/rollup.py`, and do not fabricate
@@ -122,4 +124,8 @@ monthly or FY2015–16 data.
   unknown-PA bucket (`FY2020P03`, `0000`) with no File B bucket. The adapter
   now retains that File C overlay and offsets it with an equal negative
   residual in visible `0000`, so canonical File B net remains zero. Known-PA
-  orphan buckets still fail. Attempt 5 is the next full reconciliation run.
+  orphan buckets still fail.
+- Obligation attempt 5, run `31498087792`, completed all ten fiscal-year jobs,
+  exact reconciliation, dashboard generation, and its data commit. The
+  subsequent release inspection normalized internal USAspending award links,
+  repeated all offline checks, and completed the light/dark browser gate.

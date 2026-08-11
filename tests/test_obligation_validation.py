@@ -39,6 +39,25 @@ class ObligationValidationTests(unittest.TestCase):
         finally:
             temp.cleanup()
 
+    def test_foreign_award_url_fails(self):
+        temp, root = self.fixture(100)
+        try:
+            store = root / "data" / "obligations" / "doe" / "sc" / "events"
+            rows = [normalize_event({"id": "one", "source": "file_b_residual",
+                "submissionPeriod": "FY2024P12", "federalAccount": "089-0222",
+                "programActivityCode": "0001", "programActivityName": "BES",
+                "amountCents": 100, "awardId": "", "linked": False}),
+                normalize_event({"id": "linked", "source": "file_c",
+                "submissionPeriod": "FY2024P12", "federalAccount": "089-0222",
+                "programActivityCode": "0001", "programActivityName": "BES",
+                "amountCents": 0, "awardId": "A1", "linked": True,
+                "awardUrl": "https://example.com/award/A1"})]
+            write_store(store, rows)
+            self.assertTrue(any("invalid public USAspending award URL" in e
+                                for e in validate(root, require_data=False)))
+        finally:
+            temp.cleanup()
+
 
 if __name__ == "__main__":
     unittest.main()

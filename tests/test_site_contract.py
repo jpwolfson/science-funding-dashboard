@@ -14,7 +14,8 @@ class SiteContractTests(unittest.TestCase):
     def test_obligation_namespace_and_signed_copy(self):
         for text in ("data/obligations/index.json", "renderObligationNotes",
                      "fmtSignedMoney", "Reported in submission periods",
-                     "File C is award-linked enrichment"):
+                     "File C is award-linked enrichment",
+                     "publicUSAspendingAwardUrl(flow.awardUrl)"):
             self.assertIn(text, self.html)
 
 

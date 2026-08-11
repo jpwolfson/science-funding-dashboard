@@ -150,6 +150,14 @@ function awardUrl(id) {
   }
   return `https://www.nsf.gov/awardsearch/showAward?AWD_ID=${encodeURIComponent(value)}`;
 }
+
+function publicUSAspendingAwardUrl(value) {
+  value = String(value || "").trim();
+  const internal = value.match(/^(?:https?:\/\/)?localhost(?::\d+)?\/award\/([^/?#]+)\/?/i);
+  if (internal) return `https://www.usaspending.gov/award/${encodeURIComponent(decodeURIComponent(internal[1]))}/`;
+  if (/^https:\/\/www\.usaspending\.gov\/award\//i.test(value)) return value;
+  return "";
+}
 const $app = document.getElementById("app");
 
 const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -1087,7 +1095,8 @@ function obligationFlowTables(data) {
     const tr = el("tr");
     tr.append(el("td", { text: `FY${fy}${flow.submissionPeriod ? " · " + flow.submissionPeriod : ""}` }));
     const award = el("td"), label = flow.title || flow.awardId || "Unlinked flow";
-    if (flow.awardUrl) award.append(el("a", { href: flow.awardUrl, text: label })); else award.textContent = label;
+    const flowUrl = publicUSAspendingAwardUrl(flow.awardUrl);
+    if (flowUrl) award.append(el("a", { href: flowUrl, text: label })); else award.textContent = label;
     const amount = flow.amount ?? flow.netObligations ?? flow.obligations ?? 0;
     tr.append(award, el("td", { text: flow.recipient || "Unknown recipient" }),
       el("td", { text: direction }), el("td", { class: `num ${amount < 0 ? "negative" : ""}`.trim(), text: fmtSignedMoney(amount) }));
