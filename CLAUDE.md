@@ -212,9 +212,12 @@ consequences already encoded:
         filtered+IM-total comparison inside `validate_nih.py --live`;
         (2) cosmetic: NIH-scale dollar tiles render "$23314M" — wants a
         billions formatter in the site's `fmtM`.
-- [ ] Phase 3.1 — USAspending adapter, calibrated against known truth,
-      plus one pilot agency. One Fable-led session. Do these IN ORDER —
-      the ordering is the risk control:
+- [x] Phase 3.1 — USAspending award-search adapter + calibration gate
+      (completed at its designed STOP 2026-08-11 via PR #5; reviewed by
+      Fable, verdict: correct execution, real blocker, sound diagnosis).
+      The calibration-before-onboarding ordering worked exactly as
+      intended — DOE was NOT onboarded, and the findings drove the Phase
+      3.1b redesign below.
       - **CALIBRATION STOP GATE TRIGGERED 2026-08-10 — DOE NOT ONBOARDED.**
         Core award-search adapter and fail-closed pagination checks are built;
         the Phase 2 NIH mechanism tripwire is also built (and exposed missing
@@ -231,63 +234,90 @@ consequences already encoded:
         `reference/usaspending_calibration.json`; CI prevents USAspending
         registry onboarding while status is blocked. Recommended next phase:
         redesign around File C account/PARK allocation events.
-      1. `adapters/usaspending.py` core. The hard, one-time problem is
-         semantics: USAspending records TRANSACTIONS (modifications,
-         amendments, de-obligations) layered on base awards. Decide and
-         document: award identity (one record per base award), amount
-         (current total obligation vs base action), date (base action
-         date, to match "new awards" semantics elsewhere), and the
-         awarding sub-tier/office code mapping for the directorate tier.
-         Expect undocumented API behavior; apply the data-integrity rules
-         at the top of this file (union, never delete, fail closed).
-      2. Cross-validation calibration BEFORE any new agency: query
-         USAspending for NSF and NIH units where this repo already holds
-         verified stores (start nsf/mps/dms and a mid-size NIH IC).
-         Reconcile counts/dollars per FY against our stores; characterize
-         every residual (reporting lag, scope differences) and pin
-         tolerances in a `reference/usaspending_calibration.json`. This
-         both ships the cross-validation layer for existing units (wire it
-         into CI like validate_nih) and proves the adapter's semantics
-         against ground truth before USAspending becomes any agency's
-         sole source. If reconciliation can't be brought within a
-         defensible tolerance, STOP and present findings to the owner —
-         do not onboard new agencies on uncalibrated semantics.
-      3. Pilot agency: DOE Office of Science, program offices as the
-         directorate tier. Full backfill on CI, plausibility ranges,
-         pinned external baseline (DOE budget/report figures where
-         available), rollup, site, browser verification — same release
-         bar as Phase 2 (zero warnings, invariants exact, deploy green).
-      Also fold in the Phase 2 hardening tripwire while touching
-      validators: per-FY unfiltered-total vs filtered+IM-total comparison
-      in `validate_nih.py --live`.
-- [ ] Phase 3.2+ — fan-out via the calibrated adapter. Cheap, parallel,
-      Sonnet-executed with Fable review only; batch several agencies per
-      session. Each unit = registry entries, plausibility ranges, pinned
-      baseline, CI backfill, verification sweep (store integrity,
-      invariants, browser, links), cross-validation wiring.
+- [ ] Phase 3.1b — the OBLIGATION LEDGER: File C allocation events + DOE
+      Office of Science pilot. One Fable-led session; the design decisions
+      below are OWNER-APPROVED (2026-08-11) — implement, don't relitigate.
+      **Architecture: two ledgers, both kept, clearly labeled.**
+      - AWARD ledger (exists; unchanged): NSF + NIH native-API pipelines.
+        Answers "how many new awards were made and how much was committed."
+      - OBLIGATION ledger (this phase): AAAS-account agencies. Answers
+        "how many dollars were obligated from this appropriations account,
+        when" — the ex post complement of an AAAS appropriations row.
+        Award-filtered representations are PROVEN WRONG for this (Phase
+        3.1: 36.6% under / 402% over on DOE 089-0222) — the atom is the
+        File C allocation event: award × federal account × program
+        activity × period × obligated dollars. File C rows allocate
+        dollars per row, so account- and PA-tier rollups are exact by
+        construction, and de-obligations appear as negative events —
+        terminations/clawbacks become visible, which the award ledger
+        structurally cannot show. Agencies may eventually carry BOTH views
+        (e.g. NSF award pages + an NSF R&RA account page); numbers will
+        differ because the ledgers answer different questions — label,
+        don't reconcile.
+      Ordered steps:
+      1. Store contract design (document in docs/ before coding): event
+         rows keyed by (award id, federal account, program activity,
+         submission period); append-only by reporting period with
+         de-obligations kept as negative events (the never-delete rule,
+         adapted); fiscal-year attribution by submission period; award
+         metadata (recipient, title, link id) joined from award ids for
+         top-flows tables. Ingestion source: File C via the USAspending
+         custom-account bulk download or equivalent API — verify which
+         surface is complete and paginate fail-closed per the house rules.
+      2. Aggregation flavor: dashboard.json kind "obligations" — monthly
+         obligated dollars, cumulative FY-to-date obligations (the
+         centerpiece chart: the direct ex post mirror of appropriations),
+         distinct-awards-obligated count clearly labeled as such, top
+         recipients/flows. Site branches on node kind (the provider/
+         metadata branching pattern from Phase 2).
+      3. Reconciliation gate, exact-by-construction: per-account per-FY
+         File C sums vs pinned GTAS account obligations (Phase 3.1 pinned
+         089-0222 FY2024 = $9,281,791,000). Characterize and document the
+         known small File C↔GTAS reporting gaps; pin tolerances per
+         account-FY in reference/. This replaces plausibility guesswork —
+         every fan-out account gets its baseline from GTAS mechanically.
+      4. Pilot: DOE Office of Science = account 089-0222, program
+         activities as the sub-tier (File C rows are per-PA, so PA rollups
+         are exact — this resolves the overlap that blocked award-filtered
+         program offices). Backfill FY2015-present on CI, reconcile every
+         FY against GTAS, site pages, browser verification — Phase 2
+         release bar (zero warnings, invariants exact, deploy green).
+      5. Flip reference/usaspending_calibration.json to
+         status "ready" / onboardingAllowed true ONLY after the DOE SC
+         reconciliation gate is green; the CI gate from PR #5 enforces
+         this.
+      6. Cross-validation wrap-up for the award ledger: formalize the NSF
+         count-coverage validator (award-ID match vs USAspending, 99.80%
+         proven on DMS FY2024) as a wired CI gate with the two known IAA
+         residuals documented; record dollars as intentionally
+         non-comparable (intended totals ≠ obligations to date — 81.6%
+         observed and expected); NIH external check remains the Data Book
+         (RePORTER application-years ≠ base awards, structurally).
+- [ ] Phase 3.2+ — account fan-out on the obligation ledger. Cheap,
+      parallel, Sonnet-executed with Fable review only; batch several
+      accounts per session once 3.1b's pipeline is green.
       OWNER DIRECTIVE (2026-08-11) — scope and framing:
       - Coverage matches the AAAS R&D Appropriations Dashboard
         (https://www.aaas.org/news/fy-2027-rd-appropriations-dashboard):
         this dashboard is its EX POST complement — AAAS tracks what
         Congress appropriates per account; we track obligations of those
         appropriated funds as they actually flow. Mirror AAAS's agency/
-        account structure (DOD S&T accounts, NIH, DOE SC/ARPA-E/applied
+        account structure (DOD S&T accounts, DOE SC/ARPA-E/applied
         energy, NASA science accounts, NSF, USDA ARS/NIFA, NOAA, NIST,
-        USGS, EPA S&T, VA research, DHS S&T, etc. — extract the exact
-        current list from the AAAS page, not from this parenthetical).
-      - aaas.org is proxy-blocked in the dev environment; CI has full
-        egress — extract the account list there (discover-orgs pattern)
-        and commit it under reference/.
-      - Design implication: matching appropriations accounts ex post
-        means the registry unit for these agencies is likely the
-        APPROPRIATION ACCOUNT (USAspending supports Treasury Account
-        Symbol / federal-account filters on award search), not the
-        awarding office — validate this mapping empirically in the 3.1
-        pilot (DOE SC is both an AAAS account and an awarding office, a
-        clean test of whether the two framings agree).
-      - Instrument scope: include all obligation instruments (grants,
-        cooperative agreements, contracts, IAAs) — AAAS accounts like
-        DOD RDT&E are contract-dominated, so instrument filtering would
-        break the ex post correspondence. Note per-agency caveats where
-        award-level USAspending coverage is known-incomplete (e.g.
-        classified DOD work) rather than silently under-reporting.
+        USGS, EPA S&T, VA research, DHS S&T, etc.) — extract the exact
+        current account list from the AAAS page on CI (aaas.org is
+        proxy-blocked in dev; discover-orgs pattern), map each row to
+        federal account codes, commit under reference/.
+      - Each account = registry entry + GTAS-pinned per-FY baselines
+        (mechanical, from step 3.1b.3) + CI backfill + reconciliation +
+        verification sweep (store integrity, invariants, browser, links).
+      - Instrument scope: ALL obligation instruments (grants, cooperative
+        agreements, contracts, IAAs) — DOD RDT&E is contract-dominated;
+        filtering would break the AAAS correspondence. Where USAspending
+        award-level coverage is known-incomplete (e.g. classified DOD
+        work), surface a per-account caveat rather than silently
+        under-reporting; the GTAS reconciliation gate quantifies any gap
+        per account-FY.
+      - Site: add a "by appropriations account" navigation view aligned
+        row-for-row with AAAS's dashboard, alongside the existing
+        by-agency org tree.
