@@ -294,7 +294,8 @@ consequences already encoded:
       - a scheduled freshness SLA and an automated rendered-page matrix cover
         light/dark, narrow/wide, empty/negative/out-of-range File C/net cases,
         keyboard access, public links, and console/network failures.
-- [ ] Phase 3.2b — build and review the AAAS-to-federal-account crosswalk.
+- [x] Phase 3.2b — build and review the AAAS-to-federal-account crosswalk
+      (completed 2026-08-11 as reference-only research).
       Treat the AAAS R&D Appropriations Dashboard as the scope/framing source,
       not as an unattended production registry. Commit a dated source snapshot
       and a reviewed, possibly many-to-many mapping to federal accounts; CI may
@@ -307,6 +308,15 @@ consequences already encoded:
       may run in parallel with 3.2a in a separate worktree if it touches only
       reference/crosswalk artifacts; registry integration and onboarding wait
       for the 3.2a schema/workflow contract.
+      - The dated snapshot preserves 45 AAAS grouping fields and 237 exact
+        labels from the public FY 2026 Power BI model; the reviewed crosswalk
+        classifies 185 rows as resolved, 10 as provisional, and 42 as
+        unresolved, with row-level evidence and explicit account arrays.
+      - Artifacts: `reference/aaas_rd_appropriations_2026-08-11.json`,
+        `reference/aaas_federal_account_crosswalk.{json,csv}`, and
+        `docs/aaas-federal-account-crosswalk.md`.
+      - Registry integration, onboarding, and automated drift checks remain
+        deferred until Phase 3.2a publishes its schema-v2/workflow contract.
 - [ ] Phase 3.2c — non-blocking funding-action sentinel pilot.
       Implement the signal/status/review contract in
       `docs/funding-action-sentinel.md` as two sequential goal-sized tasks:
