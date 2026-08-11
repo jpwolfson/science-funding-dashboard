@@ -239,8 +239,8 @@ consequences already encoded:
         registry onboarding while status is blocked. Recommended next phase:
         redesign around File C account/PARK allocation events.
 - [x] Phase 3.1b — obligation ledger + DOE Office of Science pilot
-      (base release completed 2026-08-11 via PRs #6 and #7; deployed to Pages;
-      post-deploy QA patch pending branch CI/merge/deployed smoke).
+      (completed 2026-08-11 via PRs #6–#9; post-deploy QA, landing-page
+      obligation summaries, and deployed Pages smoke checks passed).
       - Two ledgers remain physically separate and clearly labeled. The award
         ledger answers how many source-native awards/applications were made and
         their reported totals. The obligation ledger answers how signed dollars
@@ -263,7 +263,10 @@ consequences already encoded:
         are enforced. UI copy distinguishes File C/net from a bounded coverage
         score, scopes every current-FY tile, exposes freshness, names charts for
         assistive technology, improves light-theme contrast, and collapses the
-        180-row recipient/flow tail behind current-year summaries.
+        180-row recipient/flow tail behind current-year summaries. The landing
+        page now gives DOE obligations the same summary-tile prominence as
+        award activity while stating that the measures are separate and that
+        negative sign alone does not establish cancellation.
       - Detailed contract and release evidence:
         `docs/obligation-ledger.md`, `docs/phase-3.1b-handoff.md`.
 - [ ] Phase 3.2a — platformize before account fan-out (new release gate).

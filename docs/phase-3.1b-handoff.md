@@ -1,10 +1,10 @@
 # Phase 3.1b handoff
 
-Status: the base Phase 3.1b release is merged and deployed. A post-deploy QA
-patch has completed local implementation and validation but is not deployed
-until its branch CI, merge, and Pages smoke check pass. The historical backfill,
-exact reconciliation, award-link normalization, and calibration-ready gate are
-complete. Current live deployment:
+Status: complete. The base release, post-deploy QA patch, and landing-page
+obligation-summary correction are merged and deployed through PRs #6–#9. CI,
+desktop/mobile visual QA, and the final Pages smoke check passed. The historical
+backfill, exact reconciliation, award-link normalization, and calibration-ready
+gate are complete. Current live deployment:
 https://jpwolfson.github.io/science-funding-dashboard/?org=obligations
 
 ## What changed
@@ -104,11 +104,13 @@ synthesized for the unavailable years.
   secondary-text contrast were added. The award-ledger path remains backward
   compatible.
 
-The QA patch's remaining release steps are branch CI, merge, and a deployed
-Pages smoke check; no new data backfill is required. Phase 3.2 must begin with
-workflow platformization: the current backfill is hardcoded to DOE, is not
-scheduled, relies on a separate push-triggered deploy, and drops request/archive
-provenance at the artifact boundary. See the revised roadmap in `CLAUDE.md`.
+The Phase 3.1b release has no remaining steps. PR #8 released the QA hardening;
+PR #9 corrected the landing-page asymmetry by adding parallel DOE obligation
+summary tiles for net, gross positive, gross negative, and File C-linked award
+coverage. Phase 3.2 must begin with workflow platformization: the current
+backfill is hardcoded to DOE, is not scheduled, relies on a separate
+push-triggered deploy, and drops request/archive provenance at the artifact
+boundary. See the revised roadmap in `CLAUDE.md`.
 
 The separate NIH full re-pull is complete: all 28 IC shards carry structured
 activity/mechanism detail, exact live RePORTER reconciliation passes, the
