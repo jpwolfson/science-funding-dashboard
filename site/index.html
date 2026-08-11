@@ -38,6 +38,15 @@
     padding: 32px 16px 64px;
   }
   .wrap { max-width: 1040px; margin: 0 auto; }
+  .view-nav {
+    display: flex; gap: 18px; border-bottom: 1px solid var(--grid);
+    margin-bottom: 18px; font-size: 13px;
+  }
+  .view-nav a, .view-nav span { padding: 0 0 7px; text-decoration: none; }
+  .view-nav a:hover { text-decoration: underline; }
+  .view-nav .active {
+    color: var(--ink); font-weight: 620; border-bottom: 2px solid var(--s1);
+  }
   .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
   .breadcrumb a { color: var(--s1); text-decoration: none; }
   .breadcrumb a:hover { text-decoration: underline; }
@@ -100,6 +109,7 @@
 </head>
 <body>
 <div class="wrap">
+  <nav class="view-nav" id="viewNav" aria-label="Dashboard view"></nav>
   <nav class="breadcrumb" id="breadcrumb" aria-label="Breadcrumb"></nav>
   <h1 id="h1">Federal science funding dashboard</h1>
   <p class="sub" id="sub"></p>
@@ -291,6 +301,19 @@ function findInIndex(indexData, path) {
 
 function levelForDepth(d) { return LEVELS[Math.min(d, LEVELS.length - 1)]; }
 
+function renderViewNav(obligationRoot) {
+  const nav = document.getElementById("viewNav");
+  const views = [
+    { label: "Award dashboards", href: "index.html", active: !obligationRoot },
+    { label: "Appropriations obligations", href: "index.html?org=obligations", active: obligationRoot },
+  ];
+  for (const view of views) {
+    nav.append(view.active
+      ? el("span", { class: "active", "aria-current": "page", text: view.label })
+      : el("a", { href: view.href, text: view.label }));
+  }
+}
+
 function renderBreadcrumb(found, obligationRoot = false) {
   const nav = document.getElementById("breadcrumb");
   if (!found) { nav.remove(); return; }
@@ -390,12 +413,12 @@ function childrenCard(data) {
   $app.append(card);
 }
 
-function obligationChildrenCard(data) {
+function obligationChildrenCard(data, title = null, note = null) {
   const kids = data.children || [];
   if (!kids.length) return;
   const card = el("div", { class: "card" });
-  card.append(el("h2", { text: obligationChildrenTierTitle(data.node?.level) }));
-  card.append(el("p", { class: "note", text:
+  card.append(el("h2", { text: title || obligationChildrenTierTitle(data.node?.level) }));
+  card.append(el("p", { class: "note", text: note ||
     "Dollar columns add to the parent. Distinct linked-award counts do not: one award may receive obligations in more than one program activity." }));
   const sorted = kids.slice().sort((a, b) =>
     (b.currentFYNetObligations || 0) - (a.currentFYNetObligations || 0));
@@ -1134,6 +1157,7 @@ async function boot() {
   let orgPath = (params.get("org") || "").trim();
   if (orgPath && !/^[a-z0-9-]+(\/[a-z0-9-]+)*$/.test(orgPath)) orgPath = "";
   const obligationRoot = orgPath === "obligations" || orgPath.startsWith("obligations/");
+  renderViewNav(obligationRoot);
   const indexPath = obligationRoot ? "data/obligations/index.json" : "data/index.json";
   const indexLookupPath = obligationRoot
     ? orgPath.replace(/^obligations\/?/, "") : orgPath;
@@ -1238,6 +1262,15 @@ async function boot() {
   const windowDone = gen >= new Date(data.currentFY, 7, 1);
   tiles(data);
   if (indexData) childrenCard(data);
+  if (node.level === "root") {
+    let obligationSummary = null;
+    try { obligationSummary = await fetchJSON("data/obligations/dashboard.json"); }
+    catch (e) { obligationSummary = null; }
+    if (obligationSummary?.kind === "obligations") {
+      obligationChildrenCard(obligationSummary, "Appropriations obligation dashboards",
+        "Account-level signed obligations are shown separately from award totals because the measures are not additive or directly comparable. Each row links to that obligation ledger.");
+    }
+  }
   const renders = [];
   // Sparse/dormant units: skip both cumulative cards entirely rather than
   // feed an all-zero series into niceTicks (consistent with how sparse

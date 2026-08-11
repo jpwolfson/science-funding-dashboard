@@ -18,6 +18,13 @@ class SiteContractTests(unittest.TestCase):
                      "publicUSAspendingAwardUrl(flow.awardUrl)"):
             self.assertIn(text, self.html)
 
+    def test_obligation_ledger_is_discoverable_from_award_root(self):
+        for text in ("renderViewNav(obligationRoot)",
+                     "Appropriations obligation dashboards",
+                     "data/obligations/dashboard.json",
+                     "measures are not additive or directly comparable"):
+            self.assertIn(text, self.html)
+
 
 if __name__ == "__main__":
     unittest.main()
