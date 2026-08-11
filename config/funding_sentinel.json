@@ -1,0 +1,14 @@
+{
+ "schemaVersion": 1,
+ "financialDetector": {
+  "materialGrossNegativeCents": 2500000000,
+  "clusterGrossNegativeCents": 2500000000,
+  "clusterMinimumDistinctAwards": 5,
+  "ruleNote": "Rules prioritize gross negative File C activity for investigation. They do not classify a cancellation."
+ },
+ "episodeCorrelation": {
+  "automaticScope": "same federal account and Program Activity or award within one fiscal year",
+  "note": "Cross-year or cross-portfolio joins require an explicit sourced-event episode key rather than an amount-only inference."
+ },
+ "sources": []
+}

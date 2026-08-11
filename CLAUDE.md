@@ -307,11 +307,15 @@ consequences already encoded:
 - [ ] Phase 3.2c — non-blocking funding-action sentinel pilot.
       Implement the signal/status/review contract in
       `docs/funding-action-sentinel.md` as two sequential goal-sized tasks:
-      - 3.2c-1 core: generic financial-signal, sourced-event, episode, and
+      - [x] 3.2c-1 core (completed 2026-08-11): generic financial-signal, sourced-event, episode, and
         optional-review stores; gross-negative/cluster detection; stable ledger
         joins; public unreviewed/confirmed/reviewed/restored states; stale-source
-        behavior; validation, site rendering, and tests;
-      - 3.2c-2 source pilots: NSF's structured termination list and a DOE
+        behavior; validation, site rendering, and tests. The independent weekly
+        workflow never gates the award or obligation pipelines. Its first
+        committed build contains nine File C observations correlated into eight
+        unreviewed episodes; File B residuals are structurally excluded. See
+        `docs/phase-3.2c1-handoff.md`.
+      - [ ] 3.2c-2 source pilots: NSF's structured termination list and a DOE
         portfolio-action example, including award matching where supported and
         separate announced value, observed deobligation, eliminated future
         value, and restoration fields.

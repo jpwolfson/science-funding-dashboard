@@ -47,7 +47,7 @@ class SiteContractTests(unittest.TestCase):
         self.assertIn("Largest award-attributed gross flows", self.html)
 
     def test_obligation_ledger_is_discoverable_from_award_root(self):
-        for text in ("renderViewNav(obligationRoot)",
+        for text in ("renderViewNav(obligationRoot, sentinelRoot)",
                      "Appropriations obligation dashboards",
                      "data/obligations/dashboard.json",
                      "measures are not additive or directly comparable"):
@@ -71,6 +71,31 @@ class SiteContractTests(unittest.TestCase):
         self.assertIn('f.svg.append(el("path"', chart)
         self.assertIn('f.svg.addEventListener("pointermove"', chart)
         self.assertNotIn("const bar =", chart)
+
+    def test_sentinel_is_discoverable_and_has_a_hard_schema_gate(self):
+        for text in ('label: "Funding-action sentinel"',
+                     'href: "index.html?org=sentinel"',
+                     'if (kind === "sentinel")',
+                     "data.schemaVersion !== 1",
+                     "renderSentinel(data)"):
+            self.assertIn(text, self.html)
+
+    def test_sentinel_copy_keeps_evidence_and_states_separate(self):
+        for text in ("A signal is not a cancellation",
+                     "Unreviewed signal", "Source-confirmed event",
+                     "Reviewed finding", "Superseded", "Restored",
+                     "not overdue", "gross negative activity",
+                     "net activity", "Attributed source event",
+                     "Optional review finding"):
+            self.assertIn(text, self.html)
+
+    def test_sentinel_publishes_limits_costs_and_source_staleness(self):
+        for text in ("Coverage and interpretation limits",
+                     "Estimated pilot burden",
+                     "Replace them with measured figures after eight weeks",
+                     "retains its last accepted records",
+                     "Other dashboards and deployments continue independently"):
+            self.assertIn(text, self.html)
 
 
 if __name__ == "__main__":

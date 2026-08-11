@@ -9,6 +9,8 @@ on:
       - "tests/**"
       - "config/orgs.json"
       - "config/obligation_accounts.json"
+      - "config/funding_sentinel.json"
+      - "data/sentinel/**"
       - "reference/nih_databook_baseline.json"
       - "reference/usaspending_calibration.json"
       - "reference/*_obligation_baseline.json"
@@ -34,6 +36,7 @@ jobs:
           python -m compileall -q adapters scripts tests
           python -m json.tool config/orgs.json >/dev/null
           python -m json.tool config/obligation_accounts.json >/dev/null
+          python -m json.tool config/funding_sentinel.json >/dev/null
           python -m json.tool reference/nih_databook_baseline.json >/dev/null
           python -m json.tool reference/usaspending_calibration.json >/dev/null
           python -m json.tool reference/doe_sc_obligation_baseline.json >/dev/null
@@ -43,5 +46,9 @@ jobs:
         run: python scripts/validate_usaspending_calibration.py
       - name: Obligation ledger contract (data backfills in its dedicated workflow)
         run: python scripts/validate_obligations.py --allow-empty
+      - name: Funding-action sentinel core contract
+        run: python scripts/validate_funding_sentinel.py
       - name: Rendered obligation page matrix
         run: python scripts/smoke_obligation_pages.py
+      - name: Rendered funding-action sentinel matrix
+        run: python scripts/smoke_sentinel_page.py
