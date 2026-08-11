@@ -1,10 +1,11 @@
 # Funding-action sentinel and optional review process
 
-Status: Phase 3.2c-1 core implemented 2026-08-11. The signed obligation ledger
-now supplies gross-negative File C observations to a separate, versioned
-sentinel store and public page. Phase 3.2c-2 will add the first structured NSF
-and DOE sourced-event adapters. The core does not classify financial signals as
-cancellations and does not maintain a required review queue.
+Status: Phase 3.2c completed 2026-08-11. The signed obligation ledger supplies
+gross-negative File C observations to a separate, versioned sentinel store and
+public page. The first authoritative-source adapters ingest NSF's structured
+terminated-awards CSV and DOE's October 2025 portfolio announcement. The
+sentinel does not classify financial signals as cancellations and does not
+maintain a required review queue.
 
 ## Purpose
 
@@ -244,3 +245,30 @@ maintenance signal, not a review SLA or publication gate.
   cancellation coverage.
 - The site's current-coverage disclosure is generated from the obligation and
   source registries and fails validation if it becomes stale or is omitted.
+
+## Phase 3.2c-2 source-pilot outcome
+
+The NSF adapter accepts only the official CSV's bounded schema: award ID,
+directorate, recipient, title, source-listed obligated amount, and export date.
+Its first accepted June 5, 2025 export contains 1,667 unique award identifiers.
+The source does not provide award-specific termination dates or reasons, so the
+normalized records do not invent them. Source-listed prior obligations remain
+separate from announced value and observed deobligation.
+
+The DOE adapter watches only the official October 1, 2025 announcement and
+fails closed if its bounded facts drift. The normalized event is an attributed
+announcement of termination preserving “approximately $7.56 billion,” 321
+awards, 223 projects, and Office of Clean Energy Demonstrations (OCED), Energy
+Efficiency and Renewable Energy (EERE), Grid Deployment (GDO), Manufacturing
+and Energy Supply Chains (MESC), Advanced Research Projects Agency-Energy
+(ARPA-E), and Fossil Energy (FE). The source publishes no award identifiers, so
+the adapter makes no award-level match. The announced amount is not populated
+as an observed deobligation, eliminated future value, or restoration.
+
+An announcement does not stand in for a later appeal, closeout, litigation,
+deobligation, or restoration. Those lifecycle types normalize to separate,
+stable sourced-event records with their own dates, sources, and amount
+semantics. The sentinel workflow fetches sources before rebuilding, but a
+source error retains the last accepted hash and records while publication of
+unrelated award and obligation data continues. No financial-account expansion
+or manual review was a launch dependency.

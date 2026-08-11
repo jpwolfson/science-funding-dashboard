@@ -22,11 +22,15 @@ technical prerequisite does not authorize automatic account onboarding or
 production remapping. See
 [`docs/aaas-federal-account-crosswalk.md`](docs/aaas-federal-account-crosswalk.md).
 
-Phase 3.2c-1 implements a non-blocking funding-action sentinel that surfaces
+Phase 3.2c implements a non-blocking funding-action sentinel that surfaces
 material gross-negative File C activity without calling it a cancellation.
 Its versioned financial-observation, sourced-event, optional-review, and episode
 stores publish durable unreviewed/confirmed/reviewed/superseded/restored states.
-The structured NSF and DOE source pilots remain scoped to Phase 3.2c-2. See
+The completed source pilot ingests NSF's structured terminated-awards CSV and
+DOE's October 2025 portfolio announcement. The DOE event preserves the source's
+“approximately $7.56 billion,” 321 awards, 223 projects, and six named offices
+while leaving announcement, appeal, closeout, litigation, deobligation, and
+restoration as separate records. See
 [`docs/funding-action-sentinel.md`](docs/funding-action-sentinel.md) for the
 labeling, review, limitation, and maintenance-cost contract.
 
@@ -53,8 +57,9 @@ labeling, review, limitation, and maintenance-cost contract.
   `data/obligations/` — a physically separate appropriation-obligation ledger.
   Canonical dollars come from File B reporting-period deltas; File C provides
   award-linked recipient/flow detail and the residual remains visible.
-- `config/funding_sentinel.json`, `adapters/funding_sentinel.py`, and
-  `data/sentinel/` — the separate funding-action signal/status layer. The
+- `config/funding_sentinel.json`, `adapters/funding_sentinel.py`,
+  `adapters/funding_source_adapters.py`, `scripts/update_funding_sources.py`,
+  and `data/sentinel/` — the separate funding-action signal/status layer. The
   detector reads gross-negative File C components, excludes File B residuals,
   and joins every signal back to stable obligation event IDs.
 - `site/index.html` — the single static page that renders any node
@@ -81,9 +86,9 @@ labeling, review, limitation, and maintenance-cost contract.
 - `docs/aaas-federal-account-crosswalk.md` — Phase 3.2b source provenance,
   classification rules, many-to-many review results, evidence model, and the
   reviewed account-onboarding boundary.
-- `docs/funding-action-sentinel.md` and `docs/phase-3.2c1-handoff.md` — the
-  sentinel contract, implemented core, boundaries of automation, source-pilot
-  handoff, and estimated operating burden.
+- `docs/funding-action-sentinel.md`, `docs/phase-3.2c1-handoff.md`, and
+  `docs/phase-3.2c2-handoff.md` — the sentinel contract, boundaries of
+  automation, source-pilot semantics, and release evidence.
 
 ## NIH data semantics
 

@@ -125,7 +125,25 @@ def validate(repo=REPO, require_data=True):
             if event.get("source") != "file_c":
                 errors.append(f"{prefix}: File B residual {event_id} cannot trigger a signal")
 
-    source_ids = {row.get("id") for row in config.get("sources", [])}
+    registered_sources = config.get("sources", [])
+    source_ids = {row.get("id") for row in registered_sources}
+    if len(source_ids) != len(registered_sources):
+        errors.append("funding source registry contains duplicate IDs")
+    for source in registered_sources:
+        prefix = source.get("id", "funding source")
+        if not source.get("adapter"):
+            errors.append(f"{prefix}: source adapter is missing")
+        if not re.fullmatch(r"https://[^\s]+", str(source.get("url", ""))):
+            errors.append(f"{prefix}: source URL must be public HTTPS")
+        if not isinstance(source.get("freshnessMaxDays"), int) or source.get(
+                "freshnessMaxDays", 0) <= 0:
+            errors.append(f"{prefix}: freshnessMaxDays must be positive")
+    status_ids = {row.get("id") for row in sources}
+    if require_data and source_ids - status_ids:
+        errors.append(
+            f"registered sources lack a first attempted snapshot: "
+            f"{sorted(source_ids - status_ids)}"
+        )
     expected_sources = apply_source_freshness(
         sources, config.get("sources", []), generated
     )
@@ -140,6 +158,14 @@ def validate(repo=REPO, require_data=True):
         if status.get("lastAcceptedSha256") is not None and not SHA256_RE.fullmatch(
                 str(status.get("lastAcceptedSha256"))):
             errors.append(f"{prefix}: invalid last accepted source SHA-256")
+        history = status.get("snapshotHistory") or []
+        if status.get("lastAcceptedSha256") and (
+                not history or history[-1].get("sha256") !=
+                status.get("lastAcceptedSha256")):
+            errors.append(f"{prefix}: accepted snapshot history is missing or stale")
+        if history and any(not SHA256_RE.fullmatch(str(row.get("sha256", "")))
+                           for row in history):
+            errors.append(f"{prefix}: snapshot history contains an invalid SHA-256")
         if status.get("status") in {"stale", "error"} and status.get("lastAcceptedAt"):
             accepted = set(status.get("acceptedEventIds") or [])
             retained = {event["id"] for event in events
@@ -167,6 +193,54 @@ def validate(repo=REPO, require_data=True):
         for field in SEPARATE_AMOUNT_FIELDS:
             if event.get(field) is not None and not isinstance(event[field], int):
                 errors.append(f"{prefix}: {field} must be exact integer cents")
+        if (event.get("announcedAffectedValueQualifier") is not None and
+                event.get("announcedAffectedValueCents") is None):
+            errors.append(
+                f"{prefix}: announced amount qualifier lacks an announced amount"
+            )
+        for field in ("announcedAwardCount", "announcedProjectCount"):
+            if event.get(field) is not None and (
+                    not isinstance(event[field], int) or event[field] < 0):
+                errors.append(f"{prefix}: {field} must be a nonnegative integer")
+        award_ids = event.get("awardIds") or []
+        if (not isinstance(award_ids, list) or
+                len(award_ids) != len(set(award_ids)) or
+                any(not isinstance(value, str) or not value for value in award_ids)):
+            errors.append(f"{prefix}: awardIds must be unique nonempty strings")
+        source_status = next(
+            (row for row in sources if row.get("id") == event.get("sourceId")),
+            None,
+        )
+        if (event.get("active", True) and source_status and
+                source_status.get("lastAcceptedSha256") and
+                event.get("sourceSha256") != source_status["lastAcceptedSha256"]):
+            errors.append(f"{prefix}: active event does not match last accepted source")
+
+    active_doe = [row for row in events if row.get("active", True) and
+                  row.get("sourceId") == "doe-october-2025-portfolio-action"]
+    if "doe-october-2025-portfolio-action" in source_ids and active_doe:
+        if len(active_doe) != 1:
+            errors.append("DOE October 2025 source must contain one announcement event")
+        else:
+            event = active_doe[0]
+            expected_offices = next(
+                row["expectedOffices"] for row in registered_sources
+                if row["id"] == "doe-october-2025-portfolio-action"
+            )
+            if (event.get("eventType"), event.get("announcedAction")) != (
+                    "announcement", "termination"):
+                errors.append("DOE October 2025 action must remain a termination announcement")
+            if event.get("announcedAffectedValueDisplay") != "approximately $7.56 billion":
+                errors.append("DOE October 2025 amount qualifier or source amount changed")
+            if (event.get("announcedAwardCount"),
+                    event.get("announcedProjectCount")) != (321, 223):
+                errors.append("DOE October 2025 award/project counts changed")
+            if event.get("namedOffices") != expected_offices:
+                errors.append("DOE October 2025 six-office attribution changed")
+            for field in ("observedDeobligationCents", "eliminatedFutureValueCents",
+                          "restoredValueCents"):
+                if event.get(field) is not None:
+                    errors.append(f"DOE announcement cannot populate {field}")
 
     known_episode_ids = {row.get("id") for row in episodes}
     for finding in findings:

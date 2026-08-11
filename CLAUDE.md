@@ -315,7 +315,8 @@ consequences already encoded:
         remains reference-only pending reviewed account onboarding. It does not
         authorize automatic registry onboarding, production remapping, workflow
         changes, or automated drift enforcement.
-- [ ] Phase 3.2c — non-blocking funding-action sentinel pilot.
+- [x] Phase 3.2c — non-blocking funding-action sentinel pilot (completed
+      2026-08-11).
       Implement the signal/status/review contract in
       `docs/funding-action-sentinel.md` as two sequential goal-sized tasks:
       - [x] 3.2c-1 core (completed 2026-08-11): generic financial-signal, sourced-event, episode, and
@@ -326,10 +327,17 @@ consequences already encoded:
         committed build contains nine File C observations correlated into eight
         unreviewed episodes; File B residuals are structurally excluded. See
         `docs/phase-3.2c1-handoff.md`.
-      - [ ] 3.2c-2 source pilots: NSF's structured termination list and a DOE
-        portfolio-action example, including award matching where supported and
-        separate announced value, observed deobligation, eliminated future
-        value, and restoration fields.
+      - [x] 3.2c-2 source pilots (completed 2026-08-11): fail-closed adapters
+        fetch, validate, hash, and retain last-good snapshots for NSF's
+        structured terminated-awards CSV and DOE's October 2025 portfolio
+        announcement. The accepted NSF export has 1,667 identifier-backed
+        award records; the DOE event preserves “approximately $7.56 billion,”
+        321 awards, 223 projects, and the named OCED, EERE, GDO, MESC, ARPA-E,
+        and FE offices without inventing award IDs. Announcement, appeal,
+        closeout, litigation, deobligation, and restoration are separate event
+        types, and the five amount semantics stay separate. Source failure is
+        a publishable error/last-good state. No financial account was added and
+        no review was required. See `docs/phase-3.2c2-handoff.md`.
       Financial observations, source-confirmed status events, and optional
       review findings remain separate. Unreviewed signals are a durable public
       state: no data pull, rollup, validation job, or deploy may wait for a human
