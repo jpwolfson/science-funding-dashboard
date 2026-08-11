@@ -33,6 +33,29 @@ the scarce resource; wall-clock time and GitHub Actions minutes are not.
      A zero-warning run is the release bar.
    - When counts come up short in a systematic pattern, treat the pattern
      as diagnostic (exactly-one-short-per-window ⇒ pagination offset bug).
+5. **Reader review — part of every phase release bar.** Distinct from the
+   mechanical browser matrix (which verifies rendering, not
+   communication): before release, a reviewer with NO build context — a
+   fresh agent given only rendered page screenshots, or the owner —
+   answers in writing: What would a first-time visitor conclude from each
+   page? What is the most misleading possible reading? Does any label,
+   chart form, or juxtaposition imply more than the data supports?
+   Findings gate release like any other check. Rationale: every human
+   steer to date (sentinel coverage disclosure, obligation chart form,
+   presentation logic) has been of exactly this kind — mechanical QA
+   passed while a human-obvious reading problem shipped.
+6. **Decision layers.** The owner operates at the product/editorial
+   layer; agents own engineering and build decisions outright — do not
+   ask permission for implementation choices, and do not relitigate
+   decisions recorded in this file. Escalate to the owner ONLY:
+   (a) measure semantics and editorial framing — what a published number
+   or label claims to be; (b) public-claim risk — anything a reader
+   could cite as an accusation or conclusion, sentinel language
+   especially (owner sign-off is the standing norm for sentinel-facing
+   language, per the PR #15 precedent); (c) scope changes, recurring
+   spend, or new external dependencies; (d) irreversible data or
+   published-history changes. Escalations arrive as short option memos
+   with a recommendation, never as open-ended questions.
 
 ## NSF Award Search API defects (empirically confirmed 2026-08)
 
