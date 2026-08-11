@@ -21,7 +21,7 @@ class SiteContractTests(unittest.TestCase):
     def test_obligation_copy_identifies_time_and_ratio_scopes(self):
         for text in ("File C / net", "File B − File C residual",
                      "submissionPeriodDisplay(asOf)",
-                     "Distinct linked awards, FY${data.currentFY} to date",
+                     "Distinct File C-linked awards, FY${data.currentFY} to date (not new awards)",
                      "Positive ledger entries, FY${data.currentFY} to date",
                      "Negative ledger entries, FY${data.currentFY} to date",
                      "negative reconciliation residuals",
@@ -44,6 +44,16 @@ class SiteContractTests(unittest.TestCase):
                      "Appropriations obligation dashboards",
                      "data/obligations/dashboard.json",
                      "measures are not additive or directly comparable"):
+            self.assertIn(text, self.html)
+
+    def test_award_root_has_parallel_obligation_summary_tiles(self):
+        for text in ('heading: "Award activity"',
+                     'heading: `${obligationScope} obligations`',
+                     "obligationTiles(obligationSummary",
+                     "compact: true",
+                     "not additive to, the award totals above",
+                     "not new awards",
+                     "sign alone does not establish a cancellation"):
             self.assertIn(text, self.html)
 
 

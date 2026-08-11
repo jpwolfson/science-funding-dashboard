@@ -62,6 +62,11 @@
     color: var(--ink-2); font-size: 13.5px;
   }
   .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-top: 24px; }
+  .summary-group { margin-top: 24px; }
+  .summary-group + .summary-group { margin-top: 20px; }
+  .summary-group h2 { font-size: 16px; font-weight: 620; }
+  .summary-group .note { color: var(--ink-2); font-size: 13px; margin-top: 2px; max-width: 78ch; }
+  .summary-group .tiles { margin-top: 8px; }
   .tile { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
   .tile .label { color: var(--ink-2); font-size: 13px; }
   .tile .value { font-size: 30px; font-weight: 600; margin-top: 2px; }
@@ -570,7 +575,21 @@ function renderCsvNote(level, path, data) {
 }
 
 // ---------- tiles ----------
-function tiles(data) {
+function appendTileGroup(row, { id = "", heading = "", note = "" } = {}) {
+  if (!heading) {
+    $app.append(row);
+    return;
+  }
+  const section = el("section", { class: "summary-group" });
+  const title = el("h2", { id, text: heading });
+  if (id) section.setAttribute("aria-labelledby", id);
+  section.append(title);
+  if (note) section.append(el("p", { class: "note", text: note }));
+  section.append(row);
+  $app.append(section);
+}
+
+function tiles(data, options = {}) {
   // Units with no current-FY awards (dormant offices) still get the tile
   // row, showing zeros rather than silently omitting the summary.
   const cur = data.fiscalYears.find(f => f.fy === data.currentFY)
@@ -605,7 +624,7 @@ function tiles(data) {
     }
     row.append(tile);
   }
-  $app.append(row);
+  appendTileGroup(row, options);
 }
 
 // ---------- chart 1: monthly line ----------
@@ -958,19 +977,22 @@ function signedYAxis(svg, f, domain, fmt) {
   return y;
 }
 
-function obligationTiles(data) {
+function obligationTiles(data, options = {}) {
   const cur = (data.fiscalYears || []).find(f => f.fy === data.currentFY) || {
     netObligations: 0, grossObligations: 0, deobligations: 0, distinctLinkedAwards: 0,
   };
-  const specs = [
+  const primarySpecs = [
     [ `Net obligations, FY${data.currentFY} to date`, fmtSignedMoney(cur.netObligations) ],
-    [ `Distinct linked awards, FY${data.currentFY} to date`, fmtN(cur.distinctLinkedAwards || 0) ],
+    [ `Positive ledger entries, FY${data.currentFY} to date`, fmtSignedMoney(cur.grossObligations || 0) ],
+    [ `Negative ledger entries, FY${data.currentFY} to date`, fmtSignedMoney(cur.deobligations || 0) ],
+    [ `Distinct File C-linked awards, FY${data.currentFY} to date (not new awards)`, fmtN(cur.distinctLinkedAwards || 0) ],
+  ];
+  const reconciliationSpecs = [
     [ `File C portion, FY${data.currentFY} to date (${fmtCoverage(cur.fileCCoverage ?? (cur.netObligations ? cur.awardLinkedObligations / cur.netObligations : null))} of net)`,
       fmtSignedMoney(cur.awardLinkedObligations || 0) ],
     [ `File B − File C residual, FY${data.currentFY} to date`, fmtSignedMoney(cur.residualObligations || 0) ],
-    [ `Positive ledger entries, FY${data.currentFY} to date`, fmtSignedMoney(cur.grossObligations || 0) ],
-    [ `Negative ledger entries, FY${data.currentFY} to date`, fmtSignedMoney(cur.deobligations || 0) ],
   ];
+  const specs = options.compact ? primarySpecs : [...primarySpecs, ...reconciliationSpecs];
   const row = el("div", { class: "tiles" });
   for (const [label, value] of specs) {
     const tile = el("div", { class: "tile" });
@@ -978,7 +1000,7 @@ function obligationTiles(data) {
       el("div", { class: "value", text: value }));
     row.append(tile);
   }
-  $app.append(row);
+  appendTileGroup(row, options);
 }
 
 function obligationCumulativeChart(data) {
@@ -1348,18 +1370,33 @@ async function boot() {
     return;
   }
   const windowDone = gen >= new Date(data.currentFY, 7, 1);
-  tiles(data);
-  if (indexData) childrenCard(data);
+  let obligationSummary = null;
   if (node.level === "root") {
-    let obligationSummary = null;
     try { obligationSummary = await fetchJSON("data/obligations/dashboard.json"); }
     catch (e) { obligationSummary = null; }
-    if (obligationSummary?.kind === "obligations") {
-      const obligationGenerated = new Date(obligationSummary.generated + "T12:00:00");
-      const obligationAsOf = obligationSummary.asOfPeriod || "latest available period";
-      obligationChildrenCard(obligationSummary, "Appropriations obligation dashboards",
-        `Account-level signed obligations are separate from award totals because the measures are not additive or directly comparable. Data through ${submissionPeriodDisplay(obligationAsOf)}; updated ${obligationGenerated.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}.`);
-    }
+  }
+  tiles(data, node.level === "root" ? {
+    id: "award-summary-heading",
+    heading: "Award activity",
+  } : {});
+  if (obligationSummary?.kind === "obligations") {
+    const obligationGenerated = new Date(obligationSummary.generated + "T12:00:00");
+    const obligationAsOf = obligationSummary.asOfPeriod || "latest available period";
+    const obligationScope = obligationSummary.children?.length === 1
+      ? obligationSummary.children[0].name : "Appropriations";
+    obligationTiles(obligationSummary, {
+      id: "obligation-summary-heading",
+      heading: `${obligationScope} obligations`,
+      note: `Signed account-ledger measures through ${submissionPeriodDisplay(obligationAsOf)}; updated ${obligationGenerated.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}. They are separate from, and not additive to, the award totals above. Negative entries can include routine corrections or reductions; sign alone does not establish a cancellation.`,
+      compact: true,
+    });
+  }
+  if (indexData) childrenCard(data);
+  if (obligationSummary?.kind === "obligations") {
+    const obligationGenerated = new Date(obligationSummary.generated + "T12:00:00");
+    const obligationAsOf = obligationSummary.asOfPeriod || "latest available period";
+    obligationChildrenCard(obligationSummary, "Appropriations obligation dashboards",
+      `Account-level signed obligations are separate from award totals because the measures are not additive or directly comparable. Data through ${submissionPeriodDisplay(obligationAsOf)}; updated ${obligationGenerated.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}.`);
   }
   const renders = [];
   // Sparse/dormant units: skip both cumulative cards entirely rather than
