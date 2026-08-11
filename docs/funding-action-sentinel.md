@@ -1,9 +1,10 @@
 # Funding-action sentinel and optional review process
 
-Status: design contract for Phase 3.2c. No funding-action sentinel is
-implemented yet. The signed obligation ledger supplies some of its future
-financial inputs, but it does not classify cancellations or maintain a review
-queue.
+Status: Phase 3.2c-1 core implemented 2026-08-11. The signed obligation ledger
+now supplies gross-negative File C observations to a separate, versioned
+sentinel store and public page. Phase 3.2c-2 will add the first structured NSF
+and DOE sourced-event adapters. The core does not classify financial signals as
+cancellations and does not maintain a required review queue.
 
 ## Purpose
 

@@ -111,6 +111,19 @@
   .notes { margin-top: 28px; color: var(--ink-2); font-size: 13.5px; max-width: 82ch; }
   .notes h2 { font-size: 15px; color: var(--ink); margin-bottom: 6px; }
   .notes li { margin: 6px 0 6px 18px; }
+  .state {
+    display: inline-block; padding: 2px 7px; margin-left: 8px;
+    border: 1px solid var(--border); border-radius: 999px;
+    color: var(--ink-2); font-size: 11px; font-weight: 620;
+    vertical-align: 2px;
+  }
+  .state.confirmed, .state.reviewed { border-color: var(--s1); }
+  .state.restored { border-color: var(--good); color: var(--good); }
+  .state.superseded { color: var(--muted); }
+  .sentinel-facts { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 10px; font-size: 13px; }
+  .sentinel-facts strong { font-variant-numeric: tabular-nums; }
+  .sentinel-event { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--grid); font-size: 13px; }
+  .sentinel-event p + p { margin-top: 3px; }
   a { color: var(--s1); }
   .axis-text { fill: var(--muted); font-size: 11.5px; }
   .dlabel { fill: var(--ink-2); font-size: 12px; font-weight: 550; }
@@ -341,11 +354,12 @@ function findInIndex(indexData, path) {
 
 function levelForDepth(d) { return LEVELS[Math.min(d, LEVELS.length - 1)]; }
 
-function renderViewNav(obligationRoot) {
+function renderViewNav(obligationRoot, sentinelRoot = false) {
   const nav = document.getElementById("viewNav");
   const views = [
-    { label: "Award dashboards", href: "index.html", active: !obligationRoot },
+    { label: "Award dashboards", href: "index.html", active: !obligationRoot && !sentinelRoot },
     { label: "Appropriations obligations", href: "index.html?org=obligations", active: obligationRoot },
+    { label: "Funding-action sentinel", href: "index.html?org=sentinel", active: sentinelRoot },
   ];
   for (const view of views) {
     nav.append(view.active
@@ -1282,6 +1296,151 @@ function renderObligationNotes(data) {
   notes.append(list);
 }
 
+// ---------- funding-action sentinel ----------
+const SENTINEL_STATE_LABELS = {
+  "unreviewed-signal": "Unreviewed signal",
+  "source-confirmed-event": "Source-confirmed event",
+  "reviewed-finding": "Reviewed finding",
+  "superseded": "Superseded",
+  "restored": "Restored",
+};
+
+const sentinelStateClass = state => ({
+  "source-confirmed-event": "confirmed",
+  "reviewed-finding": "reviewed",
+  "superseded": "superseded",
+  "restored": "restored",
+}[state] || "unreviewed");
+
+const fmtCents = value => fmtSignedMoney(Number(value || 0) / 100);
+
+function sentinelTiles(data) {
+  const summary = data.summary || {}, states = summary.stateCounts || {};
+  const rows = [
+    ["Episodes", summary.episodeCount || 0],
+    ["Unreviewed signals", states["unreviewed-signal"] || 0],
+    ["Source-confirmed", states["source-confirmed-event"] || 0],
+    ["Reviewed / restored", (states["reviewed-finding"] || 0) + (states.restored || 0)],
+  ];
+  const group = el("section", { class: "summary-group", "aria-labelledby": "sentinel-summary-heading" });
+  group.append(el("h2", { id: "sentinel-summary-heading", text: "Episode status" }),
+    el("p", { class: "note", text: "States describe the evidence currently attached to an episode; an unreviewed state is durable and has no deadline." }));
+  const tiles = el("div", { class: "tiles" });
+  rows.forEach(([label, value]) => tiles.append(el("div", { class: "tile" },
+    el("div", { class: "label", text: label }),
+    el("div", { class: "value", text: fmtN(value) }))));
+  group.append(tiles); $app.append(group);
+}
+
+function sentinelSourceCard(data) {
+  const card = el("div", { class: "card" });
+  card.append(el("h2", { text: "Authoritative source freshness" }));
+  const statuses = data.sourceStatuses || [];
+  if (!statuses.length) {
+    card.append(el("p", { class: "note", text: "No authoritative source pilot is registered in the 3.2c-1 core. The first structured NSF and DOE source adapters are scoped to 3.2c-2; financial signals remain available meanwhile." }));
+  } else {
+    const table = el("table"), head = el("tr");
+    ["Source", "Status", "Last accepted", "Last attempt"].forEach(text =>
+      head.append(el("th", { text })));
+    table.append(head);
+    statuses.forEach(source => table.append(el("tr", {},
+      el("td", { text: source.name || source.id }),
+      el("td", { text: source.status }),
+      el("td", { text: source.lastAcceptedAt || "No accepted snapshot" }),
+      el("td", { text: source.lastAttemptAt || "Not attempted" }))));
+    card.append(table);
+    if (statuses.some(source => source.status !== "current"))
+      card.append(el("p", { class: "note", text: "A stale or failed source retains its last accepted records. Other dashboards and deployments continue independently." }));
+  }
+  $app.append(card);
+}
+
+function sentinelEpisodeCard(episode) {
+  const card = el("article", { class: "card" });
+  const heading = el("h2", { text: episode.title || "Funding-action episode" });
+  heading.append(el("span", { class: `state ${sentinelStateClass(episode.state)}`,
+    text: SENTINEL_STATE_LABELS[episode.state] || episode.state }));
+  card.append(heading);
+  const observed = episode.firstObserved === episode.lastObserved
+    ? episode.firstObserved : `${episode.firstObserved} through ${episode.lastObserved}`;
+  const age = episode.state === "unreviewed-signal"
+    ? ` · unreviewed for ${fmtN(episode.unreviewedAgeDays || 0)} days (not overdue)` : "";
+  card.append(el("p", { class: "note", text: `Observed ${observed || "date unavailable"}${age}` }));
+  const facts = el("div", { class: "sentinel-facts" });
+  facts.append(
+    el("span", {}, el("strong", { text: fmtCents(episode.grossNegativeCents) }), document.createTextNode(" gross negative activity")),
+    el("span", {}, el("strong", { text: fmtCents(episode.netActivityCents) }), document.createTextNode(" net activity")),
+    el("span", {}, el("strong", { text: fmtN((episode.awardIds || []).length) }), document.createTextNode(" affected award IDs")),
+  );
+  card.append(facts);
+  (episode.financialObservations || []).forEach(observation => {
+    const section = el("div", { class: "sentinel-event" });
+    const rules = (observation.ruleIds || []).map(rule => rule === "portfolio-cluster"
+      ? "portfolio cluster rule" : "material gross-negative rule").join(" + ");
+    section.append(el("p", {}, el("strong", { text: `${observation.submissionPeriod}: ` }),
+      document.createTextNode(`${rules}; ${fmtCents(observation.grossNegativeCents)} gross negative and ${fmtCents(observation.netActivityCents)} net activity.`)));
+    section.append(el("p", { class: "note", text: observation.classificationNote }));
+    const publicUrl = (observation.awardUrls || []).find(publicUSAspendingAwardUrl);
+    if (publicUrl) section.append(el("p", {}, el("a", {
+      href: publicUSAspendingAwardUrl(publicUrl), text: "Open a linked USAspending award",
+    })));
+    card.append(section);
+  });
+  (episode.sourcedEvents || []).forEach(event => {
+    const section = el("div", { class: "sentinel-event" });
+    const label = `${event.eventType || "status event"}${event.effectiveDate ? ` effective ${event.effectiveDate}` : ""}`;
+    section.append(el("p", {}, el("strong", { text: "Attributed source event: " }),
+      el("a", { href: event.sourceUrl, text: event.sourceTitle || label })));
+    if (event.statedReason) section.append(el("p", { class: "note", text: event.statedReason }));
+    const amounts = [
+      ["Announced affected value", event.announcedAffectedValueCents],
+      ["Observed deobligation", event.observedDeobligationCents],
+      ["Eliminated future value", event.eliminatedFutureValueCents],
+      ["Restored value", event.restoredValueCents],
+    ].filter(([, value]) => value != null);
+    if (amounts.length) section.append(el("p", { class: "note", text: amounts.map(([name, value]) => `${name}: ${fmtCents(value)}`).join(" · ") }));
+    card.append(section);
+  });
+  (episode.reviewFindings || []).forEach(finding => {
+    const section = el("div", { class: "sentinel-event" });
+    section.append(el("p", {}, el("strong", { text: "Optional review finding: " }),
+      document.createTextNode(finding.finding)),
+      el("p", { class: "note", text: finding.summary || "No additional reviewer summary." }));
+    card.append(section);
+  });
+  $app.append(card);
+}
+
+function renderSentinelNotes(data) {
+  const notes = document.getElementById("notes");
+  notes.replaceChildren(el("h2", { text: "Coverage and interpretation limits" }));
+  const limits = el("ul");
+  (data.limitations || []).forEach(item => {
+    const li = el("li");
+    li.append(el("strong", { text: `${item.title}. ` }), document.createTextNode(item.text));
+    limits.append(li);
+  });
+  notes.append(limits, el("h2", { text: "Estimated pilot burden" }));
+  const table = el("table"), head = el("tr");
+  ["Activity", "Initial", "Recurring"].forEach(text => head.append(el("th", { text })));
+  table.append(head);
+  (data.maintenanceEstimates || []).forEach(row => table.append(el("tr", {},
+    el("td", { text: row.activity }), el("td", { text: row.initial }),
+    el("td", { text: row.recurring }))));
+  notes.append(table, el("p", { class: "stamp", text: "These are planning ranges. Replace them with measured figures after eight weeks without delaying publication, account fan-out, or closing this implementation phase." }));
+}
+
+function renderSentinel(data) {
+  const banner = el("div", { class: "banner" });
+  banner.append(el("strong", { text: "A signal is not a cancellation. " }),
+    document.createTextNode(data.classificationPolicy || "Negative activity is a financial observation until an accepted source says more."));
+  $app.append(banner);
+  sentinelTiles(data);
+  sentinelSourceCard(data);
+  (data.episodes || []).forEach(sentinelEpisodeCard);
+  renderSentinelNotes(data);
+}
+
 // ---------- boot ----------
 async function fetchJSON(path) {
   try {
@@ -1298,14 +1457,18 @@ async function boot() {
   const params = new URLSearchParams(location.search);
   let orgPath = (params.get("org") || "").trim();
   if (orgPath && !/^[a-z0-9-]+(\/[a-z0-9-]+)*$/.test(orgPath)) orgPath = "";
+  const sentinelRoot = orgPath === "sentinel";
   const obligationRoot = orgPath === "obligations" || orgPath.startsWith("obligations/");
-  renderViewNav(obligationRoot);
-  const indexPath = obligationRoot ? "data/obligations/index.json" : "data/index.json";
+  renderViewNav(obligationRoot, sentinelRoot);
+  const indexPath = sentinelRoot ? null
+    : (obligationRoot ? "data/obligations/index.json" : "data/index.json");
   const indexLookupPath = obligationRoot
     ? orgPath.replace(/^obligations\/?/, "") : orgPath;
 
   let indexData = null;
-  try { indexData = await fetchJSON(indexPath); } catch (e) { indexData = null; }
+  if (indexPath) {
+    try { indexData = await fetchJSON(indexPath); } catch (e) { indexData = null; }
+  }
   const found = indexData ? findInIndex(indexData, indexLookupPath) : null;
   renderBreadcrumb(found, obligationRoot);
 
@@ -1336,6 +1499,21 @@ async function boot() {
   }
 
   const kind = data.kind || "awards";
+  if (kind === "sentinel") {
+    if (data.schemaVersion !== 1)
+      throw new Error(`Unsupported sentinel dashboard schema: ${data.schemaVersion}`);
+    document.title = data.title || "Funding-action sentinel";
+    document.getElementById("h1").textContent = data.title || "Funding-action sentinel";
+    document.getElementById("sub").textContent = sentenceJoin(
+      data.source,
+      "Material financial signals, attributed status events, and optional findings remain separate evidence types.",
+    );
+    const generated = new Date(data.generated + "T12:00:00");
+    document.getElementById("stamp").textContent =
+      `${fmtN(data.summary?.episodeCount || 0)} episodes · ${fmtN(data.summary?.financialObservationCount || 0)} financial observations · updated ${generated.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}`;
+    renderSentinel(data);
+    return;
+  }
   if (kind === "obligations") {
     if (data.schemaVersion !== 2)
       throw new Error(`Unsupported obligation dashboard schema: ${data.schemaVersion}`);
