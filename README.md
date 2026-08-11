@@ -34,12 +34,20 @@ NSF API defects the pipeline defends against.
   `awards/FY####.csv.gz` shards and a manifest. Stores are never pruned.
   Rollup `dashboard.json` files exist at every level, with `data/index.json`
   for navigation.
+- `config/obligation_accounts.json`, `adapters/usaspending_obligations.py`, and
+  `data/obligations/` — a physically separate appropriation-obligation ledger.
+  Canonical dollars come from File B reporting-period deltas; File C provides
+  award-linked recipient/flow detail and the residual remains visible.
 - `site/index.html` — the single static page that renders any node
   (`?org=nsf/mps/dms`), deployed via GitHub Pages.
 - `.github/workflows/update-data.yml` — weekly incremental matrices (full
   reconciliation the first Monday of each month), rollups, deploy. NSF runs
   four leaves in parallel; NIH runs serially and the adapter enforces NIH's
   recommended one-request-per-second ceiling.
+- `.github/workflows/update-obligations.yml` — account-level File B/File C
+  backfill, exact GTAS reconciliation, Program Activity fan-out, and separate
+  obligation navigation. It never passes obligation events through award-ID
+  deduplication.
 
 ## NIH data semantics
 

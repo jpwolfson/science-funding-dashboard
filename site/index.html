@@ -57,6 +57,7 @@
   .tile .delta span { color: var(--muted); font-weight: 400; }
   .delta.na { color: var(--muted); font-weight: 400; }
   .up { color: var(--good); } .down { color: var(--bad); }
+  .negative { color: var(--bad); }
   .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px 20px 14px; margin-top: 20px; }
   .card h2 { font-size: 16px; font-weight: 620; }
   .card .note { color: var(--ink-2); font-size: 13px; margin-top: 2px; max-width: 78ch; }
@@ -105,7 +106,7 @@
   <p class="stamp" id="stamp">Loading data&hellip;</p>
   <div id="app"></div>
 
-  <div class="notes">
+  <div class="notes" id="notes">
     <h2>How to read this</h2>
     <ul>
       <li><strong>Oct&ndash;Jul basis.</strong> Fiscal years run Oct&ndash;Sep. Comparisons use the
@@ -167,6 +168,17 @@ const fmtM = v => v >= 1e9
   : "$" + (v / 1e6 >= 100 ? (v / 1e6).toFixed(0) : (v / 1e6).toFixed(1)) + "M";
 const fmtAxisM = v => v >= 1e9 ? "$" + +(v / 1e9).toFixed(1) + "B" : "$" + Math.round(v / 1e6) + "M";
 const fmtMoney = v => v >= 1e6 ? fmtM(v) : "$" + Math.round(v / 1e3) + "K";
+const fmtSignedMoney = v => {
+  const n = Number(v || 0), sign = n < 0 ? "−" : "";
+  const absolute = Math.abs(n);
+  return sign + (absolute < 1000 ? "$" + Math.round(absolute) : fmtMoney(absolute));
+};
+const fmtSignedAxisMoney = v => {
+  const absolute = Math.abs(v);
+  return (v < 0 ? "−" : "") +
+    (absolute < 1e6 ? "$" + Math.round(absolute / 1e3) + "K" : fmtAxisM(absolute));
+};
+const fmtCoverage = v => v == null ? "—" : (Number(v) * 100).toFixed(1) + "%";
 const fmtPct = v => (v > 0 ? "+" : "−") + Math.abs(v * 100).toFixed(1) + "%";
 const monthName = m => new Date(m + "-15").toLocaleString("en-US", { month: "short", year: "numeric" });
 
@@ -271,17 +283,25 @@ function findInIndex(indexData, path) {
 
 function levelForDepth(d) { return LEVELS[Math.min(d, LEVELS.length - 1)]; }
 
-function renderBreadcrumb(found) {
+function renderBreadcrumb(found, obligationRoot = false) {
   const nav = document.getElementById("breadcrumb");
   if (!found) { nav.remove(); return; }
   const chain = found.chain;
   chain.forEach((n, i) => {
     if (i > 0) nav.append(document.createTextNode(" › "));
-    const label = i === 0 ? "All agencies" : (n.abbrev || n.name);
+    const label = i === 0
+      ? (obligationRoot ? "Appropriations accounts" : "All agencies")
+      : (n.abbrev || n.name);
     if (i === chain.length - 1) {
       nav.append(el("span", { text: label }));
     } else {
-      const href = i === 0 ? "index.html" : `index.html?org=${n.path}`;
+      let href;
+      if (i === 0) href = obligationRoot ? "index.html?org=obligations" : "index.html";
+      else {
+        const path = obligationRoot && !String(n.path || "").startsWith("obligations")
+          ? `obligations/${n.path}` : n.path;
+        href = `index.html?org=${path}`;
+      }
       nav.append(el("a", { href, text: label }));
     }
   });
@@ -290,6 +310,11 @@ function renderBreadcrumb(found) {
 function childrenTierTitle(level, provider) {
   if (level === "agency" && provider === "nih") return "Institutes & centers";
   return { root: "Agencies", agency: "Directorates", directorate: "Divisions & offices" }[level] || "Units";
+}
+
+function obligationChildrenTierTitle(level) {
+  return { root: "Agencies", agency: "Appropriations accounts",
+    account: "Program activities" }[level] || "Program activities";
 }
 
 function unitLabel(c) {
@@ -357,6 +382,42 @@ function childrenCard(data) {
   $app.append(card);
 }
 
+function obligationChildrenCard(data) {
+  const kids = data.children || [];
+  if (!kids.length) return;
+  const card = el("div", { class: "card" });
+  card.append(el("h2", { text: obligationChildrenTierTitle(data.node?.level) }));
+  card.append(el("p", { class: "note", text:
+    "Dollar columns add to the parent. Distinct linked-award counts do not: one award may receive obligations in more than one program activity." }));
+  const sorted = kids.slice().sort((a, b) =>
+    (b.currentFYNetObligations || 0) - (a.currentFYNetObligations || 0));
+  const t = el("table"), trh = el("tr");
+  ["Unit", `Net obligations FY${data.currentFY} to date`, "File C coverage", "Distinct linked awards"]
+    .forEach((h, i) => trh.append(el("th", { class: i > 0 ? "num" : "", text: h })));
+  trh.append(el("th", { class: "chev" }));
+  t.append(trh);
+  for (const c of sorted) {
+    const tr = el("tr"), tdUnit = el("td");
+    const path = String(c.path || "").startsWith("obligations") ? c.path : `obligations/${c.path}`;
+    tdUnit.append(el("a", { href: `index.html?org=${path}`, text: unitLabel(c) }));
+    tr.append(tdUnit);
+    if (!c.hasData) {
+      tr.append(el("td", { class: "num", text: "no data yet" }),
+        el("td", { class: "num", text: "—" }), el("td", { class: "num", text: "—" }));
+    } else {
+      const value = c.currentFYNetObligations || 0;
+      tr.append(el("td", { class: `num ${value < 0 ? "negative" : ""}`.trim(),
+        text: fmtSignedMoney(value) }),
+      el("td", { class: "num", text: fmtCoverage(c.fileCCoverage) }),
+      el("td", { class: "num", text: fmtN(c.distinctLinkedAwards || 0) }));
+    }
+    navRow(tr, path);
+    t.append(tr);
+  }
+  card.append(t);
+  $app.append(card);
+}
+
 function childrenCardFromIndex(node, level) {
   const kids = node.children || [];
   if (!kids.length) return;
@@ -380,6 +441,30 @@ function childrenCardFromIndex(node, level) {
       el("td", { class: "num", text: "—" }),
       el("td", { class: "num", text: "—" }));
     navRow(tr, c.path);
+    t.append(tr);
+  }
+  card.append(t);
+  $app.append(card);
+}
+
+function obligationChildrenCardFromIndex(node, level) {
+  const kids = node.children || [];
+  if (!kids.length) return;
+  const card = el("div", { class: "card" });
+  card.append(el("h2", { text: obligationChildrenTierTitle(level) }));
+  card.append(el("p", { class: "note", text: DRILL_NOTE }));
+  const t = el("table"), trh = el("tr");
+  ["Unit", "Net obligations FY to date", "File C coverage", "Distinct linked awards"]
+    .forEach((h, i) => trh.append(el("th", { class: i > 0 ? "num" : "", text: h })));
+  trh.append(el("th", { class: "chev" }));
+  t.append(trh);
+  for (const c of kids) {
+    const tr = el("tr"), tdUnit = el("td");
+    const path = String(c.path || "").startsWith("obligations") ? c.path : `obligations/${c.path}`;
+    tdUnit.append(el("a", { href: `index.html?org=${path}`, text: unitLabel(c) }));
+    tr.append(tdUnit, el("td", { class: "num", text: "no data yet" }),
+      el("td", { class: "num", text: "—" }), el("td", { class: "num", text: "—" }));
+    navRow(tr, path);
     t.append(tr);
   }
   card.append(t);
@@ -770,6 +855,264 @@ function topAwards(data) {
   $app.append(card);
 }
 
+// ---------- obligation-ledger rendering ----------
+function signedDomain(values) {
+  const vals = values.filter(Number.isFinite);
+  let lo = Math.min(0, ...(vals.length ? vals : [0]));
+  let hi = Math.max(0, ...(vals.length ? vals : [0]));
+  if (lo === 0 && hi === 0) hi = 1;
+  if (lo < 0 && hi > 0) {
+    const edge = niceTicks(Math.max(Math.abs(lo), Math.abs(hi))).at(-1);
+    return { lo: -edge, hi: edge };
+  }
+  if (lo < 0) lo = -niceTicks(Math.abs(lo)).at(-1);
+  if (hi > 0) hi = niceTicks(hi).at(-1);
+  return { lo, hi };
+}
+
+function signedYAxis(svg, f, domain, fmt) {
+  const span = domain.hi - domain.lo || 1;
+  const y = v => f.B - ((v - domain.lo) / span) * (f.B - f.T);
+  const edge = Math.max(Math.abs(domain.lo), Math.abs(domain.hi));
+  let ticks = niceTicks(edge);
+  if (domain.lo < 0) ticks = [...ticks.slice(1).map(v => -v).reverse(), ...ticks];
+  if (domain.hi <= 0) ticks = ticks.filter(v => v <= 0);
+  if (domain.lo >= 0) ticks = ticks.filter(v => v >= 0);
+  for (const v of ticks) {
+    if (v < domain.lo || v > domain.hi) continue;
+    const yy = y(v);
+    svg.append(el("line", { x1: f.L, x2: f.R, y1: yy, y2: yy,
+      stroke: v === 0 ? css("--axis") : css("--grid"), "stroke-width": v === 0 ? 1.5 : 1 }));
+    svg.append(el("text", { class: "axis-text", x: f.L - 8, y: yy + 4,
+      "text-anchor": "end", text: fmt(v) }));
+  }
+  return y;
+}
+
+function obligationTiles(data) {
+  const cur = (data.fiscalYears || []).find(f => f.fy === data.currentFY) || {
+    netObligations: 0, grossObligations: 0, deobligations: 0, distinctLinkedAwards: 0,
+  };
+  const specs = [
+    [ `Net obligations, FY${data.currentFY} to date`, fmtSignedMoney(cur.netObligations) ],
+    [ "Distinct linked awards with activity", fmtN(cur.distinctLinkedAwards || 0) ],
+    [ `Award-linked File C (${fmtCoverage(cur.fileCCoverage ?? (cur.netObligations ? cur.awardLinkedObligations / cur.netObligations : null))})`,
+      fmtSignedMoney(cur.awardLinkedObligations || 0) ],
+    [ "Non-award residual", fmtSignedMoney(cur.residualObligations || 0) ],
+    [ "Gross positive obligations", fmtSignedMoney(cur.grossObligations || 0) ],
+    [ "De-obligations", fmtSignedMoney(cur.deobligations || 0) ],
+  ];
+  const row = el("div", { class: "tiles" });
+  for (const [label, value] of specs) {
+    const tile = el("div", { class: "tile" });
+    tile.append(el("div", { class: "label", text: label }),
+      el("div", { class: "value", text: value }));
+    row.append(tile);
+  }
+  $app.append(row);
+}
+
+function obligationCumulativeChart(data) {
+  const { card, plot, tip } = makeCard("Cumulative net obligations through the fiscal year",
+    "Signed File B obligations reported through each submission period. File C identifies award-linked flows; the residual is spending not attributable to File C awards.");
+  const series = (data.fyCumulative || []).slice().sort((a, b) => b.fy - a.fy)
+    .map((s, i) => ({ ...s, v: ["--s1", "--s2", "--s3", "--s4", "--s5"][i] }));
+  function render() {
+    plot.querySelector("svg")?.remove();
+    const f = frame(plot, 340, 62, 140), DAYS = 365;
+    const domain = signedDomain(series.flatMap(s => s.points.map(p => Number(p.netObligations || 0))));
+    const y = signedYAxis(f.svg, f, domain, fmtSignedAxisMoney);
+    const x = d => f.L + (Math.min(Math.max(d, 0), DAYS - 1) / (DAYS - 1)) * (f.R - f.L);
+    MONTH_OFFSETS.forEach((off, m) => {
+      f.svg.append(el("line", { x1: x(off), x2: x(off), y1: f.B, y2: f.B + 6,
+        stroke: css("--axis"), "stroke-width": 1 }));
+      f.svg.append(el("text", { class: "axis-text", x: x(off + 15), y: f.B + 18,
+        "text-anchor": "middle", text: MONTH_ABBR[m] }));
+    });
+    for (const s of [...series].reverse()) {
+      if (!s.points.length) continue;
+      // Reporting-period observations are discrete. Hold the last reported
+      // cumulative value until the next period instead of visually inventing
+      // activity between submissions.
+      const line = s.points.map((p, i) => i
+        ? `H${x(p.d).toFixed(1)}V${y(p.netObligations || 0).toFixed(1)}`
+        : `M${x(p.d).toFixed(1)},${y(p.netObligations || 0).toFixed(1)}`).join("");
+      f.svg.append(el("path", { d: line, fill: "none", stroke: css(s.v),
+        "stroke-width": s.partial ? 3 : 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+      const end = s.points.at(-1);
+      f.svg.append(el("circle", { cx: x(end.d), cy: y(end.netObligations || 0), r: s.partial ? 5 : 4,
+        fill: css(s.v), stroke: css("--surface"), "stroke-width": 2 }));
+    }
+    let prevY = -Infinity;
+    for (const s of series.filter(s => s.points.length)
+      .sort((a, b) => b.points.at(-1).netObligations - a.points.at(-1).netObligations)) {
+      const end = s.points.at(-1), ly = Math.max(y(end.netObligations || 0) + 4, prevY + 15);
+      prevY = ly;
+      f.svg.append(el("line", { x1: f.R + 6, x2: f.R + 14, y1: ly - 4, y2: ly - 4,
+        stroke: css(s.v), "stroke-width": 2.5, "stroke-linecap": "round" }));
+      f.svg.append(el("text", { class: "dlabel", x: f.R + 18, y: ly,
+        text: `FY${String(s.fy).slice(2)} · ${fmtSignedMoney(end.netObligations || 0)}` }));
+    }
+    const cross = el("line", { y1: f.T, y2: f.B, stroke: css("--axis"), "stroke-width": 1, visibility: "hidden" });
+    f.svg.append(cross);
+    const scale = () => plot.clientWidth / f.W;
+    f.svg.addEventListener("pointermove", e => {
+      const r0 = f.svg.getBoundingClientRect();
+      const day = Math.max(0, Math.min(DAYS - 1,
+        ((e.clientX - r0.left) / scale() - f.L) / (f.R - f.L) * (DAYS - 1)));
+      const available = series.map(s => ({ s, p: s.points.filter(p => p.d <= day).at(-1) })).filter(x0 => x0.p);
+      if (!available.length) return;
+      cross.setAttribute("x1", x(day)); cross.setAttribute("x2", x(day)); cross.setAttribute("visibility", "visible");
+      showTip(tip, plot, x(day) * scale(), f.T * scale() + 40, `Through day ${Math.round(day) + 1} of the fiscal year`,
+        available.map(({ s, p }) => ({ color: css(s.v), val: fmtSignedMoney(p.netObligations || 0),
+          lab: `FY${s.fy} · ${p.submissionPeriod}` })));
+    });
+    f.svg.addEventListener("pointerleave", () => { tip.style.display = "none"; cross.setAttribute("visibility", "hidden"); });
+  }
+  render();
+  legend(card, series.map(s => ({ label: `FY${s.fy}${s.partial ? " (to date)" : ""}`, color: css(s.v) })), "line");
+  const rows = [];
+  for (const s of series) for (const p of s.points)
+    rows.push([`FY${s.fy} · ${p.submissionPeriod}`, fmtSignedMoney(p.netObligations || 0),
+      fmtSignedMoney(p.awardLinkedObligations || 0), fmtSignedMoney(p.residualObligations || 0),
+      fmtN(p.distinctLinkedAwards || 0)]);
+  addTable(card, ["Reporting period", "Net obligations", "Award-linked", "Residual", "Distinct linked awards"], rows);
+  return render;
+}
+
+function obligationPeriodsChart(data) {
+  const { card, plot, tip } = makeCard("Obligations by reporting period",
+    "Signed activity in each agency submission period. The first P02 bucket covers the first reporting window; quarterly reporters appear only in quarter-ending periods.");
+  const rows = (data.reportingPeriods || []).slice(-48);
+  function render() {
+    plot.querySelector("svg")?.remove();
+    const f = frame(plot, 310, 62, 14);
+    const domain = signedDomain(rows.map(r => Number(r.netObligations || 0)));
+    const y = signedYAxis(f.svg, f, domain, fmtSignedAxisMoney), zero = y(0);
+    const band = rows.length ? (f.R - f.L) / rows.length : 0, bw = Math.max(2, Math.min(18, band - 2));
+    rows.forEach((r, i) => {
+      const cx = f.L + band * (i + .5), yy = y(r.netObligations || 0);
+      const bar = el("rect", { x: cx - bw / 2, y: Math.min(yy, zero), width: bw,
+        height: Math.max(1, Math.abs(zero - yy)), fill: (r.netObligations || 0) < 0 ? css("--s2") : css("--s1") });
+      f.svg.append(bar);
+      if (i % Math.max(1, Math.ceil(rows.length / 10)) === 0)
+        f.svg.append(el("text", { class: "axis-text", x: cx, y: f.B + 18,
+          "text-anchor": "middle", text: String(r.submissionPeriod || "").replace("FY", "") }));
+      const hit = el("rect", { x: cx - band / 2, y: f.T, width: band, height: f.B - f.T, fill: "transparent" });
+      const scale = () => plot.clientWidth / f.W;
+      hit.addEventListener("pointermove", () => showTip(tip, plot, cx * scale(), Math.min(yy, zero) * scale(),
+        r.submissionPeriod, [
+          { val: fmtSignedMoney(r.netObligations || 0), lab: "net obligations" },
+          { val: fmtSignedMoney(r.awardLinkedObligations || 0), lab: "award-linked File C" },
+          { val: fmtSignedMoney(r.residualObligations || 0), lab: "non-award residual" },
+          { val: fmtN(r.distinctLinkedAwards || 0), lab: "distinct linked awards" },
+        ]));
+      hit.addEventListener("pointerleave", () => { tip.style.display = "none"; });
+      f.svg.append(hit);
+    });
+  }
+  render();
+  addTable(card, ["Reporting period", "Net obligations", "Award-linked", "Residual", "Gross positive", "De-obligations", "Distinct linked awards"],
+    rows.map(r => [r.submissionPeriod, fmtSignedMoney(r.netObligations || 0),
+      fmtSignedMoney(r.awardLinkedObligations || 0), fmtSignedMoney(r.residualObligations || 0),
+      fmtSignedMoney(r.grossObligations || 0), fmtSignedMoney(r.deobligations || 0),
+      fmtN(r.distinctLinkedAwards || 0)]));
+  return render;
+}
+
+function obligationFYChart(data) {
+  const { card, plot, tip } = makeCard("Net obligations by fiscal year",
+    "File B totals reconcile to GTAS. Award-linked File C coverage is shown in the table and tooltip; it is not assumed to represent the full account.");
+  const rows = data.fiscalYears || [];
+  function render() {
+    plot.querySelector("svg")?.remove();
+    const f = frame(plot, 300, 62, 14), domain = signedDomain(rows.map(r => Number(r.netObligations || 0)));
+    const y = signedYAxis(f.svg, f, domain, fmtSignedAxisMoney), zero = y(0);
+    const band = rows.length ? (f.R - f.L) / rows.length : 0, bw = Math.min(28, Math.max(3, band - 8));
+    rows.forEach((r, i) => {
+      const cx = f.L + band * (i + .5), yy = y(r.netObligations || 0);
+      const bar = el("rect", { x: cx - bw / 2, y: Math.min(yy, zero), width: bw,
+        height: Math.max(1, Math.abs(zero - yy)), fill: css("--s1"), opacity: r.partial ? .5 : 1 });
+      f.svg.append(bar, el("text", { class: "axis-text", x: cx, y: f.B + 18,
+        "text-anchor": "middle", text: "'" + String(r.fy).slice(2) + (r.partial ? "*" : "") }));
+      const hit = el("rect", { x: cx - band / 2, y: f.T, width: band, height: f.B - f.T, fill: "transparent" });
+      const scale = () => plot.clientWidth / f.W;
+      hit.addEventListener("pointermove", () => showTip(tip, plot, cx * scale(), Math.min(yy, zero) * scale(), `FY${r.fy}`, [
+        { val: fmtSignedMoney(r.netObligations || 0), lab: "net obligations" },
+        { val: fmtCoverage(r.netObligations ? r.awardLinkedObligations / r.netObligations : null), lab: "File C coverage" },
+        { val: fmtN(r.distinctLinkedAwards || 0), lab: "distinct linked awards" },
+      ]));
+      hit.addEventListener("pointerleave", () => { tip.style.display = "none"; });
+      f.svg.append(hit);
+    });
+  }
+  render();
+  addTable(card, ["Fiscal year", "Net obligations", "Award-linked", "Residual", "File C coverage", "Distinct linked awards"],
+    rows.map(r => [`FY${r.fy}${r.partial ? " (to date)" : ""}`, fmtSignedMoney(r.netObligations || 0),
+      fmtSignedMoney(r.awardLinkedObligations || 0), fmtSignedMoney(r.residualObligations || 0),
+      fmtCoverage(r.netObligations ? r.awardLinkedObligations / r.netObligations : null),
+      fmtN(r.distinctLinkedAwards || 0)]));
+  return render;
+}
+
+function obligationFlowTables(data) {
+  const years = (data.fiscalYears || []).slice(-3).reverse();
+  const recipientRows = [];
+  for (const fy of years) for (const r of (fy.topRecipients || []))
+    recipientRows.push([`FY${fy.fy}`, r.recipient || r.name || "Unknown recipient",
+      fmtSignedMoney(r.netObligations ?? r.amount ?? 0)]);
+  if (recipientRows.length) {
+    const card = el("div", { class: "card" });
+    card.append(el("h2", { text: "Top recipients of award-attributed obligations" }),
+      el("p", { class: "note", text: "Recipient rankings use award-linked File C only; they exclude the residual not attributable to File C awards." }));
+    const t = el("table"), h = el("tr");
+    ["FY", "Recipient", "Net award-linked obligations"].forEach((x, i) => h.append(el("th", { class: i === 2 ? "num" : "", text: x })));
+    t.append(h);
+    recipientRows.forEach(r => { const tr = el("tr"); r.forEach((x, i) => tr.append(el("td", { class: i === 2 ? "num" : "", text: x }))); t.append(tr); });
+    card.append(t); $app.append(card);
+  }
+  const flows = [];
+  for (const fy of years) {
+    for (const flow of (fy.positiveFlows || [])) flows.push([fy.fy, flow, "Obligation"]);
+    for (const flow of (fy.negativeFlows || [])) flows.push([fy.fy, flow, "De-obligation"]);
+  }
+  if (!flows.length) return;
+  const card = el("div", { class: "card" });
+  card.append(el("h2", { text: "Largest award-attributed flows" }),
+    el("p", { class: "note", text: "Largest positive and negative File C flows. Negative values are de-obligations, terminations, or other downward adjustments." }));
+  const t = el("table"), h = el("tr");
+  ["FY / period", "Award", "Recipient", "Direction", "Amount"].forEach((x, i) => h.append(el("th", { class: i === 4 ? "num" : "", text: x })));
+  t.append(h);
+  for (const [fy, flow, direction] of flows) {
+    const tr = el("tr");
+    tr.append(el("td", { text: `FY${fy}${flow.submissionPeriod ? " · " + flow.submissionPeriod : ""}` }));
+    const award = el("td"), label = flow.title || flow.awardId || "Unlinked flow";
+    if (flow.awardUrl) award.append(el("a", { href: flow.awardUrl, text: label })); else award.textContent = label;
+    const amount = flow.amount ?? flow.netObligations ?? flow.obligations ?? 0;
+    tr.append(award, el("td", { text: flow.recipient || "Unknown recipient" }),
+      el("td", { text: direction }), el("td", { class: `num ${amount < 0 ? "negative" : ""}`.trim(), text: fmtSignedMoney(amount) }));
+    t.append(tr);
+  }
+  card.append(t); $app.append(card);
+}
+
+function renderObligationNotes(data) {
+  const notes = document.getElementById("notes");
+  notes.replaceChildren(el("h2", { text: "How to read this obligation ledger" }));
+  const list = el("ul");
+  const entries = [
+    ["Obligations, not appropriations or outlays. ", "The dollar series measures signed obligations charged to this federal account. Congress's appropriation is the starting authority; outlays occur later."],
+    ["Reported in submission periods. ", "Values are attributed to agency reporting periods, not reconstructed award-action dates. The first P02 bucket covers the first reporting window, and historical quarterly submissions appear only at quarter ends."],
+    ["De-obligations stay negative. ", "Downward adjustments, terminations, and clawbacks reduce period and cumulative totals instead of disappearing from the history."],
+    ["File C is award-linked enrichment. ", `Award and recipient tables describe only the ${fmtCoverage((data.totalNetObligations ?? data.netObligations) ? (data.totalAwardLinkedObligations ?? data.awardLinkedObligations) / (data.totalNetObligations ?? data.netObligations) : null)} of obligations linked through File C for this view. The residual remains in every canonical dollar total.`],
+    ["Distinct linked awards are not additive. ", "The same award may receive obligations in multiple periods or program activities. Parent counts are set unions; child counts should never be summed."],
+  ];
+  for (const [head, body] of entries) {
+    const li = el("li"); li.append(el("strong", { text: head }), document.createTextNode(body)); list.append(li);
+  }
+  notes.append(list);
+}
+
 // ---------- boot ----------
 async function fetchJSON(path) {
   const res = await fetch(path, { cache: "no-store" });
@@ -781,11 +1124,15 @@ async function boot() {
   const params = new URLSearchParams(location.search);
   let orgPath = (params.get("org") || "").trim();
   if (orgPath && !/^[a-z0-9-]+(\/[a-z0-9-]+)*$/.test(orgPath)) orgPath = "";
+  const obligationRoot = orgPath === "obligations" || orgPath.startsWith("obligations/");
+  const indexPath = obligationRoot ? "data/obligations/index.json" : "data/index.json";
+  const indexLookupPath = obligationRoot
+    ? orgPath.replace(/^obligations\/?/, "") : orgPath;
 
   let indexData = null;
-  try { indexData = await fetchJSON("data/index.json"); } catch (e) { indexData = null; }
-  const found = indexData ? findInIndex(indexData, orgPath) : null;
-  renderBreadcrumb(found);
+  try { indexData = await fetchJSON(indexPath); } catch (e) { indexData = null; }
+  const found = indexData ? findInIndex(indexData, indexLookupPath) : null;
+  renderBreadcrumb(found, obligationRoot);
 
   const dataPath = orgPath ? `data/${orgPath}/dashboard.json` : "data/dashboard.json";
   let data = null;
@@ -797,15 +1144,65 @@ async function boot() {
     let level;
     if (found && found.node) {
       const isRoot = found.chain.length === 1;
-      const title = isRoot ? "Federal science funding dashboard" : `${found.node.name} — funding dashboard`;
+      const title = obligationRoot
+        ? (isRoot ? "Federal science obligation dashboard" : `${found.node.name} — obligation dashboard`)
+        : (isRoot ? "Federal science funding dashboard" : `${found.node.name} — funding dashboard`);
       document.title = title;
       document.getElementById("h1").textContent = title;
-      level = levelForDepth(found.chain.length - 1);
-      childrenCardFromIndex(found.node, level);
+      level = found.node.level || (obligationRoot
+        ? ["root", "agency", "account", "program-activity"][Math.min(found.chain.length - 1, 3)]
+        : levelForDepth(found.chain.length - 1));
+      if (obligationRoot) obligationChildrenCardFromIndex(found.node, level);
+      else childrenCardFromIndex(found.node, level);
     }
-    renderCsvNote(level, orgPath, null);
+    if (obligationRoot) renderObligationNotes({});
+    else renderCsvNote(level, orgPath, null);
     return;
   }
+
+  const kind = data.kind || "awards";
+  if (kind === "obligations") {
+    const node = data.node || {};
+    const title = node.level === "root" ? "Federal science obligation dashboard"
+      : `${node.name || "Unit"} — obligation dashboard`;
+    document.title = title;
+    document.getElementById("h1").textContent = title;
+    document.getElementById("sub").textContent =
+      `${data.source || ""} ${data.amountNote || "Signed obligations attributed by reporting period — not award totals, appropriations, or outlays."}`;
+    const gen = new Date(data.generated + "T12:00:00");
+    const asOf = data.asOfPeriod || data.reportingPeriods?.at(-1)?.submissionPeriod || "latest available period";
+    const totalNet = data.totalNetObligations ?? data.netObligations ?? 0;
+    document.getElementById("stamp").textContent =
+      `${fmtSignedMoney(totalNet)} net obligations across ${fmtN(data.distinctLinkedAwards || 0)} distinct linked awards · through ${asOf} · last updated ${gen.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}`;
+    if (data.warnings?.length) {
+      const b = el("div", { class: "banner" });
+      b.append(el("strong", { text: "Data quality warnings from the last pull: " }),
+        document.createTextNode(data.warnings.join(" · ")));
+      $app.append(b);
+    }
+    renderObligationNotes(data);
+    if (data.dataComplete === false && !data.reportingPeriods?.length) {
+      document.getElementById("stamp").textContent = "Initial obligation-ledger pull pending";
+      if (indexData) obligationChildrenCard(data);
+      return;
+    }
+    obligationTiles(data);
+    if (indexData) obligationChildrenCard(data);
+    const renders = [];
+    if (data.fyCumulative?.some(s => s.points?.length))
+      renders.push(obligationCumulativeChart(data));
+    if (data.reportingPeriods?.length) renders.push(obligationPeriodsChart(data));
+    if (data.fiscalYears?.length) renders.push(obligationFYChart(data));
+    obligationFlowTables(data);
+    const foot = el("p", { class: "stamp", text: "* fiscal year in progress · values are reported by submission period" });
+    $app.append(foot);
+    let raf;
+    const rerender = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => renders.forEach(r => r())); };
+    window.addEventListener("resize", rerender);
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", rerender);
+    return;
+  }
+  if (kind !== "awards") throw new Error(`Unsupported dashboard kind: ${kind}`);
 
   const node = data.node || {};
   const title = node.level === "root" ? "Federal science funding dashboard" : `${node.name || "Unit"} — funding dashboard`;

@@ -2,14 +2,16 @@ name: Test
 
 on:
   push:
-    branches: [main, "claude/**"]
+    branches: [main, "claude/**", "codex/**"]
     paths:
       - "adapters/**"
       - "scripts/**"
       - "tests/**"
       - "config/orgs.json"
+      - "config/obligation_accounts.json"
       - "reference/nih_databook_baseline.json"
       - "reference/usaspending_calibration.json"
+      - "reference/doe_sc_obligation_baseline.json"
       - "site/index.html"
       - ".github/workflows/**"
   pull_request:
@@ -31,9 +33,13 @@ jobs:
         run: |
           python -m compileall -q adapters scripts tests
           python -m json.tool config/orgs.json >/dev/null
+          python -m json.tool config/obligation_accounts.json >/dev/null
           python -m json.tool reference/nih_databook_baseline.json >/dev/null
           python -m json.tool reference/usaspending_calibration.json >/dev/null
+          python -m json.tool reference/doe_sc_obligation_baseline.json >/dev/null
       - name: Offline NIH data integrity and external benchmark checks
         run: python scripts/validate_nih.py
       - name: USAspending calibration and onboarding gate
         run: python scripts/validate_usaspending_calibration.py
+      - name: Obligation ledger contract (data backfills in its dedicated workflow)
+        run: python scripts/validate_obligations.py --allow-empty

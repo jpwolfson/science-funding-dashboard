@@ -25,6 +25,13 @@ class USAspendingCalibrationTests(unittest.TestCase):
                 "accountFilteredTransactionObligations": 1,
                 "programActivityProbe": {}, "assessment": "blocked",
             },
+            "obligationLedger": {
+                "status": "implementation-complete-backfill-pending",
+                "canonicalSource": "File B cumulative CPE deltas",
+                "awardEnrichmentSource": "File C reporting-period transaction obligated amounts",
+                "federalAccount": "089-0222", "fileCFy2024ObligationsCents": 1,
+                "gtasFy2024ObligationsCents": 1, "fileCCoverage": 1,
+            },
         }
         (root / "reference" / "usaspending_calibration.json").write_text(
             json.dumps(calibration))

@@ -1,0 +1,88 @@
+# Phase 3.1b handoff
+
+Status at PR creation: implementation and local validation complete; remote
+historical backfill/release gate pending.
+
+## What changed
+
+- Added a physically separate obligation ledger and documented its exact-cent
+  event/store contract in `docs/obligation-ledger.md`.
+- Added the DOE Office of Science `089-0222` registry with legacy PAC/PAN and
+  FY2026 PARK aliases for every observed Program Activity, including an
+  unknown bucket.
+- Added a fail-closed USAspending custom-account adapter. File B cumulative
+  CPE snapshots are differenced by reporting period for canonical dollars.
+  File C TOA rows are direct signed period activity and provide award,
+  recipient, and flow metadata. Assistance, Contracts, and Unlinked files are
+  all ingested.
+- Added explicit File B-minus-File C residual events. This preserves the exact
+  account/Program Activity series while honestly separating award-linked from
+  payroll, intramural, and other non-award activity.
+- Added deterministic fiscal-year gzip shards, additive obligation rollups,
+  exact-cent offline validation, pinned GTAS/File A baselines, and a parallel
+  FY2017-present GitHub Actions backfill.
+- Added a separate `data/obligations/index.json` tree and site rendering for
+  signed totals, submission-period steps, de-obligations, File C coverage,
+  distinct linked awards, recipients, and positive/negative flows. Existing
+  award dashboards still default to `kind=awards`.
+- Formalized the NSF DMS USAspending count diagnostic as a ≥99.5% calibration
+  invariant; the pinned result is 1,006/1,008 (99.80%) with the two known IAA
+  residuals. Dollars remain intentionally non-comparable.
+
+## Evidence and decisions
+
+The revised roadmap assumed File C could reconcile to GTAS with a small gap.
+Live FY2024 DOE data disproved that assumption:
+
+| Source | FY2024 obligations |
+|---|---:|
+| GTAS/File A and File B | $9,281,790,861.20 |
+| File C award-linked subset | $8,527,849,368.87 |
+| Non-award residual | $753,941,492.33 |
+| File C coverage | 91.8772% |
+
+The gap is structural, not a pagination defect: USAspending describes File C
+as prime-award spending, which is a subset of account spending. The
+implementation therefore uses File B as canonical and File C as enrichment.
+This is the only tested design that preserves both exact account reconciliation
+and useful award/recipient detail.
+
+The other roadmap exception is historical availability. Files A/B/C begin in
+FY2017 Q2, so FY2015–16 are recorded as unavailable, FY2017 as partial-source
+history, and FY2018 as the first full fiscal year. No award-search values are
+synthesized for the unavailable years.
+
+## Validation completed locally
+
+- Full Python unit suite: 34 tests green before the final documentation pass.
+- Live account resolver: DOE `089-0222` dynamically resolved to internal ID
+  5778 and the requested account scope echoed correctly.
+- Live File B P02 probe: 146 rows, $1,123,055,113.69 cumulative obligations.
+- Live File C FY2024 archive: 52,749 source rows, 4,036 canonical events,
+  $8,527,849,368.87, including negative and unlinked rows.
+- JavaScript syntax and whitespace checks passed. Local Playwright could not
+  launch Chrome inside the desktop sandbox, so browser layout remains part of
+  the remote release bar.
+
+## Remaining gate and takeover steps
+
+1. Let `Backfill obligation ledger` complete on the PR branch. It fans out one
+   fiscal year per job, rebuilds the unified store, and must reconcile every
+   pinned year exactly.
+2. Review any live schema drift or USAspending transient-download failure. The
+   adapter retries 429/5xx/disconnects and refuses unknown status states,
+   archive hosts, row-count mismatches, scope mismatches, unmapped Program
+   Activities, or cent differences.
+3. Run the browser smoke against obligation root, DOE, account, and at least
+   one positive/negative Program Activity in light and dark mode; require zero
+   console errors and verify the legacy award root is unchanged.
+4. Only after those checks pass, change
+   `reference/usaspending_calibration.json` to `status=ready`,
+   `onboardingAllowed=true`, and `obligationLedger.status=passed`. The
+   validator rejects an early flip.
+5. Merge, confirm the Pages deployment, and record run/PR/deploy links in this
+   handoff and the Phase 3.1b roadmap entry.
+
+Do not replace canonical File B dollars with File C-only totals, do not route
+events through `adapters/common.py` or `scripts/rollup.py`, and do not fabricate
+monthly or FY2015–16 data.

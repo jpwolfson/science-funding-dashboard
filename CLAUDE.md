@@ -237,6 +237,16 @@ consequences already encoded:
 - [ ] Phase 3.1b — the OBLIGATION LEDGER: File C allocation events + DOE
       Office of Science pilot. One Fable-led session; the design decisions
       below are OWNER-APPROVED (2026-08-11) — implement, don't relitigate.
+      - EXECUTION NOTE (2026-08-11): live official data established that File
+        C is structurally incomplete for this product: FY2024 File C is
+        $8.528B versus $9.282B in File A/GTAS (91.8772% coverage). The official
+        disclosure calls File C prime-award spending a subset of account
+        spending. The implemented ledger therefore uses File B PA CPE deltas
+        for canonical dollars, File C for award-linked enrichment, and an
+        explicit File B-minus-File C residual. Files A/B/C begin FY2017 Q2, so
+        FY2015–16 are unavailable rather than synthesized. Code/local tests are
+        complete; remote historical backfill, browser smoke, ready flip, and
+        deploy remain the release gate. See `docs/phase-3.1b-handoff.md`.
       **Architecture: two ledgers, both kept, clearly labeled.**
       - AWARD ledger (exists; unchanged): NSF + NIH native-API pipelines.
         Answers "how many new awards were made and how much was committed."

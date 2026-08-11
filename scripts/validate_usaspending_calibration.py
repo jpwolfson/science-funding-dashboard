@@ -40,6 +40,15 @@ def validate(repo_root=REPO_ROOT):
     for name in ("nsfDmsFy2024", "nihNigmsFy2024"):
         if name not in comparisons:
             errors.append(f"missing required calibration comparator {name}")
+    nsf = comparisons.get("nsfDmsFy2024") or {}
+    if nsf:
+        expected = nsf.get("usaspendingBaseAwards")
+        actual = nsf.get("dashboardRecords")
+        coverage = nsf.get("countCoverage")
+        if not expected or not actual or abs(coverage - expected / actual) > 1e-9:
+            errors.append("NSF DMS count-coverage comparator is internally inconsistent")
+        elif coverage < 0.995:
+            errors.append("NSF DMS USAspending count coverage fell below 99.5%")
 
     gate = calibration.get("doeScienceGate") or {}
     for key in ("gtasAccountObligations", "newBaseAwardCurrentObligations",
@@ -47,6 +56,17 @@ def validate(repo_root=REPO_ROOT):
                 "programActivityProbe", "assessment"):
         if key not in gate:
             errors.append(f"DOE Science gate is missing {key}")
+
+    obligation = calibration.get("obligationLedger") or {}
+    for key in ("canonicalSource", "awardEnrichmentSource", "federalAccount",
+                "fileCFy2024ObligationsCents", "gtasFy2024ObligationsCents",
+                "fileCCoverage", "status"):
+        if key not in obligation:
+            errors.append(f"obligation ledger calibration is missing {key}")
+    if obligation and obligation.get("canonicalSource") != "File B cumulative CPE deltas":
+        errors.append("obligation ledger must use File B as the canonical dollar source")
+    if calibration.get("status") == "ready" and obligation.get("status") != "passed":
+        errors.append("ready calibration requires a passed obligation-ledger backfill")
 
     active = [agency.get("slug") for agency in config.get("agencies", [])
               if agency.get("adapter") == "usaspending"]

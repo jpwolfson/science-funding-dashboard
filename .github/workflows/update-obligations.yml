@@ -1,0 +1,119 @@
+name: Backfill obligation ledger
+
+on:
+  workflow_dispatch:
+    inputs:
+      from_fy:
+        description: First fiscal year (Files A/B/C begin FY2017 Q2)
+        default: "2017"
+      to_fy:
+        description: Last fiscal year
+        default: "2026"
+      current_period:
+        description: Last available period for the final fiscal year
+        default: "9"
+  push:
+    branches: ["codex/**", "claude/**"]
+    paths: [".github/triggers/update-obligations.json"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: obligation-backfill-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      to_fy: ${{ steps.plan.outputs.to_fy }}
+      current_period: ${{ steps.plan.outputs.current_period }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: plan
+        shell: python
+        run: |
+          import json, os
+          if os.environ["GITHUB_EVENT_NAME"] == "workflow_dispatch":
+              values = json.load(open(os.environ["GITHUB_EVENT_PATH"])).get("inputs") or {}
+              first = int(values.get("from_fy", 2017))
+              last = int(values.get("to_fy", 2026))
+              period = int(values.get("current_period", 9))
+          else:
+              values = json.load(open(".github/triggers/update-obligations.json"))
+              first, last = int(values["from_fy"]), int(values["to_fy"])
+              period = int(values["current_period"])
+          if first < 2017 or last < first or not 2 <= period <= 12:
+              raise SystemExit("invalid fiscal-year/period scope")
+          with open(os.environ["GITHUB_OUTPUT"], "a") as out:
+              out.write("matrix=" + json.dumps({"fy": list(range(first, last + 1))}) + "\n")
+              out.write(f"to_fy={last}\ncurrent_period={period}\n")
+
+  pull-year:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: true
+      max-parallel: 3
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Pull exact File B and File C data for FY${{ matrix.fy }}
+        env:
+          FINAL_FY: ${{ needs.plan.outputs.to_fy }}
+          FINAL_PERIOD: ${{ needs.plan.outputs.current_period }}
+        run: |
+          PERIOD=12
+          if [ "${{ matrix.fy }}" = "$FINAL_FY" ]; then PERIOD="$FINAL_PERIOD"; fi
+          python scripts/pull_obligation_account.py --account doe/sc \
+            --from-fy "${{ matrix.fy }}" --to-fy "${{ matrix.fy }}" \
+            --current-period "$PERIOD" --no-rollup
+      - uses: actions/upload-artifact@v4
+        with:
+          name: obligation-fy-${{ matrix.fy }}
+          path: data/obligations/doe/sc/events/FY${{ matrix.fy }}.csv.gz
+          if-no-files-found: error
+
+  reconcile:
+    needs: [plan, pull-year]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: obligation-fy-*
+          path: data/obligations/doe/sc/events
+          merge-multiple: true
+      - name: Rebuild manifest and all obligation dashboards
+        run: |
+          python - <<'PY'
+          from adapters.obligation_common import load_store, write_store
+          path = "data/obligations/doe/sc/events"
+          write_store(path, load_store(path), {"federalAccount": "089-0222", "backfill": "FY2017-present"})
+          PY
+          python scripts/rollup_obligations.py
+      - name: Exact GTAS, partition, and dashboard validation
+        run: python scripts/validate_obligations.py
+      - name: Unit and site contract tests
+        run: python -m unittest discover -s tests -v
+      - name: Commit reconciled obligation ledger
+        env:
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/obligations
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Backfill DOE Science obligation ledger [skip ci]"
+          git push origin "HEAD:$BRANCH"
