@@ -1,0 +1,876 @@
+{
+  "snapshot_schema": "aaas-rd-appropriations-source-snapshot-v1",
+  "snapshot_date": "2026-08-11",
+  "scope": "AAAS FY 2026 R&D Appropriations Dashboard displayed label universe",
+  "source": {
+    "publisher": "American Association for the Advancement of Science",
+    "original_page_url": "https://www.aaas.org/news/fy-2026-rd-appropriations-dashboard",
+    "original_page_status_on_snapshot_date": 404,
+    "archived_page_capture": "20260517191653",
+    "archived_page_url": "https://web.archive.org/web/20260517191653id_/https://www.aaas.org/news/fy-2026-rd-appropriations-dashboard",
+    "powerbi_embed_url": "https://app.powerbi.com/view?r=eyJrIjoiZmU4NjhlMjQtNmQ2Ni00NDk4LWIzNTEtOGRiOWFiMWY5OGU2IiwidCI6IjJlZWJkOGZmLTllZDEtNDBmMC1hMTU2LTM4ZTVkZmIzYmM1NiIsImMiOjF9",
+    "powerbi_resource_key": "fe868e24-6d66-4498-b351-8db9ab1f98e6",
+    "powerbi_tenant_id": "2eebd8ff-9ed1-40f0-a156-38e5dfb3bc56",
+    "powerbi_report_object_id": "f7516472-7298-4118-829c-866096bc3dc3",
+    "powerbi_dataset_id": "a2a975d1-0c4a-4628-abb3-a704121fb92b",
+    "powerbi_model_id": 910582,
+    "powerbi_report_display_name": "Appropriations 2026",
+    "powerbi_report_last_updated": "2026-05-06T12:59:09.69",
+    "powerbi_model_last_refresh": "2026-05-06T12:59:11.613"
+  },
+  "extraction": {
+    "retrieved_at_utc": "2026-08-11T19:34:20Z",
+    "method": "Read-only Power BI public modelsAndExploration, conceptualschema, and querydata requests; distinct values selected from the 45 AAAS label/grouping columns.",
+    "field_count": 45,
+    "distinct_label_count": 237,
+    "notes": [
+      "Labels preserve AAAS whitespace and spelling exactly; aaas_label_trimmed is supplied only in the crosswalk for review convenience.",
+      "NIHAccts1 through NIHAccts5 occur on both a visible and a hidden page instance; the label set is identical and appears once here.",
+      "This is a dated research snapshot, not a production registry and not an automated extraction workflow."
+    ]
+  },
+  "groupings": [
+    {
+      "field": "DOESC",
+      "page": "Energy",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "Energy",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        " TOTAL",
+        "Adv Sci Computing Res (ASCR)",
+        "Basic Energy Sciences (BES)",
+        "Bio and Environ Research (BER)",
+        "Fusion Energy Sciences (FES)",
+        "High-Energy Physics (HEP)",
+        "Nuclear Physics"
+      ]
+    },
+    {
+      "field": "DOEEERE1",
+      "page": "Energy",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "Energy",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        " TOTAL",
+        "Bioenergy Tech",
+        "Hydrogen & Fuel Cells",
+        "Solar Energy",
+        "Wind Energy"
+      ]
+    },
+    {
+      "field": "DOEEERE2",
+      "page": "Energy",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "Energy",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        "Advanced Manufacturing",
+        "Building Tech",
+        "Geothermal Tech",
+        "Vehicle Tech",
+        "Water Power"
+      ]
+    },
+    {
+      "field": "DOEFossil",
+      "page": "Energy",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "Energy",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        " Total Budget",
+        "CCUS",
+        "Natural Gas Tech",
+        "Other Advanced Coal R&D",
+        "Unconventional Tech"
+      ]
+    },
+    {
+      "field": "DOENuc",
+      "page": "Energy",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "Energy",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        " Total Budget",
+        "Adv. Reactor Demonstration",
+        "Nuclear Enabling Tech",
+        "Reactor Concepts RD&D"
+      ]
+    },
+    {
+      "field": "DOEOther",
+      "page": "Energy",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "Energy",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        "ARPA-E",
+        "Cybersecurity and Response",
+        "Electricity Delivery",
+        "Energy Information Administration"
+      ]
+    },
+    {
+      "field": "DOEDemo",
+      "page": "Energy",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "Energy",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        "Clean Energy Demonstration"
+      ]
+    },
+    {
+      "field": "DOENNSA",
+      "page": "Energy",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "Energy",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        " RDT&E Total",
+        "Nonproliferation and Forensics R&D",
+        "RDT&E: Academic Programs",
+        "RDT&E: Adv Sim & Computing",
+        "RDT&E: Engineering",
+        "RDT&E: IC Fusion",
+        "RDT&E: Manufacturing",
+        "RDT&E: Science Assessment"
+      ]
+    },
+    {
+      "field": "DODS&Taccounts",
+      "page": "Defense",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "Defense",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        " S&T (6.1-6.3)",
+        "Adv Technology Development (6.3)",
+        "Applied Research (6.2)",
+        "Basic Research (6.1)",
+        "R&D (6.1-6.6)"
+      ]
+    },
+    {
+      "field": "DODBasicMil",
+      "page": "Defense",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "Defense",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        "Air Force",
+        "Army",
+        "Defense Agencies",
+        "Navy",
+        "Space Force"
+      ]
+    },
+    {
+      "field": "DODBasicProgs",
+      "page": "Defense",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "Defense",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        "Defense Research Sciences",
+        "Minority Institutions",
+        "National Defense Education Program",
+        "OSD Initiatives",
+        "Univ Research Initiatives",
+        "University / Industry Research Centers"
+      ]
+    },
+    {
+      "field": "DODOther",
+      "page": "Defense",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "Defense",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        "Defense Medical Research",
+        "Defense-Wide Manufacturing S&T",
+        "DIU",
+        "National Security Innovation Network",
+        "SERDP"
+      ]
+    },
+    {
+      "field": "DODMil",
+      "page": "Defense",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "Defense",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        " Total",
+        "Air Force",
+        "Army",
+        "Defense Agencies",
+        "Navy",
+        "Space Force"
+      ]
+    },
+    {
+      "field": "NIHAccts1",
+      "page": "NIH",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "NIH",
+          "hidden": false
+        },
+        {
+          "page": "NIH",
+          "hidden": true
+        }
+      ],
+      "labels": [
+        " Total NIH",
+        "Aging",
+        "Alcohol Abuse and Alcoholism",
+        "Allergy and Infectious Diseases",
+        "Arthritis / Musculoskeletal",
+        "Biomedical Imaging / Bioengineering"
+      ]
+    },
+    {
+      "field": "NIHAccts2",
+      "page": "NIH",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "NIH",
+          "hidden": false
+        },
+        {
+          "page": "NIH",
+          "hidden": true
+        }
+      ],
+      "labels": [
+        "Cancer Institute",
+        "Child Health & Human Dev",
+        "Complementary and Integrative Health",
+        "Deafness and Communication",
+        "Dental Research",
+        "Diabetes, Digestive, and Kidney"
+      ]
+    },
+    {
+      "field": "NIHAccts3",
+      "page": "NIH",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "NIH",
+          "hidden": false
+        },
+        {
+          "page": "NIH",
+          "hidden": true
+        }
+      ],
+      "labels": [
+        "Drug Abuse",
+        "Environmental Health Sciences",
+        "Eye Institute",
+        "Fogarty International Center",
+        "General Medical Sciences",
+        "Heart, Lung, and Blood"
+      ]
+    },
+    {
+      "field": "NIHAccts4",
+      "page": "NIH",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "NIH",
+          "hidden": false
+        },
+        {
+          "page": "NIH",
+          "hidden": true
+        }
+      ],
+      "labels": [
+        "Human Genome",
+        "Mental Health",
+        "Minority Health / Disparities",
+        "National Library of Medicine",
+        "Natl Center for Advancing Translational Sci",
+        "Neurological Disorders"
+      ]
+    },
+    {
+      "field": "NIHAccts5",
+      "page": "NIH",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "NIH",
+          "hidden": false
+        },
+        {
+          "page": "NIH",
+          "hidden": true
+        }
+      ],
+      "labels": [
+        "ARPA-H",
+        "Buildings and Facilities",
+        "Nursing Research",
+        "Office of the Director"
+      ]
+    },
+    {
+      "field": "NIHARPA",
+      "page": "NIH",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "NIH",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        "ARPA Health",
+        "ARPA-Health"
+      ]
+    },
+    {
+      "field": "NIH Reorg1",
+      "page": "NIH",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "NIH",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        "Allergy and Infectious Disease",
+        "Body Systems",
+        "Cancer",
+        "Neuroscience and Brain"
+      ]
+    },
+    {
+      "field": "NIH Reorg2",
+      "page": "NIH",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "NIH",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        "Aging",
+        "Behavioral Health",
+        "Child and Women's Health, Sensory Disorders and Communication",
+        "General Medicine"
+      ]
+    },
+    {
+      "field": "NIH Reorg Del",
+      "page": "NIH",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "NIH",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        "Complementary and Integrative Health",
+        "Fogarty International Center",
+        "Minority Health/ Disparities",
+        "Nursing"
+      ]
+    },
+    {
+      "field": "NIH Reorg Moved",
+      "page": "NIH",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "NIH",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        "ARPA-Health",
+        "Environmental Health Sciences",
+        "Natl Center for Advancing Translational Sci"
+      ]
+    },
+    {
+      "field": "NSFAccounts",
+      "page": "NSF and NASA",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "NSF and NASA",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        " NSF Total",
+        "Agency Ops & Award Mgmt",
+        "Major Equipment & Facilities",
+        "Research & Related Activities",
+        "STEM Education"
+      ]
+    },
+    {
+      "field": "NASA Accounts",
+      "page": "NSF and NASA",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "NSF and NASA",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        " NASA Total",
+        "Aeronautics Research",
+        "Deep Space Exploration Systems",
+        "LEO and Spaceflight Operations",
+        "Science",
+        "Space Technology",
+        "STEM Engagement"
+      ]
+    },
+    {
+      "field": "NASA Explor",
+      "page": "NSF and NASA",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "NSF and NASA",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        " Total Deep Space Exploration",
+        "ACD: Cislunar, Surface, Lander",
+        "ACD: Gateway",
+        "Artemis Campaign Development",
+        "Exploration Ground Systems",
+        "Orion Program",
+        "Space Launch System (SLS)"
+      ]
+    },
+    {
+      "field": "NASA SMD",
+      "page": "NSF and NASA",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "NSF and NASA",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        " Science Total",
+        "Astrophysics",
+        "Bio and Physical Sciences",
+        "Earth Science",
+        "Heliophysics",
+        "Planetary Science"
+      ]
+    },
+    {
+      "field": "NASA Miss",
+      "page": "NSF and NASA",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "NSF and NASA",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        "Astrophysics Research",
+        "Discovery",
+        "Earth Science Research",
+        "Heliophysics Research",
+        "Lunar Exploration",
+        "Mars Exploration",
+        "Mars Sample Return"
+      ]
+    },
+    {
+      "field": "Stats1",
+      "page": "Other Agencies",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "Other Agencies",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        "Bureau of Economic Analysis",
+        "Bureau of Labor Statistics",
+        "Bureau of the Census",
+        "Economic Research Service",
+        "Natl Agricultural Statistics Service"
+      ]
+    },
+    {
+      "field": "Stats2",
+      "page": "Other Agencies",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "Other Agencies",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        "Bureau of Justice Statistics",
+        "Bureau of Transportation Stats",
+        "Energy Information Admin",
+        "Natl Center for Education Stats",
+        "Natl Center for Health Statistics",
+        "Natl Ctr for Science and Eng Stats, NSF"
+      ]
+    },
+    {
+      "field": "USDAARS",
+      "page": "Ag and Environment",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "Ag and Environment",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        " Total Budget",
+        "ARS: Buildings and Facilities",
+        "ARS: Salaries and Expenses"
+      ]
+    },
+    {
+      "field": "USDAAccts",
+      "page": "Ag and Environment",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "Ag and Environment",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        "Economic Research Service",
+        "Forest Service: Rangeland Research",
+        "National Ag Statistics Service"
+      ]
+    },
+    {
+      "field": "USDA NIFA",
+      "page": "Ag and Environment",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "Ag and Environment",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        " Total Budget",
+        "1890 Research",
+        "AFRI",
+        "Extension Activities",
+        "Hatch Act",
+        "Integrated Activites",
+        "Research and Education"
+      ]
+    },
+    {
+      "field": "EPAST",
+      "page": "Ag and Environment",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "Ag and Environment",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        " Total Science & Technology",
+        "Air, Climate, and Energy",
+        "Chemical Safety and Sustainability",
+        "Clean Air",
+        "Homeland Security",
+        "Safe and Sustainable Water Resources",
+        "Sustainable Communities"
+      ]
+    },
+    {
+      "field": "USGS",
+      "page": "Ag and Environment",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "Ag and Environment",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        " USGS Total",
+        "Core Science Systems",
+        "Ecosystems",
+        "Energy and Minerals",
+        "Natural Hazards",
+        "Science Support",
+        "Water Resources"
+      ]
+    },
+    {
+      "field": "OtherVA",
+      "page": "Other Agencies",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "Other Agencies",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        "Medical & Prosthetic Research"
+      ]
+    },
+    {
+      "field": "OtherNIST",
+      "page": "Other Agencies",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "Other Agencies",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        " Total",
+        "Industrial Tech Services",
+        "NIST Labs"
+      ]
+    },
+    {
+      "field": "NOAA",
+      "page": "Ag and Environment",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "Ag and Environment",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        "NOAA Total",
+        "OAR: Climate Research",
+        "OAR: High Performance Computing Initiatives",
+        "OAR: Ocean, Coastal, and Great Lakes Research",
+        "OAR: Weather and Air Chemistry Research",
+        "Office of Oceanic & Atmospheric Research (OAR)",
+        "Weather Satellites"
+      ]
+    },
+    {
+      "field": "OtherDHS",
+      "page": "Other Agencies",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "Other Agencies",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        "Countering Weapons of Mass Destruction",
+        "Cybersecurity and Infrastructure R&D",
+        "Science & Technology"
+      ]
+    },
+    {
+      "field": "OtherHHS",
+      "page": "Other Agencies",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "Other Agencies",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        "Agency for Healthcare Research and Quality",
+        "Biomedical Advanced R&D Authority",
+        "Centers for Disease Control and Prevention",
+        "Project BioShield"
+      ]
+    },
+    {
+      "field": "OtherIES",
+      "page": "Other Agencies",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "Other Agencies",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        "Institute of Education Sciences"
+      ]
+    },
+    {
+      "field": "OtherDOT",
+      "page": "Other Agencies",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "Other Agencies",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        "ARPA-I",
+        "FAA Research, Eng & Dev",
+        "Railroad Administration R&D",
+        "Research & Technology"
+      ]
+    },
+    {
+      "field": "AggTot",
+      "page": "R&D Totals",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "R&D Totals",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        " Total R&D",
+        "Applied Research",
+        "Basic Research",
+        "Development",
+        "R&D Facilities"
+      ]
+    },
+    {
+      "field": "AggAgcy",
+      "page": "R&D Totals",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "R&D Totals",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        "All Other",
+        "Dept. of Agriculture",
+        "Dept. of Commerce",
+        "Dept. of Defense",
+        "Dept. of Energy",
+        "NASA",
+        "NIH",
+        "NSF"
+      ]
+    },
+    {
+      "field": "PBRFunc",
+      "page": "R&D Totals",
+      "page_hidden": false,
+      "page_instances": [
+        {
+          "page": "R&D Totals",
+          "hidden": false
+        }
+      ],
+      "labels": [
+        "Agriculture",
+        "Community Development",
+        "Defense",
+        "Education and Training",
+        "Energy",
+        "General Science",
+        "Health",
+        "Income Security",
+        "International Affairs",
+        "Justice",
+        "Medicaid",
+        "Medicare",
+        "Natural Resources",
+        "Net Interest",
+        "Other Mandatory Spending",
+        "Other Nondefense Discretionary",
+        "Social Security",
+        "Space",
+        "Transportation",
+        "Veterans Programs"
+      ]
+    }
+  ]
+}

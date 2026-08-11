@@ -291,7 +291,8 @@ consequences already encoded:
         states, keyboard focus, and console/network failures.
       - Local release evidence: 64 tests plus all offline validators and the
         rendered matrix pass. Detailed contract: `docs/phase-3.2a-handoff.md`.
-- [ ] Phase 3.2b — build and review the AAAS-to-federal-account crosswalk.
+- [x] Phase 3.2b — build and review the AAAS-to-federal-account crosswalk
+      (completed 2026-08-11 as reference-only research).
       Treat the AAAS R&D Appropriations Dashboard as the scope/framing source,
       not as an unattended production registry. Commit a dated source snapshot
       and a reviewed, possibly many-to-many mapping to federal accounts; CI may
@@ -301,9 +302,19 @@ consequences already encoded:
       `unresolved`, with evidence. Resolved rows may proceed without waiting for
       optional review of the others. Federal-account hierarchy is canonical;
       AAAS is an alternate grouping/framing view. Source discovery and mapping
-      may run in parallel with 3.2a in a separate worktree if it touches only
-      reference/crosswalk artifacts; registry integration and onboarding wait
-      for the 3.2a schema/workflow contract.
+      were completed in a separate worktree without changing the registry,
+      production workflows, schemas, or generated dashboard data.
+      - The dated snapshot preserves 45 AAAS grouping fields and 237 exact
+        labels from the public FY 2026 Power BI model; the reviewed crosswalk
+        classifies 185 rows as resolved, 10 as provisional, and 42 as
+        unresolved, with row-level evidence and explicit account arrays.
+      - Artifacts: `reference/aaas_rd_appropriations_2026-08-11.json`,
+        `reference/aaas_federal_account_crosswalk.{json,csv}`, and
+        `docs/aaas-federal-account-crosswalk.md`.
+      - Phase 3.2a satisfies the technical prerequisite, but the crosswalk
+        remains reference-only pending reviewed account onboarding. It does not
+        authorize automatic registry onboarding, production remapping, workflow
+        changes, or automated drift enforcement.
 - [ ] Phase 3.2c — non-blocking funding-action sentinel pilot.
       Implement the signal/status/review contract in
       `docs/funding-action-sentinel.md` as two sequential goal-sized tasks:

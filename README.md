@@ -15,6 +15,13 @@ ever deleting stored history.
 See `CLAUDE.md` for architecture, roadmap, and the empirically confirmed
 NSF API defects the pipeline defends against.
 
+Phase 3.2b records a dated, reviewed AAAS FY 2026 R&D Appropriations
+crosswalk as reference-only research. Federal accounts remain canonical, AAAS
+labels are retained as alternate framing, and the completed Phase 3.2a
+technical prerequisite does not authorize automatic account onboarding or
+production remapping. See
+[`docs/aaas-federal-account-crosswalk.md`](docs/aaas-federal-account-crosswalk.md).
+
 Phase 3.2c-1 implements a non-blocking funding-action sentinel that surfaces
 material gross-negative File C activity without calling it a cancellation.
 Its versioned financial-observation, sourced-event, optional-review, and episode
@@ -67,6 +74,13 @@ labeling, review, limitation, and maintenance-cost contract.
 - `scripts/plan_obligation_refresh.py` and
   `scripts/reconcile_obligation_artifacts.py` — account × FY planning and
   provenance-preserving atomic snapshot assembly.
+- `reference/aaas_rd_appropriations_2026-08-11.json` and
+  `reference/aaas_federal_account_crosswalk.{json,csv}` — dated AAAS source
+  inventory and reviewed reference-only federal-account mappings; neither is a
+  production registry or ingestion input.
+- `docs/aaas-federal-account-crosswalk.md` — Phase 3.2b source provenance,
+  classification rules, many-to-many review results, evidence model, and the
+  reviewed account-onboarding boundary.
 - `docs/funding-action-sentinel.md` and `docs/phase-3.2c1-handoff.md` — the
   sentinel contract, implemented core, boundaries of automation, source-pilot
   handoff, and estimated operating burden.
