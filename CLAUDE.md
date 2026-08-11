@@ -244,17 +244,34 @@ consequences already encoded:
       Also fold in the Phase 2 hardening tripwire while touching
       validators: per-FY unfiltered-total vs filtered+IM-total comparison
       in `validate_nih.py --live`.
-- [ ] Phase 3.2+ — per-agency fan-out via the calibrated adapter. Cheap,
-      parallel, Sonnet-executed with Fable review only; batch several
-      agencies per session. Each agency = registry entries (sub-tier/
-      office codes, display names, tier mapping), plausibility ranges,
-      pinned baseline, CI backfill, verification sweep (store integrity,
+- [ ] Phase 3.2+ — fan-out via the calibrated adapter. Cheap, parallel,
+      Sonnet-executed with Fable review only; batch several agencies per
+      session. Each unit = registry entries, plausibility ranges, pinned
+      baseline, CI backfill, verification sweep (store integrity,
       invariants, browser, links), cross-validation wiring.
-      BLOCKED ON OWNER INPUT before starting: (1) priority-ordered agency
-      list (candidates: NASA SMD, DOD research offices DARPA/ONR/AFOSR,
-      USDA NIFA, NOAA, NIST, DOE beyond SC); (2) for defense agencies,
-      whether contracts count as science funding here or grants/
-      cooperative agreements only — this changes their totals by an order
-      of magnitude and is the owner's editorial call, not an engineering
-      choice. Ask via AskUserQuestion if not already answered in the
-      conversation.
+      OWNER DIRECTIVE (2026-08-11) — scope and framing:
+      - Coverage matches the AAAS R&D Appropriations Dashboard
+        (https://www.aaas.org/news/fy-2027-rd-appropriations-dashboard):
+        this dashboard is its EX POST complement — AAAS tracks what
+        Congress appropriates per account; we track obligations of those
+        appropriated funds as they actually flow. Mirror AAAS's agency/
+        account structure (DOD S&T accounts, NIH, DOE SC/ARPA-E/applied
+        energy, NASA science accounts, NSF, USDA ARS/NIFA, NOAA, NIST,
+        USGS, EPA S&T, VA research, DHS S&T, etc. — extract the exact
+        current list from the AAAS page, not from this parenthetical).
+      - aaas.org is proxy-blocked in the dev environment; CI has full
+        egress — extract the account list there (discover-orgs pattern)
+        and commit it under reference/.
+      - Design implication: matching appropriations accounts ex post
+        means the registry unit for these agencies is likely the
+        APPROPRIATION ACCOUNT (USAspending supports Treasury Account
+        Symbol / federal-account filters on award search), not the
+        awarding office — validate this mapping empirically in the 3.1
+        pilot (DOE SC is both an AAAS account and an awarding office, a
+        clean test of whether the two framings agree).
+      - Instrument scope: include all obligation instruments (grants,
+        cooperative agreements, contracts, IAAs) — AAAS accounts like
+        DOD RDT&E are contract-dominated, so instrument filtering would
+        break the ex post correspondence. Note per-agency caveats where
+        award-level USAspending coverage is known-incomplete (e.g.
+        classified DOD work) rather than silently under-reporting.
