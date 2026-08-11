@@ -1,8 +1,8 @@
 # Phase 3.1b handoff
 
-Status: the historical backfill, exact reconciliation, and light/dark browser
-release gates are complete. Calibration remains fail-closed until the
-award-link normalization commit passes its head-specific CI run.
+Status: the historical backfill, exact reconciliation, light/dark browser
+release gate, and award-link normalization CI are complete. Calibration is
+ready; only the readiness commit's head-specific CI and merge remain.
 
 ## What changed
 
@@ -60,7 +60,7 @@ synthesized for the unavailable years.
 
 ## Validation completed
 
-- Full Python unit suite: 46 tests green.
+- Full Python unit suite: 47 tests green.
 - Live account resolver: DOE `089-0222` dynamically resolved to internal ID
   5778 and the requested account scope echoed correctly.
 - Live File B P02 probe: 146 rows, $1,123,055,113.69 cumulative obligations.
@@ -81,14 +81,8 @@ synthesized for the unavailable years.
 
 ## Remaining gate and takeover steps
 
-1. Require the head-specific CI run for the award-link normalization commit to
-   pass; the earlier green checks do not cover the newer `[skip ci]` data head.
-2. Only after that check passes, change
-   `reference/usaspending_calibration.json` to `status=ready`,
-   `onboardingAllowed=true`, and `obligationLedger.status=passed`. The
-   validator rejects an early flip.
-3. Require the readiness commit's own CI run to pass.
-4. Merge, confirm the Pages deployment, and record run/PR/deploy links in this
+1. Require the readiness commit's own CI run to pass.
+2. Merge, confirm the Pages deployment, and record the deploy link in this
    handoff and the Phase 3.1b roadmap entry.
 
 The separate NIH full re-pull is complete: all 28 IC shards carry structured

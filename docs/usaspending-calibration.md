@@ -1,6 +1,6 @@
 # USAspending Phase 3.1 calibration decision
 
-Status: **BLOCKED before agency onboarding** (2026-08-10).
+Status: **READY for obligation-ledger onboarding** (2026-08-11).
 
 Phase 3.1 deliberately required calibration against known NSF and NIH data
 before USAspending became any agency's sole source. That gate worked: the
@@ -79,9 +79,16 @@ recipient and flow detail. A visible residual (`File B - File C`) retains all
 non-award account activity and makes both identities exact. See
 `docs/obligation-ledger.md`.
 
-The calibration remains blocked only until the dedicated FY2017-present
-backfill, exact GTAS checks, and browser/deploy release bar finish. FY2015–16
-are officially unavailable; FY2017 begins with the first DATA Act submission.
+The dedicated FY2017-present backfill completed in
+[run 31498087792](https://github.com/jpwolfson/science-funding-dashboard/actions/runs/31498087792).
+All available years were ingested; FY2018–25 reconcile to pinned GTAS/File A
+totals at exact cents, while FY2017 and FY2026 reconcile to their pinned
+partial periods. Offline invariants and light/dark browser checks passed for
+the obligation root, DOE, account, a Program Activity with signed flows, and
+the legacy award root. The calibration is therefore ready for the separate
+File B/File C obligation adapter. It does not authorize award-search totals as
+account-flow dollars. FY2015–16 remain officially unavailable; FY2017 begins
+with the first DATA Act submission.
 
 Official references:
 

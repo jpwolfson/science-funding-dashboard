@@ -52,6 +52,21 @@ class USAspendingCalibrationTests(unittest.TestCase):
             self.assertTrue(any("registry agencies" in error
                                 for error in validate(root)))
 
+    def test_ready_gate_requires_passed_obligation_ledger(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.fixture(root)
+            path = root / "reference" / "usaspending_calibration.json"
+            calibration = json.loads(path.read_text())
+            calibration["status"] = "ready"
+            calibration["onboardingAllowed"] = True
+            path.write_text(json.dumps(calibration))
+            self.assertTrue(any("passed obligation-ledger" in error
+                                for error in validate(root)))
+            calibration["obligationLedger"]["status"] = "passed"
+            path.write_text(json.dumps(calibration))
+            self.assertEqual([], validate(root))
+
 
 if __name__ == "__main__":
     unittest.main()
