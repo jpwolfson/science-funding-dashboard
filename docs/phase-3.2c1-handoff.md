@@ -40,6 +40,12 @@ or making optional review a workflow dependency.
 - The page publishes the full automation/coverage limitations and the launch
   maintenance-cost estimates. It repeatedly distinguishes financial signals
   from confirmed cancellations.
+- A post-launch coverage correction generates the page's prominent financial-
+  account and authoritative-source scope directly from their registries. The
+  initial disclosure therefore states that financial detection covers only DOE
+  Office of Science account `089-0222`, that no authoritative source adapter is
+  registered, and that absence from the page is not evidence of no action.
+  Validation fails if this disclosure diverges from either registry.
 
 ## First committed output
 
@@ -81,3 +87,14 @@ last-good records on failure, and populate only fields the source supports.
 Award matching must be identifier- or source-backed. Do not infer motive,
 legality, or financial equivalence, and do not merge announced value with
 observed deobligation or eliminated future value.
+
+The required DOE pilot is the [October 2025 announcement](https://www.energy.gov/articles/energy-department-announces-termination-223-projects-saving-over-75-billion)
+covering 321 awards, 223 projects, and approximately $7.56 billion across OCED,
+EERE, GDO, MESC, ARPA-E, and FE. Preserve “approximately” as an amount qualifier
+and record the announcement as an attributed termination event, not as an
+observed deobligation. Appeals, closeout, litigation, deobligation, vacatur,
+and restoration are later events with their own dates and sources. A direct
+order or agency record is required before publishing a vacatur or restoration;
+a different court's citation to litigation is not sufficient. Financial
+detection for the six named offices remains Phase 3.2d+ account onboarding and
+does not block publication of the sourced portfolio event in 3.2c-2.

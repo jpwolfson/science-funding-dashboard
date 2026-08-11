@@ -1,5 +1,18 @@
 {
  "classificationPolicy": "A financial observation is not a confirmed cancellation. Confirmation requires an accepted authoritative sourced status event.",
+ "coverage": {
+  "authoritativeSources": [],
+  "disclaimer": "Absence from this page is not evidence that no funding action occurred.",
+  "financialAccounts": [
+   {
+    "abbrev": "DOE SC",
+    "agency": "Department of Energy",
+    "federalAccount": "089-0222",
+    "name": "Office of Science",
+    "path": "doe/sc"
+   }
+  ]
+ },
  "detector": {
   "clusterGrossNegativeCents": 2500000000,
   "clusterMinimumDistinctAwards": 5,
@@ -921,7 +934,7 @@
  "kind": "sentinel",
  "limitations": [
   {
-   "text": "There is no complete federal feed of terminations, suspensions, appeals, settlements, and reinstatements. This page covers registered sources and financial rules only.",
+   "text": "There is no complete federal feed of terminations, suspensions, appeals, settlements, and reinstatements. The financial detector covers only the registered accounts shown above, and sourced-event discovery covers only registered authoritative sources.",
    "title": "Incomplete discovery"
   },
   {

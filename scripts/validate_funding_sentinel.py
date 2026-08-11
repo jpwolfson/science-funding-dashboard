@@ -13,6 +13,7 @@ REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
 from adapters.funding_sentinel import (
+    COVERAGE_DISCLAIMER,
     LIMITATIONS,
     PUBLIC_STATES,
     SCHEMA_VERSION,
@@ -20,6 +21,7 @@ from adapters.funding_sentinel import (
     VALID_EVENT_TYPES,
     VALID_REVIEW_FINDINGS,
     apply_source_freshness,
+    build_coverage,
     build_episodes,
     content_sha256,
     detect_financial_observations,
@@ -205,6 +207,13 @@ def validate(repo=REPO, require_data=True):
         errors.append("sentinel dashboard episodes differ from the durable store")
     if dashboard.get("sourceStatuses") != sources:
         errors.append("sentinel dashboard source statuses differ from the durable store")
+    expected_coverage = build_coverage(accounts, config.get("sources", []))
+    if dashboard.get("coverage") != expected_coverage:
+        errors.append(
+            "sentinel dashboard coverage does not match the account and source registries"
+        )
+    if (dashboard.get("coverage") or {}).get("disclaimer") != COVERAGE_DISCLAIMER:
+        errors.append("sentinel dashboard coverage disclaimer is missing")
     summary = dashboard.get("summary") or {}
     if summary.get("episodeCount") != len(episodes):
         errors.append("sentinel dashboard episode count mismatch")

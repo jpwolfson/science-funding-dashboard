@@ -39,7 +39,9 @@ A negative obligation is a financial observation, not proof of cancellation.
 A termination may also eliminate unobligated future funding without producing
 an equal negative obligation. Announced affected value, prior obligations,
 posted deobligations, eliminated unobligated value, and later restorations must
-remain separate fields.
+remain separate fields. Source qualifiers such as “approximately” or “up to”
+are part of an amount's meaning and must survive normalization and public
+rendering.
 
 File B-minus-File C residual events are reconciliation facts and must never be
 used as cancellation candidates.
@@ -80,7 +82,10 @@ Phase 3.2c should add a generic funding-action store rather than a
 4. **Build the site regardless of review state.** The public sentinel page
    renders `unreviewed signal`, `source-confirmed event`, `reviewed finding`,
    `superseded`, and `restored` as distinct states. It shows source freshness
-   and the age of an unreviewed record without calling it overdue.
+   and the age of an unreviewed record without calling it overdue. A prominent,
+   registry-derived banner names the current financial accounts and registered
+   authoritative sources and warns that absence is not evidence that no funding
+   action occurred.
 5. **Optionally mirror reviewable records.** CI may open or update a GitHub
    Issue for convenience. An issue is not the store of record, and failure to
    create or close one must not block ingestion or deployment.
@@ -237,3 +242,5 @@ maintenance signal, not a review SLA or publication gate.
 - GitHub Issues and agent reviews are optional conveniences, not dependencies.
 - The site publishes the limitations above and never implies complete federal
   cancellation coverage.
+- The site's current-coverage disclosure is generated from the obligation and
+  source registries and fails validation if it becomes stale or is omitted.

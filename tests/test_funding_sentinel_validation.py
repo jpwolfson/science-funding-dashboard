@@ -24,7 +24,11 @@ class FundingSentinelValidationTests(unittest.TestCase):
         }))
         (root / "config" / "obligation_accounts.json").write_text(json.dumps({
             "schemaVersion": 2,
-            "accounts": [{"path": "doe/sc", "federalAccount": "089-0222"}],
+            "accounts": [{
+                "path": "doe/sc", "agency": "Department of Energy",
+                "name": "Office of Science", "abbrev": "DOE SC",
+                "federalAccount": "089-0222",
+            }],
         }))
         file_c = normalize_event({
             "id": "file-c", "source": "file_c",
@@ -50,6 +54,12 @@ class FundingSentinelValidationTests(unittest.TestCase):
         temp, root = self.fixture()
         try:
             self.assertEqual([], validate(root))
+            dashboard = json.loads(
+                (root / "data" / "sentinel" / "dashboard.json").read_text()
+            )
+            self.assertEqual("089-0222", dashboard["coverage"]
+                             ["financialAccounts"][0]["federalAccount"])
+            self.assertEqual([], dashboard["coverage"]["authoritativeSources"])
         finally:
             temp.cleanup()
 
@@ -76,6 +86,19 @@ class FundingSentinelValidationTests(unittest.TestCase):
             errors = validate(root)
             self.assertTrue(any("coverage limitation" in error for error in errors))
             self.assertTrue(any("non-blocking review policy" in error
+                                for error in errors))
+        finally:
+            temp.cleanup()
+
+    def test_stale_coverage_contract_fails(self):
+        temp, root = self.fixture()
+        try:
+            path = root / "data" / "sentinel" / "dashboard.json"
+            value = json.loads(path.read_text())
+            value["coverage"]["financialAccounts"] = []
+            path.write_text(json.dumps(value))
+            errors = validate(root)
+            self.assertTrue(any("coverage does not match" in error
                                 for error in errors))
         finally:
             temp.cleanup()
