@@ -8,17 +8,17 @@
  },
  "source": "https://api.reporter.nih.gov/v2/projects/search (NIH RePORTER v2), administering IC NINR; one application record per fiscal year; intramural projects excluded; dated by award notice, then budget/project start when unavailable",
  "warnings": [],
- "totalAwards": 4055,
+ "totalAwards": 4056,
  "currentFY": 2026,
  "monthly": [
   {
    "month": "2014-10",
-   "awards": 3,
-   "dollars": 482655,
+   "awards": 4,
+   "dollars": 24886655,
    "std": 0,
    "cont": 2,
    "fell": 1,
-   "other": 0
+   "other": 1
   },
   {
    "month": "2014-11",
@@ -1303,19 +1303,25 @@
   {
    "fy": 2015,
    "partial": false,
-   "awards": 344,
-   "dollars": 113201722,
-   "median": 366705,
-   "exTop3Dollars": 109684814,
+   "awards": 345,
+   "dollars": 137605722,
+   "median": 369045,
+   "exTop3Dollars": 110504002,
    "octJul": {
-    "awards": 270,
-    "dollars": 91578446,
+    "awards": 271,
+    "dollars": 115982446,
     "std": 32,
     "cont": 199,
     "fell": 39,
-    "other": 0
+    "other": 1
    },
    "top3": [
+    {
+     "id": "nih:9065022",
+     "title": "NCBI (National Center for Biotechnology Information)",
+     "awardee": "",
+     "amount": 24404000
+    },
     {
      "id": "nih:8926710",
      "title": "Refinement and Expansion of the Palliative Care Research Cooperative Group (PCRC)",
@@ -1327,12 +1333,6 @@
      "title": "Study of Women's Health Across the Nation (SWAN V): Michigan Site",
      "awardee": "UNIVERSITY OF MICHIGAN AT ANN ARBOR",
      "amount": 858318
-    },
-    {
-     "id": "nih:9038685",
-     "title": "How Does Stress Affect Health Behaviors: Preferences, Beliefs, or Constraints?",
-     "awardee": "PRINCETON UNIVERSITY",
-     "amount": 819188
     }
    ]
   },
