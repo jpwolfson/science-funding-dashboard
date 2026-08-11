@@ -5,6 +5,7 @@ import hashlib
 import http.client
 import io
 import json
+import sys
 import time
 import urllib.request
 import urllib.error
@@ -17,6 +18,7 @@ from adapters.obligation_common import canonical_period, cents, normalize_event,
 
 API = "https://api.usaspending.gov/api/v2"
 _LAST_DOWNLOAD_REQUEST = 0.0
+DOWNLOAD_COOLDOWN_SECONDS = 20
 
 
 def _json(url, payload=None, attempts=10):
@@ -33,7 +35,12 @@ def _json(url, payload=None, attempts=10):
             code = getattr(error, "code", None)
             if attempt + 1 == attempts or (code is not None and code not in (429, 500, 502, 503, 504)):
                 raise
-            time.sleep(min(30, 2 ** attempt))
+            delay = min(60, 2 ** attempt)
+            print(
+                f"USAspending request interrupted ({type(error).__name__}); "
+                f"retry {attempt + 2}/{attempts} in {delay}s",
+                file=sys.stderr, flush=True)
+            time.sleep(delay)
 
 
 def _bytes(url, attempts=6):
@@ -47,7 +54,12 @@ def _bytes(url, attempts=6):
             code = getattr(error, "code", None)
             if attempt + 1 == attempts or (code is not None and code not in (429, 500, 502, 503, 504)):
                 raise
-            time.sleep(min(30, 2 ** attempt))
+            delay = min(60, 2 ** attempt)
+            print(
+                f"USAspending archive download interrupted "
+                f"({type(error).__name__}); retry {attempt + 2}/{attempts} "
+                f"in {delay}s", file=sys.stderr, flush=True)
+            time.sleep(delay)
 
 
 def resolve_account(account, fiscal_year):
@@ -64,14 +76,14 @@ def request_download(account_id, fiscal_year, period, submission_type, columns):
     # drops bursty connections instead of always returning 429. Keep POSTs
     # serialized and spaced even after the previous archive finishes.
     elapsed = time.monotonic() - _LAST_DOWNLOAD_REQUEST
-    if elapsed < 5:
-        time.sleep(5 - elapsed)
+    if elapsed < DOWNLOAD_COOLDOWN_SECONDS:
+        time.sleep(DOWNLOAD_COOLDOWN_SECONDS - elapsed)
     payload = {"account_level": "federal_account", "file_format": "csv",
                "filters": {"fy": fiscal_year, "period": period,
                            "submission_types": [submission_type],
                            "federal_account": str(account_id)},
                "columns": columns}
-    result = _json(f"{API}/download/accounts/", payload)
+    result = _json(f"{API}/download/accounts/", payload, attempts=20)
     _LAST_DOWNLOAD_REQUEST = time.monotonic()
     echoed = result.get("download_request") or {}
     filters = echoed.get("filters", {})
@@ -84,6 +96,7 @@ def request_download(account_id, fiscal_year, period, submission_type, columns):
 
 
 def finish_download(result, timeout=1800, poll_seconds=15):
+    global _LAST_DOWNLOAD_REQUEST
     status_url = result["status_url"]
     if status_url.startswith("/"):
         status_url = "https://api.usaspending.gov" + status_url
@@ -103,6 +116,10 @@ def finish_download(result, timeout=1800, poll_seconds=15):
     if not str(file_url).startswith("https://files.usaspending.gov/"):
         raise ValueError(f"unexpected download host: {file_url}")
     payload = _bytes(file_url)
+    # Start the cooldown after the archive is actually retrieved. Measuring
+    # from POST acceptance still allows back-to-back generator requests when
+    # the preceding archive took more than the old cooldown to build.
+    _LAST_DOWNLOAD_REQUEST = time.monotonic()
     return payload, status
 
 

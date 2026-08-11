@@ -1,7 +1,10 @@
+import http.client
+import io
 import unittest
+from unittest.mock import patch
 
 from adapters.usaspending_obligations import (
-    combine_file_b_file_c, file_b_period_events, parse_file_c,
+    _json, combine_file_b_file_c, file_b_period_events, parse_file_c,
 )
 
 
@@ -11,6 +14,16 @@ ALIASES = {"0001": {"code": "0001", "name": "BES", "park": "PARK1"},
 
 
 class USAspendingObligationTests(unittest.TestCase):
+    def test_remote_disconnect_is_retried(self):
+        response = io.BytesIO(b'{"ok": true}')
+        with patch(
+                "adapters.usaspending_obligations.urllib.request.urlopen",
+                side_effect=[http.client.RemoteDisconnected(), response]) as open_, \
+             patch("adapters.usaspending_obligations.time.sleep") as sleep:
+            self.assertEqual(_json("https://example.test", attempts=2), {"ok": True})
+        self.assertEqual(open_.call_count, 2)
+        sleep.assert_called_once_with(1)
+
     def test_file_b_cumulative_snapshots_are_differenced(self):
         key = ("0001", "BES", "PARK1", "25.1", "D", "", "")
         vanished = ("0001", "BES", "PARK1", "25.2", "D", "", "")

@@ -56,7 +56,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 350
     strategy:
-      fail-fast: true
+      # Let independent years finish even if one USAspending archive request
+      # exhausts retries. A failed year still blocks reconcile; re-running
+      # failed jobs can then reuse all successful artifacts from the attempt.
+      fail-fast: false
       # USAspending's custom-account generator drops bursty connections;
       # serialize account-year jobs and also throttle POSTs in the adapter.
       max-parallel: 1

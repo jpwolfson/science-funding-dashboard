@@ -59,7 +59,7 @@ synthesized for the unavailable years.
 
 ## Validation completed locally
 
-- Full Python unit suite: 41 tests green.
+- Full Python unit suite: 42 tests green.
 - Live account resolver: DOE `089-0222` dynamically resolved to internal ID
   5778 and the requested account scope echoed correctly.
 - Live File B P02 probe: 146 rows, $1,123,055,113.69 cumulative obligations.
@@ -97,3 +97,19 @@ old 694,443 total. This mixed state is intentionally blocked from publication.
 Do not replace canonical File B dollars with File C-only totals, do not route
 events through `adapters/common.py` or `scripts/rollup.py`, and do not fabricate
 monthly or FY2015–16 data.
+
+## CI run history and current blockers
+
+- Obligation backfill run `31462254962` proved the original quarterly File C
+  labels (`FY2017Q2`) needed canonical period-end normalization (`P06`). That
+  semantic fix is covered by a regression test.
+- Retry run `31462411725` then completed FY2017 exactly. FY2018 successfully
+  generated File B periods P02–P09, but USAspending disconnected on all ten
+  attempts to request P10; `fail-fast` cancelled the remaining years. The
+  adapter now uses a 20-second post-archive cooldown, 20 POST attempts with
+  visible backoff, and a non-fail-fast year matrix. Trigger attempt 4 is the
+  next run.
+- The NIH full re-pull is intentionally separate from the obligation ledger.
+  It must rewrite all 28 IC shards with structured activity/mechanism detail,
+  pass exact live RePORTER reconciliation, pass the like-for-like Data Book
+  subset at 2%, and rebuild NIH/root rollups before publication.
