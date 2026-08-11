@@ -79,7 +79,10 @@
   .tip .t-lab { color: var(--ink-2); }
   details { margin-top: 8px; }
   summary { color: var(--muted); font-size: 13px; cursor: pointer; user-select: none; }
-  table { border-collapse: collapse; margin-top: 8px; font-size: 13px; width: 100%; }
+  table {
+    border-collapse: collapse; display: block; margin-top: 8px;
+    font-size: 13px; overflow-x: auto; width: 100%;
+  }
   tr.nav-row { cursor: pointer; }
   tr.nav-row:hover td { background: rgba(128,128,128,.08); }
   th.chev, td.chev { width: 1.4em; text-align: right; color: var(--muted); font-size: 15px; }
