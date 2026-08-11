@@ -212,6 +212,49 @@ consequences already encoded:
         filtered+IM-total comparison inside `validate_nih.py --live`;
         (2) cosmetic: NIH-scale dollar tiles render "$23314M" — wants a
         billions formatter in the site's `fmtM`.
-- [ ] Phase 3 — USAspending adapter for agencies without good native APIs
-      (DOE SC, NASA SMD, DOD research offices, USDA NIFA, ...) plus the
-      cross-validation layer for all existing units.
+- [ ] Phase 3.1 — USAspending adapter, calibrated against known truth,
+      plus one pilot agency. One Fable-led session. Do these IN ORDER —
+      the ordering is the risk control:
+      1. `adapters/usaspending.py` core. The hard, one-time problem is
+         semantics: USAspending records TRANSACTIONS (modifications,
+         amendments, de-obligations) layered on base awards. Decide and
+         document: award identity (one record per base award), amount
+         (current total obligation vs base action), date (base action
+         date, to match "new awards" semantics elsewhere), and the
+         awarding sub-tier/office code mapping for the directorate tier.
+         Expect undocumented API behavior; apply the data-integrity rules
+         at the top of this file (union, never delete, fail closed).
+      2. Cross-validation calibration BEFORE any new agency: query
+         USAspending for NSF and NIH units where this repo already holds
+         verified stores (start nsf/mps/dms and a mid-size NIH IC).
+         Reconcile counts/dollars per FY against our stores; characterize
+         every residual (reporting lag, scope differences) and pin
+         tolerances in a `reference/usaspending_calibration.json`. This
+         both ships the cross-validation layer for existing units (wire it
+         into CI like validate_nih) and proves the adapter's semantics
+         against ground truth before USAspending becomes any agency's
+         sole source. If reconciliation can't be brought within a
+         defensible tolerance, STOP and present findings to the owner —
+         do not onboard new agencies on uncalibrated semantics.
+      3. Pilot agency: DOE Office of Science, program offices as the
+         directorate tier. Full backfill on CI, plausibility ranges,
+         pinned external baseline (DOE budget/report figures where
+         available), rollup, site, browser verification — same release
+         bar as Phase 2 (zero warnings, invariants exact, deploy green).
+      Also fold in the Phase 2 hardening tripwire while touching
+      validators: per-FY unfiltered-total vs filtered+IM-total comparison
+      in `validate_nih.py --live`.
+- [ ] Phase 3.2+ — per-agency fan-out via the calibrated adapter. Cheap,
+      parallel, Sonnet-executed with Fable review only; batch several
+      agencies per session. Each agency = registry entries (sub-tier/
+      office codes, display names, tier mapping), plausibility ranges,
+      pinned baseline, CI backfill, verification sweep (store integrity,
+      invariants, browser, links), cross-validation wiring.
+      BLOCKED ON OWNER INPUT before starting: (1) priority-ordered agency
+      list (candidates: NASA SMD, DOD research offices DARPA/ONR/AFOSR,
+      USDA NIFA, NOAA, NIST, DOE beyond SC); (2) for defense agencies,
+      whether contracts count as science funding here or grants/
+      cooperative agreements only — this changes their totals by an order
+      of magnitude and is the owner's editorial call, not an engineering
+      choice. Ask via AskUserQuestion if not already answered in the
+      conversation.
