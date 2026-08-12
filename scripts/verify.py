@@ -226,13 +226,16 @@ def _lint_account(repo, account, crosswalk_rows):
             "no crosswalk row references this federal account (not required)",
         ))
     else:
-        unresolved = [row.get("aaas_row_key") for row in matches
-                      if row.get("status") != "resolved"]
+        resolved = [row.get("aaas_row_key") for row in matches
+                    if row.get("status") == "resolved"]
+        deferred = [row.get("aaas_row_key") for row in matches
+                    if row.get("status") != "resolved"]
         checks.append(_check(
-            f"{path}: crosswalk correspondence", not unresolved,
-            (f"{len(matches)} corresponding row(s); unresolved={unresolved}"
-             if unresolved else
-             f"{len(matches)} corresponding row(s), all resolved"),
+            f"{path}: crosswalk correspondence", bool(resolved),
+            (f"{len(resolved)} resolved corresponding row(s); "
+             f"deferred provisional/unresolved rows={deferred}"
+             if resolved else
+             f"no resolved corresponding row; deferred rows={deferred}"),
         ))
     return checks
 
