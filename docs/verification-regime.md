@@ -160,7 +160,7 @@ a verifier needs is a new column here, added once, not a per-agency branch.
 | Field | Meaning |
 |---|---|
 | `rows[].federal_accounts[].code` | Federal account code(s) an AAAS row maps to. The registry tier finds every row whose `federal_accounts` includes an account's `federalAccount`. |
-| `rows[].status` | `resolved` / `provisional` / `unresolved`. Where a corresponding row exists, the registry tier requires it to be `resolved`; an account with no corresponding row passes trivially (crosswalk coverage is not mandatory, per `docs/aaas-federal-account-crosswalk.md`). |
+| `rows[].status` | `resolved` / `provisional` / `unresolved`. Where corresponding rows exist, the registry tier requires at least one resolved mapping for the account. Separate provisional/unresolved alternate views referencing the same account are explicitly deferred and do not block its resolved mapping; an account with no corresponding row passes trivially (crosswalk coverage is not mandatory, per `docs/aaas-federal-account-crosswalk.md`). |
 
 Award-ledger invariants (`validate_award_invariants.py`) read no
 agency-specific parameter at all — `totalAwards`, `fiscalYears`, `monthly`,
