@@ -25,6 +25,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Fetch registered authoritative sources
+        run: python scripts/update_funding_sources.py
       - name: Build from committed File C activity and accepted source stores
         run: python scripts/build_funding_sentinel.py
       - name: Validate stores, stable ledger joins, episodes, and public contract

@@ -26,8 +26,8 @@ STORE_FILES = {
     "episodes": "episodes.json",
 }
 VALID_EVENT_TYPES = {
-    "termination", "suspension", "appeal", "litigation", "supersession",
-    "restoration", "other",
+    "announcement", "termination", "suspension", "appeal", "closeout",
+    "litigation", "deobligation", "supersession", "restoration", "other",
 }
 VALID_REVIEW_FINDINGS = {
     "confirmed-status-event",
@@ -43,6 +43,7 @@ PUBLIC_STATES = {
 }
 SEPARATE_AMOUNT_FIELDS = (
     "announcedAffectedValueCents",
+    "priorObligationsCents",
     "observedDeobligationCents",
     "eliminatedFutureValueCents",
     "restoredValueCents",
@@ -388,7 +389,8 @@ def normalize_sourced_event(event, source_id):
 
 
 def accept_source_snapshot(existing_events, source_statuses, source_id,
-                           extracted_events, snapshot_sha256, accepted_at):
+                           extracted_events, snapshot_sha256, accepted_at,
+                           snapshot_metadata=None):
     """Accept one validated source snapshot without erasing prior history."""
     if len(snapshot_sha256) != 64 or any(
             ch not in "0123456789abcdef" for ch in snapshot_sha256):
@@ -416,14 +418,24 @@ def accept_source_snapshot(existing_events, source_statuses, source_id,
 
     statuses = {row["id"]: dict(row) for row in source_statuses}
     old_status = statuses.get(source_id, {})
+    metadata = dict(snapshot_metadata or {})
+    history = list(old_status.get("snapshotHistory", []))
+    if not history or history[-1].get("sha256") != snapshot_sha256:
+        history.append({
+            "sha256": snapshot_sha256,
+            "acceptedAt": accepted_at,
+            **metadata,
+        })
     statuses[source_id] = {
         **old_status,
+        **metadata,
         "id": source_id,
         "status": "current",
         "lastAttemptAt": accepted_at,
         "lastAcceptedAt": accepted_at,
         "lastAcceptedSha256": snapshot_sha256,
         "acceptedEventIds": sorted(ids),
+        "snapshotHistory": history,
         "error": None,
     }
     return (sorted(by_id.values(), key=lambda row: row["id"]),
@@ -442,6 +454,21 @@ def record_source_failure(source_statuses, source_id, attempted_at, error):
         "error": str(error),
     }
     return sorted(statuses.values(), key=lambda row: row["id"])
+
+
+def write_source_stores(repo, events, source_statuses):
+    """Write only the accepted-source stores; financial stores stay separate."""
+    root = Path(repo) / "data" / "sentinel"
+    _write_store(root / STORE_FILES["events"], {
+        "schemaVersion": SCHEMA_VERSION,
+        "kind": "sourced-events",
+        "events": sorted(events, key=lambda row: row["id"]),
+    })
+    _write_store(root / STORE_FILES["sources"], {
+        "schemaVersion": SCHEMA_VERSION,
+        "kind": "source-status",
+        "sources": sorted(source_statuses, key=lambda row: row["id"]),
+    })
 
 
 def apply_source_freshness(source_statuses, registered_sources, as_of):

@@ -1370,12 +1370,14 @@ function sentinelSourceCard(data) {
       : "No authoritative source pilot is registered in the 3.2c-1 core. The first structured NSF and DOE source adapters are scoped to 3.2c-2; financial signals remain available meanwhile." }));
   } else {
     const table = el("table"), head = el("tr");
-    ["Source", "Status", "Last accepted", "Last attempt"].forEach(text =>
+    ["Source", "Status", "Source as of", "Records", "Last accepted", "Last attempt"].forEach(text =>
       head.append(el("th", { text })));
     table.append(head);
     statuses.forEach(source => table.append(el("tr", {},
       el("td", { text: source.name || source.id }),
       el("td", { text: source.status }),
+      el("td", { text: source.sourceAsOf || "Not stated" }),
+      el("td", { text: source.recordCount == null ? "—" : fmtN(source.recordCount) }),
       el("td", { text: source.lastAcceptedAt || "No accepted snapshot" }),
       el("td", { text: source.lastAttemptAt || "Not attempted" }))));
     card.append(table);
@@ -1383,6 +1385,56 @@ function sentinelSourceCard(data) {
       card.append(el("p", { class: "note", text: "A stale or failed source retains its last accepted records. Other dashboards and deployments continue independently." }));
   }
   $app.append(card);
+}
+
+function renderSentinelSourcedEvent(event, card) {
+  const section = el("div", { class: "sentinel-event" });
+  const action = event.eventType === "announcement" && event.announcedAction
+    ? `announcement of ${event.announcedAction}` : (event.eventType || "status event");
+  const label = `${action}${event.effectiveDate ? ` on ${event.effectiveDate}` : ""}`;
+  section.append(el("p", {}, el("strong", { text: "Attributed source event: " }),
+    el("a", { href: event.sourceUrl, text: event.sourceTitle || label })));
+  section.append(el("p", { class: "note", text: `Event: ${label}. This dated record remains separate from any later appeal, closeout, litigation, deobligation, or restoration.` }));
+  if (event.statedReason) section.append(el("p", { class: "note", text: event.statedReason }));
+  const announcedDisplay = event.announcedAffectedValueDisplay
+    || (event.announcedAffectedValueCents == null ? null
+      : `${event.announcedAffectedValueQualifier ? `${event.announcedAffectedValueQualifier} ` : ""}${fmtCents(event.announcedAffectedValueCents)}`);
+  const amounts = [
+    ["Announced affected value", announcedDisplay],
+    ["Source-listed prior obligations", event.priorObligationsCents == null ? null : fmtCents(event.priorObligationsCents)],
+    ["Observed deobligation", event.observedDeobligationCents == null ? null : fmtCents(event.observedDeobligationCents)],
+    ["Eliminated future value", event.eliminatedFutureValueCents == null ? null : fmtCents(event.eliminatedFutureValueCents)],
+    ["Restored value", event.restoredValueCents == null ? null : fmtCents(event.restoredValueCents)],
+  ].filter(([, value]) => value != null);
+  if (amounts.length) section.append(el("p", { class: "note", text: amounts.map(([name, value]) => `${name}: ${value}`).join(" · ") }));
+  const counts = [];
+  if (event.announcedAwardCount != null) counts.push(`${fmtN(event.announcedAwardCount)} awards`);
+  if (event.announcedProjectCount != null) counts.push(`${fmtN(event.announcedProjectCount)} projects`);
+  if (counts.length) section.append(el("p", { class: "note", text: `Attributed source counts: ${counts.join(" · ")}.` }));
+  if ((event.namedOffices || []).length) section.append(el("p", { class: "note", text:
+    `Named offices: ${event.namedOffices.map(office => `${office.name} (${office.abbrev})`).join("; ")}.` }));
+  if (event.awardMapping === "not-published-by-source") section.append(el("p", { class: "note", text:
+    "Award mapping: the announcement did not publish award identifiers; no award-level match is inferred." }));
+  card.append(section);
+}
+
+function renderSentinelSourcedEvents(episode, card) {
+  const events = episode.sourcedEvents || [];
+  const keys = new Set(events.map(event => `${event.sourceId}|${event.eventType}`));
+  if (events.length > 20 && keys.size === 1) {
+    const first = events[0];
+    const section = el("div", { class: "sentinel-event" });
+    const awardIds = [...new Set(events.flatMap(event => event.awardIds || []))].sort();
+    section.append(el("p", {}, el("strong", { text: "Attributed structured source: " }),
+      el("a", { href: first.sourceUrl, text: first.sourceTitle || first.sourceId })));
+    section.append(el("p", { class: "note", text:
+      `${fmtN(events.length)} separate ${first.eventType} records and ${fmtN(awardIds.length)} mapped award IDs are retained from the source${first.sourceAsOf ? ` as of ${first.sourceAsOf}` : ""}.` }));
+    section.append(el("p", { class: "note", text:
+      `Award ID sample: ${awardIds.slice(0, 12).join(", ")}${awardIds.length > 12 ? ", …" : ""}. The complete identifiers and source-listed fields remain in the versioned dashboard data.` }));
+    card.append(section);
+    return;
+  }
+  events.forEach(event => renderSentinelSourcedEvent(event, card));
 }
 
 function sentinelEpisodeCard(episode) {
@@ -1416,21 +1468,7 @@ function sentinelEpisodeCard(episode) {
     })));
     card.append(section);
   });
-  (episode.sourcedEvents || []).forEach(event => {
-    const section = el("div", { class: "sentinel-event" });
-    const label = `${event.eventType || "status event"}${event.effectiveDate ? ` effective ${event.effectiveDate}` : ""}`;
-    section.append(el("p", {}, el("strong", { text: "Attributed source event: " }),
-      el("a", { href: event.sourceUrl, text: event.sourceTitle || label })));
-    if (event.statedReason) section.append(el("p", { class: "note", text: event.statedReason }));
-    const amounts = [
-      ["Announced affected value", event.announcedAffectedValueCents],
-      ["Observed deobligation", event.observedDeobligationCents],
-      ["Eliminated future value", event.eliminatedFutureValueCents],
-      ["Restored value", event.restoredValueCents],
-    ].filter(([, value]) => value != null);
-    if (amounts.length) section.append(el("p", { class: "note", text: amounts.map(([name, value]) => `${name}: ${fmtCents(value)}`).join(" · ") }));
-    card.append(section);
-  });
+  renderSentinelSourcedEvents(episode, card);
   (episode.reviewFindings || []).forEach(finding => {
     const section = el("div", { class: "sentinel-event" });
     section.append(el("p", {}, el("strong", { text: "Optional review finding: " }),

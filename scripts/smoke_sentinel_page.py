@@ -69,6 +69,13 @@ def run(repo=REPO, chrome=None):
                 "Absence from this page is not evidence that no funding action occurred",
                 "Unreviewed signal", "Coverage and interpretation limits",
                 "Estimated pilot burden", "not overdue",
+                "approximately $7.56 billion", "321 awards", "223 projects",
+                "Office of Clean Energy Demonstrations (OCED)",
+                "Energy Efficiency and Renewable Energy (EERE)",
+                "Grid Deployment (GDO)",
+                "Manufacturing and Energy Supply Chains (MESC)",
+                "Advanced Research Projects Agency-Energy (ARPA-E)",
+                "Fossil Energy (FE)",
             ):
                 if marker not in visible:
                     case_errors.append(f"missing visible marker: {marker}")

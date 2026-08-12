@@ -176,6 +176,31 @@ class FundingSentinelTests(unittest.TestCase):
         )
         self.assertEqual("restored", restored[0]["state"])
 
+    def test_lifecycle_events_remain_separate_records(self):
+        event_types = (
+            "announcement", "appeal", "closeout", "litigation",
+            "deobligation", "restoration",
+        )
+        events = []
+        for index, event_type in enumerate(event_types, start=1):
+            events.append({
+                "sourceRecordId": f"record-{index}",
+                "episodeKey": "portfolio|doe|bounded-example",
+                "eventType": event_type,
+                "effectiveDate": f"2025-10-{index:02d}",
+                "sourceUrl": f"https://example.gov/events/{index}",
+                "sourceSha256": "c" * 64,
+            })
+        accepted, _ = accept_source_snapshot(
+            [], [], "doe-events", events, "c" * 64,
+            "2026-08-11T12:00:00+00:00",
+        )
+        self.assertEqual(6, len({row["id"] for row in accepted}))
+        episode = build_episodes([], accepted, [], "2026-08-11")[0]
+        self.assertEqual(list(event_types), [
+            row["eventType"] for row in episode["sourcedEvents"]
+        ])
+
 
 if __name__ == "__main__":
     unittest.main()

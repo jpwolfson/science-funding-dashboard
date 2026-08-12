@@ -10,5 +10,61 @@
   "automaticScope": "same federal account and Program Activity or award within one fiscal year",
   "note": "Cross-year or cross-portfolio joins require an explicit sourced-event episode key rather than an amount-only inference."
  },
- "sources": []
+ "sources": [
+  {
+   "id": "nsf-terminated-awards",
+   "name": "NSF terminated awards list",
+   "adapter": "nsf_terminated_awards_csv",
+   "url": "https://nsf-gov-resources.nsf.gov/files/NSF-Terminated-Awards.csv",
+   "accept": "text/csv,*/*;q=0.1",
+   "freshnessMaxDays": 10,
+   "maximumBytes": 5000000,
+   "timeoutSeconds": 60
+  },
+  {
+   "id": "doe-october-2025-portfolio-action",
+   "name": "DOE October 2025 portfolio-action announcement",
+   "adapter": "doe_portfolio_announcement",
+   "url": "https://www.energy.gov/articles/energy-department-announces-termination-223-projects-saving-over-75-billion",
+   "accept": "text/html,*/*;q=0.1",
+   "freshnessMaxDays": 10,
+   "maximumBytes": 5000000,
+   "timeoutSeconds": 60,
+   "sourceTitle": "Energy Department Announces Termination of 223 Projects, Saving Over $7.5 Billion",
+   "expectedFacts": {
+    "effectiveDate": "2025-10-01",
+    "displayDate": "October 1, 2025",
+    "awardCount": 321,
+    "projectCount": 223,
+    "amountCents": 756000000000,
+    "amountQualifier": "approximately"
+   },
+   "expectedOffices": [
+    {
+     "name": "Office of Clean Energy Demonstrations",
+     "abbrev": "OCED"
+    },
+    {
+     "name": "Energy Efficiency and Renewable Energy",
+     "abbrev": "EERE"
+    },
+    {
+     "name": "Grid Deployment",
+     "abbrev": "GDO"
+    },
+    {
+     "name": "Manufacturing and Energy Supply Chains",
+     "abbrev": "MESC"
+    },
+    {
+     "name": "Advanced Research Projects Agency-Energy",
+     "abbrev": "ARPA-E"
+    },
+    {
+     "name": "Fossil Energy",
+     "abbrev": "FE"
+    }
+   ]
+  }
+ ]
 }

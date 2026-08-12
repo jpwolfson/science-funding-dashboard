@@ -46,7 +46,7 @@ jobs:
         run: python scripts/validate_usaspending_calibration.py
       - name: Obligation ledger contract (data backfills in its dedicated workflow)
         run: python scripts/validate_obligations.py --allow-empty
-      - name: Funding-action sentinel core contract
+      - name: Funding-action sentinel and source-pilot contract
         run: python scripts/validate_funding_sentinel.py
       - name: Rendered obligation page matrix
         run: python scripts/smoke_obligation_pages.py

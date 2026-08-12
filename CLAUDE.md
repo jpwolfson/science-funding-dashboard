@@ -169,9 +169,15 @@ Full completed-phase history, evidence, and discovery narratives live in
       (185 resolved / 10 provisional / 42 unresolved, row-level
       evidence). Does NOT authorize automatic onboarding or remapping.
       `docs/aaas-federal-account-crosswalk.md`.
-- [ ] Phase 3.2c — non-blocking funding-action sentinel pilot.
-      Implement the signal/status/review contract in
-      `docs/funding-action-sentinel.md` as two sequential goal-sized tasks:
+- [x] Phase 3.2c — non-blocking funding-action sentinel pilot (completed
+      2026-08-12 via PR #17, integrated by Fable with two validator
+      hardenings from the overseer review: accepted current sources must
+      have active events exactly equal to acceptedEventIds with a matching
+      recordCount, and the DOE announcement source must retain exactly one
+      active event once accepted — a truncated or vanished snapshot now
+      fails closed instead of passing silently).
+      The signal/status/review contract is
+      `docs/funding-action-sentinel.md`, implemented as two tasks:
       - [x] 3.2c-1 core (completed 2026-08-11): generic financial-signal, sourced-event, episode, and
         optional-review stores; gross-negative/cluster detection; stable ledger
         joins; public unreviewed/confirmed/reviewed/restored states; stale-source
@@ -180,15 +186,20 @@ Full completed-phase history, evidence, and discovery narratives live in
         committed build contains nine File C observations correlated into eight
         unreviewed episodes; File B residuals are structurally excluded. See
         `docs/phase-3.2c1-handoff.md`.
-      - [ ] 3.2c-2 source pilots: NSF's structured termination list and a DOE
-        portfolio-action example, including award matching where supported and
-        separate announced value, observed deobligation, eliminated future
-        value, and restoration fields. Coverage asymmetry is a stated case,
-        not an emergent one: NSF sourced events have NO obligation-ledger
-        financial counterpart until Phase 3.2d onboards NSF accounts, so
-        source-only episodes must render as such — with the registry-derived
-        coverage disclosure saying so explicitly — rather than implying a
-        financial signal is missing or contradictory.
+      - [x] 3.2c-2 source pilots (completed 2026-08-11): fail-closed adapters
+        fetch, validate, hash, and retain last-good snapshots for NSF's
+        structured terminated-awards CSV and DOE's October 2025 portfolio
+        announcement. The accepted NSF export has 1,667 identifier-backed
+        award records; the DOE event preserves "approximately $7.56 billion,"
+        321 awards, 223 projects, and the named OCED, EERE, GDO, MESC, ARPA-E,
+        and FE offices without inventing award IDs. Announcement, appeal,
+        closeout, litigation, deobligation, and restoration are separate event
+        types, and the five amount semantics stay separate. Source failure is
+        a publishable error/last-good state. No financial account was added and
+        no review was required. Coverage asymmetry is a stated case: NSF
+        sourced events have no obligation-ledger financial counterpart until
+        Phase 3.2d onboards NSF accounts, and source-only episodes render as
+        such. See `docs/phase-3.2c2-handoff.md`.
       Financial observations, source-confirmed status events, and optional
       review findings remain separate. Unreviewed signals are a durable public
       state: no data pull, rollup, validation job, or deploy may wait for a human
@@ -204,7 +215,9 @@ Full completed-phase history, evidence, and discovery narratives live in
       backfill, exact reconciliation, Program Activity aliases, site pages,
       tests, and rendered-browser QA:
       1. DOE expansion, beginning with ARPA-E and applied/clean-energy accounts;
-      2. NSF and other grant-heavy civilian science accounts;
+      2. NSF and other grant-heavy civilian science OBLIGATION accounts
+         (the NSF/NIH award-ledger dashboards have been complete since
+         Phases 1-2; this batch adds their appropriations-account flows);
       3. remaining resolved civilian R&D accounts (NASA Science, NOAA, NIST,
          USGS, USDA, EPA, VA, and DHS as the crosswalk supports);
       4. DOD and classified/intramural-heavy accounts last, with the standard
