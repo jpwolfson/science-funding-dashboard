@@ -153,16 +153,20 @@ def _pa(row, aliases):
     raw_name = _first(row, "program_activity_name")
     name = raw_name or "Unknown / other"
     normalized_name = name.strip().lower()
-    identity = (
-        aliases.get(("park", park))
-        or aliases.get(("code-name", code, normalized_name))
-        or aliases.get(("code", code))
-        # Backward compatibility for direct test fixtures and callers that
-        # predate the typed alias-map keys.
-        or aliases.get(park)
-        or aliases.get(f"{code}:{normalized_name}")
-        or aliases.get(code)
-    )
+    # A nonblank PARK is the authoritative FY2026 identity. It must never
+    # fall through to a PAC/PAN or the implicit 0000 fallback: doing so can
+    # silently merge several distinct PARKs into one Program Activity bucket.
+    if park:
+        identity = aliases.get(("park", park)) or aliases.get(park)
+    else:
+        identity = (
+            aliases.get(("code-name", code, normalized_name))
+            or aliases.get(("code", code))
+            # Backward compatibility for direct test fixtures and callers that
+            # predate the typed alias-map keys.
+            or aliases.get(f"{code}:{normalized_name}")
+            or aliases.get(code)
+        )
     if not identity:
         # Truly missing attribution belongs in the explicit unknown bucket.
         # A nonblank, unregistered code/PARK is schema drift and must stop the
