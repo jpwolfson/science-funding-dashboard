@@ -80,6 +80,26 @@ class USAspendingObligationTests(unittest.TestCase):
                 "obligations_incurred": "1.00",
             }], "089-0222", ALIASES)
 
+    def test_unmapped_park_with_blank_legacy_fields_fails_closed(self):
+        with self.assertRaisesRegex(ValueError, "unmapped Program Activity"):
+            parse_file_b_snapshot([{
+                "federal_account_symbol": "089-2250",
+                "program_activity_reporting_key": "NEW-PARK",
+                "program_activity_code": "",
+                "program_activity_name": "",
+                "obligations_incurred": "1.00",
+            }], "089-2250", ALIASES)
+
+    def test_unmapped_park_does_not_fall_through_to_known_legacy_code(self):
+        with self.assertRaisesRegex(ValueError, "unmapped Program Activity"):
+            parse_file_b_snapshot([{
+                "federal_account_symbol": "089-0222",
+                "program_activity_reporting_key": "NEW-PARK",
+                "program_activity_code": "0001",
+                "program_activity_name": "BES",
+                "obligations_incurred": "1.00",
+            }], "089-0222", ALIASES)
+
     def test_remote_disconnect_is_retried(self):
         response = io.BytesIO(b'{"ok": true}')
         with patch(
