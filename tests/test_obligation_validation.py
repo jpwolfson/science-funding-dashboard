@@ -20,7 +20,8 @@ class ObligationValidationTests(unittest.TestCase):
             "refreshDefaults": {"freshnessMaxDays": 10},
             "accounts": [{"path": "doe/sc", "federalAccount": "089-0222",
                           "baseline": "reference/doe_sc_obligation_baseline.json",
-                          "programActivities": [{"code": "0001"}]}]}))
+                          "programActivities": [{"slug": "bes", "code": "0001",
+                                                 "name": "BES"}]}]}))
         (root / "reference" / "doe_sc_obligation_baseline.json").write_text(json.dumps({
             "schemaVersion": 2,
             "federalAccount": "089-0222",
