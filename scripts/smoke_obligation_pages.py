@@ -135,7 +135,12 @@ def _free_port():
     return port
 
 
-def render_page(executable, url, width, height, theme):
+def render_page(executable, url, width, height, theme, screenshot_path=None):
+    """Render `url` headlessly and return (document, diagnostics). When
+    `screenshot_path` is given, additionally capture a full-page PNG (the
+    viewport is grown to the page's actual content height first, so the
+    shot is not clipped) and write it there -- used by the screens tier's
+    reader-review pack, which never gates pass/fail."""
     port = _free_port()
     with tempfile.TemporaryDirectory() as profile:
         process = subprocess.Popen([
@@ -189,6 +194,21 @@ def render_page(executable, url, width, height, theme):
                 "expression": "({html:document.documentElement.outerHTML,text:document.body.innerText,width:window.innerWidth,dark:window.matchMedia('(prefers-color-scheme: dark)').matches})",
                 "returnByValue": True,
             })["result"]["value"]
+            if screenshot_path is not None:
+                metrics = client.call("Page.getLayoutMetrics")
+                content = metrics.get("cssContentSize") or metrics.get("contentSize") or {}
+                full_height = max(int(content.get("height") or height), height)
+                client.call("Emulation.setDeviceMetricsOverride", {
+                    "width": width, "height": full_height, "deviceScaleFactor": 1,
+                    "mobile": width <= 500,
+                })
+                shot = client.call("Page.captureScreenshot", {
+                    "format": "png", "captureBeyondViewport": True,
+                    "clip": {"x": 0, "y": 0, "width": width,
+                             "height": full_height, "scale": 1},
+                })
+                screenshot_path.parent.mkdir(parents=True, exist_ok=True)
+                screenshot_path.write_bytes(base64.b64decode(shot["data"]))
             diagnostics = []
             for event in client.events:
                 method, params = event.get("method"), event.get("params", {})
@@ -244,6 +264,32 @@ def _dashboards(repo):
     return values
 
 
+def account_registry(repo):
+    config = json.loads((repo / "config" / "obligation_accounts.json").read_text())
+    return config.get("accounts", [])
+
+
+def all_accounts_matrix(repo):
+    """Every registered obligation account page, plus one Program Activity
+    sub-page per account, in both themes. Discovered entirely from
+    config/obligation_accounts.json (the registry) -- never a hardcoded path
+    list -- so a newly onboarded agency is covered automatically."""
+    cases = []
+    for account in account_registry(repo):
+        account_path = f"obligations/{account['path']}"
+        activities = account.get("programActivities") or []
+        pa_path = f"{account_path}/{activities[0]['slug']}" if activities else None
+        for theme in ("light", "dark"):
+            cases.append((f"{account['path']}-account-{theme}", account_path,
+                          1440, 1000, theme))
+            if pa_path:
+                cases.append((f"{account['path']}-pa-{theme}", pa_path,
+                              1440, 1000, theme))
+    if not cases:
+        raise ValueError("no registered obligation accounts found for --all-accounts")
+    return cases
+
+
 def page_matrix(repo):
     values = _dashboards(repo)
     if not values:
@@ -279,7 +325,42 @@ def page_matrix(repo):
     ]
 
 
-def run(repo=REPO, chrome=None):
+def _evaluate_case(document, diagnostic, width, theme):
+    """Zero-console-error, keyboard-accessible, real-data checks shared by
+    every rendered case, whichever matrix produced it."""
+    rendered, visible_text = document["html"], document["text"]
+    case_errors = []
+    if document.get("width") != width:
+        case_errors.append(
+            f"viewport width {document.get('width')} != expected {width}"
+        )
+    if bool(document.get("dark")) != (theme == "dark"):
+        case_errors.append(f"{theme} color-scheme emulation did not apply")
+    if 'data-render-complete="true"' not in rendered:
+        case_errors.append("render did not complete")
+    if "data-render-error=" in rendered:
+        case_errors.append("page recorded a JavaScript error")
+    if "data-network-error=" in rendered:
+        case_errors.append("page recorded a network failure")
+    if "No data yet for this unit" in visible_text:
+        case_errors.append("known dashboard rendered as missing data")
+    for marker in ("Uncaught ", "net::ERR_", "exceptionDetails"):
+        if marker in diagnostic:
+            case_errors.append(f"browser diagnostic contains {marker.strip()}")
+    links = Links()
+    links.feed(rendered)
+    if not links.hrefs:
+        case_errors.append("rendered page has no keyboard-native links")
+    invalid_links = [href for href in links.hrefs
+                     if "localhost" in href or href.startswith("file:")]
+    if invalid_links:
+        case_errors.append(f"non-public links remain: {invalid_links[:3]}")
+    if 'tabindex="-1"' in rendered:
+        case_errors.append("rendered controls remove keyboard focus")
+    return case_errors
+
+
+def _run_matrix(repo, matrix, chrome=None):
     repo = Path(repo)
     html_source = (repo / "site" / "index.html").read_text()
     if ":focus-visible" not in html_source:
@@ -295,41 +376,13 @@ def run(repo=REPO, chrome=None):
     thread.start()
     failures = []
     try:
-        for label, org_path, width, height, theme in page_matrix(repo):
+        for label, org_path, width, height, theme in matrix:
             url = (f"http://127.0.0.1:{server.server_port}/index.html"
                    f"?org={quote(org_path, safe='/')}")
             document, diagnostic = render_page(
                 executable, url, width, height, theme
             )
-            rendered, visible_text = document["html"], document["text"]
-            case_errors = []
-            if document.get("width") != width:
-                case_errors.append(
-                    f"viewport width {document.get('width')} != expected {width}"
-                )
-            if bool(document.get("dark")) != (theme == "dark"):
-                case_errors.append(f"{theme} color-scheme emulation did not apply")
-            if 'data-render-complete="true"' not in rendered:
-                case_errors.append("render did not complete")
-            if "data-render-error=" in rendered:
-                case_errors.append("page recorded a JavaScript error")
-            if "data-network-error=" in rendered:
-                case_errors.append("page recorded a network failure")
-            if "No data yet for this unit" in visible_text:
-                case_errors.append("known dashboard rendered as missing data")
-            for marker in ("Uncaught ", "net::ERR_", "exceptionDetails"):
-                if marker in diagnostic:
-                    case_errors.append(f"browser diagnostic contains {marker.strip()}")
-            links = Links()
-            links.feed(rendered)
-            if not links.hrefs:
-                case_errors.append("rendered page has no keyboard-native links")
-            invalid_links = [href for href in links.hrefs
-                             if "localhost" in href or href.startswith("file:")]
-            if invalid_links:
-                case_errors.append(f"non-public links remain: {invalid_links[:3]}")
-            if 'tabindex="-1"' in rendered:
-                case_errors.append("rendered controls remove keyboard focus")
+            case_errors = _evaluate_case(document, diagnostic, width, theme)
             if case_errors:
                 failures.append(f"{label}: " + "; ".join(case_errors))
             else:
@@ -340,15 +393,34 @@ def run(repo=REPO, chrome=None):
         assembly.cleanup()
     if failures:
         raise AssertionError("\n".join(failures))
-    return len(page_matrix(repo))
+    return len(matrix)
+
+
+def run(repo=REPO, chrome=None):
+    repo = Path(repo)
+    return _run_matrix(repo, page_matrix(repo), chrome=chrome)
+
+
+def run_all_accounts(repo=REPO, chrome=None):
+    repo = Path(repo)
+    return _run_matrix(repo, all_accounts_matrix(repo), chrome=chrome)
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--chrome")
+    parser.add_argument(
+        "--all-accounts", action="store_true",
+        help="render every registered account page plus one Program "
+             "Activity sub-page per account, in both themes, instead of "
+             "the fixed representative-state matrix")
     args = parser.parse_args()
-    count = run(chrome=args.chrome)
-    print(f"Rendered obligation page matrix passed ({count} cases)")
+    if args.all_accounts:
+        count = run_all_accounts(chrome=args.chrome)
+        print(f"Rendered all-accounts obligation page matrix passed ({count} cases)")
+    else:
+        count = run(chrome=args.chrome)
+        print(f"Rendered obligation page matrix passed ({count} cases)")
 
 
 if __name__ == "__main__":
