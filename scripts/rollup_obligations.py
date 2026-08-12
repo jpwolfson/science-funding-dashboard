@@ -62,7 +62,9 @@ def build(repo=REPO):
         account_freshness[account["path"]] = freshness
         pa_children = []
         for pa in account["programActivities"]:
-            pa_events = [e for e in events if e["programActivityCode"] == pa["code"]]
+            pa_events = [e for e in events if (
+                e["programActivityCode"], e["programActivityName"]
+            ) == (pa["code"], pa["name"])]
             path = f"obligations/{account['path']}/{pa['slug']}"
             write_dashboard(data_root / account["path"] / pa["slug"],
                 {"level": "programActivity", "path": path, "name": pa["name"],
@@ -75,8 +77,10 @@ def build(repo=REPO):
             pa_children.append(child_summary(path, pa["name"], pa.get("abbrev", ""),
                                              pa_events, current_fy,
                                              covered_periods, partial_fys))
-        known = {pa["code"] for pa in account["programActivities"]}
-        unknown = sorted({e["programActivityCode"] for e in events} - known)
+        known = {(pa["code"], pa["name"])
+                 for pa in account["programActivities"]}
+        unknown = sorted({(e["programActivityCode"], e["programActivityName"])
+                          for e in events} - known)
         if unknown:
             raise ValueError(f"unregistered Program Activity codes: {unknown}")
         account_path = f"obligations/{account['path']}"

@@ -225,7 +225,8 @@ def _observation_payload(rows, rules, observation_id, episode_key,
     rows = sorted(rows, key=lambda row: row["id"])
     periods = {row["submissionPeriod"] for row in rows}
     accounts = {row["federalAccount"] for row in rows}
-    programs = {row["programActivityCode"] for row in rows}
+    programs = {(row["programActivityCode"], row["programActivityName"])
+                for row in rows}
     if len(periods) != 1 or len(accounts) != 1 or len(programs) != 1:
         raise ValueError("one financial observation must have one account/program/period")
     first = rows[0]
@@ -280,13 +281,23 @@ def detect_financial_observations(events, detector, detected_at,
     if min(material, cluster_amount, cluster_awards) <= 0:
         raise ValueError("sentinel detector thresholds must be positive")
 
+    names_by_code = defaultdict(set)
+    for row in events:
+        names_by_code[(row["federalAccount"], row["programActivityCode"])].add(
+            row["programActivityName"]
+        )
+
     eligible = [
         row for row in events
         if row.get("source") == "file_c" and row.get("grossNegativeCents", 0) < 0
     ]
     buckets = defaultdict(list)
     for row in eligible:
-        buckets[(row["federalAccount"], row["programActivityCode"],
+        account = row["federalAccount"]
+        code = row["programActivityCode"]
+        program = (code if len(names_by_code[(account, code)]) == 1
+                   else f"{code}:{row['programActivityName']}")
+        buckets[(account, program,
                  row["submissionPeriod"])].append(row)
 
     current = []

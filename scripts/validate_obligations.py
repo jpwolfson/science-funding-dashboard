@@ -194,8 +194,10 @@ def validate(repo=REPO, require_data=True, check_freshness=False,
         ids = [e["id"] for e in events]
         if len(ids) != len(set(ids)):
             errors.append(f"{account['path']}: duplicate event IDs")
-        known = {pa["code"] for pa in account["programActivities"]}
-        unknown = sorted({e["programActivityCode"] for e in events} - known)
+        known = {(pa["code"], pa["name"])
+                 for pa in account["programActivities"]}
+        unknown = sorted({(e["programActivityCode"], e["programActivityName"])
+                          for e in events} - known)
         if unknown:
             errors.append(f"{account['path']}: unmapped Program Activities {unknown}")
         by_fy = defaultdict(list)
@@ -210,7 +212,11 @@ def validate(repo=REPO, require_data=True, check_freshness=False,
                     event["grossPositiveCents"] + event["grossNegativeCents"] !=
                     event["amountCents"]):
                 errors.append(f"{event['id']}: signed gross amounts do not reconcile")
-            bucket = (event["submissionPeriod"], event["programActivityCode"])
+            bucket = (
+                event["submissionPeriod"],
+                event["programActivityCode"],
+                event["programActivityName"],
+            )
             if event["source"] == "file_b_residual":
                 residual_buckets[bucket] += 1
                 if event["linked"] or event["awardId"]:
@@ -388,7 +394,8 @@ def validate(repo=REPO, require_data=True, check_freshness=False,
                 child_page = json.loads(child.read_text())
                 child_events = [
                     event for event in events
-                    if event["programActivityCode"] == pa["code"]
+                    if (event["programActivityCode"], event["programActivityName"])
+                    == (pa["code"], pa["name"])
                 ]
                 child_stats = aggregate(
                     child_events, stats["currentFY"], covered_periods, partial_fys

@@ -4,8 +4,8 @@ import unittest
 from unittest.mock import patch
 
 from adapters.usaspending_obligations import (
-    _json, combine_file_b_file_c, file_b_period_events, parse_file_b_snapshot,
-    parse_file_c,
+    _json, alias_map, combine_file_b_file_c, file_b_period_events,
+    parse_file_b_snapshot, parse_file_c,
 )
 
 
@@ -15,6 +15,62 @@ ALIASES = {"0001": {"code": "0001", "name": "BES", "park": "PARK1"},
 
 
 class USAspendingObligationTests(unittest.TestCase):
+    def test_multiple_historical_parks_normalize_to_one_canonical_activity(self):
+        aliases = alias_map({"programActivities": [{
+            "slug": "research", "code": "0001", "name": "Research",
+            "park": "CURRENT", "parkAliases": ["HISTORICAL-A", "HISTORICAL-B"],
+        }]})
+        values = parse_file_b_snapshot([{
+            "federal_account_symbol": "999-0001",
+            "program_activity_reporting_key": "HISTORICAL-A",
+            "program_activity_name": "Old research label",
+            "obligations_incurred": "1.00",
+        }], "999-0001", aliases)
+        self.assertEqual({("0001", "0001", "Research", "CURRENT",
+                           "", "", "", ""): 100},
+                         values)
+
+    def test_one_park_cannot_alias_multiple_canonical_activities(self):
+        with self.assertRaisesRegex(ValueError, "maps to multiple identities"):
+            alias_map({"programActivities": [
+                {"slug": "first", "code": "0001", "name": "First",
+                 "park": "SHARED"},
+                {"slug": "second", "code": "0002", "name": "Second",
+                 "parkAliases": ["SHARED"]},
+            ]})
+
+    def test_reused_code_is_disambiguated_by_exact_name(self):
+        aliases = alias_map({"programActivities": [
+            {"slug": "spectrum", "code": "0010",
+             "name": "Spectrum Relocation Fund"},
+            {"slug": "omao", "code": "0010", "name": "OMAO",
+             "codeNameAliases": [
+                 {"code": "0007", "name": "Office of Marine and Aviation Operations"},
+             ]},
+        ]})
+        values = parse_file_b_snapshot([
+            {"federal_account_symbol": "013-1450",
+             "program_activity_code": "0010",
+             "program_activity_name": "Spectrum Relocation Fund",
+             "obligations_incurred": "1.00"},
+            {"federal_account_symbol": "013-1450",
+             "program_activity_code": "0010",
+             "program_activity_name": "OMAO",
+             "obligations_incurred": "2.00"},
+        ], "013-1450", aliases)
+        identities = {(key[0], key[1], key[2]): amount
+                      for key, amount in values.items()}
+        self.assertEqual({
+            ("0010:spectrum", "0010", "Spectrum Relocation Fund"): 100,
+            ("0010:omao", "0010", "OMAO"): 200,
+        }, identities)
+        flows = file_b_period_events({"FY2024P02": values}, "013-1450")
+        events = combine_file_b_file_c(flows, [], "013-1450")
+        self.assertEqual(300, sum(row["amountCents"] for row in events))
+        self.assertEqual(2, len({row["id"] for row in events}))
+        self.assertEqual({"OMAO", "Spectrum Relocation Fund"},
+                         {row["programActivityName"] for row in events})
+
     def test_unmapped_nonblank_program_activity_fails_closed(self):
         with self.assertRaisesRegex(ValueError, "unmapped Program Activity"):
             parse_file_b_snapshot([{
@@ -35,8 +91,8 @@ class USAspendingObligationTests(unittest.TestCase):
         sleep.assert_called_once_with(1)
 
     def test_file_b_cumulative_snapshots_are_differenced(self):
-        key = ("0001", "BES", "PARK1", "25.1", "D", "", "")
-        vanished = ("0001", "BES", "PARK1", "25.2", "D", "", "")
+        key = ("0001", "0001", "BES", "PARK1", "25.1", "D", "", "")
+        vanished = ("0001", "0001", "BES", "PARK1", "25.2", "D", "", "")
         flows = file_b_period_events({"FY2024P02": {key: 100, vanished: 50},
                                       "FY2024P03": {key: 130}}, "089-0222")
         self.assertEqual([150, -20], [row["amountCents"] for row in flows])

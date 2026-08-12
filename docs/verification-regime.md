@@ -140,7 +140,7 @@ a verifier needs is a new column here, added once, not a per-agency branch.
 | `adapter` | Which shared adapter module pulls this account (`usaspending_obligations` today). |
 | `baseline` | Path to this account's baseline JSON (see below). |
 | `availability.firstFiscalYear` / `firstFiscalYearPeriod` / `regularFirstPeriod` | Source-availability boundary: the first FY File B/C exist for this account, that FY's first reporting period, and the first period of every regular FY. |
-| `programActivities[]` | `{slug, code, park, name, abbrev?}` — this account's Program Activity aliases; `slug` and `code` must be unique per account. |
+| `programActivities[]` | `{slug, code, name, park?, parkAliases?, codeNameAliases?, abbrev?}` — canonical Program Activity identities. `slug` and canonical `(code, name)` must be unique; a source code may repeat when the agency reused it for distinct named activities. `park` is the preferred reporting key and `parkAliases` lists other PARK keys for the same identity. `codeNameAliases` lists exact historical `{code, name}` pairs for that identity. Every PARK and exact code/name token must map to exactly one identity. An ambiguous code without a matching name/PARK fails closed. |
 | `freshnessMaxDays` (optional, else `refreshDefaults.freshnessMaxDays`) | Days a current-FY source snapshot may age before `--check-freshness` fails. |
 
 ### `reference/*_obligation_baseline.json` — per-account baseline file
@@ -160,7 +160,7 @@ a verifier needs is a new column here, added once, not a per-agency branch.
 | Field | Meaning |
 |---|---|
 | `rows[].federal_accounts[].code` | Federal account code(s) an AAAS row maps to. The registry tier finds every row whose `federal_accounts` includes an account's `federalAccount`. |
-| `rows[].status` | `resolved` / `provisional` / `unresolved`. Where a corresponding row exists, the registry tier requires it to be `resolved`; an account with no corresponding row passes trivially (crosswalk coverage is not mandatory, per `docs/aaas-federal-account-crosswalk.md`). |
+| `rows[].status` | `resolved` / `provisional` / `unresolved`. Where corresponding rows exist, the registry tier requires at least one resolved mapping for the account. Separate provisional/unresolved alternate views referencing the same account are explicitly deferred and do not block its resolved mapping; an account with no corresponding row passes trivially (crosswalk coverage is not mandatory, per `docs/aaas-federal-account-crosswalk.md`). |
 
 Award-ledger invariants (`validate_award_invariants.py`) read no
 agency-specific parameter at all — `totalAwards`, `fiscalYears`, `monthly`,
