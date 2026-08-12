@@ -132,8 +132,40 @@ def _lint_account(repo, account, crosswalk_rows):
         if availability.get(field) is None
     ]
     activities = account.get("programActivities") or []
+    slugs = [pa.get("slug") for pa in activities]
+    canonical_pairs = [
+        (str(pa.get("code", "")).zfill(4), str(pa.get("name", "")).strip().lower())
+        for pa in activities
+    ]
+    park_tokens = [
+        token
+        for pa in activities
+        for token in ([pa.get("park")] + list(pa.get("parkAliases") or []))
+        if token
+    ]
+    code_name_aliases = [
+        alias
+        for pa in activities
+        for alias in (pa.get("codeNameAliases") or [])
+    ]
+    source_pairs = canonical_pairs + [
+        (str(alias.get("code", "")).zfill(4),
+         str(alias.get("name", "")).strip().lower())
+        for alias in code_name_aliases
+    ]
     activities_ok = bool(activities) and all(
-        pa.get("slug") and pa.get("code") and pa.get("name") for pa in activities
+        pa.get("slug") and pa.get("code") and pa.get("name")
+        and isinstance(pa.get("parkAliases", []), list)
+        and all(isinstance(alias, str) and alias for alias in pa.get("parkAliases", []))
+        and isinstance(pa.get("codeNameAliases", []), list)
+        and all(isinstance(alias, dict) and alias.get("code") and alias.get("name")
+                for alias in pa.get("codeNameAliases", []))
+        for pa in activities
+    ) and (
+        len(slugs) == len(set(slugs))
+        and len(canonical_pairs) == len(set(canonical_pairs))
+        and len(park_tokens) == len(set(park_tokens))
+        and len(source_pairs) == len(set(source_pairs))
     )
     fields_ok = not missing and not missing_availability and activities_ok
     evidence = "all required fields present" if fields_ok else (

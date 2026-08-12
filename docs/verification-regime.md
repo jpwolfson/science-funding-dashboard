@@ -140,7 +140,7 @@ a verifier needs is a new column here, added once, not a per-agency branch.
 | `adapter` | Which shared adapter module pulls this account (`usaspending_obligations` today). |
 | `baseline` | Path to this account's baseline JSON (see below). |
 | `availability.firstFiscalYear` / `firstFiscalYearPeriod` / `regularFirstPeriod` | Source-availability boundary: the first FY File B/C exist for this account, that FY's first reporting period, and the first period of every regular FY. |
-| `programActivities[]` | `{slug, code, park, name, abbrev?}` — this account's Program Activity aliases; `slug` and `code` must be unique per account. |
+| `programActivities[]` | `{slug, code, name, park?, parkAliases?, codeNameAliases?, abbrev?}` — canonical Program Activity identities. `slug` and canonical `(code, name)` must be unique; a source code may repeat when the agency reused it for distinct named activities. `park` is the preferred reporting key and `parkAliases` lists other PARK keys for the same identity. `codeNameAliases` lists exact historical `{code, name}` pairs for that identity. Every PARK and exact code/name token must map to exactly one identity. An ambiguous code without a matching name/PARK fails closed. |
 | `freshnessMaxDays` (optional, else `refreshDefaults.freshnessMaxDays`) | Days a current-FY source snapshot may age before `--check-freshness` fails. |
 
 ### `reference/*_obligation_baseline.json` — per-account baseline file

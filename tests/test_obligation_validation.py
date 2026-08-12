@@ -20,7 +20,8 @@ class ObligationValidationTests(unittest.TestCase):
             "refreshDefaults": {"freshnessMaxDays": 10},
             "accounts": [{"path": "doe/sc", "federalAccount": "089-0222",
                           "baseline": "reference/doe_sc_obligation_baseline.json",
-                          "programActivities": [{"code": "0001"}]}]}))
+                          "programActivities": [{"slug": "bes", "code": "0001",
+                                                 "name": "BES"}]}]}))
         (root / "reference" / "doe_sc_obligation_baseline.json").write_text(json.dumps({
             "schemaVersion": 2,
             "federalAccount": "089-0222",
@@ -104,6 +105,46 @@ class ObligationValidationTests(unittest.TestCase):
             baseline.write_text(json.dumps(value))
             self.assertTrue(any("FY2023: required complete snapshot is missing" in e
                                 for e in validate(root, require_data=False)))
+        finally:
+            temp.cleanup()
+
+    def test_reused_code_residuals_are_validated_per_named_identity(self):
+        temp, root = self.fixture(300)
+        try:
+            registry = root / "config" / "obligation_accounts.json"
+            value = json.loads(registry.read_text())
+            value["accounts"][0]["programActivities"] = [
+                {"slug": "first", "code": "0001", "name": "First"},
+                {"slug": "second", "code": "0001", "name": "Second"},
+            ]
+            registry.write_text(json.dumps(value))
+            rows = []
+            for name, prefix, file_c, residual in (
+                    ("First", "first", 40, 60),
+                    ("Second", "second", 80, 120)):
+                rows.extend([
+                    normalize_event({
+                        "id": f"{prefix}-c", "source": "file_c",
+                        "submissionPeriod": "FY2024P12",
+                        "federalAccount": "089-0222",
+                        "programActivityCode": "0001",
+                        "programActivityName": name,
+                        "amountCents": file_c, "awardId": "", "linked": False,
+                    }),
+                    normalize_event({
+                        "id": f"{prefix}-r", "source": "file_b_residual",
+                        "submissionPeriod": "FY2024P12",
+                        "federalAccount": "089-0222",
+                        "programActivityCode": "0001",
+                        "programActivityName": name,
+                        "amountCents": residual, "awardId": "", "linked": False,
+                    }),
+                ])
+            write_store(root / "data" / "obligations" / "doe" / "sc" / "events",
+                        rows, {"federalAccount": "089-0222"})
+            errors = validate(root, require_data=False)
+            self.assertFalse(any("File B residual rows" in error for error in errors),
+                             errors)
         finally:
             temp.cleanup()
 

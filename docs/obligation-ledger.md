@@ -52,8 +52,12 @@ by object class and DEFC. Those rows are deliberately summed in exact cents at:
 
 `(award identity, federal account, Program Activity identity, submission period)`
 
-Program Activity identity prefers PARK. Legacy rows use the committed
-code-and-name alias table so the FY2026 PARK transition does not split pages.
+Program Activity identity prefers PARK. A canonical registry identity may
+retain multiple PARK aliases and exact historical code-and-name aliases so the
+FY2026 PARK transition and ordinary agency renames do not split pages. Because
+agencies can also reuse one code for different named activities, PARK and exact
+code/name matches take precedence over an unqualified code; an ambiguous code
+without a registered name or PARK fails closed instead of merging programs.
 Award identity prefers USAspending's generated award key, then PIID/parent,
 FAIN, URI, and finally a deterministic unlinked token.
 
