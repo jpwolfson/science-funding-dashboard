@@ -59,8 +59,8 @@ class NSFObligationOnboardingTests(unittest.TestCase):
                 if item.get("code") == symbol
             ))
 
-    def test_baseline_scaffolds_cover_the_full_source_window(self):
-        for account in self.accounts.values():
+    def test_baselines_cover_the_full_source_window_before_and_after_backfill(self):
+        for path, account in self.accounts.items():
             baseline = json.loads((REPO / account["baseline"]).read_text())
             self.assertEqual(2, baseline["schemaVersion"])
             self.assertEqual(account["federalAccount"], baseline["federalAccount"])
@@ -68,22 +68,31 @@ class NSFObligationOnboardingTests(unittest.TestCase):
             self.assertEqual(set(map(str, range(2015, 2027))), set(years))
             self.assertEqual("unavailable", years["2015"]["status"])
             self.assertEqual("unavailable", years["2016"]["status"])
-            self.assertEqual(
-                {"status": "partial", "asOfPeriod": 12, "firstPeriod": 6},
-                years["2017"],
-            )
-            for fiscal_year in range(2018, 2026):
-                self.assertEqual(
-                    {"status": "partial", "asOfPeriod": 12},
-                    years[str(fiscal_year)],
-                )
-            self.assertEqual(
-                {"status": "partial", "asOfPeriod": 9}, years["2026"]
-            )
-            self.assertFalse(any(
-                "obligationsCents" in row for row in years.values()
-                if row["status"] != "unavailable"
-            ))
+            self.assertEqual("partial", years["2017"]["status"])
+            self.assertEqual(12, years["2017"]["asOfPeriod"])
+            self.assertEqual(6, years["2017"]["firstPeriod"])
+            self.assertEqual("partial", years["2026"]["status"])
+            self.assertEqual(9, years["2026"]["asOfPeriod"])
+            store = REPO / "data" / "obligations" / path / "events"
+            if store.exists():
+                for fiscal_year in range(2017, 2027):
+                    self.assertIn(
+                        "obligationsCents",
+                        years[str(fiscal_year)],
+                        f"{path} FY{fiscal_year} retained an unfilled scaffold",
+                    )
+                for fiscal_year in range(2018, 2026):
+                    self.assertEqual("complete", years[str(fiscal_year)]["status"])
+            else:
+                for fiscal_year in range(2018, 2026):
+                    self.assertEqual(
+                        {"status": "partial", "asOfPeriod": 12},
+                        years[str(fiscal_year)],
+                    )
+                self.assertFalse(any(
+                    "obligationsCents" in row for row in years.values()
+                    if row["status"] != "unavailable"
+                ))
 
     def test_full_backfill_plan_replaces_every_scaffold(self):
         jobs = plan(repo=REPO, mode="full", selectors="nsf")["include"]
