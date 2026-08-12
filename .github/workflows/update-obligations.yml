@@ -32,7 +32,7 @@ permissions:
 
 concurrency:
   group: obligation-refresh-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   plan:
@@ -106,7 +106,10 @@ jobs:
           name: obligation-partition-${{ matrix.artifact }}-FY${{ matrix.fiscalYear }}
           path: _partition
           if-no-files-found: error
-          retention-days: 1
+          # A 100-account-year Phase 3.2d matrix is serialized and can take
+          # longer than one day. Early partitions must still exist when the
+          # final reconcile job downloads the complete atomic candidate.
+          retention-days: 7
       - name: Retain raw source ZIPs for bounded audit/debugging
         if: always()
         uses: actions/upload-artifact@v4
