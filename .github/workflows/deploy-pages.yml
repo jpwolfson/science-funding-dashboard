@@ -30,6 +30,19 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate before deploy
+        # This workflow is path-triggered off main with no dependency on the
+        # Test workflow, so a direct push could otherwise deploy unvalidated
+        # content. Re-run the offline gates here; they cost about a minute.
+        run: |
+          python -m unittest discover -s tests
+          python scripts/validate_nih.py
+          python scripts/validate_usaspending_calibration.py
+          python scripts/validate_obligations.py --allow-empty
+          python scripts/validate_funding_sentinel.py
       - name: Assemble site
         run: |
           mkdir -p _site

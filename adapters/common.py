@@ -211,12 +211,21 @@ def aggregate(awards, today, series_start=SERIES_START):
     # Cumulative FY-to-date overlays, last five fiscal years: weekly running
     # totals aligned by day-of-fiscal-year (day 0 = Oct 1), so leap years and
     # weekday drift never misalign the lines. Complete years end on Sep 30;
-    # the current year ends at today. Endpoints therefore equal the
-    # fiscal-year totals above exactly.
+    # the current year ends at the latest data date - the later of today and
+    # the newest award date, because NIH award-notice dates can post-date the
+    # pull. Endpoints therefore equal the fiscal-year totals above exactly.
+    latest_by_fy = {}
+    for a in awards:
+        d = date.fromisoformat(a["date"])
+        fy_a = fiscal_year(d)
+        if fy_a not in latest_by_fy or d > latest_by_fy[fy_a]:
+            latest_by_fy[fy_a] = d
     fy_cum = []
     for fy in [f for f in sorted(fys) if current_fy - 5 < f <= current_fy]:
         fy_start = date(fy - 1, 10, 1)
-        last_day = (min(date(fy, 9, 30), today) - fy_start).days
+        series_end = min(date(fy, 9, 30),
+                         max(today, latest_by_fy.get(fy, today)))
+        last_day = (series_end - fy_start).days
         daily = [[0, 0] for _ in range(last_day + 1)]
         for a in awards:
             d = (date.fromisoformat(a["date"]) - fy_start).days

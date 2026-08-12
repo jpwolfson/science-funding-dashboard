@@ -48,7 +48,7 @@ Rules (each one matters):
   of the FY).days`. This is what makes leap years and weekday drift unable
   to misalign the lines.
 - Emit a point at every `d % 7 == 6` plus one final point at the series'
-  last day. Complete years end at Sep 30; the partial year ends at `today`.
+  last day. Complete years end at Sep 30; the partial year ends at the latest data date (the later of today and the newest award date - NIH notice dates can post-date the pull).
 - **Endpoint invariant (the acceptance test):** each complete year's final
   point must equal that year's `fiscalYears` entry `awards`/`dollars`
   EXACTLY; the partial year's final point must equal the current FY row.
