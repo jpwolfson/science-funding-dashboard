@@ -85,9 +85,50 @@ class SiteContractTests(unittest.TestCase):
                      "Unreviewed signal", "Source-confirmed event",
                      "Reviewed finding", "Superseded", "Restored",
                      "not overdue", "gross negative activity",
-                     "net activity", "Attributed source event",
+                     "net activity", "Attributed source headline",
                      "Optional review finding"):
             self.assertIn(text, self.html)
+
+    def test_attributed_source_fields_render_only_through_the_shared_helper(self):
+        # Owner-approved 2026-08-12 rule: render by provenance, not judgment.
+        # Every authoritative-source display string (announcement titles,
+        # stated reasons, qualified amount display strings) must route
+        # through the single attributedText() helper — never be interpolated
+        # directly into a heading, link, or plain text node.
+        self.assertIn("function attributedText(text, source,", self.html)
+        # Required: each attributed field is passed into the helper.
+        for text in (
+            "attributedText(event.sourceTitle || label, source, { omitCitation: true })",
+            "attributedText(event.statedReason, source, { omitCitation: true })",
+            "attributedText(announcedDisplay, source, { omitCitation: true })",
+            "attributedText(first.sourceTitle || first.sourceId, source, { omitCitation: true })",
+            "attributedText(null, source)",
+        ):
+            self.assertIn(text, self.html)
+        # Forbidden: the same fields must never be interpolated directly into
+        # a heading, link, or plain text node outside the helper call.
+        for text in (
+            'el("a", { href: event.sourceUrl, text: event.sourceTitle',
+            'el("a", { href: first.sourceUrl, text: first.sourceTitle',
+            "text: event.sourceTitle",
+            "text: event.statedReason",
+            "text: announcedDisplay",
+            "text: first.sourceTitle",
+        ):
+            self.assertNotIn(text, self.html)
+
+    def test_sourced_episode_headings_are_mechanical_never_a_source_headline(self):
+        # Owner-approved 2026-08-12 rule: agency headlines never occupy
+        # heading positions, even quoted. Sourced-episode headings are
+        # composed mechanically from structured fields; only financial-
+        # observation episodes (no sourcedEvents) fall back to their
+        # registry program-activity title.
+        self.assertIn("function sourcedEpisodeHeading(episode) {", self.html)
+        self.assertIn("function episodeHeadingText(episode) {", self.html)
+        self.assertIn('el("h2", { text: episodeHeadingText(episode) })', self.html)
+        # The old pattern that rendered a raw episode.title as the card
+        # heading must not reappear.
+        self.assertNotIn('el("h2", { text: episode.title', self.html)
 
     def test_sentinel_publishes_limits_costs_and_source_staleness(self):
         for text in ("Coverage and interpretation limits",

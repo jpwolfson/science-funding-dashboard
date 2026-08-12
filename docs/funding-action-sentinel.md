@@ -118,6 +118,40 @@ This prevents hundreds of related terminations from becoming hundreds of
 independent alarms and prevents later reinstatements from erasing the original
 history.
 
+### Attributed-language rendering rule (owner-approved 2026-08-12)
+
+Render by provenance, not judgment. Any string whose value comes from an
+authoritative-source field — announcement titles, stated reasons or event
+descriptions, and qualified amount display strings such as "approximately
+$7.56 billion" — renders on the sentinel page only through one shared
+`attributedText()` helper. The helper wraps the string in quotation marks and
+shows its citation: the source's registered name and its source-as-of date,
+linked to the source URL where the record has one. Several attributed strings
+from the same source may render together in one block with a single shared
+citation rather than one repeated per line, but every attributed string is
+still individually quoted.
+
+Strings in the dashboard's own voice — card headings, labels, state
+descriptions — are composed mechanically from registry or store metadata and
+never contain source language. In particular, **agency headlines never occupy
+heading positions, even quoted.** A sourced episode's card heading (for
+example the DOE portfolio-action announcement or the NSF terminated-awards
+list) is composed mechanically from structured fields — the registered
+source's ID, the event type, and the event date, e.g. "DOE portfolio-action
+announcement — October 2025" — never from the source's own headline text.
+That headline instead renders in the card body as a quoted, cited line.
+Financial-observation episode headings (program-activity names drawn from the
+registry) were already mechanical and are unchanged by this rule.
+
+This is enforced two ways so it cannot regress silently: a contract test
+(`tests/test_site_contract.py`) statically checks that the attributed field
+names are interpolated only via `attributedText()` calls in `site/index.html`,
+and never bound to a heading or a link's text directly; and the rendered
+smoke test (`scripts/smoke_sentinel_page.py`) drives a headless browser and
+asserts the DOE source headline text appears on the rendered page only inside
+quotation marks, and never inside any heading element (h1-h4 — the page has
+no separate card-heading class).
+
 ## Optional review process
 
 There is no assigned reviewer, review deadline, or minimum review cadence.
