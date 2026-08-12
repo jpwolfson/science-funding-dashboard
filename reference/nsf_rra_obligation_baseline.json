@@ -1,0 +1,23 @@
+{
+ "schemaVersion": 2,
+ "federalAccount": "049-0100",
+ "source": "USAspending federal account fiscal-year snapshots (GTAS/File A); account title and source availability reviewed 2026-08-12",
+ "fiscalYears": {
+  "2015": {"status": "unavailable", "reason": "Files A/B/C begin in FY2017 Q2"},
+  "2016": {"status": "unavailable", "reason": "Files A/B/C begin in FY2017 Q2"},
+  "2017": {"status": "partial", "asOfPeriod": 12, "firstPeriod": 6},
+  "2018": {"status": "partial", "asOfPeriod": 12},
+  "2019": {"status": "partial", "asOfPeriod": 12},
+  "2020": {"status": "partial", "asOfPeriod": 12},
+  "2021": {"status": "partial", "asOfPeriod": 12},
+  "2022": {"status": "partial", "asOfPeriod": 12},
+  "2023": {"status": "partial", "asOfPeriod": 12},
+  "2024": {"status": "partial", "asOfPeriod": 12},
+  "2025": {"status": "partial", "asOfPeriod": 12},
+  "2026": {"status": "partial", "asOfPeriod": 9}
+ },
+ "notes": [
+  "Initial replaceable scaffolds intentionally omit obligationsCents until the first accepted full backfill.",
+  "The atomic reconcile promotes completed P12 years and pins exact File B cents; FY2017 remains partial from P06 and FY2026 remains period-specific."
+ ]
+}
