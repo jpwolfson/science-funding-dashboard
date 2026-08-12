@@ -167,7 +167,9 @@ jobs:
           subprocess.run(["git", "config", "user.email",
                           "41898282+github-actions[bot]@users.noreply.github.com"], check=True)
           config = json.load(open("config/obligation_accounts.json"))
-          paths = ["data/obligations"] + [row["baseline"] for row in config["accounts"]]
+          paths = ["data/obligations", "data/sentinel"] + [
+              row["baseline"] for row in config["accounts"]
+          ]
           subprocess.run(["git", "add", *paths], check=True)
           if subprocess.run(["git", "diff", "--cached", "--quiet"]).returncode == 0:
               print("No obligation snapshot changes.")
