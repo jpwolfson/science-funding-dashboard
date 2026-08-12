@@ -120,9 +120,21 @@ class NSFObligationOnboardingTests(unittest.TestCase):
             self.assertEqual(len(parks), len(set(parks)))
             aliases = alias_map(account)
             for activity in activities:
-                self.assertIs(activity, aliases[activity["code"]])
+                pair = (
+                    "code-name",
+                    str(activity["code"]).zfill(4),
+                    activity["name"].strip().lower(),
+                )
+                self.assertEqual(activity["slug"], aliases[pair]["slug"])
+                self.assertEqual(
+                    activity["slug"],
+                    aliases[("code", str(activity["code"]).zfill(4))]["slug"],
+                )
                 if activity.get("park"):
-                    self.assertIs(activity, aliases[activity["park"]])
+                    self.assertEqual(
+                        activity["slug"],
+                        aliases[("park", activity["park"])]["slug"],
+                    )
 
 
 if __name__ == "__main__":
