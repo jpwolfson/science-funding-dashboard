@@ -8,6 +8,7 @@ from adapters.obligation_common import (
     event_fingerprint, file_sha256, normalize_event, partition_diff, write_store,
 )
 from scripts.reconcile_obligation_artifacts import reconcile
+from scripts.validate_funding_sentinel import validate as validate_sentinel
 from scripts.validate_obligations import validate
 
 
@@ -30,6 +31,15 @@ class ObligationReconcileTests(unittest.TestCase):
                     "programActivities": [{"slug": "bes", "code": "0001",
                                            "name": "BES"}],
                 }],
+            }))
+            (root / "config" / "funding_sentinel.json").write_text(json.dumps({
+                "schemaVersion": 1,
+                "financialDetector": {
+                    "materialGrossNegativeCents": 2_500,
+                    "clusterGrossNegativeCents": 2_500,
+                    "clusterMinimumDistinctAwards": 5,
+                },
+                "sources": [],
             }))
             (root / "reference" / "doe.json").write_text(json.dumps({
                 "schemaVersion": 2, "federalAccount": "089-0222",
@@ -95,6 +105,15 @@ class ObligationReconcileTests(unittest.TestCase):
             self.assertEqual(9, baseline["fiscalYears"]["2026"]["asOfPeriod"])
             self.assertEqual([], validate(root, require_data=True,
                                           require_current_provenance=True))
+            self.assertEqual([], validate_sentinel(root, require_data=False))
+            sentinel = json.loads(
+                (root / "data" / "sentinel" / "dashboard.json").read_text()
+            )
+            self.assertEqual(
+                ["089-0222"],
+                [row["federalAccount"]
+                 for row in sentinel["coverage"]["financialAccounts"]],
+            )
         finally:
             temp.cleanup()
 

@@ -11,7 +11,8 @@ REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
 from adapters.obligation_common import file_sha256, rebuild_manifest
-from scripts.rollup_obligations import build
+from adapters.funding_sentinel import build as build_sentinel
+from scripts.rollup_obligations import build as build_obligations
 
 
 def reconcile(staging, repo=REPO):
@@ -88,7 +89,12 @@ def reconcile(staging, repo=REPO):
                 "federalAccount": account["federalAccount"],
                 "baseline": account["baseline"],
             })
-    build(repo)
+    build_obligations(repo)
+    # The sentinel's financial-coverage disclosure is registry-derived and
+    # its observations are downstream of the exact File C candidate above.
+    # Rebuild it inside the same disposable candidate tree so verification
+    # and publication can never see a newly live account with stale coverage.
+    build_sentinel(repo)
     return len(planned), sorted(touched)
 
 
