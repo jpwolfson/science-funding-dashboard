@@ -22,8 +22,11 @@ flagged here.
 
 import json
 import re
+import tempfile
 import unittest
 from pathlib import Path
+
+from scripts.verify import _lint_account
 
 REPO = Path(__file__).resolve().parent.parent
 CHECKED_FILES = (
@@ -52,6 +55,61 @@ def registry_slugs():
 
 
 class UniformityContractTests(unittest.TestCase):
+    def account_fixture(self):
+        temporary = tempfile.TemporaryDirectory()
+        root = Path(temporary.name)
+        (root / "reference").mkdir()
+        baseline = root / "reference" / "account.json"
+        baseline.write_text(json.dumps({
+            "schemaVersion": 2,
+            "federalAccount": "999-0001",
+            "source": "Official baseline",
+            "fiscalYears": {
+                "2024": {"status": "complete", "obligationsCents": 1},
+            },
+        }))
+        account = {
+            "path": "agency/account", "name": "Account", "abbrev": "A",
+            "agency": "Agency", "federalAccount": "999-0001",
+            "agencyIdentifier": "999", "adapter": "usaspending_obligations",
+            "baseline": "reference/account.json",
+            "availability": {"firstFiscalYear": 2024,
+                             "firstFiscalYearPeriod": 2,
+                             "regularFirstPeriod": 2},
+            "programActivities": [
+                {"slug": "program", "code": "0001", "name": "Program"},
+            ],
+        }
+        return temporary, root, account
+
+    def test_resolved_mapping_is_not_blocked_by_separate_provisional_view(self):
+        temporary, root, account = self.account_fixture()
+        try:
+            rows = [
+                {"aaas_row_key": "resolved-view", "status": "resolved",
+                 "federal_accounts": [{"code": "999-0001"}]},
+                {"aaas_row_key": "provisional-view", "status": "provisional",
+                 "federal_accounts": [{"code": "999-0001"}]},
+            ]
+            check = _lint_account(root, account, rows)[-1]
+            self.assertTrue(check["passed"])
+            self.assertIn("deferred", check["evidence"])
+        finally:
+            temporary.cleanup()
+
+    def test_account_with_only_provisional_mapping_still_fails(self):
+        temporary, root, account = self.account_fixture()
+        try:
+            rows = [
+                {"aaas_row_key": "provisional-view", "status": "provisional",
+                 "federal_accounts": [{"code": "999-0001"}]},
+            ]
+            check = _lint_account(root, account, rows)[-1]
+            self.assertFalse(check["passed"])
+            self.assertIn("no resolved", check["evidence"])
+        finally:
+            temporary.cleanup()
+
     def test_no_registry_slug_is_a_string_literal_in_shared_verifiers(self):
         slugs = registry_slugs()
         self.assertTrue(slugs, "expected at least one registry slug to check")

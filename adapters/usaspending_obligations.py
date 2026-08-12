@@ -152,7 +152,17 @@ def _pa(row, aliases):
     code = raw_code.zfill(4) if raw_code else "0000"
     raw_name = _first(row, "program_activity_name")
     name = raw_name or "Unknown / other"
-    identity = aliases.get(park) or aliases.get(code) or aliases.get(f"{code}:{name.lower()}")
+    normalized_name = name.strip().lower()
+    identity = (
+        aliases.get(("park", park))
+        or aliases.get(("code-name", code, normalized_name))
+        or aliases.get(("code", code))
+        # Backward compatibility for direct test fixtures and callers that
+        # predate the typed alias-map keys.
+        or aliases.get(park)
+        or aliases.get(f"{code}:{normalized_name}")
+        or aliases.get(code)
+    )
     if not identity:
         # Truly missing attribution belongs in the explicit unknown bucket.
         # A nonblank, unregistered code/PARK is schema drift and must stop the
@@ -165,7 +175,12 @@ def _pa(row, aliases):
         identity = aliases.get(
             "0000", {"code": "0000", "name": "Unknown / other", "park": ""}
         )
-    return identity["code"], identity["name"], identity.get("park", "") or park
+    return (
+        identity.get("_identityKey", identity["code"]),
+        identity["code"],
+        identity["name"],
+        identity.get("park", "") or park,
+    )
 
 
 def _award_identity(row):
@@ -204,13 +219,14 @@ def parse_file_c(members, account, aliases):
             row_account = _first(row, "federal_account_symbol")
             if row_account and row_account != account:
                 raise ValueError(f"File C account mismatch: {row_account}")
-            code, name, park = _pa(row, aliases)
+            identity_key, code, name, park = _pa(row, aliases)
             award_id, linked = _award_identity(row)
-            key = (award_id, account, code, period)
+            key = (award_id, account, identity_key, period)
             if key not in grouped:
                 grouped[key] = {"source": "file_c", "submissionPeriod": period,
                     "federalAccount": account, "programActivityCode": code,
                     "programActivityName": name, "programActivityReportingKey": park,
+                    "_programActivityKey": identity_key,
                     "amountCents": 0, "awardId": award_id, "linked": linked,
                     "title": _first(row, "prime_award_base_transaction_description"),
                     "recipientUEI": _first(row, "recipient_uei"),
@@ -226,7 +242,7 @@ def parse_file_c(members, account, aliases):
             raw_total += amount
     events = []
     for event in grouped.values():
-        event["id"] = stable_id("file_c", account, event["programActivityCode"],
+        event["id"] = stable_id("file_c", account, event["_programActivityKey"],
                                 event["submissionPeriod"], event["awardId"])
         events.append(normalize_event(event))
     if sum(e["amountCents"] for e in events) != raw_total:
@@ -241,11 +257,11 @@ def parse_file_b_snapshot(rows, account, aliases):
         row_account = _first(row, "federal_account_symbol")
         if row_account and row_account != account:
             raise ValueError(f"File B account mismatch: {row_account}")
-        code, name, park = _pa(row, aliases)
+        identity_key, code, name, park = _pa(row, aliases)
         raw = _first(row, "obligations_incurred", "obligations_incurred_by_program_activity_object_class_cpe")
         if raw == "":
             continue
-        key = (code, name, park,
+        key = (identity_key, code, name, park,
                _first(row, "object_class_code"),
                _first(row, "direct_or_reimbursable_funding_source"),
                _first(row, "disaster_emergency_fund_code"),
@@ -261,25 +277,29 @@ def file_b_period_events(snapshots, account):
     for submission_period, current in sorted(snapshots.items()):
         pa_deltas = defaultdict(int)
         for key in set(prior) | set(current):
-            pa_deltas[key[:3]] += current.get(key, 0) - prior.get(key, 0)
-        for (code, name, park), amount in sorted(pa_deltas.items()):
+            pa_deltas[key[:4]] += current.get(key, 0) - prior.get(key, 0)
+        for (identity_key, code, name, park), amount in sorted(pa_deltas.items()):
             output.append({"submissionPeriod": submission_period,
                            "federalAccount": account, "programActivityCode": code,
                            "programActivityName": name,
                            "programActivityReportingKey": park,
+                           "_programActivityKey": identity_key,
                            "amountCents": amount})
         prior = current
     return output
 
 
 def combine_file_b_file_c(file_b_events, file_c_events, account):
+    def activity_key(event):
+        return event.get("_programActivityKey", event["programActivityCode"])
+
     c_by_bucket = defaultdict(int)
     for event in file_c_events:
-        c_by_bucket[(event["submissionPeriod"], event["programActivityCode"])] += event["amountCents"]
+        c_by_bucket[(event["submissionPeriod"], activity_key(event))] += event["amountCents"]
     residuals = []
     seen = set()
     for flow in file_b_events:
-        key = (flow["submissionPeriod"], flow["programActivityCode"])
+        key = (flow["submissionPeriod"], activity_key(flow))
         if key in seen:
             raise ValueError(f"duplicate File B PA-period bucket: {key}")
         seen.add(key)
@@ -289,7 +309,7 @@ def combine_file_b_file_c(file_b_events, file_c_events, account):
                  "grossPositiveCents": max(0, amount),
                  "grossNegativeCents": min(0, amount)}
         event["id"] = stable_id("file_b_residual", account,
-                                event["programActivityCode"], event["submissionPeriod"])
+                                activity_key(event), event["submissionPeriod"])
         residuals.append(normalize_event(event))
     # File C requires an award identifier but may omit Program Activity. If
     # File B has no matching unknown-PA bucket, preserve the award-linked
@@ -300,14 +320,15 @@ def combine_file_b_file_c(file_b_events, file_c_events, account):
     if invalid:
         raise ValueError(
             f"File C contains PA-period buckets absent from File B: {invalid[:3]}")
-    for (submission_period, code), file_c_amount in sorted(c_by_bucket.items()):
+    for (submission_period, identity_key), file_c_amount in sorted(c_by_bucket.items()):
         amount = -file_c_amount
         event = {
             "submissionPeriod": submission_period,
             "federalAccount": account,
-            "programActivityCode": code,
+            "programActivityCode": "0000",
             "programActivityName": "Unknown / other",
             "programActivityReportingKey": "",
+            "_programActivityKey": identity_key,
             "source": "file_b_residual",
             "amountCents": amount,
             "awardId": "",
@@ -318,7 +339,7 @@ def combine_file_b_file_c(file_b_events, file_c_events, account):
             "grossNegativeCents": min(0, amount),
         }
         event["id"] = stable_id(
-            "file_b_residual", account, code, submission_period)
+            "file_b_residual", account, identity_key, submission_period)
         residuals.append(normalize_event(event))
     combined = list(file_c_events) + residuals
     if sum(e["amountCents"] for e in combined) != sum(e["amountCents"] for e in file_b_events):
@@ -328,9 +349,56 @@ def combine_file_b_file_c(file_b_events, file_c_events, account):
 
 def alias_map(account_config):
     aliases = {}
-    for row in account_config["programActivities"]:
-        aliases[row["code"]] = row
-        if row.get("park"):
-            aliases[row["park"]] = row
-        aliases[f"{row['code']}:{row['name'].lower()}"] = row
+    activities = [dict(row) for row in account_config["programActivities"]]
+    code_targets = defaultdict(dict)
+
+    def bind(key, identity):
+        prior = aliases.get(key)
+        if prior is not None and prior["_identityKey"] != identity["_identityKey"]:
+            raise ValueError(
+                f"Program Activity alias {key!r} maps to multiple identities"
+            )
+        aliases[key] = identity
+
+    for identity in activities:
+        identity["code"] = str(identity["code"]).zfill(4)
+        identity["_identityKey"] = identity["code"]
+        code_targets[identity["code"]][identity["slug"]] = identity
+        for alias in identity.get("codeNameAliases") or []:
+            alias_code = str(alias["code"]).zfill(4)
+            code_targets[alias_code][identity["slug"]] = identity
+
+    # A reused source code needs a stable discriminator for event IDs. Unique
+    # codes keep the historical ID contract unchanged; colliding codes use the
+    # already-stable registry slug.
+    for targets in code_targets.values():
+        if len(targets) > 1:
+            for identity in targets.values():
+                if not (
+                    identity["code"] == "0000"
+                    and identity["name"].strip().lower() == "unknown / other"
+                ):
+                    identity["_identityKey"] = (
+                        f"{identity['code']}:{identity['slug']}"
+                    )
+
+    for identity in activities:
+        for park in [identity.get("park"), *(identity.get("parkAliases") or [])]:
+            if park:
+                bind(("park", park), identity)
+        pairs = [{"code": identity["code"], "name": identity["name"]}]
+        pairs.extend(identity.get("codeNameAliases") or [])
+        for pair in pairs:
+            code = str(pair["code"]).zfill(4)
+            name = str(pair["name"]).strip().lower()
+            bind(("code-name", code, name), identity)
+
+    for code, targets in code_targets.items():
+        if len(targets) == 1:
+            bind(("code", code), next(iter(targets.values())))
+
+    # Missing Program Activity attribution keeps its explicit fallback.
+    unknown = next((row for row in activities if row["code"] == "0000"), None)
+    if unknown:
+        aliases["0000"] = unknown
     return aliases
