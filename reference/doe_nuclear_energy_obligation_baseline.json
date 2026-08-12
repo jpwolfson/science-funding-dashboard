@@ -1,0 +1,20 @@
+{
+ "schemaVersion": 2,
+ "federalAccount": "089-0319",
+ "source": "USAspending Federal Account endpoint (GTAS/File A): https://api.usaspending.gov/api/v2/federal_accounts/089-0319/",
+ "fiscalYears": {
+  "2015": {"status": "unavailable", "reason": "Files A/B/C begin in FY2017 Q2"},
+  "2016": {"status": "unavailable", "reason": "Files A/B/C begin in FY2017 Q2"},
+  "2017": {"status": "partial", "firstPeriod": 6, "asOfPeriod": 12},
+  "2018": {"status": "partial", "asOfPeriod": 12},
+  "2019": {"status": "partial", "asOfPeriod": 12},
+  "2020": {"status": "partial", "asOfPeriod": 12},
+  "2021": {"status": "partial", "asOfPeriod": 12},
+  "2022": {"status": "partial", "asOfPeriod": 12},
+  "2023": {"status": "partial", "asOfPeriod": 12},
+  "2024": {"status": "partial", "asOfPeriod": 12},
+  "2025": {"status": "partial", "asOfPeriod": 12},
+  "2026": {"status": "partial", "asOfPeriod": 9}
+ },
+ "notes": ["Pre-backfill scaffold: CI replaces source-available pins with exact File A cents before publication."]
+}
