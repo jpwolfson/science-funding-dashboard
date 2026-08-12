@@ -18,14 +18,14 @@ from adapters.obligation_common import normalize_event
 
 def ledger_event(event_id, amount, period="FY2025P02", award_id="A1",
                  gross_positive=None, gross_negative=None,
-                 source="file_c", program="0001"):
+                 source="file_c", program="0001", program_name=None):
     row = normalize_event({
         "id": event_id,
         "source": source,
         "submissionPeriod": period,
         "federalAccount": "089-0222",
         "programActivityCode": program,
-        "programActivityName": "Basic Energy Sciences",
+        "programActivityName": program_name or "Basic Energy Sciences",
         "amountCents": amount,
         "awardId": award_id if source == "file_c" else "",
         "linked": source == "file_c",
@@ -47,6 +47,20 @@ DETECTOR = {
 
 
 class FundingSentinelTests(unittest.TestCase):
+    def test_reused_program_code_keeps_named_identities_separate(self):
+        rows = [
+            ledger_event("one", -3_000, award_id="A1", program="0010",
+                         program_name="Spectrum Relocation Fund"),
+            ledger_event("two", -4_000, award_id="A2", program="0010",
+                         program_name="OMAO"),
+        ]
+        observations = detect_financial_observations(
+            rows, DETECTOR, "2026-08-11"
+        )
+        self.assertEqual(2, len(observations))
+        self.assertEqual({"OMAO", "Spectrum Relocation Fund"},
+                         {row["programActivityName"] for row in observations})
+
     def test_registry_scaffold_is_not_financial_coverage_until_store_exists(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
