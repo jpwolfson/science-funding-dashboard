@@ -209,8 +209,17 @@ Full completed-phase history, evidence, and discovery narratives live in
       maintenance-cost estimates at launch. Replace estimates with measured
       figures after eight weeks as a non-blocking operational follow-up; do not
       keep an agent goal open or delay account fan-out while the clock runs.
-- [ ] Phase 3.2d+ — fan out in bounded agency batches after
-      3.2a/3.2b and the 3.2c launch are green.
+- [ ] Phase 3.2d+ — fan out in bounded agency batches (3.2a/3.2b/3.2c
+      are green; READY TO RUN). Execution: launch ONE coordinating agent
+      in goal mode ("complete phase 3.2d") — it follows
+      `docs/phase-3.2d-execution-protocol.md` (owner-approved parallel
+      worker/coordinator protocol: per-agency workers on branches under
+      strict file-ownership contracts, serial merges, cross-cutting
+      gates, owner escalations only for DOD disclosure language, measure
+      semantics, or new dependencies). Batch content:
+      `docs/phase-3.2d-agency-roadmap.md`, amended 2026-08-12 to include
+      NSF obligation accounts in wave 1 (closes the sentinel's NSF
+      coverage asymmetry); NIH obligation accounts stay out of scope.
       Use one goal-mode task per batch, each adding registry entries, baselines,
       backfill, exact reconciliation, Program Activity aliases, site pages,
       tests, and rendered-browser QA:

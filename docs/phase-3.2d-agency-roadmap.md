@@ -19,10 +19,19 @@ roadmap.
 
 ## Execution rules for every batch
 
-Use one goal-mode task per implementation batch and run implementation batches
-sequentially. Read-only account research may run in parallel, but registry,
-workflow, generated-data, and site changes share enough files that parallel
-implementation is more likely to create conflicts than save time.
+SUPERSEDED 2026-08-12 (owner-approved): batches now run under the parallel
+worker/coordinator protocol in `docs/phase-3.2d-execution-protocol.md` — one
+coordinating agent launches parallel per-agency workers under strict
+file-ownership contracts and merges serially. The sequential rule below is
+retained for context only. The same decision brings NSF obligation accounts
+into 3.2d scope (wave 1), superseding this document's NSF descoping note;
+NIH obligation accounts remain out of scope.
+
+Original (superseded) rule: use one goal-mode task per implementation batch
+and run implementation batches sequentially. Read-only account research may
+run in parallel, but registry, workflow, generated-data, and site changes
+share enough files that parallel implementation is more likely to create
+conflicts than save time.
 
 Each task must start from current `main` and, for every account it attempts:
 
