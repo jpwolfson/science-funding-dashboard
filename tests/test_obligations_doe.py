@@ -165,6 +165,16 @@ SOURCE_PAIR_EXPECTATIONS = {
     },
 }
 
+CESER_PARK_EXPECTATIONS = {
+    "0000": "unknown-other",
+    "5Q0QFJ08DGM": "cybersecurity-for-energy-delivery-systems",
+    "5UWQ6UKQ7PC": "risk-management-technology-and-tools",
+    "5Q0QFJ08DGW": "infrastructure-security-and-energy-restoration",
+    "5UWQ6UKQ7PN": "response-and-restoration",
+    "5UWQ6UKQ7PZ": "information-sharing-partnerships-and-exercises",
+    "5WKQ40G9H6B": "ceser-infrastructure-investment-and-jobs-act",
+}
+
 
 class DoeOnboardingTests(unittest.TestCase):
     @classmethod
@@ -254,6 +264,14 @@ class DoeOnboardingTests(unittest.TestCase):
                 with self.subTest(path=path, code=code, name=name):
                     identity = aliases[("code-name", code, name.strip().lower())]
                     self.assertEqual(expected_slug, identity["slug"])
+
+    def test_reviewed_ceser_park_transitions_resolve_exactly(self):
+        aliases = alias_map(self.accounts["doe/ceser"])
+        for park, expected_slug in CESER_PARK_EXPECTATIONS.items():
+            with self.subTest(park=park):
+                self.assertEqual(
+                    expected_slug, aliases[("park", park)]["slug"]
+                )
 
     def test_reused_source_codes_cannot_fall_back_to_code_only(self):
         for path, codes in AMBIGUOUS_SOURCE_CODES.items():

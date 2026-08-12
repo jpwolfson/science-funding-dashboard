@@ -49,6 +49,19 @@ CESER. It therefore remains a first-class CESER identity rather than being
 folded into Electricity or the unknown bucket. The branch registry and alias
 tests include the exact pair.
 
+The FY2026 P02-P07 custom File B snapshots use earlier PARK keys that the
+FY2026 P08-P09 snapshots replace with consolidated/current keys. The official
+Data Broker PARK mapping file at
+`https://files.usaspending.gov/reference_data/park.csv` maps those earlier
+keys exactly: `5Q0QFJ08DGM` to Cybersecurity for Energy Delivery Systems,
+`5UWQ6UKQ7PC` to Risk Management Technology and Tools (CEDS),
+`5Q0QFJ08DGW` to Infrastructure Security and Energy Restoration,
+`5UWQ6UKQ7PN` to Response and Restoration, `5UWQ6UKQ7PZ` to Information
+Sharing, Partnerships and Exercises, and `5WKQ40G9H6B` to CESER,
+Infrastructure Investment and Jobs Act. Literal PARK `0000` appears only on a
+zero-dollar P02 row and remains the explicit Unknown / other identity. These
+are declared PARK aliases, not inferred dollar-based mappings.
+
 ## Program Activity alias review
 
 The registry retains every unique PAC/PAN code returned by the official
