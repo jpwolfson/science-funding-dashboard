@@ -111,6 +111,21 @@ block a wave.
   pointer to a new `docs/phase-history.md` entry; per-wave detail goes in
   the history file, not the roadmap.
 
+## Verification regime
+
+`docs/verification-regime.md` is the full contract (governing principle,
+tier table, JSON schema, specialization schema). `scripts/verify.py` is
+the one command both workers and the coordinator run — it is what "release
+bar" and "cross-cutting gates" above mean mechanically:
+
+| Stage | Tier(s) | Notes |
+|---|---|---|
+| Worker, before a backfill starts | `registry` (`--account <your account>` for a fast single-entry check) | Catches a bad registry entry or baseline before spending API budget on a doomed pull. |
+| Worker, every local iteration | `fast` | The unit suite + full offline validator suite; ~seconds, run as often as useful. |
+| Worker, before opening the PR | `fast` + `rendered` | Attach the `--json` result of both as PR evidence (release-bar item: "an OPEN pull request whose body carries the evidence"). |
+| Coordinator, after each serial merge | `fast` + `rendered` on the merged tree | Diff against the worker's attached JSON to confirm nothing regressed between the worker's branch tip and the post-merge tree. |
+| Final release gates (goal-complete) | `rendered` (its `smoke_obligation_pages.py --all-accounts` mode covers every registered account) + `screens` + the footprint figures folded into the JSON report | `screens` feeds the working-regime item 5 reader review; footprint feeds the cross-cutting "Footprint check" gate above — never fixed on sight, only flagged. |
+
 ## Owner escalations (bring as short option memos with a recommendation)
 
 1. DOD disclosure language before the wave-3 merge (standing sentinel

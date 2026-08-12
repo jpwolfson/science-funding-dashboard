@@ -137,13 +137,26 @@ jobs:
       - name: Reconcile every account into one candidate snapshot
         run: python scripts/reconcile_obligation_artifacts.py --staging _partitions
       - name: Validate all account stores, baselines, provenance, freshness, and dashboards
+        # --check-freshness/--require-current-provenance are a temporal SLA
+        # gate meaningful only right after a live pull (a submission-age
+        # window, an "is this partition's provenance current" check); they
+        # are not a universal-across-agencies invariant, so they stay a
+        # direct scripts/validate_obligations.py call rather than a
+        # scripts/verify.py tier. See docs/verification-regime.md.
         run: >-
           python scripts/validate_obligations.py
           --check-freshness --require-current-provenance
-      - name: Unit and site contract tests
-        run: python -m unittest discover -s tests -v
-      - name: Render obligation release matrix in Chrome
-        run: python scripts/smoke_obligation_pages.py
+      # The remaining two steps ARE verify.py tiers -- unit/site-contract
+      # tests plus the full offline validator suite, then the full rendered
+      # matrix (including --all-accounts, so a newly onboarded agency is
+      # covered the first week it reconciles) -- the same commands a worker
+      # or the coordinator runs locally. Actions minutes are not the scarce
+      # resource here (CLAUDE.md working regime #1), so re-running the full
+      # fast tier atop the freshness gate above is deliberate, not waste.
+      - name: Verify — fast tier (unit tests + full offline validator suite)
+        run: python scripts/verify.py --tier fast --json _verify-fast.json
+      - name: Verify — rendered tier (obligation, all-accounts, and sentinel browser matrices)
+        run: python scripts/verify.py --tier rendered --json _verify-rendered.json
       - name: Commit the validated atomic snapshot
         shell: python
         run: |

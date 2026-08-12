@@ -29,8 +29,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Unit tests
-        run: python -m unittest discover -s tests -v
       - name: Compile Python and validate registry JSON
         run: |
           python -m compileall -q adapters scripts tests
@@ -39,16 +37,28 @@ jobs:
           python -m json.tool config/funding_sentinel.json >/dev/null
           python -m json.tool reference/nih_databook_baseline.json >/dev/null
           python -m json.tool reference/usaspending_calibration.json >/dev/null
-          python -m json.tool reference/doe_sc_obligation_baseline.json >/dev/null
-      - name: Offline NIH data integrity and external benchmark checks
-        run: python scripts/validate_nih.py
-      - name: USAspending calibration and onboarding gate
-        run: python scripts/validate_usaspending_calibration.py
-      - name: Obligation ledger contract (data backfills in its dedicated workflow)
-        run: python scripts/validate_obligations.py --allow-empty
-      - name: Funding-action sentinel and source-pilot contract
-        run: python scripts/validate_funding_sentinel.py
-      - name: Rendered obligation page matrix
-        run: python scripts/smoke_obligation_pages.py
-      - name: Rendered funding-action sentinel matrix
-        run: python scripts/smoke_sentinel_page.py
+          python -c "
+          import json
+          config = json.load(open('config/obligation_accounts.json'))
+          for account in config['accounts']:
+              json.load(open(account['baseline']))
+          print(f'{len(config[\"accounts\"])} obligation baseline(s) OK')
+          "
+      # Single source of truth (docs/verification-regime.md): every offline
+      # check below is scripts/verify.py's own tiers, the same command a
+      # worker or the coordinator runs locally, so this list cannot drift
+      # from what agents run before opening a PR.
+      - name: Verify — registry tier (pre-backfill registry/baseline lint)
+        run: python scripts/verify.py --tier registry
+      - name: Verify — fast tier (unit tests + full offline validator suite)
+        run: python scripts/verify.py --tier fast --json _verify-fast.json
+      - name: Verify — rendered tier (obligation, all-accounts, and sentinel browser matrices)
+        run: python scripts/verify.py --tier rendered --json _verify-rendered.json
+      - name: Retain verification JSON reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verify-reports
+          path: _verify-*.json
+          if-no-files-found: ignore
+          retention-days: 14

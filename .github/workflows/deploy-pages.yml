@@ -37,12 +37,12 @@ jobs:
         # This workflow is path-triggered off main with no dependency on the
         # Test workflow, so a direct push could otherwise deploy unvalidated
         # content. Re-run the offline gates here; they cost about a minute.
-        run: |
-          python -m unittest discover -s tests
-          python scripts/validate_nih.py
-          python scripts/validate_usaspending_calibration.py
-          python scripts/validate_obligations.py --allow-empty
-          python scripts/validate_funding_sentinel.py
+        # The fast tier (docs/verification-regime.md) is a strict superset
+        # of this job's previous five checks -- same unit suite, same
+        # --allow-empty obligation ledger contract, plus verify_dms_baseline
+        # and validate_award_invariants for free, from the one verifier
+        # every worker and CI job runs.
+        run: python scripts/verify.py --tier fast --json _verify-fast.json
       - name: Assemble site
         run: |
           mkdir -p _site
