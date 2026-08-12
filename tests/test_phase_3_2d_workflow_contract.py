@@ -22,6 +22,12 @@ class Phase32dWorkflowContractTests(unittest.TestCase):
             workflow,
         )
 
+    def test_obligation_refresh_commits_rebuilt_sentinel_candidate(self):
+        workflow = (
+            REPO / ".github/workflows/update-obligations.yml"
+        ).read_text()
+        self.assertIn('["data/obligations", "data/sentinel"]', workflow)
+
 
 if __name__ == "__main__":
     unittest.main()
