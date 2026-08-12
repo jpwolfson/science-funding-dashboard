@@ -247,6 +247,7 @@ def chrome_path(explicit=None):
         shutil.which("google-chrome-stable"),
         shutil.which("chromium"),
         shutil.which("chromium-browser"),
+        "/opt/pw-browsers/chromium",  # pre-installed in Claude dev containers
         "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
     ]
     for value in candidates:
