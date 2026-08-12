@@ -23,7 +23,8 @@ on:
         description: Final FY period (custom mode only)
         required: false
   push:
-    branches: ["codex/**", "claude/**"]
+    # Phase 3.2d's coordinator protocol assigns workers agent/3-2d-* branches.
+    branches: ["codex/**", "claude/**", "agent/**"]
     paths: [".github/triggers/update-obligations.json"]
 
 permissions:

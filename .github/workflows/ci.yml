@@ -2,7 +2,7 @@ name: Test
 
 on:
   push:
-    branches: [main, "claude/**", "codex/**"]
+    branches: [main, "claude/**", "codex/**", "agent/**"]
     paths:
       - "adapters/**"
       - "scripts/**"
