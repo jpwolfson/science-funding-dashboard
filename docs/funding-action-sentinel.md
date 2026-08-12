@@ -121,15 +121,22 @@ history.
 ### Attributed-language rendering rule (owner-approved 2026-08-12)
 
 Render by provenance, not judgment. Any string whose value comes from an
-authoritative-source field — announcement titles, stated reasons or event
-descriptions, and qualified amount display strings such as "approximately
-$7.56 billion" — renders on the sentinel page only through one shared
-`attributedText()` helper. The helper wraps the string in quotation marks and
+authoritative-source VERBATIM field — announcement titles and qualified
+amount display strings such as "approximately $7.56 billion" — renders on the
+sentinel page only through one shared `attributedText()` helper. The helper wraps the string in quotation marks and
 shows its citation: the source's registered name and its source-as-of date,
 linked to the source URL where the record has one. Several attributed strings
 from the same source may render together in one block with a single shared
 citation rather than one repeated per line, but every attributed string is
 still individually quoted.
+
+Adapter-composed paraphrases are the deliberate exception: a paraphrase in
+quotation marks would attribute the dashboard's own wording to the agency,
+which is the inverse attribution error. Fields that paraphrase a source
+(`statedReason`) render unquoted, explicitly labeled — "Stated reason
+(paraphrase, not verbatim): …" — and written so the source is named as the
+actor ("DOE attributed the decision to …"). Dashboard meta-commentary never
+appears inside quotation marks.
 
 Strings in the dashboard's own voice — card headings, labels, state
 descriptions — are composed mechanically from registry or store metadata and

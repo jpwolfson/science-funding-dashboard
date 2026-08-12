@@ -99,13 +99,19 @@ class SiteContractTests(unittest.TestCase):
         # Required: each attributed field is passed into the helper.
         for text in (
             "attributedText(event.sourceTitle || label, source, { omitCitation: true })",
-            "attributedText(event.statedReason, source, { omitCitation: true })",
             "attributedText(announcedDisplay, source, { omitCitation: true })",
             "attributedText(first.sourceTitle || first.sourceId, source, { omitCitation: true })",
             "attributedText(null, source)",
         ):
             self.assertIn(text, self.html)
-        # Forbidden: the same fields must never be interpolated directly into
+        # statedReason is an adapter paraphrase, never a verbatim quote:
+        # it must render unquoted AND carry the paraphrase label, so neither
+        # the helper (which quotes) nor a bare interpolation is acceptable.
+        self.assertIn(
+            '"Stated reason (paraphrase, not verbatim): " + event.statedReason',
+            self.html)
+        self.assertNotIn("attributedText(event.statedReason", self.html)
+        # Forbidden: verbatim fields must never be interpolated directly into
         # a heading, link, or plain text node outside the helper call.
         for text in (
             'el("a", { href: event.sourceUrl, text: event.sourceTitle',

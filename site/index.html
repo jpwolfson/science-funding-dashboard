@@ -1481,8 +1481,11 @@ function renderSentinelSourcedEvent(event, card, data) {
   section.append(el("p", {}, el("strong", { text: "Attributed source headline: " }),
     attributedText(event.sourceTitle || label, source, { omitCitation: true })));
   section.append(el("p", { class: "note", text: `Event: ${label}. This dated record remains separate from any later appeal, closeout, litigation, deobligation, or restoration.` }));
+  // statedReason is an adapter-composed paraphrase, not a verbatim source
+  // string: quoting it would attribute the dashboard's wording to the
+  // agency, so it renders unquoted and labeled as a paraphrase.
   if (event.statedReason) section.append(el("p", { class: "note" },
-    document.createTextNode("Stated reason: "), attributedText(event.statedReason, source, { omitCitation: true })));
+    document.createTextNode("Stated reason (paraphrase, not verbatim): " + event.statedReason)));
   const announcedDisplay = event.announcedAffectedValueDisplay
     || (event.announcedAffectedValueCents == null ? null
       : `${event.announcedAffectedValueQualifier ? `${event.announcedAffectedValueQualifier} ` : ""}${fmtCents(event.announcedAffectedValueCents)}`);
