@@ -172,6 +172,23 @@ def validate(repo=REPO, require_data=True):
                         if event.get("sourceId") == prefix}
             if not accepted <= retained:
                 errors.append(f"{prefix}: failure did not preserve the last accepted events")
+        if status.get("status") == "current" and status.get("lastAcceptedSha256"):
+            # A truncated-but-parseable snapshot must fail closed: the active
+            # events for a current source must be exactly the accepted set,
+            # and the recorded count must agree with it.
+            accepted = set(status.get("acceptedEventIds") or [])
+            active = {event["id"] for event in events
+                      if event.get("sourceId") == prefix
+                      and event.get("active", True)}
+            if active != accepted:
+                errors.append(
+                    f"{prefix}: active events do not equal the accepted "
+                    f"snapshot's event IDs "
+                    f"({len(active)} active vs {len(accepted)} accepted)")
+            if status.get("recordCount") != len(accepted):
+                errors.append(
+                    f"{prefix}: recordCount={status.get('recordCount')} does "
+                    f"not match {len(accepted)} accepted event IDs")
         if status.get("status") == "stale" and status.get("ageDays", -1) <= status.get(
                 "freshnessMaxDays", 0):
             errors.append(f"{prefix}: source is marked stale before its SLA expires")
@@ -218,9 +235,17 @@ def validate(repo=REPO, require_data=True):
 
     active_doe = [row for row in events if row.get("active", True) and
                   row.get("sourceId") == "doe-october-2025-portfolio-action"]
-    if "doe-october-2025-portfolio-action" in source_ids and active_doe:
+    doe_accepted = any(
+        row.get("id") == "doe-october-2025-portfolio-action" and
+        row.get("lastAcceptedSha256")
+        for row in sources)
+    if "doe-october-2025-portfolio-action" in source_ids and doe_accepted:
+        # Once the source has an accepted snapshot, its announcement event
+        # must exist: a vanished event is a validation failure, not a skip.
         if len(active_doe) != 1:
-            errors.append("DOE October 2025 source must contain one announcement event")
+            errors.append(
+                "DOE October 2025 source must contain exactly one active "
+                f"announcement event after acceptance (found {len(active_doe)})")
         else:
             event = active_doe[0]
             expected_offices = next(
