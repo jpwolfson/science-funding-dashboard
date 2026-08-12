@@ -1,4 +1,7 @@
+import json
+import tempfile
 import unittest
+from pathlib import Path
 
 from adapters.funding_sentinel import (
     accept_source_snapshot,
@@ -7,6 +10,7 @@ from adapters.funding_sentinel import (
     build_episodes,
     detect_financial_observations,
     episode_id,
+    load_ledger_events,
     record_source_failure,
 )
 from adapters.obligation_common import normalize_event
@@ -43,6 +47,26 @@ DETECTOR = {
 
 
 class FundingSentinelTests(unittest.TestCase):
+    def test_registry_scaffold_is_not_financial_coverage_until_store_exists(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            (root / "config").mkdir()
+            (root / "config" / "obligation_accounts.json").write_text(
+                json.dumps({"accounts": [{
+                    "path": "agency/live-later",
+                    "agency": "Agency",
+                    "name": "Live later",
+                    "abbrev": "LL",
+                    "federalAccount": "999-0001",
+                }]})
+            )
+            events, accounts = load_ledger_events(root)
+            self.assertEqual([], events)
+            self.assertEqual({}, accounts)
+            self.assertEqual([], build_coverage(
+                accounts, []
+            )["financialAccounts"])
+
     def test_coverage_contract_comes_from_both_registries(self):
         accounts = {"089-0222": {
             "path": "doe/sc", "agency": "Department of Energy",

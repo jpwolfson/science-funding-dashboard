@@ -183,9 +183,13 @@ def load_ledger_events(repo):
     rows = []
     accounts = {}
     for account in registry["accounts"]:
-        accounts[account["federalAccount"]] = account
         store = repo / "data" / "obligations" / account["path"] / "events"
         if store.exists():
+            # Registry scaffolds are not public financial coverage until a
+            # validated ledger has actually materialized. The obligation
+            # reconcile path creates the store and rebuilds the sentinel in
+            # one atomic candidate, so coverage expands at publication time.
+            accounts[account["federalAccount"]] = account
             rows.extend(load_store(store))
     return rows, accounts
 
