@@ -20,7 +20,7 @@ EXPECTED = {
     "doe/fossil-energy": ("089-0213", "Fossil Energy", 25),
     "doe/electricity": ("089-0318", "Electricity", 19),
     "doe/ceser": (
-        "089-2250", "Cybersecurity, Energy Security, and Emergency Response", 10,
+        "089-2250", "Cybersecurity, Energy Security, and Emergency Response", 11,
     ),
     "doe/nuclear-energy": ("089-0319", "Nuclear Energy", 25),
     "doe/nnsa-weapons-activities": ("089-0240", "Weapons Activities", 23),
@@ -105,6 +105,8 @@ SOURCE_PAIR_EXPECTATIONS = {
             "cybersecurity-for-energy-delivery-systems",
         ("0010", "Risk Management Technology and Tools (CEDS)"):
             "risk-management-technology-and-tools",
+        ("0013", "DCEI Energy Mission Assurance"):
+            "dcei-energy-mission-assurance",
     },
     "doe/nuclear-energy": {
         ("0010", "Naval Reactors Development"):

@@ -41,6 +41,14 @@ Source URL pattern:
 Every corresponding Phase 3.2b AAAS row is `resolved`; the registry tier
 confirmed this independently for all ten accounts.
 
+The serialized backfill additionally exposed one official transient File B
+identity that the current all-history inventory no longer lists: CESER FY2023
+P06 contains PAC `0013`, `DCEI ENERGY MISSION ASSURANCE`. DOE's FY2023 budget
+justification documents the transfer of this program from Electricity to
+CESER. It therefore remains a first-class CESER identity rather than being
+folded into Electricity or the unknown bucket. The branch registry and alias
+tests include the exact pair.
+
 ## Program Activity alias review
 
 The registry retains every unique PAC/PAN code returned by the official
