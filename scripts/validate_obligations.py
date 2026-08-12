@@ -212,7 +212,11 @@ def validate(repo=REPO, require_data=True, check_freshness=False,
                     event["grossPositiveCents"] + event["grossNegativeCents"] !=
                     event["amountCents"]):
                 errors.append(f"{event['id']}: signed gross amounts do not reconcile")
-            bucket = (event["submissionPeriod"], event["programActivityCode"])
+            bucket = (
+                event["submissionPeriod"],
+                event["programActivityCode"],
+                event["programActivityName"],
+            )
             if event["source"] == "file_b_residual":
                 residual_buckets[bucket] += 1
                 if event["linked"] or event["awardId"]:
