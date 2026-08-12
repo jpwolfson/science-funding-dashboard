@@ -150,10 +150,58 @@ def _export_partitions(repo, account, years, destination):
     )
 
 
+def _export_skipped_partition(account, years, destination):
+    """Emit an auditable no-op artifact for a frozen matrix job.
+
+    A workflow matrix is fixed when its plan job starts. If later evidence
+    corrects one of its queued account-years to source-unavailable, that job
+    must finish without inventing a zero-dollar financial observation.
+    Reconciliation ignores descriptors whose fiscalYears list is empty.
+    """
+    destination = Path(destination)
+    destination.mkdir(parents=True, exist_ok=True)
+    value = {
+        "schemaVersion": 2,
+        "accountPath": account["path"],
+        "federalAccount": account["federalAccount"],
+        "baselinePath": account["baseline"],
+        "fiscalYears": [],
+        "files": [],
+        "skippedFiscalYears": list(years),
+        "skipReason": "registry baseline marks the fiscal year source-unavailable",
+    }
+    (destination / "partition.json").write_text(
+        json.dumps(value, indent=1, sort_keys=True) + "\n"
+    )
+
+
 def pull(account, years, current_period=12, repo=REPO, rollup=True,
          raw_archive_dir=None, partition_output=None):
     repo = Path(repo)
     years = list(years)
+    baseline = json.loads((repo / account["baseline"]).read_text())
+    unavailable_years = [
+        fy for fy in years
+        if baseline.get("fiscalYears", {}).get(str(fy), {}).get("status")
+        == "unavailable"
+    ]
+    if unavailable_years:
+        if len(unavailable_years) != len(years):
+            raise ValueError(
+                "a pull range cannot mix source-available and unavailable years"
+            )
+        if partition_output:
+            _export_skipped_partition(account, unavailable_years, partition_output)
+            print(
+                "skipping " + ", ".join(f"FY{fy}" for fy in unavailable_years)
+                + ": registry baseline marks source-unavailable",
+                flush=True,
+            )
+            return
+        raise ValueError(
+            ", ".join(f"FY{fy}" for fy in unavailable_years)
+            + " is marked source-unavailable"
+        )
     aliases = alias_map(account)
     all_events = []
     audit = {}

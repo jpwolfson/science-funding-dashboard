@@ -1,11 +1,14 @@
 """Phase 3.2d DOE account-onboarding contracts."""
 
 import json
+import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from adapters.usaspending_obligations import alias_map
 from scripts.plan_obligation_refresh import plan
+from scripts.pull_obligation_account import pull
 
 
 REPO = Path(__file__).resolve().parent.parent
@@ -295,10 +298,15 @@ class DoeOnboardingTests(unittest.TestCase):
         )
 
     def test_full_backfill_plan_replaces_every_partial_scaffold(self):
+        expected_first_fy = {
+            "doe/oced": 2022,
+            "doe/ceser": 2019,
+        }
         for path in EXPECTED:
             with self.subTest(path=path):
                 jobs = plan(REPO, mode="full", selectors=path)["include"]
-                self.assertEqual(list(range(2017, 2027)), [
+                first_fy = expected_first_fy.get(path, 2017)
+                self.assertEqual(list(range(first_fy, 2027)), [
                     row["fiscalYear"] for row in jobs
                 ])
                 self.assertEqual(12, jobs[0]["period"])
@@ -307,19 +315,48 @@ class DoeOnboardingTests(unittest.TestCase):
                 baseline = json.loads((REPO / self.accounts[path]["baseline"]).read_text())
                 self.assertEqual("unavailable", baseline["fiscalYears"]["2015"]["status"])
                 self.assertEqual("unavailable", baseline["fiscalYears"]["2016"]["status"])
-                self.assertEqual(6, baseline["fiscalYears"]["2017"]["firstPeriod"])
-                self.assertEqual(12, baseline["fiscalYears"]["2017"]["asOfPeriod"])
+                for fiscal_year in range(2017, first_fy):
+                    self.assertEqual(
+                        "unavailable",
+                        baseline["fiscalYears"][str(fiscal_year)]["status"],
+                    )
+                self.assertEqual(
+                    6 if first_fy == 2017 else 2,
+                    baseline["fiscalYears"][str(first_fy)]["firstPeriod"],
+                )
+                self.assertEqual(
+                    12, baseline["fiscalYears"][str(first_fy)]["asOfPeriod"]
+                )
                 self.assertEqual("partial", baseline["fiscalYears"]["2026"]["status"])
                 self.assertEqual(9, baseline["fiscalYears"]["2026"]["asOfPeriod"])
 
                 store = REPO / "data" / "obligations" / path / "events"
                 if store.exists():
-                    for fiscal_year in range(2017, 2027):
+                    for fiscal_year in range(first_fy, 2027):
                         self.assertIn(
                             "obligationsCents",
                             baseline["fiscalYears"][str(fiscal_year)],
                             f"{path} FY{fiscal_year} retained an unfilled scaffold",
                         )
+
+        # The DOE prefix also includes the existing Office of Science
+        # regression account; the ten Phase 3.2d accounts themselves plan 93.
+        self.assertEqual(
+            103, len(plan(REPO, mode="full", selectors="doe")["include"])
+        )
+
+    def test_frozen_matrix_unavailable_year_is_explicit_noop(self):
+        account = self.accounts["doe/ceser"]
+        with tempfile.TemporaryDirectory() as temp:
+            output = Path(temp) / "partition"
+            with patch("scripts.pull_obligation_account.resolve_account") as resolve:
+                pull(account, [2017], repo=REPO, rollup=False,
+                     partition_output=output)
+            resolve.assert_not_called()
+            descriptor = json.loads((output / "partition.json").read_text())
+            self.assertEqual([], descriptor["fiscalYears"])
+            self.assertEqual([2017], descriptor["skippedFiscalYears"])
+            self.assertEqual([], descriptor["files"])
 
 
 if __name__ == "__main__":
