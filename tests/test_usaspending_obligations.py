@@ -5,7 +5,7 @@ import unittest
 from unittest.mock import patch
 
 from adapters.usaspending_obligations import (
-    _json, alias_map, combine_file_b_file_c, file_b_period_events,
+    _bytes, _json, alias_map, combine_file_b_file_c, file_b_period_events,
     finish_download,
     parse_file_b_snapshot, parse_file_c,
 )
@@ -146,6 +146,19 @@ class USAspendingObligationTests(unittest.TestCase):
         sleep.assert_called_once_with(1)
         archive.assert_called_once_with(
             "https://files.usaspending.gov/archive.zip")
+
+    def test_archive_download_outlasts_six_disconnects(self):
+        response = io.BytesIO(b"archive")
+        with patch(
+                "adapters.usaspending_obligations.urllib.request.urlopen",
+                side_effect=[http.client.RemoteDisconnected()] * 6
+                            + [response]) as open_, \
+             patch("adapters.usaspending_obligations.time.sleep") as sleep:
+            self.assertEqual(_bytes("https://files.usaspending.gov/a.zip"),
+                             b"archive")
+        self.assertEqual(open_.call_count, 7)
+        self.assertEqual([1, 2, 4, 8, 16, 32],
+                         [call.args[0] for call in sleep.call_args_list])
 
     def test_file_b_cumulative_snapshots_are_differenced(self):
         key = ("0001", "0001", "BES", "PARK1", "25.1", "D", "", "")
