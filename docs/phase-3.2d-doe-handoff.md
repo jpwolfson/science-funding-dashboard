@@ -149,6 +149,18 @@ preserves this as distinct synthetic canonical identity `00U3 / Legacy
 Management`, reachable only through the exact code/name alias; bare `0020`
 remains intentionally ambiguous and unbound.
 
+The accepted FY2022 P02, FY2023 P02, and FY2024 P09 snapshots exposed three
+more transient Fossil Energy rows: `0301 / PROGRAM DIRECTION & SUPPORT` at
+`-$2,120.80`, `0030 / PROGRAM DIRECTION` at `-$20.00`, and `0001 / OTHER
+DEFENSE ACTIVITIES (DIRECT)` at zero cents. None appears in the account's
+official final-year totals or all-history Program Activity inventory. The
+FY2022 and FY2023 snapshots simultaneously contain material `0012 / PROGRAM
+DIRECTION - MANAGEMENT`, so neither interim row is merged into the reviewed
+Program Direction identity. Current PARK reference rows with the first and
+third names belong to other DOE accounts, not `089-0213`. The registry
+therefore preserves these three accepted source rows as exact-pair-only
+synthetic identities `00U4`, `00U5`, and `00U6`, with no inferred PARK.
+
 To be filled from the accepted CI snapshot before opening the PR:
 
 - exact File B/File A cents by account and FY;

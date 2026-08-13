@@ -20,7 +20,7 @@ EXPECTED = {
     "doe/arpa-e": ("089-0337", "Advanced Research Projects Agency-Energy", 4),
     "doe/eere": ("089-0321", "Energy Efficiency and Renewable Energy", 25),
     "doe/oced": ("089-2297", "Clean Energy Demonstrations", 18),
-    "doe/fossil-energy": ("089-0213", "Fossil Energy", 26),
+    "doe/fossil-energy": ("089-0213", "Fossil Energy", 29),
     "doe/electricity": ("089-0318", "Electricity", 19),
     "doe/ceser": (
         "089-2250", "Cybersecurity, Energy Security, and Emergency Response", 11,
@@ -84,6 +84,11 @@ SOURCE_PAIR_EXPECTATIONS = {
         ("0020", "Natural Gas Technologies"): "natural-gas-technologies",
         ("0020", "Legacy Management"): "legacy-management",
         ("0020", "Inflation Reduction Act"): "inflation-reduction-act",
+        ("0301", "Program Direction & Support"):
+            "program-direction-and-support-transient",
+        ("0030", "Program Direction"): "program-direction-transient-0030",
+        ("0001", "Other Defense Activities (Direct)"):
+            "other-defense-activities-direct-transient",
         ("0022", "Supercritical Transformational Electric Power Generation"):
             "step-supercritical-co2",
         ("0040", "Energy Asset Transformation"):
@@ -489,6 +494,62 @@ class DoeOnboardingTests(unittest.TestCase):
             actual,
         )
         self.assertNotIn(("code", "0020"), aliases)
+
+    def test_fossil_interim_transient_rows_remain_exact_and_distinct(self):
+        aliases = alias_map(self.accounts["doe/fossil-energy"])
+        rows = [
+            {
+                "submission_period": "FY2022P02",
+                "federal_account_symbol": "089-0213",
+                "program_activity_reporting_key": "",
+                "program_activity_code": "0012",
+                "program_activity_name": "PROGRAM DIRECTION - MANAGEMENT",
+                "obligations_incurred": "8495418.52",
+            },
+            {
+                "submission_period": "FY2022P02",
+                "federal_account_symbol": "089-0213",
+                "program_activity_reporting_key": "",
+                "program_activity_code": "0301",
+                "program_activity_name": "PROGRAM DIRECTION & SUPPORT",
+                "obligations_incurred": "-2120.80",
+            },
+            {
+                "submission_period": "FY2023P02",
+                "federal_account_symbol": "089-0213",
+                "program_activity_reporting_key": "",
+                "program_activity_code": "0030",
+                "program_activity_name": "PROGRAM DIRECTION",
+                "obligations_incurred": "-20.00",
+            },
+            {
+                "submission_period": "FY2024P09",
+                "federal_account_symbol": "089-0213",
+                "program_activity_reporting_key": "",
+                "program_activity_code": "0001",
+                "program_activity_name": "OTHER DEFENSE ACTIVITIES (DIRECT)",
+                "obligations_incurred": "0.00",
+            },
+        ]
+        snapshot = parse_file_b_snapshot(rows, "089-0213", aliases)
+        self.assertEqual(
+            {
+                ("0018", "Program Direction", "5ZCQYAMAEXT"):
+                    849_541_852,
+                ("00U4", "Program Direction & Support", ""):
+                    -212_080,
+                ("00U5", "Program Direction", ""):
+                    -2_000,
+                ("00U6", "Other Defense Activities (Direct)", ""):
+                    0,
+            },
+            {
+                (key[1], key[2], key[3]): amount
+                for key, amount in snapshot.items()
+            },
+        )
+        self.assertNotIn(("park", "5ZCQYAUD7RJ"), aliases)
+        self.assertNotIn(("park", "5WKPVDWW473"), aliases)
 
     def test_eere_grid_operations_fy2023_p08_code_transition_is_exact(self):
         account = self.accounts["doe/eere"]
