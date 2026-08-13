@@ -47,7 +47,7 @@ def _json(url, payload=None, attempts=10, retry_not_found=False):
             time.sleep(delay)
 
 
-def _bytes(url, attempts=6):
+def _bytes(url, attempts=10):
     for attempt in range(attempts):
         try:
             request = urllib.request.Request(url, headers={"User-Agent": "science-funding-dashboard/1"})
