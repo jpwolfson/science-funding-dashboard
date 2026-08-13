@@ -76,6 +76,7 @@ SOURCE_PAIR_EXPECTATIONS = {
         ("0033", "Program Direction-IIJA"): "program-direction-iija",
     },
     "doe/fossil-energy": {
+        ("0023", "Cross Cutting Research"): "cross-cutting-research",
         ("0006", "Carbon Utilization"): "carbon-utilization",
         ("0006", "Carbon Transport and Storage"):
             "carbon-transport-and-storage",
@@ -612,6 +613,21 @@ class DoeOnboardingTests(unittest.TestCase):
                 "program_activity_name": "PROGRAM DIRECTION-IIJA",
                 "obligations_incurred": "13000.00",
             },
+            *[
+                {
+                    "submission_period": "FY2024P11",
+                    "federal_account_symbol": "089-0213",
+                    "program_activity_reporting_key": "",
+                    "program_activity_code": "0023",
+                    "program_activity_name": "CROSS CUTTING RESEARCH",
+                    "obligations_incurred": amount,
+                }
+                for amount in (
+                    "2925.54", "2492.13", "641551.44", "19033.00",
+                    "5000.00", "7155882.68", "6493.45", "50369.18",
+                    "98624.30", "19648.83",
+                )
+            ],
         ]
         snapshot = parse_file_b_snapshot(rows, "089-0213", aliases)
         self.assertEqual(
@@ -626,6 +642,8 @@ class DoeOnboardingTests(unittest.TestCase):
                     0,
                 ("00U7", "Program Direction - IIJA", ""):
                     2_186_285,
+                ("0005", "Cross-Cutting Research", "5ZCQYAMAEXR"):
+                    800_202_055,
             },
             {
                 (key[1], key[2], key[3]): amount
