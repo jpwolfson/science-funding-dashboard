@@ -6,7 +6,10 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from adapters.usaspending_obligations import alias_map
+from adapters.usaspending_obligations import (
+    alias_map, combine_file_b_file_c, file_b_period_events,
+    parse_file_b_snapshot,
+)
 from scripts.plan_obligation_refresh import plan
 from scripts.pull_obligation_account import pull
 
@@ -22,7 +25,7 @@ EXPECTED = {
     "doe/ceser": (
         "089-2250", "Cybersecurity, Energy Security, and Emergency Response", 11,
     ),
-    "doe/nuclear-energy": ("089-0319", "Nuclear Energy", 25),
+    "doe/nuclear-energy": ("089-0319", "Nuclear Energy", 26),
     "doe/nnsa-weapons-activities": ("089-0240", "Weapons Activities", 23),
     "doe/nnsa-defense-nuclear-nonproliferation": (
         "089-0309", "Defense Nuclear Nonproliferation", 14,
@@ -111,6 +114,8 @@ SOURCE_PAIR_EXPECTATIONS = {
     "doe/nuclear-energy": {
         ("0010", "Naval Reactors Development"):
             "naval-reactors-development",
+        ("0033", "Program Direction-IIJA"):
+            "program-direction-iija",
         ("0032", "Reactor Concepts RD&D"): "reactor-concepts-rd-and-d",
         ("0032", "Reactor Concepts RD&D (RC RD&D)"):
             "reactor-concepts-rd-and-d",
@@ -279,6 +284,43 @@ class DoeOnboardingTests(unittest.TestCase):
             for code in codes:
                 with self.subTest(path=path, code=code):
                     self.assertNotIn(("code", code), aliases)
+
+    def test_nuclear_energy_iija_direction_is_distinct_from_base_direction(self):
+        account = self.accounts["doe/nuclear-energy"]
+        aliases = alias_map(account)
+        rows = [
+            {
+                "federal_account_symbol": "089-0319",
+                "program_activity_code": "0033",
+                "program_activity_name": "PROGRAM DIRECTION-IIJA",
+                "obligations_incurred": "23457.92",
+            },
+            {
+                "federal_account_symbol": "089-0319",
+                "program_activity_code": "0551",
+                "program_activity_name": "PROGRAM DIRECTION",
+                "obligations_incurred": "1.00",
+            },
+        ]
+        snapshot = parse_file_b_snapshot(rows, "089-0319", aliases)
+        self.assertEqual(
+            {
+                ("0033", "Program Direction - IIJA", ""): 2_345_792,
+                ("0551", "Program Direction", "5ZCQYAU850J"): 100,
+            },
+            {
+                (key[0], key[2], key[3]): amount
+                for key, amount in snapshot.items()
+            },
+        )
+        flows = file_b_period_events({"FY2024P10": snapshot}, "089-0319")
+        events = combine_file_b_file_c(flows, [], "089-0319")
+        self.assertEqual(2_345_892, sum(row["amountCents"] for row in events))
+        self.assertEqual(2, len({row["id"] for row in events}))
+        self.assertEqual(
+            {"0033", "0551"},
+            {row["_programActivityKey"] for row in events},
+        )
 
     def test_nnsa_account_boundary_stays_explicit(self):
         weapons = {
