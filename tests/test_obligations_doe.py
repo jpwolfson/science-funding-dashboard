@@ -214,6 +214,28 @@ EERE_PARK_EXPECTATIONS = {
     "63YPT7SFFAZ": "energy-efficiency-and-renewable-energy",
 }
 
+ELECTRICITY_PARK_EXPECTATIONS = {
+    "5ZCQYAU5K1G": "research-and-development",
+    "5ZCQYAU5K1H": "transmission-reliability-and-resiliency",
+    "5Q0QFEPMTFQ": "resilient-distribution-systems",
+    "5TAQ9MGNEAC": "dcei-energy-mission-assurance",
+    "5ZCQYAU5K1K": "energy-storage",
+    "5ZCQYAU5K1L": "transformer-resilience-and-advanced-components",
+    "5ZCQYAU5K1J": "cybersecurity-for-energy-delivery-systems",
+    "5WKQ3U7NX4T":
+        "cyber-resilient-and-security-utility-communication-network",
+    "5WKQ3U7NX4U": "energy-delivery-grid-operations-technology",
+    "5WKQ3U7NX4V": "applied-grid-transformation-solutions",
+    "5ZCQYAU5K1Q": "infrastructure-security-and-energy-restoration",
+    "5ZCQYAU5K22": "transmission-permitting-and-technical-assistance",
+    "5ZCQYAU5K2C": "program-direction",
+    "5WKQ3U7NX5J":
+        "electricity-infrastructure-investment-and-jobs-act",
+    "608Q10378JS": "disaster-relief-supplemental",
+    "608Q10378K2": "inflation-reduction-act",
+    "5ZCQYAU5KZP": "reimbursable-work",
+}
+
 
 class DoeOnboardingTests(unittest.TestCase):
     @classmethod
@@ -371,6 +393,34 @@ class DoeOnboardingTests(unittest.TestCase):
             {
                 (key[1], key[2], key[3]): amount
                 for key, amount in collision.items()
+            },
+        )
+
+    def test_electricity_fy2026_blank_name_parks_resolve_officially(self):
+        aliases = alias_map(self.accounts["doe/electricity"])
+        for park, expected_slug in ELECTRICITY_PARK_EXPECTATIONS.items():
+            with self.subTest(park=park):
+                self.assertEqual(
+                    expected_slug, aliases[("park", park)]["slug"]
+                )
+
+        # The exact accepted FY2026 P02 failure row is blank for both legacy
+        # fields. The official PARK reference maps it to legacy PAC 0012.
+        rows = [{
+            "submission_period": "FY2026P02",
+            "federal_account_symbol": "089-0318",
+            "program_activity_reporting_key": "5Q0QFEPMTFQ",
+            "program_activity_code": "",
+            "program_activity_name": "",
+            "obligations_incurred": "23000.00",
+        }]
+        snapshot = parse_file_b_snapshot(rows, "089-0318", aliases)
+        self.assertEqual(
+            {("0012", "Resilient Distribution Systems",
+              "5Q0QFEPMTFQ"): 2_300_000},
+            {
+                (key[1], key[2], key[3]): amount
+                for key, amount in snapshot.items()
             },
         )
 
