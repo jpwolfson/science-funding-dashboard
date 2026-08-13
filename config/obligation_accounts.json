@@ -337,6 +337,106 @@
     {"slug": "obligations-by-program-activity", "code": "0001", "park": "5ZCQYAMY2H7", "name": "Obligations by Program Activity"},
     {"slug": "reimbursable-program-activity", "code": "0801", "park": "EX202500275972", "name": "Reimbursable Program Activity", "codeNameAliases": [{"code": "0801", "name": "Reimbursable Work"}]}
    ]
+  },
+  {
+   "path": "nsf/rra",
+   "name": "Research and Related Activities",
+   "abbrev": "NSF R&RA",
+   "agency": "National Science Foundation",
+   "federalAccount": "049-0100",
+   "agencyIdentifier": "049",
+   "adapter": "usaspending_obligations",
+   "baseline": "reference/nsf_rra_obligation_baseline.json",
+   "availability": {
+    "firstFiscalYear": 2017,
+    "firstFiscalYearPeriod": 6,
+    "regularFirstPeriod": 2
+   },
+   "programActivities": [
+    {"slug": "unknown-other", "code": "0000", "park": "", "name": "Unknown / other"},
+    {"slug": "biological-sciences", "code": "0001", "park": "5P1BERBR3BN", "name": "Biological Sciences", "abbrev": "BIO"},
+    {"slug": "computer-information-science-engineering", "code": "0002", "park": "5P1BERBR3BZ", "name": "Computer and Information Science and Engineering", "abbrev": "CISE"},
+    {"slug": "engineering", "code": "0003", "park": "5P1BERBR3BP", "name": "Engineering", "abbrev": "ENG"},
+    {"slug": "geosciences", "code": "0005", "park": "5P1BERBR3BR", "name": "Geosciences", "abbrev": "GEO"},
+    {"slug": "mathematical-physical-sciences", "code": "0006", "park": "5P1BERBR3BS", "name": "Mathematical and Physical Sciences", "abbrev": "MPS"},
+    {"slug": "social-behavioral-economic-sciences", "code": "0007", "park": "5P1BERBR3BT", "name": "Social, Behavioral and Economic Sciences", "abbrev": "SBE"},
+    {"slug": "integrative-activities", "code": "0008", "park": "5P1BERBR3BU", "name": "Integrative Activities", "abbrev": "IA"},
+    {"slug": "office-international-science-engineering", "code": "0009", "park": "5P1BERBR3BV", "name": "Office of International Science and Engineering", "abbrev": "OISE"},
+    {"slug": "office-polar-programs", "code": "0010", "park": "5P1BERBR3BW", "name": "Office of Polar Programs", "abbrev": "OPP"},
+    {"slug": "technology-innovation-partnerships", "code": "0011", "park": "5VLB38RS70V", "name": "Technology, Innovation, and Partnerships", "abbrev": "TIP"},
+    {"slug": "arctic-research-commission", "code": "0013", "park": "5P1BERBR3C1", "name": "Arctic Research Commission", "abbrev": "USARC"},
+    {"slug": "mission-support-services", "code": "0015", "park": "62JASKEC19P", "name": "Mission Support Services", "abbrev": "MSS"},
+    {"slug": "chief-research-security-strategy-policy", "code": "0016", "park": "62JASKEC19Q", "name": "Office of the Chief of Research Security, Strategy and Policy", "abbrev": "CRSP"},
+    {"slug": "pending-program-allocation", "code": "00U1", "park": "", "name": "Pending Program Allocation"},
+    {"slug": "other-unmapped", "code": "00U2", "park": "EX202500310044", "name": "Other Unmapped"},
+    {"slug": "american-rescue-plan", "code": "0401", "park": "5VLB38RS7CD", "name": "American Rescue Plan Act", "abbrev": "ARP"},
+    {"slug": "spectrum-relocation-fund", "code": "0402", "park": "647APZ9TB1C", "name": "Spectrum Relocation Fund", "abbrev": "SRF"},
+    {"slug": "rra-reimbursable", "code": "0801", "park": "5P1BERBR417", "name": "Research and Related Activities (Reimbursable)"}
+   ]
+  },
+  {
+   "path": "nsf/stem-education",
+   "name": "STEM Education",
+   "abbrev": "NSF EDU",
+   "agency": "National Science Foundation",
+   "federalAccount": "049-0106",
+   "agencyIdentifier": "049",
+   "adapter": "usaspending_obligations",
+   "baseline": "reference/nsf_stem_education_obligation_baseline.json",
+   "availability": {
+    "firstFiscalYear": 2017,
+    "firstFiscalYearPeriod": 6,
+    "regularFirstPeriod": 2
+   },
+   "programActivities": [
+    {"slug": "unknown-other", "code": "0000", "park": "", "name": "Unknown / other"},
+    {"slug": "stem-education", "code": "0001", "park": "5X9B0CNQPFV", "name": "STEM Education (formerly Education and Human Resources)", "abbrev": "EDU"},
+    {"slug": "low-income-scholarship-program", "code": "0302", "park": "", "name": "Low Income Scholarship Program"},
+    {"slug": "itest-grants", "code": "0303", "park": "", "name": "ITEST Grants for Mathematics, Science, or Engineering Enrichment Courses", "abbrev": "ITEST"},
+    {"slug": "american-rescue-plan", "code": "0401", "park": "5VLB38S9GDF", "name": "American Rescue Plan Act", "abbrev": "ARP"},
+    {"slug": "education-reimbursable", "code": "0801", "park": "5P1BERC8D29", "name": "Education and Human Resources (Reimbursable)"}
+   ]
+  },
+  {
+   "path": "nsf/aoam",
+   "name": "Agency Operations and Award Management",
+   "abbrev": "NSF AOAM",
+   "agency": "National Science Foundation",
+   "federalAccount": "049-0180",
+   "agencyIdentifier": "049",
+   "adapter": "usaspending_obligations",
+   "baseline": "reference/nsf_aoam_obligation_baseline.json",
+   "availability": {
+    "firstFiscalYear": 2017,
+    "firstFiscalYearPeriod": 6,
+    "regularFirstPeriod": 2
+   },
+   "programActivities": [
+    {"slug": "unknown-other", "code": "0000", "park": "", "name": "Unknown / other"},
+    {"slug": "agency-operations-award-management", "code": "0001", "park": "5P1BERHQLPR", "name": "Agency Operations and Award Management", "abbrev": "AOAM"},
+    {"slug": "american-rescue-plan", "code": "0401", "park": "5VLB38XRPQH", "name": "American Rescue Plan Act", "abbrev": "ARP"},
+    {"slug": "aoam-reimbursable", "code": "0801", "park": "5P1BERHQMFB", "name": "Agency Operations and Award Management (Reimbursable)"}
+   ]
+  },
+  {
+   "path": "nsf/mrefc",
+   "name": "Major Research Equipment and Facilities Construction",
+   "abbrev": "NSF MREFC",
+   "agency": "National Science Foundation",
+   "federalAccount": "049-0551",
+   "agencyIdentifier": "049",
+   "adapter": "usaspending_obligations",
+   "baseline": "reference/nsf_mrefc_obligation_baseline.json",
+   "availability": {
+    "firstFiscalYear": 2017,
+    "firstFiscalYearPeriod": 6,
+    "regularFirstPeriod": 2
+   },
+   "programActivities": [
+    {"slug": "unknown-other", "code": "0000", "park": "", "name": "Unknown / other"},
+    {"slug": "major-research-equipment-facilities-construction", "code": "0001", "park": "5P1BESBYJ69", "name": "Major Research Equipment and Facilities Construction", "abbrev": "MREFC"},
+    {"slug": "american-rescue-plan", "code": "0401", "park": "5VLB39RJN6X", "name": "American Rescue Plan Act", "abbrev": "ARP"}
+   ]
   }
  ]
 }

@@ -21,7 +21,7 @@ _LAST_DOWNLOAD_REQUEST = 0.0
 DOWNLOAD_COOLDOWN_SECONDS = 20
 
 
-def _json(url, payload=None, attempts=10):
+def _json(url, payload=None, attempts=10, retry_not_found=False):
     body = None if payload is None else json.dumps(payload).encode()
     request = urllib.request.Request(url, data=body,
                                      headers={"Content-Type": "application/json",
@@ -33,7 +33,11 @@ def _json(url, payload=None, attempts=10):
         except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError,
                 http.client.RemoteDisconnected) as error:
             code = getattr(error, "code", None)
-            if attempt + 1 == attempts or (code is not None and code not in (429, 500, 502, 503, 504)):
+            retryable_codes = {429, 500, 502, 503, 504}
+            if retry_not_found:
+                retryable_codes.add(404)
+            if (attempt + 1 == attempts
+                    or (code is not None and code not in retryable_codes)):
                 raise
             delay = min(60, 2 ** attempt)
             print(
@@ -43,7 +47,7 @@ def _json(url, payload=None, attempts=10):
             time.sleep(delay)
 
 
-def _bytes(url, attempts=6):
+def _bytes(url, attempts=10):
     for attempt in range(attempts):
         try:
             request = urllib.request.Request(url, headers={"User-Agent": "science-funding-dashboard/1"})
@@ -102,7 +106,11 @@ def finish_download(result, timeout=1800, poll_seconds=15):
         status_url = "https://api.usaspending.gov" + status_url
     deadline = time.monotonic() + timeout
     while True:
-        status = _json(status_url)
+        # A newly accepted custom-download request can briefly return 404 from
+        # its status URL while USAspending's workers converge.  Treat that as
+        # transient only here; account and inventory 404s must still fail
+        # immediately.
+        status = _json(status_url, attempts=20, retry_not_found=True)
         state = str(status.get("status", "")).lower()
         if state == "finished":
             break

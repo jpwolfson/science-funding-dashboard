@@ -1,0 +1,62 @@
+{
+ "schemaVersion": 2,
+ "federalAccount": "049-0180",
+ "source": "USAspending federal account fiscal-year snapshots (GTAS/File A); account title and source availability reviewed 2026-08-12",
+ "fiscalYears": {
+  "2015": {
+   "status": "unavailable",
+   "reason": "Files A/B/C begin in FY2017 Q2"
+  },
+  "2016": {
+   "status": "unavailable",
+   "reason": "Files A/B/C begin in FY2017 Q2"
+  },
+  "2017": {
+   "asOfPeriod": 12,
+   "firstPeriod": 6,
+   "obligationsCents": 38729591878,
+   "status": "partial"
+  },
+  "2018": {
+   "obligationsCents": 33512630852,
+   "status": "complete"
+  },
+  "2019": {
+   "obligationsCents": 33972833602,
+   "status": "complete"
+  },
+  "2020": {
+   "obligationsCents": 35515051087,
+   "status": "complete"
+  },
+  "2021": {
+   "obligationsCents": 40322536386,
+   "status": "complete"
+  },
+  "2022": {
+   "obligationsCents": 42786346764,
+   "status": "complete"
+  },
+  "2023": {
+   "obligationsCents": 46524572125,
+   "status": "complete"
+  },
+  "2024": {
+   "obligationsCents": 47856981958,
+   "status": "complete"
+  },
+  "2025": {
+   "obligationsCents": 45346004077,
+   "status": "complete"
+  },
+  "2026": {
+   "asOfPeriod": 9,
+   "obligationsCents": 22698725776,
+   "status": "partial"
+  }
+ },
+ "notes": [
+  "Initial replaceable scaffolds intentionally omit obligationsCents until the first accepted full backfill.",
+  "The atomic reconcile promotes completed P12 years and pins exact File B cents; FY2017 remains partial from P06 and FY2026 remains period-specific."
+ ]
+}
