@@ -178,3 +178,28 @@ shared verifier on their own branch (the Phase 3.2d worker brief's
 file-ownership contract already forbids this; this rule is the same policy
 stated for verification specifically). Add the new field to this document's
 specialization-schema tables in the same change.
+
+## Recovering raw-artifact names from a legacy workflow rerun
+
+GitHub reruns use the workflow definition and `GITHUB_SHA`/`GITHUB_REF` from
+the original event. An obligation run started before raw audit archives gained
+their `-attempt${{ github.run_attempt }}` suffix will therefore try to reuse an
+attempt-1 raw artifact name when a failed matrix job is rerun. The normalized
+partition name intentionally stays stable and is not part of this recovery.
+
+Use `preserve-obligation-retry-artifacts.yml` only after the source workflow
+run is terminal. Its input is a schema-v1 manifest pinning one run ID and each
+raw artifact's exact ID, name, and `sha256:` digest. The recovery job:
+
+1. rejects normalized/non-obligation names and an active source run;
+2. re-fetches exact remote metadata, downloads every raw ZIP, and verifies its
+   digest;
+3. uploads the complete preservation bundle with fourteen-day retention; and
+4. revalidates every local ZIP and remote record before deleting only those
+   exact source artifacts.
+
+Only after that recovery job succeeds may the source run's failed jobs be
+rerun once. The empty trigger file is inert on `main`; a coordinator changes it
+only on the dedicated `agent/3-2d-retry-artifact-operation` operational branch.
+This path is solely for already-running legacy graphs. Newly dispatched runs
+use attempt-specific raw names and need no cleanup.
