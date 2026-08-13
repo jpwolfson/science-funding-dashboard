@@ -138,6 +138,17 @@ published:
 
 ## Post-backfill release evidence
 
+The live Wave 1 backfill exposed a transient FY2021 P11 Fossil Energy File B
+row `0020 / LEGACY MANAGEMENT` at exactly zero cents. The same accepted P11
+snapshot simultaneously carries material `0020 / NATURAL GAS TECHNOLOGIES`
+activity, while later source history reuses `0020` for Inflation Reduction Act.
+Official final FY2021 totals and the all-history account inventory omit Legacy
+Management, and the current PARK reference contains no `089-0213` successor
+(same-name PARK rows belong to different DOE accounts). The registry therefore
+preserves this as distinct synthetic canonical identity `00U3 / Legacy
+Management`, reachable only through the exact code/name alias; bare `0020`
+remains intentionally ambiguous and unbound.
+
 To be filled from the accepted CI snapshot before opening the PR:
 
 - exact File B/File A cents by account and FY;

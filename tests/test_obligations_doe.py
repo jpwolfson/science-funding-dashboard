@@ -20,7 +20,7 @@ EXPECTED = {
     "doe/arpa-e": ("089-0337", "Advanced Research Projects Agency-Energy", 4),
     "doe/eere": ("089-0321", "Energy Efficiency and Renewable Energy", 25),
     "doe/oced": ("089-2297", "Clean Energy Demonstrations", 18),
-    "doe/fossil-energy": ("089-0213", "Fossil Energy", 25),
+    "doe/fossil-energy": ("089-0213", "Fossil Energy", 26),
     "doe/electricity": ("089-0318", "Electricity", 19),
     "doe/ceser": (
         "089-2250", "Cybersecurity, Energy Security, and Emergency Response", 11,
@@ -82,6 +82,7 @@ SOURCE_PAIR_EXPECTATIONS = {
         ("0012", "Program Direction - Management"): "program-direction",
         ("0012", "Program Direction"): "program-direction",
         ("0020", "Natural Gas Technologies"): "natural-gas-technologies",
+        ("0020", "Legacy Management"): "legacy-management",
         ("0020", "Inflation Reduction Act"): "inflation-reduction-act",
         ("0022", "Supercritical Transformational Electric Power Generation"):
             "step-supercritical-co2",
@@ -430,6 +431,64 @@ class DoeOnboardingTests(unittest.TestCase):
             for code in codes:
                 with self.subTest(path=path, code=code):
                     self.assertNotIn(("code", code), aliases)
+
+    def test_fossil_fy2021_legacy_management_collision_is_distinct(self):
+        aliases = alias_map(self.accounts["doe/fossil-energy"])
+        rows = [
+            {
+                "submission_period": "FY2021P11",
+                "federal_account_symbol": "089-0213",
+                "program_activity_reporting_key": "",
+                "program_activity_code": "0020",
+                "program_activity_name": "NATURAL GAS TECHNOLOGIES",
+                "obligations_incurred": "71151132.91",
+            },
+            {
+                "submission_period": "FY2021P11",
+                "federal_account_symbol": "089-0213",
+                "program_activity_reporting_key": "",
+                "program_activity_code": "0020",
+                "program_activity_name": "LEGACY MANAGEMENT",
+                "obligations_incurred": "0.00",
+            },
+            {
+                "submission_period": "FY2024P12",
+                "federal_account_symbol": "089-0213",
+                "program_activity_reporting_key": "",
+                "program_activity_code": "0020",
+                "program_activity_name": "INFLATION REDUCTION ACT",
+                "obligations_incurred": "1.00",
+            },
+        ]
+        snapshot = parse_file_b_snapshot(rows, "089-0213", aliases)
+        actual = {
+            (key[0], key[1], key[2], key[3]): amount
+            for key, amount in snapshot.items()
+        }
+        self.assertEqual(
+            {
+                (
+                    "5ZCQYAMAF08:natural-gas-technologies",
+                    "5ZCQYAMAF08",
+                    "Natural Gas Technologies",
+                    "5ZCQYAMAF08",
+                ): 7_115_113_291,
+                (
+                    "00U3:legacy-management",
+                    "00U3",
+                    "Legacy Management",
+                    "",
+                ): 0,
+                (
+                    "0020:inflation-reduction-act",
+                    "0020",
+                    "Inflation Reduction Act",
+                    "608Q0XTC3YY",
+                ): 100,
+            },
+            actual,
+        )
+        self.assertNotIn(("code", "0020"), aliases)
 
     def test_eere_grid_operations_fy2023_p08_code_transition_is_exact(self):
         account = self.accounts["doe/eere"]
