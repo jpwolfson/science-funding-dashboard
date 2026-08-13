@@ -20,7 +20,7 @@ EXPECTED = {
     "doe/arpa-e": ("089-0337", "Advanced Research Projects Agency-Energy", 4),
     "doe/eere": ("089-0321", "Energy Efficiency and Renewable Energy", 25),
     "doe/oced": ("089-2297", "Clean Energy Demonstrations", 21),
-    "doe/fossil-energy": ("089-0213", "Fossil Energy", 29),
+    "doe/fossil-energy": ("089-0213", "Fossil Energy", 30),
     "doe/electricity": ("089-0318", "Electricity", 19),
     "doe/ceser": (
         "089-2250", "Cybersecurity, Energy Security, and Emergency Response", 11,
@@ -87,6 +87,8 @@ SOURCE_PAIR_EXPECTATIONS = {
         ("0301", "Program Direction & Support"):
             "program-direction-and-support-transient",
         ("0030", "Program Direction"): "program-direction-transient-0030",
+        ("0033", "Program Direction-IIJA"):
+            "program-direction-iija-transient",
         ("0001", "Other Defense Activities (Direct)"):
             "other-defense-activities-direct-transient",
         ("0022", "Supercritical Transformational Electric Power Generation"):
@@ -586,6 +588,30 @@ class DoeOnboardingTests(unittest.TestCase):
                 "program_activity_name": "OTHER DEFENSE ACTIVITIES (DIRECT)",
                 "obligations_incurred": "0.00",
             },
+            {
+                "submission_period": "FY2023P04",
+                "federal_account_symbol": "089-0213",
+                "program_activity_reporting_key": "",
+                "program_activity_code": "0033",
+                "program_activity_name": "PROGRAM DIRECTION-IIJA",
+                "obligations_incurred": "6516.62",
+            },
+            {
+                "submission_period": "FY2023P04",
+                "federal_account_symbol": "089-0213",
+                "program_activity_reporting_key": "",
+                "program_activity_code": "0033",
+                "program_activity_name": "PROGRAM DIRECTION-IIJA",
+                "obligations_incurred": "2346.23",
+            },
+            {
+                "submission_period": "FY2023P04",
+                "federal_account_symbol": "089-0213",
+                "program_activity_reporting_key": "",
+                "program_activity_code": "0033",
+                "program_activity_name": "PROGRAM DIRECTION-IIJA",
+                "obligations_incurred": "13000.00",
+            },
         ]
         snapshot = parse_file_b_snapshot(rows, "089-0213", aliases)
         self.assertEqual(
@@ -598,6 +624,8 @@ class DoeOnboardingTests(unittest.TestCase):
                     -2_000,
                 ("00U6", "Other Defense Activities (Direct)", ""):
                     0,
+                ("00U7", "Program Direction - IIJA", ""):
+                    2_186_285,
             },
             {
                 (key[1], key[2], key[3]): amount
