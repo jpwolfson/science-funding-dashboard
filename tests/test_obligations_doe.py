@@ -186,6 +186,34 @@ CESER_PARK_EXPECTATIONS = {
     "5WKQ40G9H6B": "ceser-infrastructure-investment-and-jobs-act",
 }
 
+EERE_PARK_EXPECTATIONS = {
+    "0000": "unknown-other",
+    "5ZCQYAUD7YP": "vehicle-technologies",
+    "5ZCQYAUD7YQ": "bioenergy-technologies",
+    "5ZCQYAUD7YR": "hydrogen-and-fuel-cell-technologies",
+    "5ZCQYAUD7LN": "solar-energy",
+    "5ZCQYAUD7LZ": "wind-energy",
+    "5ZCQYAUD7LP": "water-power",
+    "5ZCQYAUD7LQ": "geothermal-technologies",
+    "5WKQ3U7VKZX": "renewable-energy-integration",
+    "5ZCQYAUD7ZL": "advanced-manufacturing",
+    "5ZCQYAUD7ZM": "building-technologies",
+    "5ZCQYAUD7ZN": "weatherization-and-intergovernmental-activities",
+    "61UPW3WW5MC": "energy-delivery-grid-operations-technology",
+    "608Q103EU85": "advanced-materials-and-manufacturing-technologies",
+    "608Q103EU86": "industrial-efficiency-and-decarbonization",
+    "5ZCQYAUD7RJ": "program-direction-and-support",
+    "5ZCQYAUD7RK": "strategic-programs",
+    "5ZCQYAUD7RL": "facilities-and-infrastructure",
+    "5WKQ3U7VKXN": "infrastructure-investment-and-jobs-act",
+    "608Q103EUFC": "inflation-reduction-act",
+    "608Q103EUFD": "manufacturing-and-energy-supply-chains",
+    "5ZCQYAUD7ZZ": "federal-energy-management-program",
+    "608Q103EUFF": "state-and-community-energy-programs",
+    "5ZCQYAUD88Y": "energy-efficiency-and-renewable-energy-reimbursable",
+    "63YPT7SFFAZ": "energy-efficiency-and-renewable-energy",
+}
+
 
 class DoeOnboardingTests(unittest.TestCase):
     @classmethod
@@ -283,6 +311,68 @@ class DoeOnboardingTests(unittest.TestCase):
                 self.assertEqual(
                     expected_slug, aliases[("park", park)]["slug"]
                 )
+
+    def test_eere_fy2026_blank_name_parks_resolve_from_official_mapping(self):
+        aliases = alias_map(self.accounts["doe/eere"])
+        for park, expected_slug in EERE_PARK_EXPECTATIONS.items():
+            with self.subTest(park=park):
+                self.assertEqual(
+                    expected_slug, aliases[("park", park)]["slug"]
+                )
+
+        # The accepted FY2026 P02 File B projection contains five identical
+        # zero-dollar rows for this PARK and omits object-class columns. The
+        # blank source name therefore must not create or infer an identity;
+        # the official PARK mapping supplies the reviewed canonical identity.
+        blank_rows = [{
+            "submission_period": "FY2026P02",
+            "federal_account_symbol": "089-0321",
+            "program_activity_reporting_key": "5WKQ3U7VKZX",
+            "program_activity_code": "",
+            "program_activity_name": "",
+            "obligations_incurred": "0.00",
+        } for _ in range(5)]
+        self.assertEqual(5, len(blank_rows))
+        self.assertTrue(all("object_class_code" not in row for row in blank_rows))
+        snapshot = parse_file_b_snapshot(blank_rows, "089-0321", aliases)
+        self.assertEqual(
+            {("0105", "Renewable Energy Integration", "5WKQ3U7VKZX"): 0},
+            {
+                (key[1], key[2], key[3]): amount
+                for key, amount in snapshot.items()
+            },
+        )
+
+        # Current PARK keys disambiguate the reused historical 0204 code:
+        # grid operations and Federal Energy Management remain separate.
+        collision_rows = [{
+            "federal_account_symbol": "089-0321",
+            "program_activity_reporting_key": "61UPW3WW5MC",
+            "program_activity_code": "",
+            "program_activity_name": "",
+            "obligations_incurred": "1.25",
+        }, {
+            "federal_account_symbol": "089-0321",
+            "program_activity_reporting_key": "5ZCQYAUD7ZZ",
+            "program_activity_code": "",
+            "program_activity_name": "",
+            "obligations_incurred": "2.50",
+        }]
+        collision = parse_file_b_snapshot(
+            collision_rows, "089-0321", aliases
+        )
+        self.assertEqual(
+            {
+                ("0204", "Energy Delivery Grid Operations Technology",
+                 "61UPW3WW5MC"): 125,
+                ("0452", "Federal Energy Management Program",
+                 "5ZCQYAUD7ZZ"): 250,
+            },
+            {
+                (key[1], key[2], key[3]): amount
+                for key, amount in collision.items()
+            },
+        )
 
     def test_reused_source_codes_cannot_fall_back_to_code_only(self):
         for path, codes in AMBIGUOUS_SOURCE_CODES.items():
