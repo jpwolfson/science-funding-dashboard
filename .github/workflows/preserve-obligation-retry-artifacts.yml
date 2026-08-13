@@ -1,0 +1,70 @@
+name: Preserve conflicting obligation retry artifacts
+
+on:
+  workflow_dispatch:
+    inputs:
+      manifest_json:
+        description: Exact schema-v1 raw-artifact manifest
+        required: true
+        type: string
+  push:
+    branches: ["agent/3-2d-retry-artifact-operation"]
+    paths: [".github/triggers/preserve-obligation-retry-artifacts.json"]
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: obligation-retry-artifact-recovery
+  cancel-in-progress: false
+
+jobs:
+  preserve-then-delete:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Materialize the exact deletion manifest
+        env:
+          DISPATCH_MANIFEST: ${{ inputs.manifest_json }}
+        shell: python
+        run: |
+          import os
+          from pathlib import Path
+
+          if os.environ["GITHUB_EVENT_NAME"] == "workflow_dispatch":
+              value = os.environ["DISPATCH_MANIFEST"]
+          else:
+              value = Path(
+                  ".github/triggers/preserve-obligation-retry-artifacts.json"
+              ).read_text()
+          Path("_retry-artifact-manifest.json").write_text(value)
+      - name: Validate, download, and hash every source ZIP
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          RUN_ID=$(python -c 'import json; print(json.load(open("_retry-artifact-manifest.json"))["runId"])')
+          python scripts/manage_workflow_retry_artifacts.py preserve \
+            --repository "$GITHUB_REPOSITORY" \
+            --run-id "$RUN_ID" \
+            --manifest _retry-artifact-manifest.json \
+            --output _preserved
+      - name: Retain the verified source ZIPs before remote deletion
+        uses: actions/upload-artifact@v4
+        with:
+          name: obligation-retry-source-preservation-${{ github.run_id }}
+          path: _preserved
+          if-no-files-found: error
+          retention-days: 14
+      - name: Delete only the exact preserved conflicting artifacts
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          RUN_ID=$(python -c 'import json; print(json.load(open("_preserved/preservation.json"))["runId"])')
+          python scripts/manage_workflow_retry_artifacts.py delete \
+            --repository "$GITHUB_REPOSITORY" \
+            --run-id "$RUN_ID" \
+            --manifest _preserved/preservation.json
