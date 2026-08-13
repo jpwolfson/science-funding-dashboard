@@ -1,10 +1,12 @@
 import http.client
 import io
+import urllib.error
 import unittest
 from unittest.mock import patch
 
 from adapters.usaspending_obligations import (
     _json, alias_map, combine_file_b_file_c, file_b_period_events,
+    finish_download,
     parse_file_b_snapshot, parse_file_c,
 )
 
@@ -109,6 +111,41 @@ class USAspendingObligationTests(unittest.TestCase):
             self.assertEqual(_json("https://example.test", attempts=2), {"ok": True})
         self.assertEqual(open_.call_count, 2)
         sleep.assert_called_once_with(1)
+
+    def test_not_found_still_fails_immediately_by_default(self):
+        error = urllib.error.HTTPError(
+            "https://example.test", 404, "Not Found", {}, None)
+        with patch(
+                "adapters.usaspending_obligations.urllib.request.urlopen",
+                side_effect=error) as open_, \
+             patch("adapters.usaspending_obligations.time.sleep") as sleep:
+            with self.assertRaises(urllib.error.HTTPError):
+                _json("https://example.test", attempts=2)
+        self.assertEqual(open_.call_count, 1)
+        sleep.assert_not_called()
+
+    def test_download_status_not_found_is_retried(self):
+        error = urllib.error.HTTPError(
+            "https://api.usaspending.gov/api/v2/download/status/1",
+            404, "Not Found", {}, None)
+        finished = io.BytesIO(
+            b'{"status":"finished","file_url":'
+            b'"https://files.usaspending.gov/archive.zip"}')
+        with patch(
+                "adapters.usaspending_obligations.urllib.request.urlopen",
+                side_effect=[error, finished]) as open_, \
+             patch("adapters.usaspending_obligations._bytes",
+                   return_value=b"archive") as archive, \
+             patch("adapters.usaspending_obligations.time.sleep") as sleep:
+            payload, status = finish_download({
+                "status_url": "/api/v2/download/status/1",
+            })
+        self.assertEqual(b"archive", payload)
+        self.assertEqual("finished", status["status"])
+        self.assertEqual(open_.call_count, 2)
+        sleep.assert_called_once_with(1)
+        archive.assert_called_once_with(
+            "https://files.usaspending.gov/archive.zip")
 
     def test_file_b_cumulative_snapshots_are_differenced(self):
         key = ("0001", "0001", "BES", "PARK1", "25.1", "D", "", "")
