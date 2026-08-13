@@ -161,6 +161,13 @@ third names belong to other DOE accounts, not `089-0213`. The registry
 therefore preserves these three accepted source rows as exact-pair-only
 synthetic identities `00U4`, `00U5`, and `00U6`, with no inferred PARK.
 
+FY2026 P02 exposed 11 blank-code, blank-name rows with authoritative PARK
+`61UPW3ZTCVT`, totaling exactly `$1,427,755.93`. The current official PARK
+reference maps that key for account `089-0213` to compound PAC `0019`,
+`Infrastructure Investment and Jobs Act/Bipartisan Infrastructure Law`.
+The registry binds the PARK to that reviewed identity; it does not infer a
+name from the blank File B presentation.
+
 To be filled from the accepted CI snapshot before opening the PR:
 
 - exact File B/File A cents by account and FY;

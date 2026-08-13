@@ -551,6 +551,32 @@ class DoeOnboardingTests(unittest.TestCase):
         self.assertNotIn(("park", "5ZCQYAUD7RJ"), aliases)
         self.assertNotIn(("park", "5WKPVDWW473"), aliases)
 
+    def test_fossil_fy2026_blank_name_park_is_authoritative(self):
+        aliases = alias_map(self.accounts["doe/fossil-energy"])
+        rows = [{
+            "submission_period": "FY2026P02",
+            "federal_account_symbol": "089-0213",
+            "program_activity_reporting_key": "61UPW3ZTCVT",
+            "program_activity_code": "",
+            "program_activity_name": "",
+            "obligations_incurred": amount,
+        } for amount in (
+            "1000000.00", "200000.00", "100000.00", "50000.00",
+            "40000.00", "20000.00", "10000.00", "5000.00",
+            "2000.00", "500.00", "255.93",
+        )]
+        snapshot = parse_file_b_snapshot(rows, "089-0213", aliases)
+        self.assertEqual(142_775_593, sum(snapshot.values()))
+        self.assertEqual(
+            {(
+                "0019",
+                "Infrastructure Investment and Jobs Act/"
+                "Bipartisan Infrastructure Law",
+                "61UPW3ZTCVT",
+            )},
+            {(key[1], key[2], key[3]) for key in snapshot},
+        )
+
     def test_eere_grid_operations_fy2023_p08_code_transition_is_exact(self):
         account = self.accounts["doe/eere"]
         aliases = alias_map(account)
