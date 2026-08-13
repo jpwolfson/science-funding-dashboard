@@ -45,6 +45,23 @@ class Phase32dWorkflowContractTests(unittest.TestCase):
         # keeps a larger operational cushion without retaining raw downloads.
         self.assertGreaterEqual(int(match.group(1)), 3)
 
+    def test_failed_job_reruns_keep_raw_artifacts_without_name_collisions(self):
+        workflow = (
+            REPO / ".github/workflows/update-obligations.yml"
+        ).read_text()
+        self.assertIn(
+            "name: obligation-raw-${{ matrix.artifact }}-"
+            "FY${{ matrix.fiscalYear }}-attempt${{ github.run_attempt }}",
+            workflow,
+        )
+        # Normalized artifacts keep their stable account/FY names so the
+        # reconciliation fan-in remains independent of the producing attempt.
+        self.assertIn(
+            "name: obligation-partition-${{ matrix.artifact }}-"
+            "FY${{ matrix.fiscalYear }}\n",
+            workflow,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

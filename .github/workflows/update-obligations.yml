@@ -114,7 +114,10 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: obligation-raw-${{ matrix.artifact }}-FY${{ matrix.fiscalYear }}
+          # Failed-job reruns share one workflow run with attempt 1. Include
+          # the attempt so a retry can retain its new raw audit evidence
+          # without colliding with an earlier artifact of the same account/FY.
+          name: obligation-raw-${{ matrix.artifact }}-FY${{ matrix.fiscalYear }}-attempt${{ github.run_attempt }}
           path: _raw
           if-no-files-found: warn
           retention-days: 14
