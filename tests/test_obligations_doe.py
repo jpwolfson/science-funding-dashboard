@@ -19,7 +19,7 @@ REPO = Path(__file__).resolve().parent.parent
 EXPECTED = {
     "doe/arpa-e": ("089-0337", "Advanced Research Projects Agency-Energy", 4),
     "doe/eere": ("089-0321", "Energy Efficiency and Renewable Energy", 25),
-    "doe/oced": ("089-2297", "Clean Energy Demonstrations", 16),
+    "doe/oced": ("089-2297", "Clean Energy Demonstrations", 18),
     "doe/fossil-energy": ("089-0213", "Fossil Energy", 25),
     "doe/electricity": ("089-0318", "Electricity", 19),
     "doe/ceser": (
@@ -64,6 +64,10 @@ SOURCE_PAIR_EXPECTATIONS = {
             "infrastructure-investment-and-jobs-act",
     },
     "doe/oced": {
+        ("0008", "Energy Justice and Equity"):
+            "energy-justice-and-equity",
+        ("0009", "Chief Financial Officer"):
+            "chief-financial-officer",
         ("0010", "Clean Energy Demonstrations"):
             "clean-energy-demonstrations-base-program",
         ("0011", "Program Direction"): "program-direction-base",
@@ -319,6 +323,43 @@ class DoeOnboardingTests(unittest.TestCase):
         self.assertEqual(2, len({row["id"] for row in events}))
         self.assertEqual(
             {"0033", "0551"},
+            {row["_programActivityKey"] for row in events},
+        )
+
+    def test_oced_transient_administrative_identities_remain_distinct(self):
+        account = self.accounts["doe/oced"]
+        aliases = alias_map(account)
+        rows = [
+            {
+                "federal_account_symbol": "089-2297",
+                "program_activity_code": "0008",
+                "program_activity_name": "ENERGY JUSTICE AND EQUITY",
+                "obligations_incurred": "121801.44",
+            },
+            {
+                "federal_account_symbol": "089-2297",
+                "program_activity_code": "0009",
+                "program_activity_name": "CHIEF FINANCIAL OFFICER",
+                "obligations_incurred": "599152.00",
+            },
+        ]
+        snapshot = parse_file_b_snapshot(rows, "089-2297", aliases)
+        self.assertEqual(
+            {
+                ("0008", "Energy Justice and Equity", ""): 12_180_144,
+                ("0009", "Chief Financial Officer", ""): 59_915_200,
+            },
+            {
+                (key[0], key[2], key[3]): amount
+                for key, amount in snapshot.items()
+            },
+        )
+        flows = file_b_period_events({"FY2025P02": snapshot}, "089-2297")
+        events = combine_file_b_file_c(flows, [], "089-2297")
+        self.assertEqual(72_095_344, sum(row["amountCents"] for row in events))
+        self.assertEqual(2, len({row["id"] for row in events}))
+        self.assertEqual(
+            {"0008", "0009"},
             {row["_programActivityKey"] for row in events},
         )
 
