@@ -56,6 +56,8 @@ AMBIGUOUS_SOURCE_CODES = {
 # canonical identity from a reused code alone.
 SOURCE_PAIR_EXPECTATIONS = {
     "doe/eere": {
+        ("0018", "Energy Delivery Grid Operations Technology"):
+            "energy-delivery-grid-operations-technology",
         ("0204", "Energy Delivery Grid Operations Technology"):
             "energy-delivery-grid-operations-technology",
         ("0204", "Federal Energy Management Program"):
@@ -288,6 +290,61 @@ class DoeOnboardingTests(unittest.TestCase):
             for code in codes:
                 with self.subTest(path=path, code=code):
                     self.assertNotIn(("code", code), aliases)
+
+    def test_eere_grid_operations_fy2023_p08_code_transition_is_exact(self):
+        account = self.accounts["doe/eere"]
+        aliases = alias_map(account)
+        federal_management = [{
+            "submission_period": "FY2023P07",
+            "federal_account_symbol": "089-0321",
+            "program_activity_reporting_key": "",
+            "program_activity_code": "0204",
+            "program_activity_name": "FEDERAL ENERGY MANAGEMENT PROGRAM",
+            "obligations_incurred": "3180066.66",
+        }]
+        grid_operations = [{
+            "submission_period": "FY2023P08",
+            "federal_account_symbol": "089-0321",
+            "program_activity_reporting_key": "",
+            "program_activity_code": "0018",
+            "program_activity_name": "ENERGY DELIVERY GRID OPERATIONS TECHNOLOGY",
+            "obligations_incurred": amount,
+        } for amount in (
+            "547681.44", "9513.60", "-250.00", "190439.21",
+            "3010.04", "84000.00", "2405.00",
+        )]
+        p07 = parse_file_b_snapshot(
+            federal_management, "089-0321", aliases
+        )
+        p08 = parse_file_b_snapshot(
+            [*federal_management, *grid_operations], "089-0321", aliases
+        )
+        flows = file_b_period_events({
+            "FY2023P07": p07,
+            "FY2023P08": p08,
+        }, "089-0321")
+        p08_nonzero = [
+            row for row in flows
+            if row["submissionPeriod"] == "FY2023P08"
+            and row["amountCents"]
+        ]
+        self.assertEqual(1, len(p08_nonzero))
+        self.assertEqual(83_679_929, p08_nonzero[0]["amountCents"])
+        self.assertEqual("0204", p08_nonzero[0]["programActivityCode"])
+        self.assertEqual(
+            "Energy Delivery Grid Operations Technology",
+            p08_nonzero[0]["programActivityName"],
+        )
+        self.assertEqual(
+            "0204:energy-delivery-grid-operations-technology",
+            p08_nonzero[0]["_programActivityKey"],
+        )
+        self.assertNotEqual(
+            aliases[("code-name", "0204", "federal energy management program")][
+                "_identityKey"
+            ],
+            p08_nonzero[0]["_programActivityKey"],
+        )
 
     def test_nuclear_energy_iija_direction_is_distinct_from_base_direction(self):
         account = self.accounts["doe/nuclear-energy"]
