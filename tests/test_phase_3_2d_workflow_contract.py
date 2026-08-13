@@ -62,6 +62,21 @@ class Phase32dWorkflowContractTests(unittest.TestCase):
             workflow,
         )
 
+    def test_legacy_retry_artifact_recovery_preserves_before_delete(self):
+        workflow = (
+            REPO / ".github/workflows/preserve-obligation-retry-artifacts.yml"
+        ).read_text()
+        self.assertIn("actions: write", workflow)
+        self.assertIn(
+            'paths: [".github/triggers/preserve-obligation-retry-artifacts.json"]',
+            workflow,
+        )
+        preserve = workflow.index("Validate, download, and hash every source ZIP")
+        upload = workflow.index("Retain the verified source ZIPs before remote deletion")
+        delete = workflow.index("Delete only the exact preserved conflicting artifacts")
+        self.assertLess(preserve, upload)
+        self.assertLess(upload, delete)
+
 
 if __name__ == "__main__":
     unittest.main()
