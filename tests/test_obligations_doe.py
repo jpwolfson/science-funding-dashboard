@@ -19,7 +19,7 @@ REPO = Path(__file__).resolve().parent.parent
 EXPECTED = {
     "doe/arpa-e": ("089-0337", "Advanced Research Projects Agency-Energy", 4),
     "doe/eere": ("089-0321", "Energy Efficiency and Renewable Energy", 25),
-    "doe/oced": ("089-2297", "Clean Energy Demonstrations", 18),
+    "doe/oced": ("089-2297", "Clean Energy Demonstrations", 21),
     "doe/fossil-energy": ("089-0213", "Fossil Energy", 29),
     "doe/electricity": ("089-0318", "Electricity", 19),
     "doe/ceser": (
@@ -28,7 +28,7 @@ EXPECTED = {
     "doe/nuclear-energy": ("089-0319", "Nuclear Energy", 26),
     "doe/nnsa-weapons-activities": ("089-0240", "Weapons Activities", 23),
     "doe/nnsa-defense-nuclear-nonproliferation": (
-        "089-0309", "Defense Nuclear Nonproliferation", 14,
+        "089-0309", "Defense Nuclear Nonproliferation", 17,
     ),
     "doe/eia": ("089-0216", "Energy Information Administration", 4),
 }
@@ -242,6 +242,36 @@ ELECTRICITY_PARK_EXPECTATIONS = {
     "5ZCQYAU5KZP": "reimbursable-work",
 }
 
+NNSA_NONPROLIFERATION_PARK_EXPECTATIONS = {
+    "5UWPV26R8KX": "defense-nuclear-nonproliferation-direct",
+    "5Q0Q5ZK9EDZ": "fissile-materials-disposition",
+    "5RMQ2SFQNSN": "nuclear-counterterrorism-and-incident-response",
+    "5ZCQ8KZQ505": "nonproliferation-and-arms-control",
+    "5ZCQ8KZQ507": "nuclear-counterterrorism-and-incident-response",
+    "5ZCQ8KZQ506": "nonproliferation-construction",
+    "5ZCQ8KZQ504": "material-management-and-minimization",
+    "5ZCQ8KZQ50H": "legacy-contractor-pensions",
+    "608PP9VRRFG": "ukraine-supplemental",
+    "5ZCQ8KZQ5LK": "gtri-international-contribution",
+    "5ZCQ8KZQ503": "global-material-security",
+    "5ZCQ8KZQ5LJ": "global-material-security-reimbursable",
+    "5ZCQ8KZQ4WA":
+        "defense-nuclear-nonproliferation-research-and-development",
+    "5ZCQ8KZQ4X6": "international-materials-protection-and-cooperation",
+    "5TAPXWB9X8W": "national-technical-nuclear-forensics",
+    "5ZCQ8KZQ50C": "global-threat-reduction-initiative",
+}
+
+OCED_ADDITIONAL_PARK_EXPECTATIONS = {
+    "5UWQ6UZ9RGM": "clean-energy-demonstrations-base-program",
+    "63YPTC6AV5B": "clean-energy-demonstrations-base-program",
+    "5UWQ6UZ9RGN": "program-direction-base",
+    "63YPTC6AV6S": "chief-financial-officer",
+    "63YPTC6AV5D": "clean-energy-demonstrations-iija",
+    "63YPTC6AV5F": "clean-energy-demonstrations-ira",
+    "63YPTC6AV5G": "program-direction-ira",
+}
+
 
 class DoeOnboardingTests(unittest.TestCase):
     @classmethod
@@ -429,6 +459,32 @@ class DoeOnboardingTests(unittest.TestCase):
                 for key, amount in snapshot.items()
             },
         )
+
+    def test_remaining_doe_current_parks_resolve_from_official_mapping(self):
+        for path, expected in (
+            ("doe/nnsa-defense-nuclear-nonproliferation",
+             NNSA_NONPROLIFERATION_PARK_EXPECTATIONS),
+            ("doe/oced", OCED_ADDITIONAL_PARK_EXPECTATIONS),
+        ):
+            aliases = alias_map(self.accounts[path])
+            for park, expected_slug in expected.items():
+                with self.subTest(path=path, park=park):
+                    self.assertEqual(
+                        expected_slug, aliases[("park", park)]["slug"]
+                    )
+            rows = [{
+                "submission_period": "FY2026P02",
+                "federal_account_symbol":
+                    self.accounts[path]["federalAccount"],
+                "program_activity_reporting_key": park,
+                "program_activity_code": "",
+                "program_activity_name": "",
+                "obligations_incurred": "0.00",
+            } for park in expected]
+            snapshot = parse_file_b_snapshot(
+                rows, self.accounts[path]["federalAccount"], aliases
+            )
+            self.assertEqual(len(set(expected.values())), len(snapshot))
 
     def test_reused_source_codes_cannot_fall_back_to_code_only(self):
         for path, codes in AMBIGUOUS_SOURCE_CODES.items():
@@ -690,7 +746,8 @@ class DoeOnboardingTests(unittest.TestCase):
         self.assertEqual(
             {
                 ("0008", "Energy Justice and Equity", ""): 12_180_144,
-                ("0009", "Chief Financial Officer", ""): 59_915_200,
+                ("0009", "Chief Financial Officer", "63YPTC6AV6S"):
+                    59_915_200,
             },
             {
                 (key[0], key[2], key[3]): amount

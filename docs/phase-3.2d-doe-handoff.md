@@ -168,6 +168,17 @@ reference maps that key for account `089-0213` to compound PAC `0019`,
 The registry binds the PARK to that reviewed identity; it does not infer a
 name from the blank File B presentation.
 
+Before the serialized matrix reached the remaining FY2026 tail, the current
+official PARK reference was cross-checked account-by-account against the
+reviewed registry. For `089-0309`, every one of the 16 account-specific PARKs
+(excluding the generic `PRE2018` sentinel) now resolves: exact legacy
+successors retain their canonical pages, while National Technical Nuclear
+Forensics, GTRI International Contribution, and reimbursable Global Material
+Security remain distinct. For `089-2297`, seven additional reviewed PARKs are
+covered; the IIJA and IRA demonstration identities and IRA Program Direction
+remain distinct from the base program and base Program Direction. Tests parse
+blank-name rows for every key so a future unknown PARK still fails closed.
+
 To be filled from the accepted CI snapshot before opening the PR:
 
 - exact File B/File A cents by account and FY;
