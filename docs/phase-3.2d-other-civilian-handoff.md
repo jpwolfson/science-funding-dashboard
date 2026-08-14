@@ -16,9 +16,10 @@ base 689aba6
   -> VA -> DHS -> DOT -> IES -> AHRQ -> BLS/OJP scaffold commits
 ```
 
-Commit **P is the branch tip in this worktree**. R and D do not exist yet and
-must not be fabricated locally. VA and later commits are a separate local patch
-queue; the coordinator may cherry-pick them only onto D or a descendant of D.
+P completed as five serialized probes. P02 through P05 were source-empty; P06
+was the first material period. This worktree now represents evidence-backed R.
+D does not exist yet. VA and later commits are a separate local patch queue;
+the coordinator may cherry-pick them only onto D or a descendant of D.
 
 This ordering is mechanically enforced in
 `tests/test_obligations_other_civilian.py`. If any VA-or-later account is
@@ -35,18 +36,21 @@ The full offline validator then independently checks the atomic store and
 exact File B/File C reconciliation. A premature later-account cherry-pick
 therefore fails the dedicated suite before a trigger can be justified.
 
-## P — probe registration only
+## P — completed probe history
 
 P appends only `hhs/aspr-rd-procurement` (`075-1000`, internal account ID
 7008). The five pre-existing DOE/NSF entries are preserved byte-for-byte.
-P's baseline exposes only:
+P initially exposed only:
 
 ```json
 "2024": {"status": "partial", "asOfPeriod": 2, "firstPeriod": 2}
 ```
 
-There is deliberately no `obligationsCents`. FY2025 and FY2026 remain
-`unavailable` behind the same gate. P therefore permits exactly this payload:
+There was deliberately no `obligationsCents`, and FY2025/FY2026 remained
+unavailable until the source boundary was proven. The coordinator ran P02,
+P03, P04, P05, and P06 one at a time. P02–P05 returned header-only File B and
+File C archives. P06 returned 20 File B rows and 59 File C rows and normalized
+to 57 events totaling 44,099,377,125 cents through P06.
 
 ```json
 {
@@ -54,21 +58,22 @@ There is deliberately no `obligationsCents`. FY2025 and FY2026 remain
   "accounts": "hhs/aspr-rd-procurement",
   "from_fy": 2024,
   "to_fy": 2024,
-  "current_period": 2
+  "current_period": 6
 }
 ```
 
-It plans one FY2024 P02 job. Full mode also plans only that probe job; a custom
-FY2024–FY2026 request fails closed at FY2025. P contains no probe result,
-download, data store, or claimed pin.
+The exact workflow and artifact identifiers for all five probes are recorded in
+`reference/hhs_aspr_rd_procurement_probe_evidence.json`. P06 proves that the
+registry and FY2024 baseline must begin at period 6; no earlier activity is
+synthesized.
 
 ASPR is the whole Research, Development, and Procurement account. It is not
 BARDA-only coverage and does not resolve the provisional Project BioShield
 crosswalk row.
 
-## R — official result commit, created only after the probe
+## R — accepted official result
 
-The coordinator creates R after running the P payload. Acceptance requires:
+R satisfies the acceptance contract:
 
 - account resolution exactly `075-1000` / ID `7008`;
 - both `object_class_program_activity` and `award_financial` downloads finish;
@@ -77,13 +82,14 @@ The coordinator creates R after running the P payload. Acceptance requires:
 - normalization and probe-period reconciliation are exact; and
 - no nonblank Program Activity identity is unmapped.
 
-If P02 is unavailable, do not widen the request. Probe P03, then P04 and later
-periods one at a time until the first accepted period is found. Record that
-period in both registry `firstFiscalYearPeriod` and FY2024 `firstPeriod`; never
-synthesize earlier activity.
+The discovered P06 boundary is recorded in both registry
+`firstFiscalYearPeriod` and FY2024 `firstPeriod`. The baseline pins are
+256,707,553,603 cents for FY2024, 301,354,965,654 cents for FY2025, and
+192,325,603,497 cents for FY2026 P09. FY2024 remains partial, FY2025 is
+complete, and FY2026 is partial through P09.
 
-R must add
-`reference/hhs_aspr_rd_procurement_probe_evidence.json` with this tested shape:
+R adds `reference/hhs_aspr_rd_procurement_probe_evidence.json`; its tested core
+shape is:
 
 ```json
 {
@@ -91,61 +97,55 @@ R must add
   "federalAccount": "075-1000",
   "accountId": "7008",
   "fiscalYear": 2024,
-  "firstAcceptedPeriod": 2,
-  "acceptedAt": "<UTC timestamp>",
+  "firstAcceptedPeriod": 6,
+  "acceptedAt": "2026-08-14T07:32:11+00:00",
   "downloads": [
     {
       "submissionType": "object_class_program_activity",
       "status": "finished",
-      "archiveSha256": "<64 lowercase hex>",
-      "statusRowCount": 0,
+      "archiveSha256": "403553e072f6fddcf517ec0c38a8a0f2a42c9fbad3228d8148fc5067d96733b9",
+      "statusRowCount": 20,
       "acceptedRequestScope": {
-        "filters": {"federal_account": "7008", "fy": 2024, "period": 2}
+        "filters": {"federal_account": "7008", "fy": 2024, "period": 6}
       }
     },
     {
       "submissionType": "award_financial",
       "status": "finished",
-      "archiveSha256": "<64 lowercase hex>",
-      "statusRowCount": 0,
+      "archiveSha256": "6f73056c0a41d2caadd2358a2ec1b219a298196a9942e92a7856e693c166d42d",
+      "statusRowCount": 59,
       "acceptedRequestScope": {
-        "filters": {"federal_account": "7008", "fy": 2024, "period": 2}
+        "filters": {"federal_account": "7008", "fy": 2024, "period": 6}
       }
     }
   ],
   "accountSnapshots": [
     {
       "fiscalYear": 2024,
-      "retrievedAt": "<UTC timestamp>",
+      "retrievedAt": "2026-08-14T07:34:30Z",
       "url": "https://api.usaspending.gov/api/v2/federal_accounts/075-1000/?fiscal_year=2024",
-      "obligationsCents": 0
+      "obligationsCents": 256707553603
     },
     {
       "fiscalYear": 2025,
-      "retrievedAt": "<UTC timestamp>",
+      "retrievedAt": "2026-08-14T07:34:30Z",
       "url": "https://api.usaspending.gov/api/v2/federal_accounts/075-1000/?fiscal_year=2025",
-      "obligationsCents": 0
+      "obligationsCents": 301354965654
     },
     {
       "fiscalYear": 2026,
-      "retrievedAt": "<UTC timestamp>",
+      "retrievedAt": "2026-08-14T07:34:30Z",
       "url": "https://api.usaspending.gov/api/v2/federal_accounts/075-1000/?fiscal_year=2026",
-      "obligationsCents": 0
+      "obligationsCents": 192325603497
     }
   ]
 }
 ```
 
-Every placeholder and zero above must be replaced with observed official
-evidence. The tests compare all three snapshot cents to the baseline, validate
-the accepted period/scopes, and reject a `pending` source citation. The
-research brief's earlier values are candidates only; they are not authorization
-to invent R.
-
-If the first accepted period is P02, FY2024 may be `complete`; if it is later,
-FY2024 remains `partial`. FY2025 must be complete and FY2026 partial through
-P09. R must make the ASPR custom FY2024–FY2026 planner emit exactly three jobs:
-FY2024 P12, FY2025 P12, and FY2026 P09. R does not add the full data store.
+The tests compare all three snapshot cents to the baseline, validate the P06
+request scopes, and reject a pending source citation. R makes the ASPR custom
+FY2024–FY2026 planner emit exactly three jobs: FY2024 P12, FY2025 P12, and
+FY2026 P09. R does not add the full data store.
 
 ## D — atomic three-year ASPR reconciliation
 

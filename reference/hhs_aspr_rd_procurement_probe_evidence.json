@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "federalAccount": "075-1000",
+  "accountId": "7008",
+  "fiscalYear": 2024,
+  "firstAcceptedPeriod": 6,
+  "acceptedAt": "2026-08-14T07:32:11+00:00",
+  "workflowRunId": 31779858718,
+  "workflowJobId": 94703110627,
+  "artifacts": {
+    "partitionId": 9211421662,
+    "partitionSha256": "2cbb07d46b080f499b9a5a562112894acf4164a461a3455846f9a7ba95851546",
+    "rawId": 9211421949,
+    "rawSha256": "1ddd14541be70ce86d61e5741d17a0cb4e65c84ee17f75d6327f82b1d1a42076"
+  },
+  "priorEmptyPeriods": [
+    {"period": 2, "workflowRunId": 31776317096, "rawArtifactId": 9210100415, "rawArtifactSha256": "fb36f6cbace69b0681c2950dc9a95f4b548663d1c5904c23089c517e415d2577"},
+    {"period": 3, "workflowRunId": 31776873138, "rawArtifactId": 9210317655, "rawArtifactSha256": "70bcdab365cb8000dd05eed31f1dbda3d0296cd47eb858e6eff85d3f6aad8c55"},
+    {"period": 4, "workflowRunId": 31777299608, "rawArtifactId": 9210478273, "rawArtifactSha256": "b325fc0206c0c516091d2c05147e00d4e2b782df412415cf7d9f94b8d8e5bcc7"},
+    {"period": 5, "workflowRunId": 31778117681, "rawArtifactId": 9210774834, "rawArtifactSha256": "cc6d7e4c1a0686933d2f68b0f5e17e7d846ebb01a425239e3c0aaa46b4380206"}
+  ],
+  "downloads": [
+    {
+      "submissionType": "object_class_program_activity",
+      "status": "finished",
+      "archiveSha256": "403553e072f6fddcf517ec0c38a8a0f2a42c9fbad3228d8148fc5067d96733b9",
+      "statusRowCount": 20,
+      "acceptedRequestScope": {
+        "filters": {"federal_account": "7008", "fy": 2024, "period": 6}
+      }
+    },
+    {
+      "submissionType": "award_financial",
+      "status": "finished",
+      "archiveSha256": "6f73056c0a41d2caadd2358a2ec1b219a298196a9942e92a7856e693c166d42d",
+      "statusRowCount": 59,
+      "acceptedRequestScope": {
+        "filters": {"federal_account": "7008", "fy": 2024, "period": 6}
+      }
+    }
+  ],
+  "normalizedProbe": {
+    "recordCount": 57,
+    "fileCRecordCount": 56,
+    "fileBResidualRecordCount": 1,
+    "netObligationsCents": 44099377125,
+    "eventFingerprint": "cfed107750459bdbd4e63d29b555762ffe5235eef33bf4da16d72b24fe3bec3c"
+  },
+  "accountSnapshots": [
+    {
+      "fiscalYear": 2024,
+      "retrievedAt": "2026-08-14T07:34:30Z",
+      "url": "https://api.usaspending.gov/api/v2/federal_accounts/075-1000/?fiscal_year=2024",
+      "obligationsCents": 256707553603
+    },
+    {
+      "fiscalYear": 2025,
+      "retrievedAt": "2026-08-14T07:34:30Z",
+      "url": "https://api.usaspending.gov/api/v2/federal_accounts/075-1000/?fiscal_year=2025",
+      "obligationsCents": 301354965654
+    },
+    {
+      "fiscalYear": 2026,
+      "retrievedAt": "2026-08-14T07:34:30Z",
+      "url": "https://api.usaspending.gov/api/v2/federal_accounts/075-1000/?fiscal_year=2026",
+      "obligationsCents": 192325603497
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 {
  "schemaVersion": 2,
  "federalAccount": "075-1000",
- "source": "USAspending federal account fiscal-year snapshots (GTAS/File A); FY2024 P2 calibration pending",
+ "source": "Official federal-account fiscal-year snapshots (GTAS/File A), retrieved 2026-08-14; first material File B/File C period and archive evidence recorded in hhs_aspr_rd_procurement_probe_evidence.json",
  "fiscalYears": {
   "2015": {
    "status": "unavailable",
@@ -39,22 +39,24 @@
    "status": "unavailable",
    "reason": "USAspending federal-account snapshot has no balance or child TAS for this fiscal year"
   },
-  "2024": {
-   "status": "partial",
-   "asOfPeriod": 2,
-   "firstPeriod": 2
-  },
-  "2025": {
-   "status": "unavailable",
-   "reason": "Staging gate: multi-year release is blocked until the FY2024 first accepted period and exact pin are confirmed"
-  },
-  "2026": {
-   "status": "unavailable",
-   "reason": "Staging gate: multi-year release is blocked until the FY2024 first accepted period and exact pin are confirmed"
+    "2024": {
+      "status": "partial",
+      "asOfPeriod": 12,
+      "firstPeriod": 6,
+      "obligationsCents": 256707553603
+    },
+    "2025": {
+      "status": "complete",
+      "obligationsCents": 301354965654
+    },
+    "2026": {
+      "status": "partial",
+      "asOfPeriod": 9,
+      "obligationsCents": 192325603497
   }
  },
  "notes": [
-  "Probe-only staging baseline: FY2024 P2 deliberately omits obligationsCents.",
-  "Do not enable FY2025/FY2026 or any multi-year ASPR release until accepted File B/File C probe evidence establishes the first source period and the FY2024 exact pin."
- ]
+    "FY2024 P02-P05 custom File B/File C probes were source-empty; P06 was the first material period.",
+    "FY2024 remains partial because the account first appears at P06; FY2025 is complete and FY2026 is partial through P09."
+  ]
 }
