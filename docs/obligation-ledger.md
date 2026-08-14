@@ -124,7 +124,22 @@ Negative events and residuals remain visible throughout the UI.
 
 For every covered account-year:
 
+Ordinary source rows require:
+
 `sum(File B activity cents) = pinned GTAS/File A obligated cents`
+
+When the official source itself publishes a documented File A/File B warning,
+the baseline may instead carry both exact pins and their exact non-zero
+variance:
+
+`sum(File B activity cents) = fileBObligationsCents`
+
+`obligationsCents - fileBObligationsCents = fileAFileBVarianceCents`
+
+The published ledger remains File B. The variance is source metadata, never a
+synthetic obligation event or a numeric tolerance. All three exceptional
+fields are required together, including a non-empty source reason; ordinary
+rows continue to fail on a one-cent difference.
 
 and, for every account/Program Activity/reporting-period bucket:
 
