@@ -17,9 +17,11 @@ base 689aba6
 ```
 
 P completed as five serialized probes. P02 through P05 were source-empty; P06
-was the first material period. This worktree now represents evidence-backed R.
-D does not exist yet. VA and later commits are a separate local patch queue;
-the coordinator may cherry-pick them only onto D or a descendant of D.
+was the first material period. Evidence-backed R and atomic data commit D are
+now complete and merged through PR
+[#33](https://github.com/jpwolfson/science-funding-dashboard/pull/33).
+VA and later commits remain a separate local patch queue; the coordinator may
+cherry-pick them only onto D or a descendant of D.
 
 This ordering is mechanically enforced in
 `tests/test_obligations_other_civilian.py`. If any VA-or-later account is
@@ -147,9 +149,9 @@ request scopes, and reject a pending source citation. R makes the ASPR custom
 FY2024–FY2026 planner emit exactly three jobs: FY2024 P12, FY2025 P12, and
 FY2026 P09. R does not add the full data store.
 
-## D — atomic three-year ASPR reconciliation
+## D — accepted atomic three-year ASPR reconciliation
 
-Only after R is green may the coordinator run the exact ASPR selector:
+After R passed, the coordinator ran the exact ASPR selector:
 
 ```json
 {
@@ -161,14 +163,32 @@ Only after R is green may the coordinator run the exact ASPR selector:
 }
 ```
 
-All three years must land in one reviewed data commit D. D contains the ASPR
-event partitions, accepted provenance, manifest, dashboards, and any
-registry-derived aggregate dashboard updates produced by the established
-pipeline. It is accepted only when exact cents reconcile, warnings are zero,
-the ASPR dedicated guard passes, and the full fast tier is green.
+All three years landed in reviewed atomic commit
+`f5d43c3eb35d30f8c5758f587b56dc16d5a164b2`. D contains the ASPR event
+partitions, accepted provenance, manifest, dashboards, registry-derived
+aggregate updates, and combined sentinel. Trigger-restored head
+`921ebf369a53c3dbc4857586f75320f1e347d2a1` merged at
+`7b98acf7630ca301a8845698dbffe1d893251c56`.
 
-Do not cherry-pick VA or any later scaffold between R and D. Do not split D so
-that a later account can observe a one- or two-year ASPR store.
+Durable run
+[`31780933170`](https://github.com/jpwolfson/science-funding-dashboard/actions/runs/31780933170)
+has six terminal jobs: plan, all three pulls, and reconcile succeeded; the
+branch-only deploy job was skipped. Across FY2024--FY2026, File A and canonical
+File B each total `750,388,122,754` cents. File C totals `586,648,937,331`
+cents and the explicit residual totals `163,739,185,423` cents, so File C plus
+residual equals File B exactly. File C/net is `78.17940070505638%`.
+
+The accepted store contains 743 signed events normalized from 5,451 parsed
+rows in 29 source snapshots, with zero unmapped Program Activities or
+validator warnings. The ASPR subtree is 352,843 bytes; compressed partitions
+are 94,211 bytes and provenance records are 51,117 bytes. The run elapsed
+47m24s and reconciliation ran 7m49s. ASPR registry passed 10/10, dedicated
+tests 13/13, fast 7/7, and rendered 3/3 including 64 all-account light/dark
+cases. The 22-page screenshot pack and live ASPR account/activity pages passed
+reader review.
+
+No VA or later scaffold was cherry-picked between R and D, and D was not split
+into a one- or two-year state.
 
 ## Post-D patch queue and exact selectors
 

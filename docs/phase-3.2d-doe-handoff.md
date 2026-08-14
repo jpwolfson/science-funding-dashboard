@@ -2,16 +2,17 @@
 
 ## Scope and status
 
-This branch onboards the ten crosswalk-resolved DOE accounts in roadmap
-3.2d-1A and 3.2d-1B. DOE Office of Science (`089-0222`, `doe/sc`) remains the
-untouched Phase 3.1b regression fixture. No account is parked and no shared
-adapter, validator, workflow, site, sentinel, or trigger file changed.
+PR [#32](https://github.com/jpwolfson/science-funding-dashboard/pull/32)
+onboarded the ten crosswalk-resolved DOE accounts in roadmap 3.2d-1A and
+3.2d-1B. DOE Office of Science (`089-0222`, `doe/sc`) remains the Phase 3.1b
+regression fixture. No account is parked. The worker-owned implementation did
+not modify shared adapters, validators, workflows, site, sentinel, or trigger
+files.
 
-The registry, official-title review, Program Activity inventory, source-
-availability scaffolds, and DOE-specific tests are complete. Historical data,
-exact-cent baseline pins, dashboards, rendered evidence, and runtime/footprint
-figures are intentionally pending the CI full backfill; local USAspending
-egress is unavailable.
+The registry, official-title review, Program Activity inventory, accepted
+FY2017--FY2026 stores, exact-cent baselines, dashboards, rendered evidence,
+and measured runtime/footprint record are complete. Source-specific
+discoveries made during the serialized backfill are retained below.
 
 ## Official account evidence
 
@@ -22,16 +23,16 @@ published identities after reviewed aliases and duplicate historical labels.
 
 | Account | Path | Official account title | Bureau | Inventory | Normalized | Status |
 |---|---|---|---|---:|---:|---|
-| `089-0337` | `doe/arpa-e` | Advanced Research Projects Agency-Energy, Energy Programs, Energy | Energy Programs | 7 | 4 | ready for backfill |
-| `089-0321` | `doe/eere` | Energy Efficiency and Renewable Energy, Energy Programs, Energy | Energy Programs | 32 | 26 | ready for backfill |
-| `089-2297` | `doe/oced` | Clean Energy Demonstrations, Energy Programs, Energy | Energy Programs | 33 | 16 | ready for backfill |
-| `089-0213` | `doe/fossil-energy` | Fossil Energy, Energy Programs, Energy | Energy Programs | 52 | 27 | ready for backfill |
-| `089-0318` | `doe/electricity` | Electricity, Energy Programs, Energy | Energy Programs | 29 | 19 | ready for backfill |
-| `089-2250` | `doe/ceser` | Cybersecurity, Energy Security, and Emergency Response, Energy Programs, Energy | Energy Programs | 14 | 11 | ready for backfill |
-| `089-0319` | `doe/nuclear-energy` | Nuclear Energy, Energy Programs, Energy | Energy Programs | 58 | 29 | ready for backfill |
-| `089-0240` | `doe/nnsa-weapons-activities` | Weapons Activities, National Nuclear Security Administration, Energy | National Nuclear Security Administration | 34 | 29 | ready for backfill |
-| `089-0309` | `doe/nnsa-defense-nuclear-nonproliferation` | Defense Nuclear Nonproliferation, National Nuclear Security Administration, Energy | National Nuclear Security Administration | 18 | 16 | ready for backfill |
-| `089-0216` | `doe/eia` | Energy Information Administration, Energy Programs, Energy | Energy Programs | 7 | 3 | ready for backfill |
+| `089-0337` | `doe/arpa-e` | Advanced Research Projects Agency-Energy, Energy Programs, Energy | Energy Programs | 7 | 4 | live: 10 years |
+| `089-0321` | `doe/eere` | Energy Efficiency and Renewable Energy, Energy Programs, Energy | Energy Programs | 32 | 26 | live: 10 years |
+| `089-2297` | `doe/oced` | Clean Energy Demonstrations, Energy Programs, Energy | Energy Programs | 33 | 16 | live: 5 years |
+| `089-0213` | `doe/fossil-energy` | Fossil Energy, Energy Programs, Energy | Energy Programs | 52 | 27 | live: 10 years |
+| `089-0318` | `doe/electricity` | Electricity, Energy Programs, Energy | Energy Programs | 29 | 19 | live: 10 years |
+| `089-2250` | `doe/ceser` | Cybersecurity, Energy Security, and Emergency Response, Energy Programs, Energy | Energy Programs | 14 | 11 | live: 8 years |
+| `089-0319` | `doe/nuclear-energy` | Nuclear Energy, Energy Programs, Energy | Energy Programs | 58 | 29 | live: 10 years |
+| `089-0240` | `doe/nnsa-weapons-activities` | Weapons Activities, National Nuclear Security Administration, Energy | National Nuclear Security Administration | 34 | 29 | live: 10 years |
+| `089-0309` | `doe/nnsa-defense-nuclear-nonproliferation` | Defense Nuclear Nonproliferation, National Nuclear Security Administration, Energy | National Nuclear Security Administration | 18 | 16 | live: 10 years |
+| `089-0216` | `doe/eia` | Energy Information Administration, Energy Programs, Energy | Energy Programs | 7 | 3 | live: 10 years |
 
 Source URL pattern:
 
@@ -179,11 +180,48 @@ covered; the IIJA and IRA demonstration identities and IRA Program Direction
 remain distinct from the base program and base Program Direction. Tests parse
 blank-name rows for every key so a future unknown PARK still fails closed.
 
-To be filled from the accepted CI snapshot before opening the PR:
+## Accepted release evidence
 
-- exact File B/File A cents by account and FY;
-- File C/net figures, zero-warning reconciliation, and unmapped PA result;
-- accepted provenance coverage and raw/normalized counts;
-- `verify.py --tier fast --json` and `--tier rendered --json` outputs;
-- light/dark rendered QA;
-- runtime, compressed artifact growth, and PR URL.
+PR [#32](https://github.com/jpwolfson/science-funding-dashboard/pull/32)
+merged the atomic snapshot `efbabbfd02de824c9df88df5f793e741e8515eaf`
+after durable run
+[`31623029374`](https://github.com/jpwolfson/science-funding-dashboard/actions/runs/31623029374)
+completed at attempt 11. Its terminal topology is 103 logical jobs: plan, all
+100 account-year pulls, and reconcile succeeded; the branch-only deploy job
+was skipped as designed. The restored branch head is
+`e179057d525aced7a685f0992b7cd04dcc2b76b1`.
+
+All values below are integer cents. Every accepted account-year reconciles
+canonical File B exactly to the corresponding File A pin, and every
+PA/reporting-period grain reconciles File C plus its explicit residual to File
+B. The 93 individual year pins remain enumerated in the ten
+`reference/doe_*_obligation_baseline.json` files.
+
+| Account | Years | File A = File B | File C | File B - File C |
+|---|---:|---:|---:|---:|
+| ARPA-E | 10 | 355,986,876,363 | 311,654,562,486 | 44,332,313,877 |
+| EERE | 10 | 5,032,606,483,227 | 4,614,106,372,951 | 418,500,110,276 |
+| OCED | 5 | 1,291,234,868,529 | 831,618,852,661 | 459,616,015,868 |
+| Fossil Energy | 10 | 895,943,264,878 | 758,152,837,999 | 137,790,426,879 |
+| Electricity | 10 | 1,261,126,025,414 | 1,218,267,119,027 | 42,858,906,387 |
+| CESER | 8 | 158,134,115,379 | 130,592,358,271 | 27,541,757,108 |
+| Nuclear Energy | 10 | 1,920,679,558,123 | 1,773,209,476,345 | 147,470,081,778 |
+| NNSA Weapons Activities | 10 | 18,370,987,559,777 | 16,155,217,062,964 | 2,215,770,496,813 |
+| NNSA Defense Nuclear Nonproliferation | 10 | 2,282,736,909,861 | 2,098,929,887,476 | 183,807,022,385 |
+| EIA | 10 | 126,085,907,726 | 53,142,544,617 | 72,943,363,109 |
+| **Total** | **93** | **31,695,521,569,277** | **27,944,891,074,797** | **3,750,630,494,480** |
+
+The accepted provenance contains 1,054 source-download snapshots with 414,905
+parsed member rows, normalized to 75,919 signed events. Fail-closed Program
+Activity resolution leaves zero unmapped identities, and obligation validation
+completed with zero warnings. Overall File C/net is
+`88.16668630524904%`; the residual is retained as ledger activity rather than
+treated as missing data.
+
+The reconciled DOE subtree is 52,087,296 bytes. Its compressed event
+partitions are 8,846,282 bytes and provenance records are 1,822,044 bytes.
+Attempt 11 elapsed 36h22m35s under the serialized matrix; reconciliation ran
+8m12s. Workflow and restored-head verification both passed fast 7/7 and
+rendered 3/3, with the rendered tier covering all 60 Wave 1 account/PA/theme
+cases. Fresh deployed reader review also found the DOE landing, EERE account,
+and Solar Energy PA pages legible and internally consistent in light and dark.

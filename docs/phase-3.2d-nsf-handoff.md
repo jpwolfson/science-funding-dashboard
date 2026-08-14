@@ -1,8 +1,9 @@
 # Phase 3.2d NSF obligation-account handoff
 
-Status: registry and baseline scaffolds ready for the one-time CI backfill.
-Generated obligation stores, exact-cent pins, rendered QA, and the pull request
-remain gated on that backfill.
+Status: complete. PR
+[#31](https://github.com/jpwolfson/science-funding-dashboard/pull/31)
+merged four reconciled FY2017--FY2026 obligation stores, exact baselines,
+dashboards, and combined sentinel coverage after the terminal CI backfill.
 
 ## Account disposition
 
@@ -26,21 +27,21 @@ reviewed 2026-08-12. Files A/B/C share the platform's established availability
 boundary: FY2015–16 unavailable, FY2017 partial beginning P06, and FY2018 the
 first full fiscal year. Award-search amounts are not used.
 
-## Replaceable baseline scaffolds
+## Accepted exact baselines
 
-Each account has a schema-v2 baseline. Pullable years are deliberately marked
-`partial` without `obligationsCents` before the first accepted build. That makes
-all 40 account-year partitions selectable by `--mode full` without falsely
-publishing unverified pins. The atomic reconcile will replace those scaffolds:
+Each account has a schema-v2 baseline. Before the first accepted build,
+pullable years used replaceable `partial` rows without `obligationsCents`; that
+made all 40 account-year partitions selectable by `--mode full` without
+falsely publishing unverified pins. Atomic reconciliation replaced those
+scaffolds with the accepted lifecycle state:
 
 - FY2017 stays partial, with `firstPeriod: 6` and an exact P12 File B pin;
 - FY2018–25 are promoted to complete exact-cent P12 pins; and
 - FY2026 stays partial with an exact P09 pin.
 
-The reconcile candidate must pass both identities before any generated file or
-pin is committed: File C plus the residual equals File B in every
-Program-Activity/reporting-period bucket, and annual File B equals the accepted
-GTAS/File A pin exactly.
+The committed snapshot passes both identities: File C plus the residual equals
+File B in every Program-Activity/reporting-period bucket, and annual File B
+equals the accepted GTAS/File A pin exactly.
 
 ## Program Activity alias review
 
@@ -85,28 +86,54 @@ Pre-backfill results on commit candidate `agent/3-2d-nsf`:
 The worker reported the original integration defect to the coordinator and did
 not modify shared reconciliation, sentinel, workflow, or validation code. The
 uniform coordinator-owned fix is now present in this branch's main-line base.
-The NSF registry is ready for its first full backfill.
+Those gates authorized the accepted first full backfill recorded below.
 
-The required trigger payload is:
+The trigger payload used was:
 
 ```json
 {"mode":"full","accounts":"nsf","from_fy":"","to_fy":"","current_period":""}
 ```
 
-The coordinator owns the trigger-file change. The worker does not modify
-`.github/triggers/update-obligations.json`.
+The coordinator applied and later restored the trigger-file change; the worker
+did not modify `.github/triggers/update-obligations.json`.
 
-## Post-backfill release checklist
+## Accepted release evidence
 
-- inspect all 40 accepted schema-v2 provenance records and exact baseline pins;
-- confirm zero validator warnings and exact reconciliation for all four stores;
-- run `python3 scripts/verify.py --tier fast --json ...`;
-- run `python3 scripts/verify.py --tier rendered --json ...`;
-- inspect representative NSF agency, account, and Program Activity pages in
-  both light and dark themes, including signed/empty edge states;
-- record event counts, fiscal-year cents, File C/net ratios, runtime, artifact
-  growth, and any source corrections in this handoff; and
-- open (but do not merge) the evidence-bearing pull request.
+Durable run
+[`31623021735`](https://github.com/jpwolfson/science-funding-dashboard/actions/runs/31623021735)
+completed with 43 logical jobs: plan, all 40 account-year pulls, and reconcile
+succeeded (42 successes); the branch-only deploy job was skipped as designed.
+Reconcile job `94341025791` atomically committed snapshot
+`12d829ef777a9931dba30a4bc93b50a77a710378`. The merge commit is
+`689aba6a27f7f7282c444eacd583c4e694789bd7`.
+
+All values below are integer cents. Every accepted account-year reconciles
+canonical File B exactly to the corresponding File A pin, and every
+PA/reporting-period grain reconciles File C plus its explicit residual to File
+B. The 40 individual year pins remain enumerated in the four
+`reference/nsf_*_obligation_baseline.json` files.
+
+| Account | Years | File A = File B | File C | File B - File C |
+|---|---:|---:|---:|---:|
+| Research and Related Activities | 10 | 6,588,061,578,936 | 6,171,340,483,510 | 416,721,095,426 |
+| STEM Education | 10 | 975,424,614,012 | 903,911,851,852 | 71,512,762,160 |
+| Agency Operations and Award Management | 10 | 387,265,274,505 | 72,196,144,171 | 315,069,130,334 |
+| Major Research Equipment and Facilities Construction | 10 | 219,198,099,019 | 198,817,658,033 | 20,380,440,986 |
+| **Total** | **40** | **8,169,949,566,472** | **7,346,266,137,566** | **823,683,428,906** |
+
+The accepted provenance contains 452 source-download snapshots with 2,749,284
+parsed member rows, normalized to 291,110 signed events. Fail-closed Program
+Activity resolution leaves zero unmapped identities, and obligation validation
+completed with zero warnings. Overall File C/net is
+`89.91813324911762%`; the residual remains explicit ledger activity.
+
+The reconciled NSF subtree is 114,300,604 bytes. Its compressed event
+partitions are 100,735,265 bytes and provenance records are 778,367 bytes.
+The serialized run elapsed 10h44m55s; reconciliation ran 6m35s. Reconcile and
+restored-head verification both passed fast 7/7 and rendered 3/3; the rendered
+matrix covered five representative obligation cases, all 20 NSF-first
+account/PA/theme cases, and both sentinel cases. Fresh light/dark reader review
+and post-merge deploy/live spot checks were green.
 
 The existing NSF award-ledger dashboards and data remain untouched regression
 fixtures throughout this work.
