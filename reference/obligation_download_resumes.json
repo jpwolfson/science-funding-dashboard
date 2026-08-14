@@ -1,0 +1,53 @@
+{
+ "requests": [
+  {
+   "account": "commerce/bea",
+   "fiscalYear": 2018,
+   "period": 12,
+   "result": {
+    "download_request": {
+     "account_level": "federal_account",
+     "columns": [
+      "submission_period",
+      "federal_account_symbol",
+      "program_activity_reporting_key",
+      "program_activity_code",
+      "program_activity_name",
+      "transaction_obligated_amount",
+      "award_unique_key",
+      "award_id_piid",
+      "parent_award_id_piid",
+      "award_id_fain",
+      "award_id_uri",
+      "recipient_uei",
+      "recipient_name",
+      "prime_award_base_transaction_description",
+      "usaspending_permalink"
+     ],
+     "download_types": [
+      "award_financial"
+     ],
+     "file_format": "csv",
+     "filters": {
+      "agency": "all",
+      "budget_function": "all",
+      "budget_subfunction": "all",
+      "federal_account": "3693",
+      "fy": 2018,
+      "period": 12,
+      "quarter": 4,
+      "submission_types": [
+       "award_financial"
+      ]
+     },
+     "request_type": "account"
+    },
+    "file_name": "FY2018Q1-Q4_All_FA_AccountBreakdownByAward_2026-08-14_H07M15S58730769.zip",
+    "file_url": "https://files.usaspending.gov/generated_downloads/FY2018Q1-Q4_All_FA_AccountBreakdownByAward_2026-08-14_H07M15S58730769.zip",
+    "status_url": "https://api.usaspending.gov/api/v2/download/status?file_name=FY2018Q1-Q4_All_FA_AccountBreakdownByAward_2026-08-14_H07M15S58730769.zip"
+   },
+   "submissionType": "award_financial"
+  }
+ ],
+ "schemaVersion": 1
+}
