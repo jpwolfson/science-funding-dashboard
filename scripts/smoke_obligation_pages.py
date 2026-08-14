@@ -345,9 +345,8 @@ def _evaluate_case(document, diagnostic, width, theme):
         case_errors.append("page recorded a network failure")
     if "No data yet for this unit" in visible_text:
         case_errors.append("known dashboard rendered as missing data")
-    for marker in ("Uncaught ", "net::ERR_", "exceptionDetails"):
-        if marker in diagnostic:
-            case_errors.append(f"browser diagnostic contains {marker.strip()}")
+    if diagnostic.strip():
+        case_errors.append("browser diagnostic: " + diagnostic.strip())
     links = Links()
     links.feed(rendered)
     if not links.hrefs:

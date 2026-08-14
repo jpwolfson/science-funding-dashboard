@@ -27,6 +27,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from scripts.smoke_obligation_pages import _evaluate_case
 from scripts.verify import _lint_account, _run_command
 
 REPO = Path(__file__).resolve().parent.parent
@@ -56,6 +57,22 @@ def registry_slugs():
 
 
 class UniformityContractTests(unittest.TestCase):
+    def test_rendered_gate_rejects_every_collected_browser_error(self):
+        document = {
+            "html": '<html data-render-complete="true"><a href="/">home</a></html>',
+            "text": "home", "width": 1440, "dark": False,
+        }
+        errors = _evaluate_case(
+            document,
+            "Failed to load resource: status 404",
+            1440,
+            "light",
+        )
+        self.assertEqual(
+            ["browser diagnostic: Failed to load resource: status 404"],
+            errors,
+        )
+
     def test_failed_command_evidence_retains_actionable_trace_tail(self):
         result = _run_command(
             "diagnostic",
