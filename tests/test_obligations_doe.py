@@ -851,6 +851,9 @@ class DoeOnboardingTests(unittest.TestCase):
             "doe/oced": 2022,
             "doe/ceser": 2019,
         }
+        expected_first_period = {
+            "doe/oced": 4,
+        }
         for path in EXPECTED:
             with self.subTest(path=path):
                 jobs = plan(REPO, mode="full", selectors=path)["include"]
@@ -869,9 +872,16 @@ class DoeOnboardingTests(unittest.TestCase):
                         "unavailable",
                         baseline["fiscalYears"][str(fiscal_year)]["status"],
                     )
+                first_period = expected_first_period.get(
+                    path, 6 if first_fy == 2017 else 2
+                )
                 self.assertEqual(
-                    6 if first_fy == 2017 else 2,
+                    first_period,
                     baseline["fiscalYears"][str(first_fy)]["firstPeriod"],
+                )
+                self.assertEqual(
+                    first_period,
+                    self.accounts[path]["availability"]["firstFiscalYearPeriod"],
                 )
                 self.assertEqual(
                     12, baseline["fiscalYears"][str(first_fy)]["asOfPeriod"]
