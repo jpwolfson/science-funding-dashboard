@@ -472,5 +472,24 @@
      }
     ]
    }
+  ,
+  {
+   "path": "nasa/science",
+   "name": "Science",
+   "abbrev": "NASA Science",
+   "agency": "National Aeronautics and Space Administration",
+   "federalAccount": "080-0120",
+   "agencyIdentifier": "080",
+   "adapter": "usaspending_obligations",
+   "baseline": "reference/nasa_science_obligation_baseline.json",
+   "availability": {
+    "firstFiscalYear": 2017,
+    "firstFiscalYearPeriod": 6,
+    "regularFirstPeriod": 2
+   },
+   "programActivities": [
+    {"slug": "science-direct", "code": "0001", "name": "Science (Direct)", "park": "5ZD5GGPDU49", "parkAliases": [], "codeNameAliases": []}
+   ]
+  }
  ]
 }
