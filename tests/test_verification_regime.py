@@ -22,11 +22,12 @@ flagged here.
 
 import json
 import re
+import sys
 import tempfile
 import unittest
 from pathlib import Path
 
-from scripts.verify import _lint_account
+from scripts.verify import _lint_account, _run_command
 
 REPO = Path(__file__).resolve().parent.parent
 CHECKED_FILES = (
@@ -55,6 +56,21 @@ def registry_slugs():
 
 
 class UniformityContractTests(unittest.TestCase):
+    def test_failed_command_evidence_retains_actionable_trace_tail(self):
+        result = _run_command(
+            "diagnostic",
+            [sys.executable, "-c", (
+                "import sys; "
+                "print('exact failing test'); "
+                "print('Traceback: actionable detail', file=sys.stderr); "
+                "raise SystemExit(1)"
+            )],
+            cwd=REPO,
+        )
+        self.assertFalse(result["passed"])
+        self.assertIn("exact failing test", result["evidence"])
+        self.assertIn("Traceback: actionable detail", result["evidence"])
+
     def account_fixture(self):
         temporary = tempfile.TemporaryDirectory()
         root = Path(temporary.name)
