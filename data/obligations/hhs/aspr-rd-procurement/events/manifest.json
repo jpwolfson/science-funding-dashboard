@@ -1,0 +1,43 @@
+{
+ "baseline": "reference/hhs_aspr_rd_procurement_obligation_baseline.json",
+ "eventFingerprint": "3c5e2586973c1d692291a280b3455e8165ab6e88ef4d8fc1c80bede6d02d05cc",
+ "federalAccount": "075-1000",
+ "fiscalYears": [
+  2024,
+  2025,
+  2026
+ ],
+ "format": "obligation-events-csv-gzip-v2",
+ "latestAcceptedAt": "2026-08-14T08:21:25+00:00",
+ "partitions": [
+  {
+   "collectionStatus": "accepted",
+   "eventFingerprint": "339696728627bb90c524cdf3b35f8b234a3580d2da18e17f6cf411f0aac2b9a6",
+   "file": "FY2024.csv.gz",
+   "fiscalYear": 2024,
+   "provenance": "FY2024.provenance.json",
+   "recordCount": 306,
+   "sha256": "94aafe9b7ceb48f58c5b945f9d6a3b4e3c8b5ddae722bf7740bdd1eb30b54910"
+  },
+  {
+   "collectionStatus": "accepted",
+   "eventFingerprint": "90abf5332312c8c4a3b8d987354fa7751b2657d8d4e53d8a665420fbff8874f9",
+   "file": "FY2025.csv.gz",
+   "fiscalYear": 2025,
+   "provenance": "FY2025.provenance.json",
+   "recordCount": 283,
+   "sha256": "1b32ff02b24846d3d07c4c2510433bd82a6b9933f7cfbe1c5bd7c28353d5fe36"
+  },
+  {
+   "collectionStatus": "accepted",
+   "eventFingerprint": "52eee05374667d6f21a68f48edb8b99747be07920c44be4be00f5569bc8cc69f",
+   "file": "FY2026.csv.gz",
+   "fiscalYear": 2026,
+   "provenance": "FY2026.provenance.json",
+   "recordCount": 154,
+   "sha256": "0ec4833a923fe7534e4d637af293e27e98cead17124d0136a73b5871cb6eed6d"
+  }
+ ],
+ "recordCount": 743,
+ "schemaVersion": 2
+}
