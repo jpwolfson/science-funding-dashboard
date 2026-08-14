@@ -194,6 +194,26 @@ class EarthAgricultureObligationTests(unittest.TestCase):
                         )
                         self.assertEqual(activity["slug"], aliases[key]["slug"])
 
+    def test_epa_fy2022_preserves_exact_official_file_a_file_b_variance(self):
+        baseline = json.loads(
+            (ROOT / "reference/epa_science_technology_obligation_baseline.json")
+            .read_text()
+        )
+        row = baseline["fiscalYears"]["2022"]
+        self.assertEqual(78_078_798_237, row["obligationsCents"])
+        self.assertEqual(78_077_137_843, row["fileBObligationsCents"])
+        self.assertEqual(1_660_394, row["fileAFileBVarianceCents"])
+        self.assertEqual(
+            row["obligationsCents"] - row["fileBObligationsCents"],
+            row["fileAFileBVarianceCents"],
+        )
+        self.assertIn("A19", row["fileAFileBVarianceReason"])
+        for fiscal_year, ordinary in baseline["fiscalYears"].items():
+            if fiscal_year != "2022":
+                self.assertNotIn("fileBObligationsCents", ordinary)
+                self.assertNotIn("fileAFileBVarianceCents", ordinary)
+                self.assertNotIn("fileAFileBVarianceReason", ordinary)
+
     def test_usgs_reused_0002_identities_remain_distinct(self):
         aliases = alias_map(self.accounts["014-0804"])
         values = parse_file_b_snapshot([
