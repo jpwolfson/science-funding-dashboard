@@ -448,6 +448,24 @@
     {"slug": "major-research-equipment-facilities-construction", "code": "0001", "park": "5P1BESBYJ69", "name": "Major Research Equipment and Facilities Construction", "abbrev": "MREFC"},
     {"slug": "american-rescue-plan", "code": "0401", "park": "5VLB39RJN6X", "name": "American Rescue Plan Act", "abbrev": "ARP"}
    ]
+  },
+  {
+   "path": "nasa/science",
+   "name": "Science",
+   "abbrev": "NASA Science",
+   "agency": "National Aeronautics and Space Administration",
+   "federalAccount": "080-0120",
+   "agencyIdentifier": "080",
+   "adapter": "usaspending_obligations",
+   "baseline": "reference/nasa_science_obligation_baseline.json",
+   "availability": {
+    "firstFiscalYear": 2017,
+    "firstFiscalYearPeriod": 6,
+    "regularFirstPeriod": 2
+   },
+   "programActivities": [
+    {"slug": "science-direct", "code": "0001", "name": "Science (Direct)", "park": "5ZD5GGPDU49", "parkAliases": [], "codeNameAliases": []}
+   ]
   }
  ]
 }
