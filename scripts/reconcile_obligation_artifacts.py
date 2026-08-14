@@ -10,7 +10,9 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
-from adapters.obligation_common import file_sha256, rebuild_manifest
+from adapters.obligation_common import (
+    file_sha256, load_store, rebuild_manifest, write_partition_provenance,
+)
 from adapters.funding_sentinel import build as build_sentinel
 from scripts.rollup_obligations import build as build_obligations
 
@@ -52,6 +54,24 @@ def reconcile(staging, repo=REPO):
                     or provenance.get("accountPath") != account["path"]
                     or provenance.get("fiscalYear") != int(fy)):
                 raise ValueError(f"{key}: invalid accepted provenance")
+            pin = dict(provenance.get("baselinePin") or {})
+            first_fy = int(
+                account.get("availability", {}).get("firstFiscalYear", 2017)
+            )
+            if int(fy) == first_fy and pin.get("status") == "partial":
+                # Older partitions derived firstPeriod from the request
+                # boundary.  Recompute it from the already hash-verified
+                # normalized shard so leading finished/empty source requests
+                # cannot make a partial baseline contradict its event store.
+                material_periods = [
+                    event["fiscalPeriod"] for event in load_store(
+                        descriptor_path.parent
+                    ) if event["fiscalYear"] == int(fy)
+                ]
+                if material_periods:
+                    pin["firstPeriod"] = min(material_periods)
+                    provenance = dict(provenance)
+                    provenance["baselinePin"] = pin
             planned.append((account, int(fy), descriptor_path.parent, provenance))
     if not planned:
         raise ValueError("no obligation account-year artifacts found")
@@ -66,6 +86,10 @@ def reconcile(staging, repo=REPO):
         store.mkdir(parents=True, exist_ok=True)
         for suffix in (".csv.gz", ".provenance.json"):
             shutil.copy2(source_dir / f"FY{fy}{suffix}", store / f"FY{fy}{suffix}")
+        # The accepted source/download audit remains byte-semantic; only the
+        # derived baseline pin above may be corrected for leading empty
+        # snapshots before the candidate manifest is rebuilt.
+        write_partition_provenance(store, fy, provenance)
         touched.add(account["path"])
         baseline_updates.setdefault(account["path"], {})[str(fy)] = provenance["baselinePin"]
 

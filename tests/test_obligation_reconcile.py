@@ -28,6 +28,9 @@ class ObligationReconcileTests(unittest.TestCase):
                     "path": "doe/sc", "name": "Science", "abbrev": "SC",
                     "agency": "Energy", "federalAccount": "089-0222",
                     "baseline": "reference/doe.json",
+                    "availability": {"firstFiscalYear": 2026,
+                                     "firstFiscalYearPeriod": 2,
+                                     "regularFirstPeriod": 2},
                     "programActivities": [{"slug": "bes", "code": "0001",
                                            "name": "BES"}],
                 }],
@@ -85,7 +88,7 @@ class ObligationReconcileTests(unittest.TestCase):
                                 "previousProvenanceSha256": None},
                 "diff": partition_diff([], [row]),
                 "baselinePin": {"status": "partial", "asOfPeriod": 9,
-                                "obligationsCents": 100},
+                                "firstPeriod": 2, "obligationsCents": 100},
             }
             write_store(producer, [row], {"federalAccount": "089-0222"},
                         partition_metadata={2026: provenance})
@@ -103,6 +106,12 @@ class ObligationReconcileTests(unittest.TestCase):
             self.assertEqual((1, ["doe/sc"]), reconcile(staging.parent, root))
             baseline = json.loads((root / "reference" / "doe.json").read_text())
             self.assertEqual(9, baseline["fiscalYears"]["2026"]["asOfPeriod"])
+            self.assertEqual(9, baseline["fiscalYears"]["2026"]["firstPeriod"])
+            accepted = json.loads(
+                (root / "data" / "obligations" / "doe" / "sc" / "events"
+                 / "FY2026.provenance.json").read_text()
+            )
+            self.assertEqual(9, accepted["baselinePin"]["firstPeriod"])
             self.assertEqual([], validate(root, require_data=True,
                                           require_current_provenance=True))
             self.assertEqual([], validate_sentinel(root, require_data=False))

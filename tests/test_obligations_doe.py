@@ -851,7 +851,7 @@ class DoeOnboardingTests(unittest.TestCase):
             "doe/oced": 2022,
             "doe/ceser": 2019,
         }
-        expected_first_period = {
+        expected_material_first_period = {
             "doe/oced": 4,
         }
         for path in EXPECTED:
@@ -872,15 +872,15 @@ class DoeOnboardingTests(unittest.TestCase):
                         "unavailable",
                         baseline["fiscalYears"][str(fiscal_year)]["status"],
                     )
-                first_period = expected_first_period.get(
+                material_first_period = expected_material_first_period.get(
                     path, 6 if first_fy == 2017 else 2
                 )
                 self.assertEqual(
-                    first_period,
+                    material_first_period,
                     baseline["fiscalYears"][str(first_fy)]["firstPeriod"],
                 )
                 self.assertEqual(
-                    first_period,
+                    6 if first_fy == 2017 else 2,
                     self.accounts[path]["availability"]["firstFiscalYearPeriod"],
                 )
                 self.assertEqual(

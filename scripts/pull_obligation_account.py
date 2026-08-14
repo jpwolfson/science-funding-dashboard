@@ -112,7 +112,8 @@ def _download(repo, account, account_id, fy, period, kind, columns,
     return members, audit
 
 
-def _baseline_pin(repo, account, fy, last_period, file_b_total):
+def _baseline_pin(repo, account, fy, last_period, file_b_total,
+                  first_event_period=None):
     baseline = json.loads((repo / account["baseline"]).read_text())
     if baseline.get("schemaVersion") != 2:
         raise ValueError(f"{account['path']}: baseline schema must be v2")
@@ -138,9 +139,12 @@ def _baseline_pin(repo, account, fy, last_period, file_b_total):
         pin.update({"status": "partial", "asOfPeriod": last_period,
                     "obligationsCents": file_b_total})
     if fy == first_fy:
-        pin.setdefault("firstPeriod", int(
-            account.get("availability", {}).get("firstFiscalYearPeriod", 6)
-        ))
+        # Availability identifies the first official request period.  A new
+        # account can publish finished, empty snapshots before its first
+        # material File B activity (OCED FY2022 is P02/P03 empty, P04 first
+        # material).  Pin the event boundary, not merely the request boundary.
+        pin["firstPeriod"] = int(first_event_period or
+            account.get("availability", {}).get("firstFiscalYearPeriod", 6))
     return pin
 
 
@@ -282,8 +286,11 @@ def pull(account, years, current_period=12, repo=REPO, rollup=True,
         if last_period == 12 and detail_total and file_b_total != detail_total:
             raise ValueError(f"FY{fy}: File B {file_b_total} cents != account snapshot {detail_total}")
         all_events.extend(events)
+        first_event_period = min(
+            (event["fiscalPeriod"] for event in events), default=None
+        )
         baseline_pin = _baseline_pin(
-            repo, account, fy, last_period, file_b_total
+            repo, account, fy, last_period, file_b_total, first_event_period
         )
         previous = [e for e in existing if e["fiscalYear"] == fy]
         previous_provenance = store / f"FY{fy}.provenance.json"
