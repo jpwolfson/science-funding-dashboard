@@ -42,6 +42,52 @@ def dollars(value):
     return value / 100
 
 
+BASELINE_VARIANCE_FIELDS = (
+    "fileBObligationsCents",
+    "fileAFileBVarianceCents",
+    "fileAFileBVarianceReason",
+)
+
+
+def baseline_file_b_cents(pin):
+    """Return the exact File B ledger pin for one available baseline row."""
+    if "fileBObligationsCents" in pin:
+        return pin["fileBObligationsCents"]
+    return pin["obligationsCents"]
+
+
+def baseline_pin_problems(pin):
+    """Validate the universal File A/File B baseline specialization schema."""
+    status = pin.get("status")
+    present = [field in pin for field in BASELINE_VARIANCE_FIELDS]
+    if status == "unavailable":
+        return (["source-unavailable row cannot declare a File A/File B variance"]
+                if any(present) else [])
+    problems = []
+    if type(pin.get("obligationsCents")) is not int:
+        problems.append("available row must declare integer obligationsCents")
+    if any(present) and not all(present):
+        missing = [field for field, exists in zip(BASELINE_VARIANCE_FIELDS, present)
+                   if not exists]
+        problems.append("File A/File B variance fields must be declared together; "
+                        f"missing {missing}")
+        return problems
+    if all(present):
+        file_a = pin.get("obligationsCents")
+        file_b = pin.get("fileBObligationsCents")
+        variance = pin.get("fileAFileBVarianceCents")
+        reason = pin.get("fileAFileBVarianceReason")
+        if type(file_b) is not int or type(variance) is not int:
+            problems.append("File B and variance pins must be integer cents")
+        elif type(file_a) is int and file_a - file_b != variance:
+            problems.append("File A minus File B does not equal the declared variance")
+        if variance == 0:
+            problems.append("zero File A/File B variance must use the ordinary pin schema")
+        if not isinstance(reason, str) or not reason.strip():
+            problems.append("File A/File B variance requires a non-empty reason")
+    return problems
+
+
 def period_info(label):
     match = PERIOD_RE.fullmatch(label or "")
     if not match:
