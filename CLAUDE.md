@@ -244,3 +244,7 @@ Full completed-phase history, evidence, and discovery narratives live in
         and feeds the separate sentinel without being labeled a cancellation on
         amount or sign alone. Unresolved crosswalk rows and optional sentinel
         review never block ready accounts or unrelated publication.
+- [ ] Display-improvements batch — AFTER 3.2d completes: execute
+      `docs/display-improvements-ledger.md` as one reader-review-gated
+      batch. Ledger is append-only while 3.2d workers are in flight
+      (site/** is contract-forbidden to them).
