@@ -23,10 +23,10 @@ the reader review meaningful).
    monthly agency submission periods; steps reflect reporting cadence, not
    action dates." Do NOT smooth or interpolate; the step shape is the data
    telling the truth about its resolution (docs/obligation-ledger.md:
-   "never invents action-month precision"). Counterexample in the wild
-   (2026-08-14): sciencespending.org's obligations tab draws sloped lines
-   between submission periods, depicting intra-month timing that DATA Act
-   files do not contain — the failure mode this item exists to avoid.
+   "never invents action-month precision"). The failure mode this item
+   guards against is real and common in public spending dashboards:
+   sloped lines drawn between submission periods depict intra-month
+   timing that DATA Act files do not contain.
 
 2. **Metric-identity audit across all tabs and charts** (2026-08-14,
    inspired by the sciencespending.org reconciliation memo). Their headline
@@ -38,3 +38,14 @@ the reader review meaningful).
    screenshot pack (`verify.py --tier screens`) is the audit input; any
    finding is fixed in this batch and, where generalizable, added to the
    reader-review question list.
+
+3. **Tab purity: each tab shows only the information type it claims**
+   (2026-08-14, owner request). The landing page presents itself as the
+   awards view but also displays obligation summary boxes (the DOE
+   obligation tiles that were added below the award summary for
+   discoverability). Separate cleanly: award tabs show award-ledger
+   information only, obligation tabs show obligation-ledger information
+   only, with cross-links for discoverability instead of mixed content.
+   A tab's label is a promise about its metric; mixed boxes break that
+   promise even when individually labeled — the same principle as the
+   metric-identity audit, applied at page level.
