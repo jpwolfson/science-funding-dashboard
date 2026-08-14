@@ -3,17 +3,56 @@
  "federalAccount": "080-0120",
  "source": "USAspending federal account fiscal-year snapshots (GTAS/File A), https://api.usaspending.gov/api/v2/federal_accounts/080-0120/?fiscal_year=<FY>, retrieved 2026-08-12",
  "fiscalYears": {
-  "2015": {"status": "unavailable", "reason": "Files A/B/C begin in FY2017 Q2"},
-  "2016": {"status": "unavailable", "reason": "Files A/B/C begin in FY2017 Q2"},
-  "2017": {"status": "partial", "asOfPeriod": 12, "obligationsCents": 580635184620, "firstPeriod": 6},
-  "2018": {"status": "complete", "obligationsCents": 615406027421},
-  "2019": {"status": "complete", "obligationsCents": 668434852041},
-  "2020": {"status": "complete", "obligationsCents": 727742760754},
-  "2021": {"status": "complete", "obligationsCents": 710528050433},
-  "2022": {"status": "complete", "obligationsCents": 781081970082},
-  "2023": {"status": "complete", "obligationsCents": 792504133274},
-  "2024": {"status": "complete", "obligationsCents": 726300678004},
-  "2025": {"status": "complete", "obligationsCents": 760283157214},
-  "2026": {"status": "partial", "asOfPeriod": 9, "obligationsCents": 473335964862}
+  "2015": {
+   "status": "unavailable",
+   "reason": "Files A/B/C begin in FY2017 Q2"
+  },
+  "2016": {
+   "status": "unavailable",
+   "reason": "Files A/B/C begin in FY2017 Q2"
+  },
+  "2017": {
+   "asOfPeriod": 12,
+   "firstPeriod": 6,
+   "obligationsCents": 580635184620,
+   "status": "partial"
+  },
+  "2018": {
+   "status": "complete",
+   "obligationsCents": 615406027421
+  },
+  "2019": {
+   "status": "complete",
+   "obligationsCents": 668434852041
+  },
+  "2020": {
+   "status": "complete",
+   "obligationsCents": 727742760754
+  },
+  "2021": {
+   "status": "complete",
+   "obligationsCents": 710528050433
+  },
+  "2022": {
+   "status": "complete",
+   "obligationsCents": 781081970082
+  },
+  "2023": {
+   "status": "complete",
+   "obligationsCents": 792504133274
+  },
+  "2024": {
+   "status": "complete",
+   "obligationsCents": 726300678004
+  },
+  "2025": {
+   "status": "complete",
+   "obligationsCents": 760283157214
+  },
+  "2026": {
+   "asOfPeriod": 9,
+   "obligationsCents": 473335964862,
+   "status": "partial"
+  }
  }
 }
