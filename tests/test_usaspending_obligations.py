@@ -13,7 +13,10 @@ from adapters.usaspending_obligations import (
     finish_download, resume_download,
     parse_file_b_snapshot, parse_file_c,
 )
-from scripts.pull_obligation_account import FILE_B_COLUMNS, _resume_request
+from scripts.pull_obligation_account import (
+    FILE_B_COLUMNS, _baseline_pin, _download, _resume_request,
+    _validate_account_total,
+)
 
 
 ALIASES = {"0001": {"code": "0001", "name": "BES", "park": "PARK1"},
@@ -22,6 +25,51 @@ ALIASES = {"0001": {"code": "0001", "name": "BES", "park": "PARK1"},
 
 
 class USAspendingObligationTests(unittest.TestCase):
+    def test_dual_exact_pin_preserves_file_a_and_file_b_semantics(self):
+        account = {
+            "path": "agency/account",
+            "federalAccount": "999-0001",
+            "baseline": "reference/account.json",
+            "availability": {"firstFiscalYear": 2017,
+                             "firstFiscalYearPeriod": 6},
+        }
+        pin = {
+            "status": "complete",
+            "obligationsCents": 101,
+            "fileBObligationsCents": 100,
+            "fileAFileBVarianceCents": 1,
+            "fileAFileBVarianceReason": "Official source warning A19",
+        }
+        with tempfile.TemporaryDirectory() as temp:
+            reference = Path(temp) / "reference"
+            reference.mkdir()
+            (reference / "account.json").write_text(json.dumps({
+                "schemaVersion": 2,
+                "federalAccount": "999-0001",
+                "fiscalYears": {"2024": pin},
+            }))
+            self.assertEqual(
+                pin, _baseline_pin(Path(temp), account, 2024, 12, 100)
+            )
+            _validate_account_total(2024, 12, 101, 100, pin)
+            with self.assertRaisesRegex(ValueError, "pinned File A"):
+                _validate_account_total(2024, 12, 102, 100, pin)
+            with self.assertRaisesRegex(ValueError, "pinned File B"):
+                _validate_account_total(2024, 12, 101, 99, pin)
+            with self.assertRaisesRegex(ValueError, "pinned File B"):
+                _baseline_pin(Path(temp), account, 2024, 12, 99)
+
+            partial = dict(pin, status="partial", asOfPeriod=9,
+                           firstPeriod=2)
+            value = json.loads((reference / "account.json").read_text())
+            value["fiscalYears"]["2024"] = partial
+            (reference / "account.json").write_text(json.dumps(value))
+            self.assertEqual(
+                partial, _baseline_pin(Path(temp), account, 2024, 9, 100)
+            )
+            with self.assertRaisesRegex(ValueError, "as-of P09"):
+                _baseline_pin(Path(temp), account, 2024, 10, 100)
+
     def test_multiple_historical_parks_normalize_to_one_canonical_activity(self):
         aliases = alias_map({"programActivities": [{
             "slug": "research", "code": "0001", "name": "Research",
