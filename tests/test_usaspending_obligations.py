@@ -5,6 +5,7 @@ import unittest
 from unittest.mock import patch
 
 from adapters.usaspending_obligations import (
+    DOWNLOAD_STATUS_TIMEOUT_SECONDS,
     _bytes, _json, alias_map, combine_file_b_file_c, file_b_period_events,
     finish_download,
     parse_file_b_snapshot, parse_file_c,
@@ -144,6 +145,31 @@ class USAspendingObligationTests(unittest.TestCase):
         self.assertEqual("finished", status["status"])
         self.assertEqual(open_.call_count, 2)
         sleep.assert_called_once_with(1)
+        archive.assert_called_once_with(
+            "https://files.usaspending.gov/archive.zip")
+
+    def test_download_status_default_outlasts_thirty_minute_build(self):
+        running = {"status": "running"}
+        finished = {
+            "status": "finished",
+            "file_url": "https://files.usaspending.gov/archive.zip",
+        }
+        with patch(
+                "adapters.usaspending_obligations._json",
+                side_effect=[running, finished]) as status, \
+             patch("adapters.usaspending_obligations._bytes",
+                   return_value=b"archive") as archive, \
+             patch("adapters.usaspending_obligations.time.monotonic",
+                   side_effect=[100, 100 + 1801, 100 + 1802]), \
+             patch("adapters.usaspending_obligations.time.sleep") as sleep:
+            payload, observed = finish_download({
+                "status_url": "/api/v2/download/status/slow",
+            })
+        self.assertEqual(3600, DOWNLOAD_STATUS_TIMEOUT_SECONDS)
+        self.assertEqual(b"archive", payload)
+        self.assertIs(finished, observed)
+        self.assertEqual(2, status.call_count)
+        sleep.assert_called_once_with(15)
         archive.assert_called_once_with(
             "https://files.usaspending.gov/archive.zip")
 

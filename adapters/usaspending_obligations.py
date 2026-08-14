@@ -19,6 +19,7 @@ from adapters.obligation_common import canonical_period, cents, normalize_event,
 API = "https://api.usaspending.gov/api/v2"
 _LAST_DOWNLOAD_REQUEST = 0.0
 DOWNLOAD_COOLDOWN_SECONDS = 20
+DOWNLOAD_STATUS_TIMEOUT_SECONDS = 3600
 
 
 def _json(url, payload=None, attempts=10, retry_not_found=False):
@@ -99,7 +100,9 @@ def request_download(account_id, fiscal_year, period, submission_type, columns):
     return result, payload
 
 
-def finish_download(result, timeout=1800, poll_seconds=15):
+def finish_download(
+    result, timeout=DOWNLOAD_STATUS_TIMEOUT_SECONDS, poll_seconds=15,
+):
     global _LAST_DOWNLOAD_REQUEST
     status_url = result["status_url"]
     if status_url.startswith("/"):
