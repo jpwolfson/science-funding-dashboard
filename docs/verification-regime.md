@@ -152,6 +152,9 @@ a verifier needs is a new column here, added once, not a per-agency branch.
 | `source` | Human-readable citation for the pinned figures (e.g. "USAspending federal account fiscal-year snapshots (GTAS/File A)"). Required non-empty. |
 | `fiscalYears.<FY>.status` | `complete` (or `available`, accepted as a synonym) / `partial` / `unavailable` — the completeness state pinned for that fiscal year. |
 | `fiscalYears.<FY>.obligationsCents` | The pinned GTAS/File A cents total (whole-FY for `complete`, as-of-period for `partial`). |
+| `fiscalYears.<FY>.fileBObligationsCents` | Optional exact canonical File B cents total, used only when the official source exposes a documented File A/File B variance. Omit for ordinary exact-equality rows. |
+| `fiscalYears.<FY>.fileAFileBVarianceCents` | Required with `fileBObligationsCents`; must equal `obligationsCents - fileBObligationsCents` exactly and must be non-zero. |
+| `fiscalYears.<FY>.fileAFileBVarianceReason` | Required non-empty source disclosure when the dual-pin fields are present. |
 | `fiscalYears.<FY>.firstPeriod` / `asOfPeriod` | For `partial` years: the first reporting period covered and the period the pin is as-of. |
 | `fiscalYears.<FY>.reason` | Required for `unavailable` years — why no pin exists (e.g. "Files A/B/C begin in FY2017 Q2"). |
 
