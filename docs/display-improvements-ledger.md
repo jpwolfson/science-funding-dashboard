@@ -23,7 +23,10 @@ the reader review meaningful).
    monthly agency submission periods; steps reflect reporting cadence, not
    action dates." Do NOT smooth or interpolate; the step shape is the data
    telling the truth about its resolution (docs/obligation-ledger.md:
-   "never invents action-month precision").
+   "never invents action-month precision"). Counterexample in the wild
+   (2026-08-14): sciencespending.org's obligations tab draws sloped lines
+   between submission periods, depicting intra-month timing that DATA Act
+   files do not contain — the failure mode this item exists to avoid.
 
 2. **Metric-identity audit across all tabs and charts** (2026-08-14,
    inspired by the sciencespending.org reconciliation memo). Their headline
