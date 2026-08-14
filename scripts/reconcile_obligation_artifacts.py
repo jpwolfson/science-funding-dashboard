@@ -58,20 +58,27 @@ def reconcile(staging, repo=REPO):
             first_fy = int(
                 account.get("availability", {}).get("firstFiscalYear", 2017)
             )
-            if int(fy) == first_fy and pin.get("status") == "partial":
+            if int(fy) == first_fy:
                 # Older partitions derived firstPeriod from the request
-                # boundary.  Recompute it from the already hash-verified
-                # normalized shard so leading finished/empty source requests
-                # cannot make a partial baseline contradict its event store.
+                # boundary, or classified the year before a branch repair
+                # established that it was the account's first source year.
+                # Reapply the current registry's partial-year contract and
+                # recompute the material boundary from the already
+                # hash-verified normalized shard.
+                pin["status"] = "partial"
+                pin["asOfPeriod"] = int(provenance["asOfPeriod"])
                 material_periods = [
                     event["fiscalPeriod"] for event in load_store(
                         descriptor_path.parent
                     ) if event["fiscalYear"] == int(fy)
                 ]
-                if material_periods:
-                    pin["firstPeriod"] = min(material_periods)
-                    provenance = dict(provenance)
-                    provenance["baselinePin"] = pin
+                pin["firstPeriod"] = min(material_periods) if material_periods else int(
+                    account.get("availability", {}).get(
+                        "firstFiscalYearPeriod", 6
+                    )
+                )
+                provenance = dict(provenance)
+                provenance["baselinePin"] = pin
             planned.append((account, int(fy), descriptor_path.parent, provenance))
     if not planned:
         raise ValueError("no obligation account-year artifacts found")

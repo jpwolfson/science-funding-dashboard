@@ -6,6 +6,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+from adapters.obligation_common import load_store
 from adapters.usaspending_obligations import (
     alias_map, combine_file_b_file_c, file_b_period_events,
     parse_file_b_snapshot,
@@ -872,13 +873,6 @@ class DoeOnboardingTests(unittest.TestCase):
                         "unavailable",
                         baseline["fiscalYears"][str(fiscal_year)]["status"],
                     )
-                material_first_period = expected_material_first_period.get(
-                    path, 6 if first_fy == 2017 else 2
-                )
-                self.assertEqual(
-                    material_first_period,
-                    baseline["fiscalYears"][str(first_fy)]["firstPeriod"],
-                )
                 self.assertEqual(
                     6 if first_fy == 2017 else 2,
                     self.accounts[path]["availability"]["firstFiscalYearPeriod"],
@@ -891,12 +885,33 @@ class DoeOnboardingTests(unittest.TestCase):
 
                 store = REPO / "data" / "obligations" / path / "events"
                 if store.exists():
+                    first_events = [
+                        event for event in load_store(store)
+                        if event["fiscalYear"] == first_fy
+                    ]
+                    self.assertTrue(first_events)
+                    self.assertEqual(
+                        "partial",
+                        baseline["fiscalYears"][str(first_fy)]["status"],
+                    )
+                    self.assertEqual(
+                        min(event["fiscalPeriod"] for event in first_events),
+                        baseline["fiscalYears"][str(first_fy)]["firstPeriod"],
+                    )
                     for fiscal_year in range(first_fy, 2027):
                         self.assertIn(
                             "obligationsCents",
                             baseline["fiscalYears"][str(fiscal_year)],
                             f"{path} FY{fiscal_year} retained an unfilled scaffold",
                         )
+                else:
+                    material_first_period = expected_material_first_period.get(
+                        path, 6 if first_fy == 2017 else 2
+                    )
+                    self.assertEqual(
+                        material_first_period,
+                        baseline["fiscalYears"][str(first_fy)]["firstPeriod"],
+                    )
 
         # The DOE prefix also includes the existing Office of Science
         # regression account; the ten Phase 3.2d accounts themselves plan 93.

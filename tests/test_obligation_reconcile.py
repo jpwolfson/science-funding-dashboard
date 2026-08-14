@@ -87,8 +87,9 @@ class ObligationReconcileTests(unittest.TestCase):
                 "replacement": {"previousEventFingerprint": empty_sha,
                                 "previousProvenanceSha256": None},
                 "diff": partition_diff([], [row]),
-                "baselinePin": {"status": "partial", "asOfPeriod": 9,
-                                "firstPeriod": 2, "obligationsCents": 100},
+                # Simulate a partition produced before the branch declared
+                # FY2026 as this account's first source year.
+                "baselinePin": {"status": "complete", "obligationsCents": 100},
             }
             write_store(producer, [row], {"federalAccount": "089-0222"},
                         partition_metadata={2026: provenance})
@@ -105,6 +106,7 @@ class ObligationReconcileTests(unittest.TestCase):
 
             self.assertEqual((1, ["doe/sc"]), reconcile(staging.parent, root))
             baseline = json.loads((root / "reference" / "doe.json").read_text())
+            self.assertEqual("partial", baseline["fiscalYears"]["2026"]["status"])
             self.assertEqual(9, baseline["fiscalYears"]["2026"]["asOfPeriod"])
             self.assertEqual(9, baseline["fiscalYears"]["2026"]["firstPeriod"])
             accepted = json.loads(
