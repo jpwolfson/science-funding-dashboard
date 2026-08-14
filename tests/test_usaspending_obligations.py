@@ -13,7 +13,9 @@ from adapters.usaspending_obligations import (
     finish_download, resume_download,
     parse_file_b_snapshot, parse_file_c,
 )
-from scripts.pull_obligation_account import FILE_B_COLUMNS, _resume_request
+from scripts.pull_obligation_account import (
+    FILE_B_COLUMNS, _download, _resume_request,
+)
 
 
 ALIASES = {"0001": {"code": "0001", "name": "BES", "park": "PARK1"},
@@ -254,6 +256,89 @@ class USAspendingObligationTests(unittest.TestCase):
                 "5787", 2023, 2, "object_class_program_activity",
                 FILE_B_COLUMNS, result,
             )
+
+    def test_timeout_retains_exact_resume_handoff_in_raw_artifact(self):
+        account = {"path": "commerce/bea"}
+        request = {
+            "status_url": "https://api.usaspending.gov/api/v2/download/status/slow",
+            "download_request": {"filters": {"fy": 2018, "period": 12}},
+        }
+        with tempfile.TemporaryDirectory() as temp, \
+             patch("scripts.pull_obligation_account._resume_request",
+                   return_value=None), \
+             patch("scripts.pull_obligation_account.request_download",
+                   return_value=(request, {"requested": True})), \
+             patch("scripts.pull_obligation_account.finish_download",
+                   side_effect=TimeoutError("still running")):
+            with self.assertRaisesRegex(TimeoutError, "still running"):
+                _download(
+                    temp, account, "3693", 2018, 12,
+                    "award_financial", FILE_B_COLUMNS,
+                    raw_archive_dir=temp,
+                )
+            handoffs = list(Path(temp).glob("obligation-download-resume-*.json"))
+            self.assertEqual(1, len(handoffs))
+            self.assertEqual({
+                "schemaVersion": 1,
+                "requests": [{
+                    "account": "commerce/bea",
+                    "fiscalYear": 2018,
+                    "period": 12,
+                    "submissionType": "award_financial",
+                    "result": request,
+                }],
+            }, json.loads(handoffs[0].read_text()))
+
+    def test_finished_download_replaces_handoff_with_raw_archive(self):
+        account = {"path": "commerce/bea"}
+        request = {
+            "status_url": "https://api.usaspending.gov/api/v2/download/status/done",
+            "download_request": {"filters": {"fy": 2018, "period": 12}},
+        }
+        with tempfile.TemporaryDirectory() as temp, \
+             patch("scripts.pull_obligation_account._resume_request",
+                   return_value=None), \
+             patch("scripts.pull_obligation_account.request_download",
+                   return_value=(request, {"requested": True})), \
+             patch("scripts.pull_obligation_account.finish_download",
+                   return_value=(b"archive", {"status": "finished",
+                                              "total_rows": 0})), \
+             patch("scripts.pull_obligation_account.archive_rows",
+                   return_value={}):
+            members, audit = _download(
+                temp, account, "3693", 2018, 12,
+                "award_financial", FILE_B_COLUMNS,
+                raw_archive_dir=temp,
+            )
+            self.assertEqual({}, members)
+            self.assertEqual(0, audit["parsedRowCount"])
+            self.assertEqual([], list(Path(temp).glob(
+                "obligation-download-resume-*.json"
+            )))
+            self.assertEqual(1, len(list(Path(temp).glob("*.zip"))))
+
+    def test_source_rejected_download_clears_resume_handoff(self):
+        account = {"path": "commerce/bea"}
+        request = {
+            "status_url": "https://api.usaspending.gov/api/v2/download/status/failed",
+            "download_request": {"filters": {"fy": 2018, "period": 12}},
+        }
+        with tempfile.TemporaryDirectory() as temp, \
+             patch("scripts.pull_obligation_account._resume_request",
+                   return_value=None), \
+             patch("scripts.pull_obligation_account.request_download",
+                   return_value=(request, {"requested": True})), \
+             patch("scripts.pull_obligation_account.finish_download",
+                   side_effect=ValueError("source download failed")):
+            with self.assertRaisesRegex(ValueError, "source download failed"):
+                _download(
+                    temp, account, "3693", 2018, 12,
+                    "award_financial", FILE_B_COLUMNS,
+                    raw_archive_dir=temp,
+                )
+            self.assertEqual([], list(Path(temp).glob(
+                "obligation-download-resume-*.json"
+            )))
 
     def test_archive_download_outlasts_six_disconnects(self):
         response = io.BytesIO(b"archive")

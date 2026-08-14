@@ -104,6 +104,13 @@ GitHub Actions artifacts; one-day account-year artifacts carry normalized
 shards and provenance into the atomic reconcile job. Normalized events,
 manifests, provenance, hashes, and diffs remain in Git.
 
+Before polling an accepted asynchronous request, the puller writes an exact
+schema-v1 resume handoff into the raw-artifact directory. A finished download
+replaces that handoff with the source ZIP; a timeout leaves the handoff in the
+14-day raw artifact. A reviewed handoff may be committed temporarily as
+`reference/obligation_download_resumes.json` so a bounded retry resumes the
+same accepted request and scope instead of submitting a duplicate download.
+
 ## Dashboard contract
 
 Every obligation dashboard has `kind: "obligations"`; missing `kind` continues
