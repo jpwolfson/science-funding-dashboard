@@ -77,6 +77,13 @@ OFFICIAL_SOURCE_COUNTS = {
     "commerce/census-periodic-censuses": (13, 4),
 }
 
+# USAspending's FY2026 P05 custom File B emitted PARK ``0`` twice with blank
+# legacy fields and zero dollars. It is not present in the official five-row
+# BEA PA inventory, so keep this exact parser alias outside the inventory count.
+SOURCE_DEFECT_PARK_ALIASES = {
+    ("commerce/bea", "unknown-other", "0"),
+}
+
 STAGE_PATHS = (
     ("commerce/bea",),
     ("commerce/bea", "commerce/noaa-orf", "commerce/noaa-pac"),
@@ -131,6 +138,7 @@ class CommerceObligationTests(unittest.TestCase):
 
     def test_official_pa_inventory_is_complete_and_exactly_resolvable(self):
         grand_total = 0
+        source_defects = set()
         for path, account in self.accounts.items():
             with self.subTest(path=path):
                 aliases = alias_map(account)
@@ -147,10 +155,16 @@ class CommerceObligationTests(unittest.TestCase):
                         ))
                     pac_pairs.extend((str(row["code"]).zfill(4), row["name"])
                                      for row in activity.get("codeNameAliases", []))
-                    parks.extend(filter(None, [
-                        activity.get("park"),
-                        *activity.get("parkAliases", []),
-                    ]))
+                    for park in filter(None, [
+                            activity.get("park"),
+                            *activity.get("parkAliases", []),
+                    ]):
+                        defect = (path, activity["slug"], park)
+                        if defect in SOURCE_DEFECT_PARK_ALIASES:
+                            source_defects.add(defect)
+                            self.assertIn(("park", park), aliases)
+                        else:
+                            parks.append(park)
 
                 normalized_pairs = [(code, name.strip().lower())
                                     for code, name in pac_pairs]
@@ -169,6 +183,11 @@ class CommerceObligationTests(unittest.TestCase):
         self.assertEqual(
             sum(ACCOUNT_META[path][3] for path in self.stage_paths),
             grand_total,
+        )
+        self.assertEqual(
+            {row for row in SOURCE_DEFECT_PARK_ALIASES
+             if row[0] in self.stage_paths},
+            source_defects,
         )
 
     def test_baselines_preserve_exact_pins_and_boundaries(self):
@@ -389,6 +408,48 @@ class CommerceObligationTests(unittest.TestCase):
         self.assertEqual(strs_carryover["_programActivityKey"],
                          its_carryover["_programActivityKey"])
         self.assertNotEqual(strs_carryover["id"], its_carryover["id"])
+
+    def test_bea_fy2026_zero_park_sentinel_is_exact_and_fail_closed(self):
+        account = self.accounts["commerce/bea"]
+        aliases = alias_map(account)
+        amounts = [
+            "0.00", "25213792.66", "46642.26", "119725.79",
+            "926899.64", "9222180.44", "21949.29", "25000.00",
+            "14684.66", "1538.12", "0.00", "357404.92", "15276.84",
+            "324000.00", "1979640.89", "28808.45", "2120223.49",
+            "1955568.78", "9526.48", "-198608.36", "4207.88",
+        ]
+        rows = [{
+            "submission_period": "FY2026P05",
+            "federal_account_symbol": account["federalAccount"],
+            "program_activity_reporting_key": "0",
+            "program_activity_code": "",
+            "program_activity_name": "",
+            "obligations_incurred": "0.00",
+        } for _ in range(2)]
+        rows.extend({
+            "submission_period": "FY2026P05",
+            "federal_account_symbol": account["federalAccount"],
+            "program_activity_reporting_key": "5ZC1J3BKY9N",
+            "program_activity_code": "",
+            "program_activity_name": "",
+            "obligations_incurred": amount,
+        } for amount in amounts)
+        values = parse_file_b_snapshot(
+            rows, account["federalAccount"], aliases
+        )
+        self.assertEqual(2, len(values))
+        self.assertEqual(4218846223, sum(values.values()))
+        by_identity = {key[0]: amount for key, amount in values.items()}
+        self.assertEqual({"0000": 0, "0001": 4218846223}, by_identity)
+        with self.assertRaisesRegex(ValueError, "PARK='not-a-real-park'"):
+            parse_file_b_snapshot([{
+                "federal_account_symbol": account["federalAccount"],
+                "program_activity_reporting_key": "not-a-real-park",
+                "program_activity_code": "",
+                "program_activity_name": "",
+                "obligations_incurred": "0.00",
+            }], account["federalAccount"], aliases)
 
     def test_negative_file_c_and_ratio_over_100_percent_are_preserved(self):
         account = self.accounts["commerce/bea"]
