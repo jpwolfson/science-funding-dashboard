@@ -148,7 +148,7 @@ class USAspendingObligationTests(unittest.TestCase):
         archive.assert_called_once_with(
             "https://files.usaspending.gov/archive.zip")
 
-    def test_download_status_default_outlasts_thirty_minute_build(self):
+    def test_download_status_default_outlasts_one_hour_build(self):
         running = {"status": "running"}
         finished = {
             "status": "finished",
@@ -160,12 +160,12 @@ class USAspendingObligationTests(unittest.TestCase):
              patch("adapters.usaspending_obligations._bytes",
                    return_value=b"archive") as archive, \
              patch("adapters.usaspending_obligations.time.monotonic",
-                   side_effect=[100, 100 + 1801, 100 + 1802]), \
+                   side_effect=[100, 100 + 3601, 100 + 3602]), \
              patch("adapters.usaspending_obligations.time.sleep") as sleep:
             payload, observed = finish_download({
                 "status_url": "/api/v2/download/status/slow",
             })
-        self.assertEqual(3600, DOWNLOAD_STATUS_TIMEOUT_SECONDS)
+        self.assertEqual(7200, DOWNLOAD_STATUS_TIMEOUT_SECONDS)
         self.assertEqual(b"archive", payload)
         self.assertIs(finished, observed)
         self.assertEqual(2, status.call_count)

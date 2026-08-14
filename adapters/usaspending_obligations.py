@@ -19,7 +19,7 @@ from adapters.obligation_common import canonical_period, cents, normalize_event,
 API = "https://api.usaspending.gov/api/v2"
 _LAST_DOWNLOAD_REQUEST = 0.0
 DOWNLOAD_COOLDOWN_SECONDS = 20
-DOWNLOAD_STATUS_TIMEOUT_SECONDS = 3600
+DOWNLOAD_STATUS_TIMEOUT_SECONDS = 7200
 
 
 def _json(url, payload=None, attempts=10, retry_not_found=False):
