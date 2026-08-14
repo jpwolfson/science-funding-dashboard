@@ -39,24 +39,24 @@
    "status": "unavailable",
    "reason": "USAspending federal-account snapshot has no balance or child TAS for this fiscal year"
   },
-    "2024": {
-      "status": "partial",
-      "asOfPeriod": 12,
-      "firstPeriod": 6,
-      "obligationsCents": 256707553603
-    },
-    "2025": {
-      "status": "complete",
-      "obligationsCents": 301354965654
-    },
-    "2026": {
-      "status": "partial",
-      "asOfPeriod": 9,
-      "obligationsCents": 192325603497
+  "2024": {
+   "asOfPeriod": 12,
+   "firstPeriod": 6,
+   "obligationsCents": 256707553603,
+   "status": "partial"
+  },
+  "2025": {
+   "status": "complete",
+   "obligationsCents": 301354965654
+  },
+  "2026": {
+   "asOfPeriod": 9,
+   "obligationsCents": 192325603497,
+   "status": "partial"
   }
  },
  "notes": [
-    "FY2024 P02-P05 custom File B/File C probes were source-empty; P06 was the first material period.",
-    "FY2024 remains partial because the account first appears at P06; FY2025 is complete and FY2026 is partial through P09."
-  ]
+  "FY2024 P02-P05 custom File B/File C probes were source-empty; P06 was the first material period.",
+  "FY2024 remains partial because the account first appears at P06; FY2025 is complete and FY2026 is partial through P09."
+ ]
 }
