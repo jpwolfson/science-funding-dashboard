@@ -13,7 +13,8 @@ REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
 from adapters.obligation_common import (
-    event_fingerprint, file_sha256, load_store, partition_diff, write_store,
+    baseline_file_b_cents, baseline_pin_problems, event_fingerprint,
+    file_sha256, load_store, partition_diff, write_store,
 )
 from adapters.usaspending_obligations import (
     alias_map, archive_rows, combine_file_b_file_c, file_b_period_events,
@@ -163,15 +164,38 @@ def _baseline_pin(repo, account, fy, last_period, file_b_total,
     existing = baseline.get("fiscalYears", {}).get(str(fy))
     if existing and existing.get("status") == "unavailable":
         raise ValueError(f"FY{fy} is marked source-unavailable")
-    if existing and existing.get("status") == "complete":
-        if last_period != 12:
+    if existing and "fileBObligationsCents" in existing:
+        problems = baseline_pin_problems(existing)
+        if problems:
+            raise ValueError(f"FY{fy}: invalid baseline pin: {'; '.join(problems)}")
+        if existing.get("status") in {"complete", "available"} and last_period != 12:
             raise ValueError(f"FY{fy} is complete and must be reconciled through P12")
-        if file_b_total != existing.get("obligationsCents"):
+        if (existing.get("status") == "partial"
+                and last_period != existing.get("asOfPeriod")):
+            raise ValueError(
+                f"FY{fy}: dual File A/File B pin is as-of "
+                f"P{int(existing.get('asOfPeriod', -1)):02}"
+            )
+        expected_file_b = baseline_file_b_cents(existing)
+        if file_b_total != expected_file_b:
             raise ValueError(
                 f"FY{fy}: File B {file_b_total} cents != pinned "
-                f"{existing.get('obligationsCents')}"
+                f"File B {expected_file_b}"
             )
-        return existing
+        return dict(existing)
+    if existing and existing.get("status") in {"complete", "available"}:
+        if last_period != 12:
+            raise ValueError(f"FY{fy} is complete and must be reconciled through P12")
+        problems = baseline_pin_problems(existing)
+        if problems:
+            raise ValueError(f"FY{fy}: invalid baseline pin: {'; '.join(problems)}")
+        expected_file_b = baseline_file_b_cents(existing)
+        if file_b_total != expected_file_b:
+            raise ValueError(
+                f"FY{fy}: File B {file_b_total} cents != pinned "
+                f"File B {expected_file_b}"
+            )
+        return dict(existing)
     pin = dict(existing or {})
     first_fy = int(account.get("availability", {}).get("firstFiscalYear", 2017))
     if last_period == 12 and fy != first_fy:
@@ -187,6 +211,24 @@ def _baseline_pin(repo, account, fy, last_period, file_b_total,
         pin["firstPeriod"] = int(first_event_period or
             account.get("availability", {}).get("firstFiscalYearPeriod", 6))
     return pin
+
+
+def _validate_account_total(fy, last_period, detail_total, file_b_total,
+                            baseline_pin):
+    if last_period != 12 or not detail_total:
+        return
+    expected_file_b = baseline_file_b_cents(baseline_pin)
+    if file_b_total != expected_file_b:
+        raise ValueError(
+            f"FY{fy}: File B {file_b_total} cents != pinned File B "
+            f"{expected_file_b}"
+        )
+    file_a_total = baseline_pin.get("obligationsCents")
+    if detail_total != file_a_total:
+        raise ValueError(
+            f"FY{fy}: account snapshot {detail_total} cents != pinned File A "
+            f"{file_a_total}"
+        )
 
 
 def _provenance(account, fy, last_period, events, previous, previous_provenance_sha,
@@ -264,6 +306,13 @@ def pull(account, years, current_period=12, repo=REPO, rollup=True,
     repo = Path(repo)
     years = list(years)
     baseline = json.loads((repo / account["baseline"]).read_text())
+    for fy, pin in (baseline.get("fiscalYears") or {}).items():
+        problems = baseline_pin_problems(pin)
+        if problems:
+            raise ValueError(
+                f"{account['path']} FY{fy}: invalid baseline pin: "
+                + "; ".join(problems)
+            )
     unavailable_years = [
         fy for fy in years
         if baseline.get("fiscalYears", {}).get(str(fy), {}).get("status")
@@ -324,14 +373,15 @@ def pull(account, years, current_period=12, repo=REPO, rollup=True,
         file_b_total = sum(e["amountCents"] for e in file_b)
         from adapters.obligation_common import cents
         detail_total = cents(detail.get("total_obligated_amount") or 0)
-        if last_period == 12 and detail_total and file_b_total != detail_total:
-            raise ValueError(f"FY{fy}: File B {file_b_total} cents != account snapshot {detail_total}")
         all_events.extend(events)
         first_event_period = min(
             (event["fiscalPeriod"] for event in events), default=None
         )
         baseline_pin = _baseline_pin(
             repo, account, fy, last_period, file_b_total, first_event_period
+        )
+        _validate_account_total(
+            fy, last_period, detail_total, file_b_total, baseline_pin
         )
         previous = [e for e in existing if e["fiscalYear"] == fy]
         previous_provenance = store / f"FY{fy}.provenance.json"
