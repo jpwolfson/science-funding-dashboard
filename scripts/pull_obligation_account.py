@@ -67,6 +67,32 @@ def _resume_request(repo, account, account_id, fy, period, kind, columns):
     )
 
 
+def _resume_handoff_path(raw_archive_dir, account, fy, period, kind):
+    if not raw_archive_dir:
+        return None
+    return Path(raw_archive_dir) / (
+        f"obligation-download-resume-{account['path'].replace('/', '--')}-"
+        f"FY{fy}P{period:02}-{kind}.json"
+    )
+
+
+def _write_resume_handoff(path, account, fy, period, kind, request):
+    if path is None:
+        return
+    path.parent.mkdir(parents=True, exist_ok=True)
+    value = {
+        "schemaVersion": 1,
+        "requests": [{
+            "account": account["path"],
+            "fiscalYear": fy,
+            "period": period,
+            "submissionType": kind,
+            "result": request,
+        }],
+    }
+    path.write_text(json.dumps(value, indent=1, sort_keys=True) + "\n")
+
+
 def _download(repo, account, account_id, fy, period, kind, columns,
               raw_archive_dir=None):
     print(f"requesting FY{fy} P{period:02} {kind}", flush=True)
@@ -80,7 +106,20 @@ def _download(repo, account, account_id, fy, period, kind, columns,
         request, request_scope = request_download(
             account_id, fy, period, kind, columns
         )
-    payload, status = finish_download(request)
+    handoff_path = _resume_handoff_path(
+        raw_archive_dir, account, fy, period, kind
+    )
+    _write_resume_handoff(
+        handoff_path, account, fy, period, kind, request
+    )
+    try:
+        payload, status = finish_download(request)
+    except ValueError:
+        # A source-declared terminal failure cannot be resumed.  Preserve
+        # handoffs only for timeouts or transient transport interruptions.
+        if handoff_path is not None:
+            handoff_path.unlink(missing_ok=True)
+        raise
     archive_sha = hashlib.sha256(payload).hexdigest()
     archive_name = (
         f"{account['path'].replace('/', '--')}-FY{fy}P{period:02}-"
@@ -90,6 +129,8 @@ def _download(repo, account, account_id, fy, period, kind, columns,
         raw_path = Path(raw_archive_dir) / archive_name
         raw_path.parent.mkdir(parents=True, exist_ok=True)
         raw_path.write_bytes(payload)
+    if handoff_path is not None:
+        handoff_path.unlink(missing_ok=True)
     members = archive_rows(payload)
     expected = status.get("total_rows")
     parsed = sum(len(rows) for rows in members.values())
