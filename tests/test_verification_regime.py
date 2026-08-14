@@ -126,6 +126,34 @@ class UniformityContractTests(unittest.TestCase):
         finally:
             temporary.cleanup()
 
+    def test_registry_lints_dual_exact_file_a_file_b_pins(self):
+        temporary, root, account = self.account_fixture()
+        try:
+            baseline = root / account["baseline"]
+            value = json.loads(baseline.read_text())
+            value["fiscalYears"]["2024"] = {
+                "status": "complete",
+                "obligationsCents": 101,
+                "fileBObligationsCents": 100,
+                "fileAFileBVarianceCents": 1,
+                "fileAFileBVarianceReason": "Official source warning A19",
+            }
+            baseline.write_text(json.dumps(value))
+            checks = _lint_account(root, account, [])
+            status = next(check for check in checks
+                          if "baseline per-FY status map" in check["name"])
+            self.assertTrue(status["passed"], status["evidence"])
+
+            value["fiscalYears"]["2024"].pop("fileAFileBVarianceReason")
+            baseline.write_text(json.dumps(value))
+            checks = _lint_account(root, account, [])
+            status = next(check for check in checks
+                          if "baseline per-FY status map" in check["name"])
+            self.assertFalse(status["passed"])
+            self.assertIn("must be declared together", status["evidence"])
+        finally:
+            temporary.cleanup()
+
     def test_no_registry_slug_is_a_string_literal_in_shared_verifiers(self):
         slugs = registry_slugs()
         self.assertTrue(slugs, "expected at least one registry slug to check")
