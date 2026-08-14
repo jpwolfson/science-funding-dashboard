@@ -1,0 +1,587 @@
+{
+ "acceptedAt": "2026-08-13T10:09:08+00:00",
+ "accountPath": "doe/eia",
+ "asOfPeriod": 9,
+ "baselinePin": {
+  "asOfPeriod": 9,
+  "obligationsCents": 8231598334,
+  "status": "partial"
+ },
+ "collectionStatus": "accepted",
+ "diff": {
+  "addedCount": 86,
+  "addedIdsSha256": "0e3365eaff7adfa6f03ac6fa44caeb10f08c468658de13280f87e8b1987f51be",
+  "changedCount": 0,
+  "changedIdsSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "netAmountChangeCents": 8231598334,
+  "previousRecordCount": 0,
+  "recordCount": 86,
+  "removedCount": 0,
+  "removedIdsSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+ },
+ "downloads": [
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "5774",
+     "fy": 2026,
+     "period": 2,
+     "quarter": null,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "ee6c29a0cfca207403126e67599e1154f54a955c0d8abbf7988dcf8afd71673b",
+   "memberRowCounts": {
+    "FY2026P01-P02_All_FA_AccountBreakdownByPA-OC_2026-08-13_H09M54S14_1.csv": 14
+   },
+   "parsedRowCount": 14,
+   "rawArtifactFile": "doe--eia-FY2026P02-object_class_program_activity-ee6c29a0cfca.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "5774",
+     "fy": 2026,
+     "period": 2,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 14,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "5774",
+     "fy": 2026,
+     "period": 3,
+     "quarter": 1,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "120352403d82e924ee68cc133917dea278f0b952855f24cf4555308120556c13",
+   "memberRowCounts": {
+    "FY2026P01-P03_All_FA_AccountBreakdownByPA-OC_2026-08-13_H09M54S51_1.csv": 15
+   },
+   "parsedRowCount": 15,
+   "rawArtifactFile": "doe--eia-FY2026P03-object_class_program_activity-120352403d82.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "5774",
+     "fy": 2026,
+     "period": 3,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 15,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "5774",
+     "fy": 2026,
+     "period": 4,
+     "quarter": 1,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "56f8c593c53cbdbebcb39b94baf13bf527cc6312c31e0266731dd8b2cd06f94e",
+   "memberRowCounts": {
+    "FY2026P01-P04_All_FA_AccountBreakdownByPA-OC_2026-08-13_H09M55S28_1.csv": 17
+   },
+   "parsedRowCount": 17,
+   "rawArtifactFile": "doe--eia-FY2026P04-object_class_program_activity-56f8c593c53c.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "5774",
+     "fy": 2026,
+     "period": 4,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 17,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "5774",
+     "fy": 2026,
+     "period": 5,
+     "quarter": 1,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "2a80a3952b1738daa527ebc41501086625f092cb64437032f619313d1c2bacd9",
+   "memberRowCounts": {
+    "FY2026P01-P05_All_FA_AccountBreakdownByPA-OC_2026-08-13_H09M56S05_1.csv": 17
+   },
+   "parsedRowCount": 17,
+   "rawArtifactFile": "doe--eia-FY2026P05-object_class_program_activity-2a80a3952b17.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "5774",
+     "fy": 2026,
+     "period": 5,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 17,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "5774",
+     "fy": 2026,
+     "period": 6,
+     "quarter": 2,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "3d24a70ec77eddf73e6164bfb6581d0ecb76e6b9fb9bb9f0be8a3199ad8de806",
+   "memberRowCounts": {
+    "FY2026P01-P06_All_FA_AccountBreakdownByPA-OC_2026-08-13_H09M56S42_1.csv": 17
+   },
+   "parsedRowCount": 17,
+   "rawArtifactFile": "doe--eia-FY2026P06-object_class_program_activity-3d24a70ec77e.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "5774",
+     "fy": 2026,
+     "period": 6,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 17,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "5774",
+     "fy": 2026,
+     "period": 7,
+     "quarter": 2,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "7221dbf122f23deec6f580f1ccc9c1172b69787c6f09ca68046238e15aea80d2",
+   "memberRowCounts": {
+    "FY2026P01-P07_All_FA_AccountBreakdownByPA-OC_2026-08-13_H09M57S19_1.csv": 17
+   },
+   "parsedRowCount": 17,
+   "rawArtifactFile": "doe--eia-FY2026P07-object_class_program_activity-7221dbf122f2.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "5774",
+     "fy": 2026,
+     "period": 7,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 17,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "5774",
+     "fy": 2026,
+     "period": 8,
+     "quarter": 2,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "8bc3e23aed4b881e6ac559377122adb103172240f9c48bf9911a62d461e45463",
+   "memberRowCounts": {
+    "FY2026P01-P08_All_FA_AccountBreakdownByPA-OC_2026-08-13_H09M57S56_1.csv": 17
+   },
+   "parsedRowCount": 17,
+   "rawArtifactFile": "doe--eia-FY2026P08-object_class_program_activity-8bc3e23aed4b.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "5774",
+     "fy": 2026,
+     "period": 8,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 17,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "5774",
+     "fy": 2026,
+     "period": 9,
+     "quarter": 2,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "d0a4d063ac8cb43d33b7cd1c096bc11068f7c60603bb8a22a9bd438ccdd88efe",
+   "memberRowCounts": {
+    "FY2026P01-P09_All_FA_AccountBreakdownByPA-OC_2026-08-13_H09M58S33_1.csv": 17
+   },
+   "parsedRowCount": 17,
+   "rawArtifactFile": "doe--eia-FY2026P09-object_class_program_activity-d0a4d063ac8c.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "5774",
+     "fy": 2026,
+     "period": 9,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 17,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "transaction_obligated_amount",
+     "award_unique_key",
+     "award_id_piid",
+     "parent_award_id_piid",
+     "award_id_fain",
+     "award_id_uri",
+     "recipient_uei",
+     "recipient_name",
+     "prime_award_base_transaction_description",
+     "usaspending_permalink"
+    ],
+    "download_types": [
+     "award_financial"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "5774",
+     "fy": 2026,
+     "period": 9,
+     "quarter": 2,
+     "submission_types": [
+      "award_financial"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "079ee15ecd4212b926c6a5a17d9c0caadd5479fa66506073fb584a2673615f3b",
+   "memberRowCounts": {
+    "FY2026P01-P09_All_FA_Assistance_AccountBreakdownByAward_2026-08-13_H10M07S09_01.csv": 92,
+    "FY2026P01-P09_All_FA_Contracts_AccountBreakdownByAward_2026-08-13_H10M07S09_01.csv": 378,
+    "FY2026P01-P09_All_FA_Unlinked_AccountBreakdownByAward_2026-08-13_H10M07S09_01.csv": 0
+   },
+   "parsedRowCount": 470,
+   "rawArtifactFile": "doe--eia-FY2026P09-award_financial-079ee15ecd42.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "transaction_obligated_amount",
+     "award_unique_key",
+     "award_id_piid",
+     "parent_award_id_piid",
+     "award_id_fain",
+     "award_id_uri",
+     "recipient_uei",
+     "recipient_name",
+     "prime_award_base_transaction_description",
+     "usaspending_permalink"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "5774",
+     "fy": 2026,
+     "period": 9,
+     "submission_types": [
+      "award_financial"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 470,
+   "submissionType": "award_financial"
+  }
+ ],
+ "federalAccount": "089-0216",
+ "fiscalYear": 2026,
+ "normalized": {
+  "eventFingerprint": "6f58b28eed03ba5acbe10b255d38380a27001fb42e993e3100287df94b29acba",
+  "netObligationsCents": 8231598334,
+  "recordCount": 86
+ },
+ "replacement": {
+  "previousEventFingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "previousProvenanceSha256": null
+ },
+ "schemaVersion": 2
+}
