@@ -46,6 +46,7 @@ sys.path.insert(0, str(REPO))
 from scripts.smoke_obligation_pages import (  # noqa: E402
     QuietHandler, account_registry, chrome_path, render_page,
 )
+from adapters.obligation_common import baseline_pin_problems  # noqa: E402
 
 SCHEMA_VERSION = 1
 ONE_GIBIBYTE = 1024 ** 3
@@ -214,6 +215,11 @@ def _lint_account(repo, account, crosswalk_rows):
             fy_problems.append(f"FY{fiscal_year}: invalid status {status!r}")
         elif status == "unavailable" and not row.get("reason"):
             fy_problems.append(f"FY{fiscal_year}: unavailable status has no reason")
+        else:
+            fy_problems.extend(
+                f"FY{fiscal_year}: {problem}"
+                for problem in baseline_pin_problems(row)
+            )
     fy_map_ok = bool(fiscal_years) and not fy_problems
     checks.append(_check(
         f"{path}: baseline per-FY status map", fy_map_ok,
