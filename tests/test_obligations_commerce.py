@@ -40,7 +40,7 @@ ACCOUNT_META = {
     "commerce/bea": (
         "013-1500", "Salaries and Expenses, Economic and Statistical Analysis",
         4, 5,
-        [11687711023, 11037121955, 10440276818, None, 11769634040,
+        [11687711023, 11037121955, 10440276818, 0, 11769634040,
          11996322841, 13080326230, 13157627614, 12876519316, 8352144116],
     ),
     "commerce/census-current-surveys": (
@@ -90,7 +90,7 @@ STAGE_PATHS = (
      "commerce/census-current-surveys",
      "commerce/census-periodic-censuses"),
 )
-STAGE_JOB_COUNTS = dict(zip(STAGE_PATHS, (10, 30, 50, 59, 69)))
+STAGE_JOB_COUNTS = dict(zip(STAGE_PATHS, (10, 30, 50, 60, 70)))
 
 
 class CommerceObligationTests(unittest.TestCase):
@@ -201,45 +201,43 @@ class CommerceObligationTests(unittest.TestCase):
                     years["2026"],
                 )
 
-    def test_bea_fy2020_probe_or_final_gap_is_explicit(self):
+    def test_bea_fy2020_probe_proves_complete_zero_net_year(self):
         account = self.accounts["commerce/bea"]
         baseline = json.loads((REPO / account["baseline"]).read_text())
         row = baseline["fiscalYears"]["2020"]
-        if self.stage_paths in STAGE_PATHS[:3]:
-            self.assertEqual(
-                {"status": "partial", "firstPeriod": 2, "asOfPeriod": 12},
-                row,
-            )
-            self.assertNotIn("obligationsCents", row)
-            probe = plan(
-                REPO, mode="custom", selectors="commerce/bea",
-                from_fy=2020, to_fy=2020, current_period=12,
-            )["include"]
-            self.assertEqual(
-                [("commerce/bea", 2020, 12, "custom")],
-                [(job["account"], job["fiscalYear"], job["period"],
-                  job["purpose"]) for job in probe],
-            )
-            with self.assertRaisesRegex(AssertionError, "preflight-required"):
-                self._require_all_planned_pins(
-                    plan(REPO, mode="full", selectors="commerce/bea")["include"]
-                )
-        else:
-            self.assertEqual("unavailable", row["status"])
-            self.assertNotIn("obligationsCents", row)
-            self.assertEqual(
-                "PROVISIONAL UNTIL CI CONFIRMATION: official USAspending "
-                "FY2020 federal-account snapshot and final Program Activity "
-                "result are empty; do not synthesize zero",
-                row["reason"],
-            )
-            with self.assertRaisesRegex(
-                ValueError, "FY2020 is not source-available"
-            ):
-                plan(
-                    REPO, mode="custom", selectors="commerce/bea",
-                    from_fy=2020, to_fy=2020, current_period=12,
-                )
+        self.assertEqual(
+            {"status": "complete", "firstPeriod": 3, "asOfPeriod": 12,
+             "obligationsCents": 0},
+            row,
+        )
+        evidence = json.loads(
+            (REPO / "reference" / "commerce_bea_fy2020_probe_evidence.json")
+            .read_text()
+        )
+        self.assertEqual("013-1500", evidence["federalAccount"])
+        self.assertEqual("3693", evidence["accountId"])
+        self.assertEqual(3, evidence["firstMaterialPeriod"])
+        self.assertEqual(166, evidence["normalized"]["recordCount"])
+        self.assertEqual(0, evidence["normalized"]["netObligationsCents"])
+        self.assertEqual(10506144613,
+                         evidence["normalized"]["grossPositiveCents"])
+        self.assertEqual(-10506144613,
+                         evidence["normalized"]["grossNegativeCents"])
+        self.assertEqual(12, len(evidence["downloads"]))
+        self.assertTrue(all(item["status"] == "finished"
+                            for item in evidence["downloads"]))
+        probe = plan(
+            REPO, mode="custom", selectors="commerce/bea",
+            from_fy=2020, to_fy=2020, current_period=12,
+        )["include"]
+        self.assertEqual(
+            [("commerce/bea", 2020, 12, "custom")],
+            [(job["account"], job["fiscalYear"], job["period"],
+              job["purpose"]) for job in probe],
+        )
+        self._require_all_planned_pins(
+            plan(REPO, mode="full", selectors="commerce/bea")["include"]
+        )
 
     def _require_all_planned_pins(self, jobs):
         for job in jobs:
@@ -261,15 +259,8 @@ class CommerceObligationTests(unittest.TestCase):
             )
         for path, rows in by_account.items():
             expected = [(fy, 12) for fy in range(2017, 2026)] + [(2026, 9)]
-            if (path == "commerce/bea"
-                    and self.stage_paths not in STAGE_PATHS[:3]):
-                expected.remove((2020, 12))
             self.assertEqual(expected, rows)
-        if self.stage_paths in STAGE_PATHS[:3]:
-            with self.assertRaisesRegex(AssertionError, "preflight-required"):
-                self._require_all_planned_pins(jobs)
-        else:
-            self._require_all_planned_pins(jobs)
+        self._require_all_planned_pins(jobs)
 
     def _assert_collision(self, path, source_pairs, expected):
         account = self.accounts[path]

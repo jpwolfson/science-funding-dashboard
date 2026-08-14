@@ -3,7 +3,7 @@
 Prepared 2026-08-12 on `agent/3-2d-commerce-staged`, based on authoritative
 main `689aba6a27f7f7282c444eacd583c4e694789bd7`.
 
-## Current stage: BEA FY2020 preflight
+## Current stage: BEA FY2020 probe accepted
 
 Only `commerce/bea` is registered in this first commit. No Commerce store,
 download, trigger, workflow, remote branch, CI run, or pull request is created.
@@ -13,17 +13,21 @@ five-identity Program Activity inventory (four PAC/PAN rows plus one PARK row)
 collapsed into four collision-safe canonical paths.
 
 The official FY2020 federal-account snapshot and final Program Activity query
-are empty, but that does not prove a genuinely empty custom File B/File C
-download. The temporary baseline therefore marks FY2020 as source-available
-and pinless at P12:
+are empty, but the accepted custom download proves that the year contains real
+within-year obligation and deobligation activity. File B is empty at P02,
+material at P03 through P11, and empty again at P12. File C contains 143 rows.
+The normalized partition contains 166 events: 143 File C events and 23 File B
+residuals. Gross positive and negative obligations are each $105,061,446.13,
+so the final net is exactly zero. The evidence-backed baseline row is:
 
 ```json
-{"status":"partial","firstPeriod":2,"asOfPeriod":12}
+{"status":"complete","firstPeriod":3,"asOfPeriod":12,"obligationsCents":0}
 ```
 
-This is a probe state, not a zero-dollar claim. Tests require the planner to
-select exactly this one custom job and fail a full-plan readiness check because
-FY2020 has no `obligationsCents` pin. The only authorized preflight payload is:
+This is a zero-net claim backed by real source events, not a synthetic empty
+year. Durable hashes, row counts, request scopes, and the normalized event
+fingerprint are recorded in
+`reference/commerce_bea_fy2020_probe_evidence.json`. The accepted probe was:
 
 ```json
 {
@@ -35,21 +39,19 @@ FY2020 has no `obligationsCents` pin. The only authorized preflight payload is:
 }
 ```
 
-If every P02–P12 File B snapshot and P12 File C result is source-empty, the
-later BEA/Census Current stage replaces this temporary row with the brief's
-explicit unavailable row and retains no zero shard, zero provenance, or zero
-pin. Any File A/File B amount, or File C activity without a File B anchor,
-stops the sequence for diagnosis.
+The old planned `unavailable` replacement is invalid and must not be applied.
+The next authorized BEA operation is a full ten-year backfill so FY2020 lands
+atomically with all other source-available BEA years.
 
 ## Planned append-only commit sequence
 
 | Stage | Newly registered accounts | Commerce full-plan jobs | Readiness |
 |---|---|---:|---|
-| BEA probe | BEA | 10 | blocked except the one FY2020/P12 custom probe |
-| NOAA | NOAA ORF + NOAA PAC | 30 | NOAA batch ready; BEA remains probe-only |
-| NIST | NIST STRS + NIST ITS | 50 | NIST batch ready; BEA remains probe-only |
-| Statistics | final BEA gap + Census Current | 59 | all registered years pinned |
-| Census Periodic | Census Periodic | 69 | final seven-account scaffold |
+| BEA accepted | BEA | 10 | all ten years pinned; full BEA backfill required |
+| NOAA | NOAA ORF + NOAA PAC | 30 | only after atomic BEA data commit |
+| NIST | NIST STRS + NIST ITS | 50 | only after atomic NOAA data commit |
+| Statistics | Census Current | 60 | all registered years pinned |
+| Census Periodic | Census Periodic | 70 | final seven-account scaffold |
 
 Every stage is required to pass its own account registry checks, the whole
 registry tier, Commerce tests, the exact planner-count assertion, and the fast

@@ -1,14 +1,14 @@
 {
  "schemaVersion": 2,
  "federalAccount": "013-1500",
- "source": "USAspending federal-account fiscal-year snapshots (GTAS/File A): https://api.usaspending.gov/api/v2/federal_accounts/3693/fiscal_year_snapshot/{fiscal_year}/; retrieved 2026-08-12; FY2020 custom-download preflight staged at P12",
+ "source": "USAspending federal-account fiscal-year snapshots (GTAS/File A): https://api.usaspending.gov/api/v2/federal_accounts/3693/fiscal_year_snapshot/{fiscal_year}/; retrieved 2026-08-12; FY2020 custom File B/C probe accepted 2026-08-14 and recorded in reference/commerce_bea_fy2020_probe_evidence.json",
  "fiscalYears": {
   "2015": {"status": "unavailable", "reason": "Files A/B/C begin in FY2017 Q2"},
   "2016": {"status": "unavailable", "reason": "Files A/B/C begin in FY2017 Q2"},
   "2017": {"status": "partial", "firstPeriod": 6, "asOfPeriod": 12, "obligationsCents": 11687711023},
   "2018": {"status": "complete", "obligationsCents": 11037121955},
   "2019": {"status": "complete", "obligationsCents": 10440276818},
-  "2020": {"status": "partial", "firstPeriod": 2, "asOfPeriod": 12},
+  "2020": {"status": "complete", "firstPeriod": 3, "asOfPeriod": 12, "obligationsCents": 0},
   "2021": {"status": "complete", "obligationsCents": 11769634040},
   "2022": {"status": "complete", "obligationsCents": 11996322841},
   "2023": {"status": "complete", "obligationsCents": 13080326230},
