@@ -26,8 +26,9 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import Mock, patch
 
-from scripts.smoke_obligation_pages import _evaluate_case
+from scripts.smoke_obligation_pages import _evaluate_case, _start_chrome
 from scripts.verify import _lint_account, _run_command
 
 REPO = Path(__file__).resolve().parent.parent
@@ -57,6 +58,39 @@ def registry_slugs():
 
 
 class UniformityContractTests(unittest.TestCase):
+    def test_rendered_gate_retries_only_chrome_cold_start(self):
+        first, second = Mock(pid=101), Mock(pid=202)
+        page = {"webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/1"}
+        with tempfile.TemporaryDirectory() as profile_root, patch(
+                "scripts.smoke_obligation_pages._free_port",
+                side_effect=[9101, 9102]), patch(
+                "scripts.smoke_obligation_pages.subprocess.Popen",
+                side_effect=[first, second]) as popen, patch(
+                "scripts.smoke_obligation_pages._wait_for_devtools",
+                side_effect=[TimeoutError("cold start"), page]) as wait, patch(
+                "scripts.smoke_obligation_pages._stop_chrome",
+                return_value="first attempt diagnostics") as stop:
+            process, observed = _start_chrome(
+                "/chrome", profile_root, attempts=2, startup_timeout=20
+            )
+
+        self.assertIs(second, process)
+        self.assertEqual(page, observed)
+        self.assertEqual(2, popen.call_count)
+        self.assertEqual(2, wait.call_count)
+        stop.assert_called_once_with(first)
+        first_command, second_command = (
+            call.args[0] for call in popen.call_args_list
+        )
+        self.assertIn("--remote-debugging-port=9101", first_command)
+        self.assertIn("--remote-debugging-port=9102", second_command)
+        self.assertNotEqual(
+            next(value for value in first_command
+                 if value.startswith("--user-data-dir=")),
+            next(value for value in second_command
+                 if value.startswith("--user-data-dir=")),
+        )
+
     def test_rendered_gate_rejects_every_collected_browser_error(self):
         document = {
             "html": '<html data-render-complete="true"><a href="/">home</a></html>',

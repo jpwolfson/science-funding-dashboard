@@ -135,37 +135,101 @@ def _free_port():
     return port
 
 
+def _stop_chrome(process):
+    """Terminate one isolated Chrome process group and retain a short log tail."""
+    try:
+        os.killpg(process.pid, signal.SIGTERM)
+    except ProcessLookupError:
+        pass
+    try:
+        process.wait(timeout=5)
+    except subprocess.TimeoutExpired:
+        try:
+            os.killpg(process.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+        process.wait(timeout=5)
+    stderr = ""
+    if process.stderr:
+        try:
+            stderr = process.stderr.read()
+        finally:
+            process.stderr.close()
+    return stderr.strip()[-2000:]
+
+
+def _wait_for_devtools(process, port, timeout):
+    endpoint = f"http://127.0.0.1:{port}"
+    deadline = time.monotonic() + timeout
+    last_error = None
+    while True:
+        try:
+            request = Request(
+                endpoint + "/json/new?" + quote("about:blank", safe=""),
+                method="PUT",
+            )
+            return json.load(urlopen(request, timeout=2))
+        except Exception as error:
+            last_error = error
+            returncode = process.poll()
+            if returncode is not None:
+                raise RuntimeError(
+                    f"Chrome exited with status {returncode} before its "
+                    f"DevTools endpoint started: {error}"
+                ) from error
+            if time.monotonic() >= deadline:
+                raise TimeoutError(
+                    f"Chrome DevTools endpoint did not respond within "
+                    f"{timeout}s: {last_error}"
+                ) from error
+            time.sleep(0.1)
+
+
+def _start_chrome(executable, profile_root, attempts=2, startup_timeout=20):
+    """Start Chrome with one bounded cold-start retry.
+
+    Only process startup is retried. Once DevTools answers, every page render,
+    console diagnostic, and contract assertion still runs exactly once.
+    """
+    failures = []
+    last_error = None
+    for attempt in range(1, attempts + 1):
+        port = _free_port()
+        profile = Path(profile_root) / f"attempt-{attempt}"
+        process = None
+        try:
+            process = subprocess.Popen([
+                executable, "--headless=new", "--disable-gpu", "--no-sandbox",
+                "--disable-dev-shm-usage", "--hide-scrollbars",
+                f"--user-data-dir={profile}", f"--remote-debugging-port={port}",
+                "--remote-allow-origins=*", "about:blank",
+            ], stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True,
+               start_new_session=True)
+            page = _wait_for_devtools(process, port, startup_timeout)
+            return process, page
+        except Exception as error:
+            last_error = error
+            stderr = _stop_chrome(process) if process else ""
+            diagnostic = f"attempt {attempt}: {type(error).__name__}: {error}"
+            if stderr:
+                diagnostic += f"; Chrome stderr: {stderr}"
+            failures.append(diagnostic)
+    raise RuntimeError(
+        "Chrome DevTools endpoint did not start after "
+        f"{attempts} attempts: {' | '.join(failures)}"
+    ) from last_error
+
+
 def render_page(executable, url, width, height, theme, screenshot_path=None):
     """Render `url` headlessly and return (document, diagnostics). When
     `screenshot_path` is given, additionally capture a full-page PNG (the
     viewport is grown to the page's actual content height first, so the
     shot is not clipped) and write it there -- used by the screens tier's
     reader-review pack, which never gates pass/fail."""
-    port = _free_port()
-    with tempfile.TemporaryDirectory() as profile:
-        process = subprocess.Popen([
-            executable, "--headless=new", "--disable-gpu", "--no-sandbox",
-            "--disable-dev-shm-usage", "--hide-scrollbars",
-            f"--user-data-dir={profile}", f"--remote-debugging-port={port}",
-            "--remote-allow-origins=*", "about:blank",
-        ], stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True,
-           start_new_session=True)
+    with tempfile.TemporaryDirectory() as profile_root:
+        process, page = _start_chrome(executable, profile_root)
         client = None
         try:
-            endpoint = f"http://127.0.0.1:{port}"
-            deadline = time.monotonic() + 15
-            while True:
-                try:
-                    request = Request(
-                        endpoint + "/json/new?" + quote("about:blank", safe=""),
-                        method="PUT",
-                    )
-                    page = json.load(urlopen(request, timeout=2))
-                    break
-                except Exception:
-                    if process.poll() is not None or time.monotonic() >= deadline:
-                        raise RuntimeError("Chrome DevTools endpoint did not start")
-                    time.sleep(0.1)
             client = DevToolsSocket(page["webSocketDebuggerUrl"])
             client.call("Page.enable")
             client.call("Runtime.enable")
@@ -225,18 +289,7 @@ def render_page(executable, url, width, height, theme, screenshot_path=None):
                     client.close()
                 except OSError:
                     pass
-            try:
-                os.killpg(process.pid, signal.SIGTERM)
-            except ProcessLookupError:
-                pass
-            try:
-                process.wait(timeout=5)
-            except subprocess.TimeoutExpired:
-                try:
-                    os.killpg(process.pid, signal.SIGKILL)
-                except ProcessLookupError:
-                    pass
-                process.wait(timeout=5)
+            _stop_chrome(process)
 
 
 def chrome_path(explicit=None):
