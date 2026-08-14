@@ -75,6 +75,50 @@ def resolve_account(account, fiscal_year):
     return str(row["id"]), row
 
 
+def _download_request_payload(
+    account_id, fiscal_year, period, submission_type, columns,
+):
+    return {
+        "account_level": "federal_account",
+        "file_format": "csv",
+        "filters": {
+            "fy": fiscal_year,
+            "period": period,
+            "submission_types": [submission_type],
+            "federal_account": str(account_id),
+        },
+        "columns": list(columns),
+    }
+
+
+def _validate_download_result(result, payload, require_echo=False):
+    echoed = result.get("download_request") or {}
+    filters = echoed.get("filters", {})
+    expected = payload["filters"]
+    mismatched = (
+        filters.get("federal_account") != expected["federal_account"]
+        or int(filters.get("fy", -1)) != expected["fy"]
+        or int(filters.get("period", -1)) != expected["period"]
+        or echoed.get("download_types") != expected["submission_types"]
+        or echoed.get("account_level") != payload["account_level"]
+        or echoed.get("file_format") != payload["file_format"]
+        or echoed.get("columns") != payload["columns"]
+    )
+    if require_echo and not echoed:
+        raise ValueError("USAspending resume result omitted the accepted request scope")
+    if echoed and mismatched:
+        raise ValueError(f"USAspending echoed a different request scope: {echoed}")
+    status_url = str(result.get("status_url", ""))
+    if not (
+        status_url.startswith(
+            "https://api.usaspending.gov/api/v2/download/status"
+        )
+        or status_url.startswith("/api/v2/download/status")
+    ):
+        raise ValueError(f"unexpected download status host: {status_url}")
+    return result, payload
+
+
 def request_download(account_id, fiscal_year, period, submission_type, columns):
     global _LAST_DOWNLOAD_REQUEST
     # Custom-account generation is resource-intensive and the public service
@@ -83,21 +127,21 @@ def request_download(account_id, fiscal_year, period, submission_type, columns):
     elapsed = time.monotonic() - _LAST_DOWNLOAD_REQUEST
     if elapsed < DOWNLOAD_COOLDOWN_SECONDS:
         time.sleep(DOWNLOAD_COOLDOWN_SECONDS - elapsed)
-    payload = {"account_level": "federal_account", "file_format": "csv",
-               "filters": {"fy": fiscal_year, "period": period,
-                           "submission_types": [submission_type],
-                           "federal_account": str(account_id)},
-               "columns": columns}
+    payload = _download_request_payload(
+        account_id, fiscal_year, period, submission_type, columns
+    )
     result = _json(f"{API}/download/accounts/", payload, attempts=20)
     _LAST_DOWNLOAD_REQUEST = time.monotonic()
-    echoed = result.get("download_request") or {}
-    filters = echoed.get("filters", {})
-    if echoed and (filters.get("federal_account") != str(account_id)
-                   or int(filters.get("fy", -1)) != fiscal_year
-                   or int(filters.get("period", -1)) != period
-                   or echoed.get("download_types") != [submission_type]):
-        raise ValueError(f"USAspending echoed a different request scope: {echoed}")
-    return result, payload
+    return _validate_download_result(result, payload)
+
+
+def resume_download(account_id, fiscal_year, period, submission_type, columns,
+                    result):
+    """Validate and resume one previously accepted official download."""
+    payload = _download_request_payload(
+        account_id, fiscal_year, period, submission_type, columns
+    )
+    return _validate_download_result(result, payload, require_echo=True)
 
 
 def finish_download(

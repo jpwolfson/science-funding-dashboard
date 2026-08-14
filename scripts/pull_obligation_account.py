@@ -18,7 +18,7 @@ from adapters.obligation_common import (
 from adapters.usaspending_obligations import (
     alias_map, archive_rows, combine_file_b_file_c, file_b_period_events,
     finish_download, parse_file_b_snapshot, parse_file_c, request_download,
-    resolve_account,
+    resolve_account, resume_download,
 )
 from scripts.rollup_obligations import build
 
@@ -36,11 +36,50 @@ FILE_C_COLUMNS = [
 ]
 
 
-def _download(account, account_id, fy, period, kind, columns, raw_archive_dir=None):
-    print(f"requesting FY{fy} P{period:02} {kind}", flush=True)
-    request, request_scope = request_download(
-        account_id, fy, period, kind, columns
+def _resume_request(repo, account, account_id, fy, period, kind, columns):
+    path = Path(repo) / "reference" / "obligation_download_resumes.json"
+    if not path.exists():
+        return None
+    document = json.loads(path.read_text())
+    if document.get("schemaVersion") != 1:
+        raise ValueError("obligation download resume manifest must be schema v1")
+    requests = document.get("requests")
+    if not isinstance(requests, list):
+        raise ValueError("obligation download resume manifest requests must be a list")
+    matches = [row for row in requests if (
+        row.get("account") == account["path"]
+        and row.get("fiscalYear") == fy
+        and row.get("period") == period
+        and row.get("submissionType") == kind
+    )]
+    if len(matches) > 1:
+        raise ValueError(
+            f"duplicate obligation download resumes for {account['path']} "
+            f"FY{fy} P{period:02} {kind}"
+        )
+    if not matches:
+        return None
+    result = matches[0].get("result")
+    if not isinstance(result, dict):
+        raise ValueError("obligation download resume result must be an object")
+    return resume_download(
+        account_id, fy, period, kind, columns, result
     )
+
+
+def _download(repo, account, account_id, fy, period, kind, columns,
+              raw_archive_dir=None):
+    print(f"requesting FY{fy} P{period:02} {kind}", flush=True)
+    resumed = _resume_request(
+        repo, account, account_id, fy, period, kind, columns
+    )
+    if resumed:
+        print(f"resuming accepted FY{fy} P{period:02} {kind}", flush=True)
+        request, request_scope = resumed
+    else:
+        request, request_scope = request_download(
+            account_id, fy, period, kind, columns
+        )
     payload, status = finish_download(request)
     archive_sha = hashlib.sha256(payload).hexdigest()
     archive_name = (
@@ -221,7 +260,8 @@ def pull(account, years, current_period=12, repo=REPO, rollup=True,
         )
         for period in range(first_period, last_period + 1):
             members, download = _download(
-                account, account_id, fy, period, "object_class_program_activity",
+                repo, account, account_id, fy, period,
+                "object_class_program_activity",
                 FILE_B_COLUMNS, raw_archive_dir,
             )
             downloads.append(download)
@@ -230,7 +270,7 @@ def pull(account, years, current_period=12, repo=REPO, rollup=True,
                 rows, account["federalAccount"], aliases)
         file_b = file_b_period_events(snapshots, account["federalAccount"])
         c_members, download = _download(
-            account, account_id, fy, last_period, "award_financial",
+            repo, account, account_id, fy, last_period, "award_financial",
             FILE_C_COLUMNS, raw_archive_dir,
         )
         downloads.append(download)
