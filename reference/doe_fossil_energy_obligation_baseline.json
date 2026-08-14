@@ -1,0 +1,61 @@
+{
+ "schemaVersion": 2,
+ "federalAccount": "089-0213",
+ "source": "USAspending Federal Account endpoint (GTAS/File A): https://api.usaspending.gov/api/v2/federal_accounts/089-0213/",
+ "fiscalYears": {
+  "2015": {
+   "status": "unavailable",
+   "reason": "Files A/B/C begin in FY2017 Q2"
+  },
+  "2016": {
+   "status": "unavailable",
+   "reason": "Files A/B/C begin in FY2017 Q2"
+  },
+  "2017": {
+   "asOfPeriod": 12,
+   "firstPeriod": 6,
+   "obligationsCents": 58153662093,
+   "status": "partial"
+  },
+  "2018": {
+   "obligationsCents": 72279694666,
+   "status": "complete"
+  },
+  "2019": {
+   "obligationsCents": 67236498664,
+   "status": "complete"
+  },
+  "2020": {
+   "obligationsCents": 70236729208,
+   "status": "complete"
+  },
+  "2021": {
+   "obligationsCents": 87493896578,
+   "status": "complete"
+  },
+  "2022": {
+   "obligationsCents": 60569347626,
+   "status": "complete"
+  },
+  "2023": {
+   "obligationsCents": 101031073824,
+   "status": "complete"
+  },
+  "2024": {
+   "obligationsCents": 186487182517,
+   "status": "complete"
+  },
+  "2025": {
+   "obligationsCents": 156000140755,
+   "status": "complete"
+  },
+  "2026": {
+   "asOfPeriod": 9,
+   "obligationsCents": 36455038947,
+   "status": "partial"
+  }
+ },
+ "notes": [
+  "Pre-backfill scaffold: CI replaces source-available pins with exact File A cents before publication."
+ ]
+}

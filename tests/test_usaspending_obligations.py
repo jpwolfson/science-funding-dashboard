@@ -1,14 +1,19 @@
 import http.client
 import io
+import json
+import tempfile
 import urllib.error
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
 from adapters.usaspending_obligations import (
+    DOWNLOAD_STATUS_TIMEOUT_SECONDS,
     _bytes, _json, alias_map, combine_file_b_file_c, file_b_period_events,
-    finish_download,
+    finish_download, resume_download,
     parse_file_b_snapshot, parse_file_c,
 )
+from scripts.pull_obligation_account import FILE_B_COLUMNS, _resume_request
 
 
 ALIASES = {"0001": {"code": "0001", "name": "BES", "park": "PARK1"},
@@ -146,6 +151,109 @@ class USAspendingObligationTests(unittest.TestCase):
         sleep.assert_called_once_with(1)
         archive.assert_called_once_with(
             "https://files.usaspending.gov/archive.zip")
+
+    def test_download_status_default_outlasts_one_hour_build(self):
+        running = {"status": "running"}
+        finished = {
+            "status": "finished",
+            "file_url": "https://files.usaspending.gov/archive.zip",
+        }
+        with patch(
+                "adapters.usaspending_obligations._json",
+                side_effect=[running, finished]) as status, \
+             patch("adapters.usaspending_obligations._bytes",
+                   return_value=b"archive") as archive, \
+             patch("adapters.usaspending_obligations.time.monotonic",
+                   side_effect=[100, 100 + 3601, 100 + 3602]), \
+             patch("adapters.usaspending_obligations.time.sleep") as sleep:
+            payload, observed = finish_download({
+                "status_url": "/api/v2/download/status/slow",
+            })
+        self.assertEqual(7200, DOWNLOAD_STATUS_TIMEOUT_SECONDS)
+        self.assertEqual(b"archive", payload)
+        self.assertIs(finished, observed)
+        self.assertEqual(2, status.call_count)
+        sleep.assert_called_once_with(15)
+        archive.assert_called_once_with(
+            "https://files.usaspending.gov/archive.zip")
+
+    def test_resume_download_requires_exact_accepted_scope(self):
+        result = {
+            "status_url": (
+                "https://api.usaspending.gov/api/v2/download/status?"
+                "file_name=accepted.zip"
+            ),
+            "download_request": {
+                "account_level": "federal_account",
+                "file_format": "csv",
+                "columns": FILE_B_COLUMNS,
+                "download_types": ["object_class_program_activity"],
+                "filters": {
+                    "federal_account": "5787",
+                    "fy": 2023,
+                    "period": 2,
+                },
+            },
+        }
+        observed, scope = resume_download(
+            "5787", 2023, 2, "object_class_program_activity",
+            FILE_B_COLUMNS, result,
+        )
+        self.assertIs(result, observed)
+        self.assertEqual("5787", scope["filters"]["federal_account"])
+        mismatched = json.loads(json.dumps(result))
+        mismatched["download_request"]["filters"]["period"] = 3
+        with self.assertRaisesRegex(ValueError, "different request scope"):
+            resume_download(
+                "5787", 2023, 2, "object_class_program_activity",
+                FILE_B_COLUMNS, mismatched,
+            )
+        unexpected_host = json.loads(json.dumps(result))
+        unexpected_host["status_url"] = "https://example.test/status"
+        with self.assertRaisesRegex(ValueError, "unexpected download status"):
+            resume_download(
+                "5787", 2023, 2, "object_class_program_activity",
+                FILE_B_COLUMNS, unexpected_host,
+            )
+
+    def test_resume_manifest_selects_only_the_exact_pull(self):
+        result = {"status_url": "https://api.usaspending.gov/status"}
+        manifest = {
+            "schemaVersion": 1,
+            "requests": [{
+                "account": "doe/nnsa-weapons-activities",
+                "fiscalYear": 2023,
+                "period": 2,
+                "submissionType": "object_class_program_activity",
+                "result": result,
+            }],
+        }
+        account = {"path": "doe/nnsa-weapons-activities"}
+        with tempfile.TemporaryDirectory() as temp:
+            reference = Path(temp) / "reference"
+            reference.mkdir()
+            (reference / "obligation_download_resumes.json").write_text(
+                json.dumps(manifest)
+            )
+            with patch(
+                "scripts.pull_obligation_account.resume_download",
+                return_value=("accepted", "scope"),
+            ) as resume:
+                self.assertEqual(
+                    ("accepted", "scope"),
+                    _resume_request(
+                        temp, account, "5787", 2023, 2,
+                        "object_class_program_activity", FILE_B_COLUMNS,
+                    ),
+                )
+                self.assertIsNone(_resume_request(
+                    temp, account, "5787", 2023, 3,
+                    "object_class_program_activity", FILE_B_COLUMNS,
+                ))
+            resume.assert_called_once_with(
+                "5787", 2023, 2, "object_class_program_activity",
+                FILE_B_COLUMNS, result,
+            )
 
     def test_archive_download_outlasts_six_disconnects(self):
         response = io.BytesIO(b"archive")

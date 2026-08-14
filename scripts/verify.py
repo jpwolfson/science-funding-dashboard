@@ -88,7 +88,13 @@ def _run_command(name, cmd, cwd=REPO):
     elapsed = time.monotonic() - start
     combined = (result.stdout or "") + (result.stderr or "")
     lines = [line.strip() for line in combined.splitlines() if line.strip()]
-    evidence = lines[-1] if lines else "(no output)"
+    if result.returncode == 0:
+        evidence = lines[-1] if lines else "(no output)"
+    else:
+        # A collapsed unittest summary such as ``FAILED (errors=1)`` is not
+        # actionable in CI.  Preserve a bounded failure tail in both console
+        # and JSON evidence so the exact test and traceback survive the job.
+        evidence = "\n".join(lines[-80:]) if lines else "(no output)"
     return _check(name, result.returncode == 0, evidence, elapsed)
 
 

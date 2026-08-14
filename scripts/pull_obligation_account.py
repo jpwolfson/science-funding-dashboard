@@ -18,7 +18,7 @@ from adapters.obligation_common import (
 from adapters.usaspending_obligations import (
     alias_map, archive_rows, combine_file_b_file_c, file_b_period_events,
     finish_download, parse_file_b_snapshot, parse_file_c, request_download,
-    resolve_account,
+    resolve_account, resume_download,
 )
 from scripts.rollup_obligations import build
 
@@ -36,11 +36,50 @@ FILE_C_COLUMNS = [
 ]
 
 
-def _download(account, account_id, fy, period, kind, columns, raw_archive_dir=None):
-    print(f"requesting FY{fy} P{period:02} {kind}", flush=True)
-    request, request_scope = request_download(
-        account_id, fy, period, kind, columns
+def _resume_request(repo, account, account_id, fy, period, kind, columns):
+    path = Path(repo) / "reference" / "obligation_download_resumes.json"
+    if not path.exists():
+        return None
+    document = json.loads(path.read_text())
+    if document.get("schemaVersion") != 1:
+        raise ValueError("obligation download resume manifest must be schema v1")
+    requests = document.get("requests")
+    if not isinstance(requests, list):
+        raise ValueError("obligation download resume manifest requests must be a list")
+    matches = [row for row in requests if (
+        row.get("account") == account["path"]
+        and row.get("fiscalYear") == fy
+        and row.get("period") == period
+        and row.get("submissionType") == kind
+    )]
+    if len(matches) > 1:
+        raise ValueError(
+            f"duplicate obligation download resumes for {account['path']} "
+            f"FY{fy} P{period:02} {kind}"
+        )
+    if not matches:
+        return None
+    result = matches[0].get("result")
+    if not isinstance(result, dict):
+        raise ValueError("obligation download resume result must be an object")
+    return resume_download(
+        account_id, fy, period, kind, columns, result
     )
+
+
+def _download(repo, account, account_id, fy, period, kind, columns,
+              raw_archive_dir=None):
+    print(f"requesting FY{fy} P{period:02} {kind}", flush=True)
+    resumed = _resume_request(
+        repo, account, account_id, fy, period, kind, columns
+    )
+    if resumed:
+        print(f"resuming accepted FY{fy} P{period:02} {kind}", flush=True)
+        request, request_scope = resumed
+    else:
+        request, request_scope = request_download(
+            account_id, fy, period, kind, columns
+        )
     payload, status = finish_download(request)
     archive_sha = hashlib.sha256(payload).hexdigest()
     archive_name = (
@@ -73,7 +112,8 @@ def _download(account, account_id, fy, period, kind, columns, raw_archive_dir=No
     return members, audit
 
 
-def _baseline_pin(repo, account, fy, last_period, file_b_total):
+def _baseline_pin(repo, account, fy, last_period, file_b_total,
+                  first_event_period=None):
     baseline = json.loads((repo / account["baseline"]).read_text())
     if baseline.get("schemaVersion") != 2:
         raise ValueError(f"{account['path']}: baseline schema must be v2")
@@ -99,9 +139,12 @@ def _baseline_pin(repo, account, fy, last_period, file_b_total):
         pin.update({"status": "partial", "asOfPeriod": last_period,
                     "obligationsCents": file_b_total})
     if fy == first_fy:
-        pin.setdefault("firstPeriod", int(
-            account.get("availability", {}).get("firstFiscalYearPeriod", 6)
-        ))
+        # Availability identifies the first official request period.  A new
+        # account can publish finished, empty snapshots before its first
+        # material File B activity (OCED FY2022 is P02/P03 empty, P04 first
+        # material).  Pin the event boundary, not merely the request boundary.
+        pin["firstPeriod"] = int(first_event_period or
+            account.get("availability", {}).get("firstFiscalYearPeriod", 6))
     return pin
 
 
@@ -150,10 +193,58 @@ def _export_partitions(repo, account, years, destination):
     )
 
 
+def _export_skipped_partition(account, years, destination):
+    """Emit an auditable no-op artifact for a frozen matrix job.
+
+    A workflow matrix is fixed when its plan job starts. If later evidence
+    corrects one of its queued account-years to source-unavailable, that job
+    must finish without inventing a zero-dollar financial observation.
+    Reconciliation ignores descriptors whose fiscalYears list is empty.
+    """
+    destination = Path(destination)
+    destination.mkdir(parents=True, exist_ok=True)
+    value = {
+        "schemaVersion": 2,
+        "accountPath": account["path"],
+        "federalAccount": account["federalAccount"],
+        "baselinePath": account["baseline"],
+        "fiscalYears": [],
+        "files": [],
+        "skippedFiscalYears": list(years),
+        "skipReason": "registry baseline marks the fiscal year source-unavailable",
+    }
+    (destination / "partition.json").write_text(
+        json.dumps(value, indent=1, sort_keys=True) + "\n"
+    )
+
+
 def pull(account, years, current_period=12, repo=REPO, rollup=True,
          raw_archive_dir=None, partition_output=None):
     repo = Path(repo)
     years = list(years)
+    baseline = json.loads((repo / account["baseline"]).read_text())
+    unavailable_years = [
+        fy for fy in years
+        if baseline.get("fiscalYears", {}).get(str(fy), {}).get("status")
+        == "unavailable"
+    ]
+    if unavailable_years:
+        if len(unavailable_years) != len(years):
+            raise ValueError(
+                "a pull range cannot mix source-available and unavailable years"
+            )
+        if partition_output:
+            _export_skipped_partition(account, unavailable_years, partition_output)
+            print(
+                "skipping " + ", ".join(f"FY{fy}" for fy in unavailable_years)
+                + ": registry baseline marks source-unavailable",
+                flush=True,
+            )
+            return
+        raise ValueError(
+            ", ".join(f"FY{fy}" for fy in unavailable_years)
+            + " is marked source-unavailable"
+        )
     aliases = alias_map(account)
     all_events = []
     audit = {}
@@ -173,7 +264,8 @@ def pull(account, years, current_period=12, repo=REPO, rollup=True,
         )
         for period in range(first_period, last_period + 1):
             members, download = _download(
-                account, account_id, fy, period, "object_class_program_activity",
+                repo, account, account_id, fy, period,
+                "object_class_program_activity",
                 FILE_B_COLUMNS, raw_archive_dir,
             )
             downloads.append(download)
@@ -182,7 +274,7 @@ def pull(account, years, current_period=12, repo=REPO, rollup=True,
                 rows, account["federalAccount"], aliases)
         file_b = file_b_period_events(snapshots, account["federalAccount"])
         c_members, download = _download(
-            account, account_id, fy, last_period, "award_financial",
+            repo, account, account_id, fy, last_period, "award_financial",
             FILE_C_COLUMNS, raw_archive_dir,
         )
         downloads.append(download)
@@ -194,8 +286,11 @@ def pull(account, years, current_period=12, repo=REPO, rollup=True,
         if last_period == 12 and detail_total and file_b_total != detail_total:
             raise ValueError(f"FY{fy}: File B {file_b_total} cents != account snapshot {detail_total}")
         all_events.extend(events)
+        first_event_period = min(
+            (event["fiscalPeriod"] for event in events), default=None
+        )
         baseline_pin = _baseline_pin(
-            repo, account, fy, last_period, file_b_total
+            repo, account, fy, last_period, file_b_total, first_event_period
         )
         previous = [e for e in existing if e["fiscalYear"] == fy]
         previous_provenance = store / f"FY{fy}.provenance.json"
