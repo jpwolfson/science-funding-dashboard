@@ -36,6 +36,12 @@ EXPECTED_IDENTITIES = {
     "nasa/exploration": [
         ("deep-space-exploration-systems", "0001", "Deep Space Exploration Systems", "5RN5AZGZKXF"),
         ("unknown-other", "0000", "Unknown / other", ""),
+        (
+            "activity-from-obligation-before-fy-2018-program-activity-not-specified",
+            "PRE2018",
+            "ACTIVITY FROM OBLIGATION BEFORE FY 2018: PROGRAM ACTIVITY NOT SPECIFIED",
+            "PRE2018",
+        ),
     ],
     "nasa/space-operations": [
         ("space-operations-direct", "0001", "Space Operations (Direct)", "5ZD5GGP15KD"),
@@ -138,7 +144,7 @@ class NASAObligationScaffoldTests(unittest.TestCase):
             ]
             for path, account in self.accounts.items()
         })
-        self.assertEqual(9, sum(map(len, EXPECTED_IDENTITIES.values())))
+        self.assertEqual(10, sum(map(len, EXPECTED_IDENTITIES.values())))
         self.assertEqual(EXPECTED_CODE_NAME_ALIASES, {
             path: {
                 activity["slug"]: [
@@ -268,6 +274,30 @@ class NASAObligationScaffoldTests(unittest.TestCase):
         self.assertEqual({"0000", "0001", "0801"}, {
             key[0] for key in parsed
         })
+
+    def test_exploration_fy2026_pre2018_sentinel_is_distinct(self):
+        account = self.accounts["nasa/exploration"]
+        rows = [
+            {
+                "federal_account_symbol": "080-0124",
+                "program_activity_reporting_key": "5RN5AZGZKXF",
+                "obligations_incurred": "1139741650.42",
+            },
+            {
+                "federal_account_symbol": "080-0124",
+                "program_activity_reporting_key": "PRE2018",
+                "obligations_incurred": "0.00",
+            },
+        ]
+        parsed = parse_file_b_snapshot(rows, "080-0124", alias_map(account))
+        self.assertEqual(113_974_165_042, sum(parsed.values()))
+        self.assertEqual({"5RN5AZGZKXF", "PRE2018"}, {
+            key[3] for key in parsed
+        })
+        self.assertEqual({
+            "Deep Space Exploration Systems",
+            "ACTIVITY FROM OBLIGATION BEFORE FY 2018: PROGRAM ACTIVITY NOT SPECIFIED",
+        }, {key[2] for key in parsed})
 
     def test_aaas_budget_lines_are_not_program_activity_slugs(self):
         slugs = {

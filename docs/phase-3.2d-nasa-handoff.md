@@ -48,6 +48,14 @@ Exploration's historical `0001 EXPLORATION (DIRECT)` and later `0001 DEEP
 SPACE EXPLORATION SYSTEMS (DIRECT)` labels normalize to the current PARK
 `5RN5AZGZKXF` canonical identity `Deep Space Exploration Systems`. Its
 official `0000 UNKNOWN/OTHER` observation remains an explicit fallback.
+Stage C FY2026 P02 additionally exposed the generic authoritative PARK
+`PRE2018` with blank code/name and exactly zero cents. It remains a distinct
+canonical identity named `ACTIVITY FROM OBLIGATION BEFORE FY 2018: PROGRAM
+ACTIVITY NOT SPECIFIED`, rather than being merged into unknown/other. Failed
+job `95024679498` preserved raw artifact `9250109157`; its artifact ZIP SHA-256
+is `d48c7dabec9be02053335f73b5c62b64dafed2a3621b2dbf0affb10ea6232818`,
+and the nested official File B ZIP SHA-256 is
+`68f959e8f1159c3b821a44a5c69206555a56453f7259f81f4c2e5954f986cb21`.
 Space Operations preserves three distinct identities: direct `0001` / PARK
 `5ZD5GGP15KD`, reimbursable `0801`, and the `0000` fallback with historical
 labels `0`, `OTHER/UNKNOWN`, and `UNKNOWN/OTHER`.
