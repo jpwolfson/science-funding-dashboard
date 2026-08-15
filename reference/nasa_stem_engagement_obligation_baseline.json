@@ -1,0 +1,24 @@
+{
+ "schemaVersion": 2,
+ "federalAccount": "080-0128",
+ "source": "USAspending federal account fiscal-year snapshots (GTAS/File A), https://api.usaspending.gov/api/v2/federal_accounts/080-0128/?fiscal_year=<FY>, retrieved 2026-08-12",
+ "fiscalYears": {
+  "2015": {"status": "unavailable", "reason": "Files A/B/C begin in FY2017 Q2"},
+  "2016": {"status": "unavailable", "reason": "Files A/B/C begin in FY2017 Q2"},
+  "2017": {"status": "partial", "asOfPeriod": 12, "obligationsCents": 10543835769, "firstPeriod": 6},
+  "2018": {"status": "complete", "obligationsCents": 10493930251},
+  "2019": {"status": "complete", "obligationsCents": 11033682312},
+  "2020": {"status": "complete", "obligationsCents": 12072228456},
+  "2021": {"status": "complete", "obligationsCents": 12925056091},
+  "2022": {"status": "complete", "obligationsCents": 13230090452},
+  "2023": {"status": "complete", "obligationsCents": 15380938964},
+  "2024": {"status": "complete", "obligationsCents": 14151489463},
+  "2025": {"status": "complete", "obligationsCents": 12782240041},
+  "2026": {"status": "partial", "asOfPeriod": 9, "obligationsCents": 7540313657}
+ },
+ "notes": [
+  "FY2017 is partial because Files A/B/C begin with the cumulative Q2/P06 snapshot.",
+  "FY2026 is pinned to NASA's certified P09 snapshot as retrieved 2026-08-12.",
+  "Completed snapshots must reconcile to exact cents before publication."
+ ]
+}

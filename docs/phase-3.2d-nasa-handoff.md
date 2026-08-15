@@ -4,7 +4,11 @@ Status: Stage A is complete and live through PR
 [#34](https://github.com/jpwolfson/science-funding-dashboard/pull/34).
 Science `080-0120` has ten accepted FY2017--FY2026 partitions, its exact-cent
 baseline, the canonical `Science (Direct)` Program Activity, dashboards, and
-combined sentinel coverage. Stages B and C remain deliberately deferred.
+combined sentinel coverage. Stage B's Aeronautics `080-0126`, Space Technology
+`080-0131`, and STEM Engagement `080-0128` registry scaffolds are complete with
+official-source exact-cent baselines and canonical Program Activities. Stage B
+has not changed the production trigger or started a custom-account download.
+Stage C remains deliberately deferred.
 
 ## Staged rollout contract
 
@@ -18,23 +22,31 @@ production reconcile validates every registered store:
 The coordinator owns trigger changes. The worker appends only the accounts for
 the stage about to run; later empty accounts must not be pre-registered.
 
-## Stage A evidence boundary
+## Stages A and B evidence boundaries
 
-The official federal account is `080-0120`, titled `Science, National
+The official Science federal account is `080-0120`, titled `Science, National
 Aeronautics and Space Administration`. USAspending Files A/B/C begin at FY2017
 P06, so FY2015–16 are unavailable, FY2017 is partial P06–P12, FY2018–25 are
 complete, and FY2026 is pinned through certified P09 as retrieved 2026-08-12.
 The exact source endpoint is recorded in the baseline file.
 
-Official PA evidence contains historical `0001 SCIENCE (DIRECT)` and current
-PARK `5ZD5GGPDU49 SCIENCE (DIRECT)`. Both normalize to the single
+Official Science PA evidence contains historical `0001 SCIENCE (DIRECT)` and
+current PARK `5ZD5GGPDU49 SCIENCE (DIRECT)`. Both normalize to the single
 `science-direct` identity. AAAS mission labels such as Astrophysics, Earth
 Science, Heliophysics, and Planetary Science remain crosswalk context and do
 not become File B Program Activity pages.
 
+Aeronautics and Space Technology each use a single current direct Program
+Activity, respectively `0001` / PARK `5ZD5GGPT55B` and `0001` / PARK
+`5ZD5GGQ7TN7`. STEM Engagement retains the canonical historical identity
+`0001 Education (Direct)` / PARK `5ZD5GGQ085N`; the later official label
+`SCIENCE, TECHNOLOGY, ENGINEERING, AND MATHEMATICS ENGAGEMENT (DIRECT)` is a
+code/name alias of that same identity, not a second page.
+
 File B signed obligations remain canonical; File C and its signed residual are
-separate. The accepted backfill retains Assistance, Contracts, and Unlinked
-files and does not call File C/net a bounded completeness percentage.
+separate. The accepted Science backfill retains Assistance, Contracts, and
+Unlinked files and does not call File C/net a bounded completeness percentage.
+Stage B must retain the same signed reconciliation contract.
 
 ## Stage A accepted release evidence
 
