@@ -17,6 +17,64 @@ EXPECTED_ACCOUNTS = {
         "080-0128",
         "Science, Technology, Engineering, and Mathematics Engagement",
     ),
+    "nasa/exploration": ("080-0124", "Exploration"),
+    "nasa/space-operations": ("080-0115", "Space Operations"),
+}
+EXPECTED_IDENTITIES = {
+    "nasa/science": [
+        ("science-direct", "0001", "Science (Direct)", "5ZD5GGPDU49"),
+    ],
+    "nasa/aeronautics": [
+        ("aeronautics-direct", "0001", "Aeronautics (Direct)", "5ZD5GGPT55B"),
+    ],
+    "nasa/space-technology": [
+        ("space-technology-direct", "0001", "Space Technology (Direct)", "5ZD5GGQ7TN7"),
+    ],
+    "nasa/stem-engagement": [
+        ("education-direct", "0001", "Education (Direct)", "5ZD5GGQ085N"),
+    ],
+    "nasa/exploration": [
+        ("deep-space-exploration-systems", "0001", "Deep Space Exploration Systems", "5RN5AZGZKXF"),
+        ("unknown-other", "0000", "Unknown / other", ""),
+        (
+            "activity-from-obligation-before-fy-2018-program-activity-not-specified",
+            "PRE2018",
+            "ACTIVITY FROM OBLIGATION BEFORE FY 2018: PROGRAM ACTIVITY NOT SPECIFIED",
+            "PRE2018",
+        ),
+    ],
+    "nasa/space-operations": [
+        ("space-operations-direct", "0001", "Space Operations (Direct)", "5ZD5GGP15KD"),
+        ("space-operations-reimbursable", "0801", "Space Operations (Reimbursable)", ""),
+        ("unknown-other", "0000", "Unknown / other", ""),
+        (
+            "activity-from-obligation-before-fy-2018-program-activity-not-specified",
+            "PRE2018",
+            "ACTIVITY FROM OBLIGATION BEFORE FY 2018: PROGRAM ACTIVITY NOT SPECIFIED",
+            "PRE2018",
+        ),
+    ],
+}
+EXPECTED_CODE_NAME_ALIASES = {
+    "nasa/stem-engagement": {
+        "education-direct": [
+            ("0001", "SCIENCE, TECHNOLOGY, ENGINEERING, AND MATHEMATICS ENGAGEMENT (DIRECT)"),
+        ],
+    },
+    "nasa/exploration": {
+        "deep-space-exploration-systems": [
+            ("0001", "EXPLORATION (DIRECT)"),
+            ("0001", "DEEP SPACE EXPLORATION SYSTEMS (DIRECT)"),
+        ],
+        "unknown-other": [("0000", "UNKNOWN/OTHER")],
+    },
+    "nasa/space-operations": {
+        "unknown-other": [
+            ("0000", "0"),
+            ("0000", "OTHER/UNKNOWN"),
+            ("0000", "UNKNOWN/OTHER"),
+        ],
+    },
 }
 EXPECTED_CENTS = {
     "nasa/science": [
@@ -39,10 +97,21 @@ EXPECTED_CENTS = {
         12925056091, 13230090452, 15380938964, 14151489463,
         12782240041, 7540313657,
     ],
+    "nasa/exploration": [
+        431912621327, 448394604078, 531578518020, 599850295094,
+        659116058115, 688314506847, 762268175145, 782735099075,
+        792386697438, 579775944800,
+    ],
+    "nasa/space-operations": [
+        500236863132, 478526162989, 479202003631, 436087332797,
+        392629207884, 415856980781, 454586690568, 433838713167,
+        498761927454, 239842355296,
+    ],
 }
 STAGE_SELECTORS = {
     "nasa/science": 10,
     "nasa/aeronautics,nasa/space-technology,nasa/stem-engagement": 30,
+    "nasa/exploration,nasa/space-operations": 20,
 }
 
 
@@ -73,6 +142,30 @@ class NASAObligationScaffoldTests(unittest.TestCase):
                 "firstFiscalYearPeriod": 6,
                 "regularFirstPeriod": 2,
             }, account["availability"])
+        self.assertEqual(EXPECTED_IDENTITIES, {
+            path: [
+                (activity["slug"], activity["code"], activity["name"],
+                 activity.get("park", ""))
+                for activity in account["programActivities"]
+            ]
+            for path, account in self.accounts.items()
+        })
+        self.assertEqual(11, sum(map(len, EXPECTED_IDENTITIES.values())))
+        self.assertEqual(EXPECTED_CODE_NAME_ALIASES, {
+            path: {
+                activity["slug"]: [
+                    (alias["code"], alias["name"])
+                    for alias in activity.get("codeNameAliases", [])
+                ]
+                for activity in account["programActivities"]
+                if activity.get("codeNameAliases")
+            }
+            for path, account in self.accounts.items()
+            if any(
+                activity.get("codeNameAliases")
+                for activity in account["programActivities"]
+            )
+        })
 
     def test_exact_baseline_statuses_and_cents(self):
         for path, account in self.accounts.items():
@@ -168,6 +261,93 @@ class NASAObligationScaffoldTests(unittest.TestCase):
                     self.assertEqual(activity["code"].zfill(4), code)
                     self.assertEqual(activity["name"], name)
                     self.assertEqual(activity.get("park", ""), park)
+
+    def test_space_operations_identities_remain_distinct(self):
+        account = self.accounts["nasa/space-operations"]
+        rows = [{
+            "federal_account_symbol": account["federalAccount"],
+            "program_activity_code": code,
+            "program_activity_name": name,
+            "obligations_incurred": "1.00",
+        } for code, name in (
+            ("0001", "SPACE OPERATIONS (DIRECT)"),
+            ("0801", "SPACE OPERATIONS (REIMBURSABLE)"),
+            ("0000", "UNKNOWN/OTHER"),
+        )]
+        parsed = parse_file_b_snapshot(
+            rows, account["federalAccount"], alias_map(account)
+        )
+        self.assertEqual({"0000", "0001", "0801"}, {
+            key[0] for key in parsed
+        })
+
+    def test_exploration_fy2026_pre2018_sentinel_is_distinct(self):
+        account = self.accounts["nasa/exploration"]
+        rows = [
+            {
+                "federal_account_symbol": "080-0124",
+                "program_activity_reporting_key": "5RN5AZGZKXF",
+                "obligations_incurred": "1139741650.42",
+            },
+            {
+                "federal_account_symbol": "080-0124",
+                "program_activity_reporting_key": "PRE2018",
+                "obligations_incurred": "0.00",
+            },
+        ]
+        parsed = parse_file_b_snapshot(rows, "080-0124", alias_map(account))
+        self.assertEqual(113_974_165_042, sum(parsed.values()))
+        self.assertEqual({"5RN5AZGZKXF", "PRE2018"}, {
+            key[3] for key in parsed
+        })
+        self.assertEqual({
+            "Deep Space Exploration Systems",
+            "ACTIVITY FROM OBLIGATION BEFORE FY 2018: PROGRAM ACTIVITY NOT SPECIFIED",
+        }, {key[2] for key in parsed})
+
+    def test_space_operations_fy2026_park_transition_and_pre2018(self):
+        account = self.accounts["nasa/space-operations"]
+        aliases = alias_map(account)
+        self.assertEqual(
+            aliases[("park", "5ZD5GGP15KD")]["slug"],
+            aliases[("park", "5Q15DKKYF0L")]["slug"],
+        )
+        rows = [
+            {
+                "federal_account_symbol": "080-0115",
+                "program_activity_reporting_key": "5Q15DKKYF0L",
+                "obligations_incurred": "0.00",
+            },
+            {
+                "federal_account_symbol": "080-0115",
+                "program_activity_reporting_key": "5ZD5GGP15KD",
+                "obligations_incurred": "216336753.88",
+            },
+            {
+                "federal_account_symbol": "080-0115",
+                "program_activity_reporting_key": "PRE2018",
+                "obligations_incurred": "0.00",
+            },
+        ]
+        parsed = parse_file_b_snapshot(rows, "080-0115", aliases)
+        self.assertEqual(21_633_675_388, sum(parsed.values()))
+        self.assertEqual(2, len(parsed))
+        self.assertEqual({
+            "Space Operations (Direct)",
+            "ACTIVITY FROM OBLIGATION BEFORE FY 2018: PROGRAM ACTIVITY NOT SPECIFIED",
+        }, {key[2] for key in parsed})
+
+    def test_aaas_budget_lines_are_not_program_activity_slugs(self):
+        slugs = {
+            activity["slug"]
+            for account in self.accounts.values()
+            for activity in account["programActivities"]
+        }
+        self.assertTrue(slugs.isdisjoint({
+            "astrophysics", "earth-science", "heliophysics",
+            "planetary-science", "bio-physical-sciences", "sls", "orion",
+            "gateway", "mars-exploration", "mars-sample-return",
+        }))
 
     def test_stage_plans_have_exact_job_counts_and_periods(self):
         for selector, count in STAGE_SELECTORS.items():
