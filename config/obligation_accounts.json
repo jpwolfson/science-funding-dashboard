@@ -553,6 +553,75 @@
      ]
     }
    ]
+  },
+  {
+   "path": "nasa/exploration",
+   "name": "Exploration",
+   "abbrev": "NASA Exploration",
+   "agency": "National Aeronautics and Space Administration",
+   "federalAccount": "080-0124",
+   "agencyIdentifier": "080",
+   "adapter": "usaspending_obligations",
+   "baseline": "reference/nasa_exploration_obligation_baseline.json",
+   "availability": {
+    "firstFiscalYear": 2017,
+    "firstFiscalYearPeriod": 6,
+    "regularFirstPeriod": 2
+   },
+   "programActivities": [
+    {
+     "slug": "deep-space-exploration-systems",
+     "code": "0001",
+     "name": "Deep Space Exploration Systems",
+     "park": "5RN5AZGZKXF",
+     "parkAliases": [],
+     "codeNameAliases": [
+      {"code": "0001", "name": "EXPLORATION (DIRECT)"},
+      {"code": "0001", "name": "DEEP SPACE EXPLORATION SYSTEMS (DIRECT)"}
+     ]
+    },
+    {
+     "slug": "unknown-other",
+     "code": "0000",
+     "name": "Unknown / other",
+     "park": "",
+     "parkAliases": [],
+     "codeNameAliases": [
+      {"code": "0000", "name": "UNKNOWN/OTHER"}
+     ]
+    }
+   ]
+  },
+  {
+   "path": "nasa/space-operations",
+   "name": "Space Operations",
+   "abbrev": "NASA Space Operations",
+   "agency": "National Aeronautics and Space Administration",
+   "federalAccount": "080-0115",
+   "agencyIdentifier": "080",
+   "adapter": "usaspending_obligations",
+   "baseline": "reference/nasa_space_operations_obligation_baseline.json",
+   "availability": {
+    "firstFiscalYear": 2017,
+    "firstFiscalYearPeriod": 6,
+    "regularFirstPeriod": 2
+   },
+   "programActivities": [
+    {"slug": "space-operations-direct", "code": "0001", "name": "Space Operations (Direct)", "park": "5ZD5GGP15KD", "parkAliases": [], "codeNameAliases": []},
+    {"slug": "space-operations-reimbursable", "code": "0801", "name": "Space Operations (Reimbursable)", "park": "", "parkAliases": [], "codeNameAliases": []},
+    {
+     "slug": "unknown-other",
+     "code": "0000",
+     "name": "Unknown / other",
+     "park": "",
+     "parkAliases": [],
+     "codeNameAliases": [
+      {"code": "0000", "name": "0"},
+      {"code": "0000", "name": "OTHER/UNKNOWN"},
+      {"code": "0000", "name": "UNKNOWN/OTHER"}
+     ]
+    }
+   ]
   }
   ,
   {

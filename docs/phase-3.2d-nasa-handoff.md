@@ -1,14 +1,15 @@
 # Phase 3.2d NASA handoff
 
-Status: Stage A is complete and live through PR
-[#34](https://github.com/jpwolfson/science-funding-dashboard/pull/34).
-Science `080-0120` has ten accepted FY2017--FY2026 partitions, its exact-cent
-baseline, the canonical `Science (Direct)` Program Activity, dashboards, and
-combined sentinel coverage. Stage B's Aeronautics `080-0126`, Space Technology
-`080-0131`, and STEM Engagement `080-0128` registry scaffolds are complete with
-official-source exact-cent baselines and canonical Program Activities. Stage B
+Status: Stages A and B are reconciled, merged, deployed, and live through PRs
+[#34](https://github.com/jpwolfson/science-funding-dashboard/pull/34) and
+[#39](https://github.com/jpwolfson/science-funding-dashboard/pull/39).
+Science `080-0120`, Aeronautics `080-0126`, Space Technology `080-0131`, and
+STEM Engagement `080-0128` each have ten accepted FY2017--FY2026 partitions,
+exact-cent baselines, canonical Program Activities, dashboards, and combined
+sentinel coverage. Stage C's Exploration `080-0124` and Space Operations
+`080-0115` registry scaffolds are complete on a current-main candidate with
+official-source exact-cent baselines and canonical Program Activities. Stage C
 has not changed the production trigger or started a custom-account download.
-Stage C remains deliberately deferred.
 
 ## Staged rollout contract
 
@@ -22,7 +23,7 @@ production reconcile validates every registered store:
 The coordinator owns trigger changes. The worker appends only the accounts for
 the stage about to run; later empty accounts must not be pre-registered.
 
-## Stages A and B evidence boundaries
+## Program Activity evidence boundary
 
 The official Science federal account is `080-0120`, titled `Science, National
 Aeronautics and Space Administration`. USAspending Files A/B/C begin at FY2017
@@ -43,10 +44,18 @@ Activity, respectively `0001` / PARK `5ZD5GGPT55B` and `0001` / PARK
 `SCIENCE, TECHNOLOGY, ENGINEERING, AND MATHEMATICS ENGAGEMENT (DIRECT)` is a
 code/name alias of that same identity, not a second page.
 
+Exploration's historical `0001 EXPLORATION (DIRECT)` and later `0001 DEEP
+SPACE EXPLORATION SYSTEMS (DIRECT)` labels normalize to the current PARK
+`5RN5AZGZKXF` canonical identity `Deep Space Exploration Systems`. Its
+official `0000 UNKNOWN/OTHER` observation remains an explicit fallback.
+Space Operations preserves three distinct identities: direct `0001` / PARK
+`5ZD5GGP15KD`, reimbursable `0801`, and the `0000` fallback with historical
+labels `0`, `OTHER/UNKNOWN`, and `UNKNOWN/OTHER`.
+
 File B signed obligations remain canonical; File C and its signed residual are
 separate. The accepted Science backfill retains Assistance, Contracts, and
 Unlinked files and does not call File C/net a bounded completeness percentage.
-Stage B must retain the same signed reconciliation contract.
+Stages B and C retain the same signed reconciliation contract.
 
 ## Stage A accepted release evidence
 
@@ -73,10 +82,35 @@ elapsed 2h47m59s and reconciliation ran 9m24s. NASA tests passed 5/5, registry
 all-account light/dark cases. The 22-page screenshot pack and live Science
 account/activity pages passed reader review.
 
+## Stage B accepted release evidence
+
+Durable run
+[`31864158299`](https://github.com/jpwolfson/science-funding-dashboard/actions/runs/31864158299)
+completed with the exact terminal topology of 33 jobs: plan, all 30
+account-year pulls, and reconcile succeeded (32 successes); the branch-only
+deploy job was skipped. Reconcile atomically committed
+`3073382a3b7aa51b799bb7d8d3de7d2cc145c55b`, the trigger was restored to
+weekly/all in `33f5519353e3b3596887ed147d28c0604f327c19`, and PR #39 merged at
+`bbc67c0ef11eea612094dc1e51c65f98eb435b63`.
+
+Post-reconcile checks passed NASA 6/6, fast 7/7, rendered 3/3 including 88
+all-account cases, and 31 screenshot cases with zero audit errors or duplicate
+payloads. Post-merge Test `31888320904` and Deploy Pages `31888320902` both
+succeeded. Live Aeronautics, Space Technology, STEM Engagement, obligation
+index, and sentinel JSON match the merged branch byte-for-byte; all four
+rendered pages are populated and produced no browser warnings or errors.
+
 ## Remaining rollout work
 
-Stage B must materialize Aeronautics, Space Technology, and STEM Engagement
-atomically before Stage C appends Exploration and Space Operations. Each stage
-still requires its own source run, exact reconciliation, trigger restoration,
+Stage C must materialize Exploration and Space Operations atomically. It still
+requires its own source run, exact reconciliation, trigger restoration,
 current-main integration, PR, deploy, and live reader review. The worker opens
-but never merges those future NASA pull requests.
+but never merges that future NASA pull request.
+
+The pre-download scaffold gate is registry plus fast verification. Rendered
+all-account verification is intentionally deferred until reconcile creates the
+two new dashboard trees: before that atomic commit, its only failures are the
+expected eight light/dark account/activity requests for Exploration and Space
+Operations returning 404. Existing rendered account cases and both sentinel
+cases remain green; after reconcile, the full rendered tier must pass without
+an exception.
