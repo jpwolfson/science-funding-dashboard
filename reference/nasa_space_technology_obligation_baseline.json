@@ -3,18 +3,57 @@
  "federalAccount": "080-0131",
  "source": "USAspending federal account fiscal-year snapshots (GTAS/File A), https://api.usaspending.gov/api/v2/federal_accounts/080-0131/?fiscal_year=<FY>, retrieved 2026-08-12",
  "fiscalYears": {
-  "2015": {"status": "unavailable", "reason": "Files A/B/C begin in FY2017 Q2"},
-  "2016": {"status": "unavailable", "reason": "Files A/B/C begin in FY2017 Q2"},
-  "2017": {"status": "partial", "asOfPeriod": 12, "obligationsCents": 72019958276, "firstPeriod": 6},
-  "2018": {"status": "complete", "obligationsCents": 77158674286},
-  "2019": {"status": "complete", "obligationsCents": 90789788516},
-  "2020": {"status": "complete", "obligationsCents": 109112319017},
-  "2021": {"status": "complete", "obligationsCents": 117511331201},
-  "2022": {"status": "complete", "obligationsCents": 111068326813},
-  "2023": {"status": "complete", "obligationsCents": 119919391987},
-  "2024": {"status": "complete", "obligationsCents": 108979017841},
-  "2025": {"status": "complete", "obligationsCents": 96593899268},
-  "2026": {"status": "partial", "asOfPeriod": 9, "obligationsCents": 36122857204}
+  "2015": {
+   "status": "unavailable",
+   "reason": "Files A/B/C begin in FY2017 Q2"
+  },
+  "2016": {
+   "status": "unavailable",
+   "reason": "Files A/B/C begin in FY2017 Q2"
+  },
+  "2017": {
+   "asOfPeriod": 12,
+   "firstPeriod": 6,
+   "obligationsCents": 72019958276,
+   "status": "partial"
+  },
+  "2018": {
+   "status": "complete",
+   "obligationsCents": 77158674286
+  },
+  "2019": {
+   "status": "complete",
+   "obligationsCents": 90789788516
+  },
+  "2020": {
+   "status": "complete",
+   "obligationsCents": 109112319017
+  },
+  "2021": {
+   "status": "complete",
+   "obligationsCents": 117511331201
+  },
+  "2022": {
+   "status": "complete",
+   "obligationsCents": 111068326813
+  },
+  "2023": {
+   "status": "complete",
+   "obligationsCents": 119919391987
+  },
+  "2024": {
+   "status": "complete",
+   "obligationsCents": 108979017841
+  },
+  "2025": {
+   "status": "complete",
+   "obligationsCents": 96593899268
+  },
+  "2026": {
+   "asOfPeriod": 9,
+   "obligationsCents": 36122857204,
+   "status": "partial"
+  }
  },
  "notes": [
   "FY2017 is partial because Files A/B/C begin with the cumulative Q2/P06 snapshot.",
