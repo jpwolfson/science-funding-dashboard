@@ -9,15 +9,41 @@ from scripts.plan_obligation_refresh import plan
 
 
 REPO = Path(__file__).resolve().parent.parent
-EXPECTED_ACCOUNTS = {"nasa/science": ("080-0120", "Science")}
+EXPECTED_ACCOUNTS = {
+    "nasa/science": ("080-0120", "Science"),
+    "nasa/aeronautics": ("080-0126", "Aeronautics"),
+    "nasa/space-technology": ("080-0131", "Space Technology"),
+    "nasa/stem-engagement": (
+        "080-0128",
+        "Science, Technology, Engineering, and Mathematics Engagement",
+    ),
+}
 EXPECTED_CENTS = {
     "nasa/science": [
         580635184620, 615406027421, 668434852041, 727742760754,
         710528050433, 781081970082, 792504133274, 726300678004,
         760283157214, 473335964862,
     ],
+    "nasa/aeronautics": [
+        66013033435, 68558100461, 72900591151, 78834274091,
+        84508616452, 87399166899, 94425768765, 97417704263,
+        96680983467, 50861750910,
+    ],
+    "nasa/space-technology": [
+        72019958276, 77158674286, 90789788516, 109112319017,
+        117511331201, 111068326813, 119919391987, 108979017841,
+        96593899268, 36122857204,
+    ],
+    "nasa/stem-engagement": [
+        10543835769, 10493930251, 11033682312, 12072228456,
+        12925056091, 13230090452, 15380938964, 14151489463,
+        12782240041, 7540313657,
+    ],
 }
-STAGE_SELECTORS = {"nasa/science": 10}
+STAGE_SELECTORS = {
+    "nasa/science": 10,
+    "nasa/aeronautics,nasa/space-technology,nasa/stem-engagement": 30,
+}
 
 
 class NASAObligationScaffoldTests(unittest.TestCase):
@@ -122,14 +148,41 @@ class NASAObligationScaffoldTests(unittest.TestCase):
                         "obligations_incurred": "1.00", **row,
                     }], account["federalAccount"], aliases)
 
+    def test_historical_code_name_aliases_resolve(self):
+        for account in self.accounts.values():
+            aliases = alias_map(account)
+            for activity in account["programActivities"]:
+                for historical in activity.get("codeNameAliases", []):
+                    rows = [{
+                        "federal_account_symbol": account["federalAccount"],
+                        "program_activity_code": historical["code"],
+                        "program_activity_name": historical["name"],
+                        "obligations_incurred": "1.00",
+                    }]
+                    parsed = parse_file_b_snapshot(
+                        rows, account["federalAccount"], aliases
+                    )
+                    self.assertEqual(100, next(iter(parsed.values())))
+                    identity_key, code, name, park = next(iter(parsed))[0:4]
+                    self.assertEqual(activity["code"].zfill(4), identity_key)
+                    self.assertEqual(activity["code"].zfill(4), code)
+                    self.assertEqual(activity["name"], name)
+                    self.assertEqual(activity.get("park", ""), park)
+
     def test_stage_plans_have_exact_job_counts_and_periods(self):
         for selector, count in STAGE_SELECTORS.items():
             jobs = plan(REPO, mode="full", selectors=selector)["include"]
             self.assertEqual(count, len(jobs), selector)
-            self.assertEqual(list(range(2017, 2027)), [
-                job["fiscalYear"] for job in jobs
-            ])
-            self.assertEqual([12] * 9 + [9], [job["period"] for job in jobs])
+            selected = selector.split(",")
+            self.assertEqual(set(selected), {job["account"] for job in jobs})
+            for path in selected:
+                account_jobs = [job for job in jobs if job["account"] == path]
+                self.assertEqual(list(range(2017, 2027)), [
+                    job["fiscalYear"] for job in account_jobs
+                ])
+                self.assertEqual(
+                    [12] * 9 + [9], [job["period"] for job in account_jobs]
+                )
 
 
 if __name__ == "__main__":

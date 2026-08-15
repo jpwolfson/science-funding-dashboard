@@ -490,6 +490,69 @@
    "programActivities": [
     {"slug": "science-direct", "code": "0001", "name": "Science (Direct)", "park": "5ZD5GGPDU49", "parkAliases": [], "codeNameAliases": []}
    ]
+  },
+  {
+   "path": "nasa/aeronautics",
+   "name": "Aeronautics",
+   "abbrev": "NASA Aeronautics",
+   "agency": "National Aeronautics and Space Administration",
+   "federalAccount": "080-0126",
+   "agencyIdentifier": "080",
+   "adapter": "usaspending_obligations",
+   "baseline": "reference/nasa_aeronautics_obligation_baseline.json",
+   "availability": {
+    "firstFiscalYear": 2017,
+    "firstFiscalYearPeriod": 6,
+    "regularFirstPeriod": 2
+   },
+   "programActivities": [
+    {"slug": "aeronautics-direct", "code": "0001", "name": "Aeronautics (Direct)", "park": "5ZD5GGPT55B", "parkAliases": [], "codeNameAliases": []}
+   ]
+  },
+  {
+   "path": "nasa/space-technology",
+   "name": "Space Technology",
+   "abbrev": "NASA Space Technology",
+   "agency": "National Aeronautics and Space Administration",
+   "federalAccount": "080-0131",
+   "agencyIdentifier": "080",
+   "adapter": "usaspending_obligations",
+   "baseline": "reference/nasa_space_technology_obligation_baseline.json",
+   "availability": {
+    "firstFiscalYear": 2017,
+    "firstFiscalYearPeriod": 6,
+    "regularFirstPeriod": 2
+   },
+   "programActivities": [
+    {"slug": "space-technology-direct", "code": "0001", "name": "Space Technology (Direct)", "park": "5ZD5GGQ7TN7", "parkAliases": [], "codeNameAliases": []}
+   ]
+  },
+  {
+   "path": "nasa/stem-engagement",
+   "name": "Science, Technology, Engineering, and Mathematics Engagement",
+   "abbrev": "NASA STEM Engagement",
+   "agency": "National Aeronautics and Space Administration",
+   "federalAccount": "080-0128",
+   "agencyIdentifier": "080",
+   "adapter": "usaspending_obligations",
+   "baseline": "reference/nasa_stem_engagement_obligation_baseline.json",
+   "availability": {
+    "firstFiscalYear": 2017,
+    "firstFiscalYearPeriod": 6,
+    "regularFirstPeriod": 2
+   },
+   "programActivities": [
+    {
+     "slug": "education-direct",
+     "code": "0001",
+     "name": "Education (Direct)",
+     "park": "5ZD5GGQ085N",
+     "parkAliases": [],
+     "codeNameAliases": [
+      {"code": "0001", "name": "SCIENCE, TECHNOLOGY, ENGINEERING, AND MATHEMATICS ENGAGEMENT (DIRECT)"}
+     ]
+    }
+   ]
   }
   ,
   {
