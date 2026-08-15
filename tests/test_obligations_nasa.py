@@ -47,6 +47,12 @@ EXPECTED_IDENTITIES = {
         ("space-operations-direct", "0001", "Space Operations (Direct)", "5ZD5GGP15KD"),
         ("space-operations-reimbursable", "0801", "Space Operations (Reimbursable)", ""),
         ("unknown-other", "0000", "Unknown / other", ""),
+        (
+            "activity-from-obligation-before-fy-2018-program-activity-not-specified",
+            "PRE2018",
+            "ACTIVITY FROM OBLIGATION BEFORE FY 2018: PROGRAM ACTIVITY NOT SPECIFIED",
+            "PRE2018",
+        ),
     ],
 }
 EXPECTED_CODE_NAME_ALIASES = {
@@ -144,7 +150,7 @@ class NASAObligationScaffoldTests(unittest.TestCase):
             ]
             for path, account in self.accounts.items()
         })
-        self.assertEqual(10, sum(map(len, EXPECTED_IDENTITIES.values())))
+        self.assertEqual(11, sum(map(len, EXPECTED_IDENTITIES.values())))
         self.assertEqual(EXPECTED_CODE_NAME_ALIASES, {
             path: {
                 activity["slug"]: [
@@ -296,6 +302,38 @@ class NASAObligationScaffoldTests(unittest.TestCase):
         })
         self.assertEqual({
             "Deep Space Exploration Systems",
+            "ACTIVITY FROM OBLIGATION BEFORE FY 2018: PROGRAM ACTIVITY NOT SPECIFIED",
+        }, {key[2] for key in parsed})
+
+    def test_space_operations_fy2026_park_transition_and_pre2018(self):
+        account = self.accounts["nasa/space-operations"]
+        aliases = alias_map(account)
+        self.assertEqual(
+            aliases[("park", "5ZD5GGP15KD")]["slug"],
+            aliases[("park", "5Q15DKKYF0L")]["slug"],
+        )
+        rows = [
+            {
+                "federal_account_symbol": "080-0115",
+                "program_activity_reporting_key": "5Q15DKKYF0L",
+                "obligations_incurred": "0.00",
+            },
+            {
+                "federal_account_symbol": "080-0115",
+                "program_activity_reporting_key": "5ZD5GGP15KD",
+                "obligations_incurred": "216336753.88",
+            },
+            {
+                "federal_account_symbol": "080-0115",
+                "program_activity_reporting_key": "PRE2018",
+                "obligations_incurred": "0.00",
+            },
+        ]
+        parsed = parse_file_b_snapshot(rows, "080-0115", aliases)
+        self.assertEqual(21_633_675_388, sum(parsed.values()))
+        self.assertEqual(2, len(parsed))
+        self.assertEqual({
+            "Space Operations (Direct)",
             "ACTIVITY FROM OBLIGATION BEFORE FY 2018: PROGRAM ACTIVITY NOT SPECIFIED",
         }, {key[2] for key in parsed})
 
