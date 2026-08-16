@@ -330,9 +330,9 @@ class CommerceObligationTests(unittest.TestCase):
                     self.assertEqual(pins[offset], years[str(fy)]["obligationsCents"])
                 self.assertEqual("partial", years["2026"]["status"])
                 self.assertEqual(9, years["2026"]["asOfPeriod"])
-                self.assertIn(
+                self.assertEqual(
+                    NOAA_RECONCILED_FY2026_PINS[path],
                     years["2026"]["obligationsCents"],
-                    {pins[-1], NOAA_RECONCILED_FY2026_PINS[path]},
                 )
 
     def test_noaa_pac_fy2025_preserves_exact_file_a_file_b_variance(self):
@@ -703,10 +703,7 @@ class CommerceObligationTests(unittest.TestCase):
     def test_stage_store_transition_is_atomic(self):
         stores = [REPO / "data" / "obligations" / path
                   for path in self.stage_paths]
-        present = [store.exists() for store in stores]
-        self.assertIn(sum(present), {0, len(stores)})
-        if not any(present):
-            return
+        self.assertTrue(all(store.is_dir() for store in stores))
         expected = {"manifest.json"}
         for fy in range(2017, 2027):
             expected.add(f"FY{fy}.csv.gz")

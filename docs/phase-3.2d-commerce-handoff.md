@@ -43,7 +43,7 @@ The accepted PAC FY2024 P12 File B archive from job `95074505756` totals
 Program Activity totals. FY2025 is an exact-source variance: the accepted
 File B and date-filtered Program Activity total is `261595507473` cents while
 the official GTAS/File A account total is `263240345521` cents, a difference
-of `1644838048` cents. The proposed dual-pin row preserves both exact official
+of `1644838048` cents. The owner-approved dual-pin row preserves both exact official
 totals under the source-warning contract; File B remains canonical, and no
 synthetic residual or tolerance is introduced. Raw artifacts `9256753415`,
 `9256977273`, and the full attempt-2 archive `9257775657` are retained for 14
@@ -76,7 +76,7 @@ CSV has 731 rows totaling `749893110879` cents, and the official
 date-filtered Program Activity endpoint independently totals the same exact
 amount. The live GTAS/File A federal-account record remains `590995523920`
 cents, so File A minus File B is `-158897586959` cents
-(-$1,588,975,869.59). The proposed dual-pin row preserves both exact official
+(-$1,588,975,869.59). The owner-approved dual-pin row preserves both exact official
 totals under the existing source-warning contract; File B remains canonical,
 and no synthetic residual or tolerance is introduced. Attempt-specific raw
 artifact `9268819942` is retained for 14 days with outer SHA-256
@@ -104,6 +104,25 @@ or both stores present with all ten FY2017--26 partitions and reconciled P09
 pins (`303354666643` ORF cents and `105930342662` PAC cents). A one-store or
 partial-partition state still fails closed. After the atomic commit, the
 temporary scaffold alternatives must be removed before merge.
+
+Attempt 8 reran only the failed reconcile job after that transition repair.
+The complete terminal `filter=all` inventory is 184 raw executions across
+pages of 100 and 84 jobs, followed by an explicitly empty page 3. Its latest
+logical topology is exactly 22 successes (plan, all 20 pulls, and reconcile),
+zero failures, and the branch deploy skipped. Atomic commit
+`2ec3219fdb3895fed2e79c1c7ac651c13ba23309` materializes both ten-partition
+NOAA stores, exact approved FY2025 dual pins, reconciled FY2026 P09 pins,
+rebuilt rollups, and the 26-account combined sentinel. The temporary scaffold
+alternatives are removed at the trigger-restored release head.
+
+Post-reconcile release gates pass: Commerce `17/17`; both focused registries
+`10/10`; whole registry `185/185` with 26 unique paths and federal-account
+codes; fast `7/7`; rendered account, all-account, and sentinel matrices
+`5/5`, `104/104`, and `2/2`; and the second screenshot pack `36/36` with no
+capture errors. The footprint is `409029302` tracked bytes, `407462087` data
+bytes, and `238061118` gzipped-store bytes. Its conservative, historical-
+backfill-dominated 52-week projection remains flagged and is not treated as a
+steady-state forecast.
 
 The full batch payload is:
 
