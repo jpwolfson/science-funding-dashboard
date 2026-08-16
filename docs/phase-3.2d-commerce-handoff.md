@@ -95,6 +95,16 @@ still fails. Single-pin accounts retain the original exact File A check.
 Attempt-specific raw artifact `9269112197` is retained for 14 days with outer
 SHA-256 `6b6e57c4a5b65c9ac0eef48ad56e17563f27c6221b0d1025d5f9f5023f170c6b`.
 
+Attempt 7 completed ORF FY2025 and unblocked reconcile. Candidate data
+validation passed, then the fast tier correctly caught two scaffold-to-release
+test assumptions: NOAA stores were still required to be absent, and FY2026
+was still pinned to the pre-pull snapshot. The transition gate now permits
+only two exact atomic states: both NOAA stores absent with the scaffold pins,
+or both stores present with all ten FY2017--26 partitions and reconciled P09
+pins (`303354666643` ORF cents and `105930342662` PAC cents). A one-store or
+partial-partition state still fails closed. After the atomic commit, the
+temporary scaffold alternatives must be removed before merge.
+
 The full batch payload is:
 
 ```json

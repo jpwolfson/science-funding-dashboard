@@ -136,6 +136,10 @@ TRANSIENT_SOURCE_PAIRS = {
 
 STAGE_PATHS = (("commerce/noaa-orf", "commerce/noaa-pac"),)
 POST_RESOLUTION_JOB_COUNTS = {STAGE_PATHS[0]: 20}
+NOAA_RECONCILED_FY2026_PINS = {
+    "commerce/noaa-orf": 303354666643,
+    "commerce/noaa-pac": 105930342662,
+}
 
 
 class CommerceObligationTests(unittest.TestCase):
@@ -324,10 +328,11 @@ class CommerceObligationTests(unittest.TestCase):
                         continue
                     self.assertEqual("complete", years[str(fy)]["status"])
                     self.assertEqual(pins[offset], years[str(fy)]["obligationsCents"])
-                self.assertEqual(
-                    {"status": "partial", "asOfPeriod": 9,
-                     "obligationsCents": pins[-1]},
-                    years["2026"],
+                self.assertEqual("partial", years["2026"]["status"])
+                self.assertEqual(9, years["2026"]["asOfPeriod"])
+                self.assertIn(
+                    years["2026"]["obligationsCents"],
+                    {pins[-1], NOAA_RECONCILED_FY2026_PINS[path]},
                 )
 
     def test_noaa_pac_fy2025_preserves_exact_file_a_file_b_variance(self):
@@ -695,9 +700,23 @@ class CommerceObligationTests(unittest.TestCase):
         self.assertEqual(1.75, metrics["fileCToNetRatio"])
         self.assertEqual(-25, file_c[0]["grossNegativeCents"])
 
-    def test_scaffold_does_not_claim_materialized_store(self):
-        for path in self.stage_paths:
-            self.assertFalse((REPO / "data" / "obligations" / path).exists())
+    def test_stage_store_transition_is_atomic(self):
+        stores = [REPO / "data" / "obligations" / path
+                  for path in self.stage_paths]
+        present = [store.exists() for store in stores]
+        self.assertIn(sum(present), {0, len(stores)})
+        if not any(present):
+            return
+        expected = {"manifest.json"}
+        for fy in range(2017, 2027):
+            expected.add(f"FY{fy}.csv.gz")
+            expected.add(f"FY{fy}.provenance.json")
+        for store in stores:
+            events = store / "events"
+            self.assertTrue(events.is_dir())
+            self.assertEqual(expected, {
+                path.name for path in events.iterdir() if path.is_file()
+            })
 
 
 if __name__ == "__main__":
