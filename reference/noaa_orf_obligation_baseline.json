@@ -3,16 +3,48 @@
  "federalAccount": "013-1450",
  "source": "USAspending federal-account fiscal-year snapshots (GTAS/File A): https://api.usaspending.gov/api/v2/federal_accounts/3685/fiscal_year_snapshot/{fiscal_year}/; retrieved 2026-08-12",
  "fiscalYears": {
-  "2015": {"status": "unavailable", "reason": "Files A/B/C begin in FY2017 Q2"},
-  "2016": {"status": "unavailable", "reason": "Files A/B/C begin in FY2017 Q2"},
-  "2017": {"status": "partial", "firstPeriod": 6, "asOfPeriod": 12, "obligationsCents": 387492057258},
-  "2018": {"status": "complete", "obligationsCents": 401113134274},
-  "2019": {"status": "complete", "obligationsCents": 414053240951},
-  "2020": {"status": "complete", "obligationsCents": 446269141709},
-  "2021": {"status": "complete", "obligationsCents": 449218951481},
-  "2022": {"status": "complete", "obligationsCents": 494084647118},
-  "2023": {"status": "complete", "obligationsCents": 628433143287},
-  "2024": {"status": "complete", "obligationsCents": 725047451996},
+  "2015": {
+   "status": "unavailable",
+   "reason": "Files A/B/C begin in FY2017 Q2"
+  },
+  "2016": {
+   "status": "unavailable",
+   "reason": "Files A/B/C begin in FY2017 Q2"
+  },
+  "2017": {
+   "asOfPeriod": 12,
+   "firstPeriod": 6,
+   "obligationsCents": 387492057258,
+   "status": "partial"
+  },
+  "2018": {
+   "status": "complete",
+   "obligationsCents": 401113134274
+  },
+  "2019": {
+   "status": "complete",
+   "obligationsCents": 414053240951
+  },
+  "2020": {
+   "status": "complete",
+   "obligationsCents": 446269141709
+  },
+  "2021": {
+   "status": "complete",
+   "obligationsCents": 449218951481
+  },
+  "2022": {
+   "status": "complete",
+   "obligationsCents": 494084647118
+  },
+  "2023": {
+   "status": "complete",
+   "obligationsCents": 628433143287
+  },
+  "2024": {
+   "status": "complete",
+   "obligationsCents": 725047451996
+  },
   "2025": {
    "status": "complete",
    "obligationsCents": 590995523920,
@@ -20,7 +52,11 @@
    "fileAFileBVarianceCents": -158897586959,
    "fileAFileBVarianceReason": "Official FY2025 P12 File B and date-filtered Program Activity totals are $1,588,975,869.59 above the GTAS/File A federal-account total; preserve both exact official source totals under the source-warning contract"
   },
-  "2026": {"status": "partial", "asOfPeriod": 9, "obligationsCents": 303405392819}
+  "2026": {
+   "asOfPeriod": 9,
+   "obligationsCents": 303354666643,
+   "status": "partial"
+  }
  },
  "notes": [
   "FY2024 was re-pinned on 2026-08-16 after the accepted P12 File B archive and the live official federal-account record independently reconciled to 725047451996 cents; this supersedes the earlier 2026-08-12 snapshot value.",
