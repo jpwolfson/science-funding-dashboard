@@ -20,7 +20,16 @@ source evidence establishes one reviewed identity.
 
 FY2015–16 are unavailable. FY2017 begins at P06 and is partial through P12;
 FY2018–25 are complete; FY2026 is partial through P09. Every source-available
-year has an exact obligation-cent pin. The full batch payload is:
+year has an exact obligation-cent pin.
+
+The accepted ORF FY2024 P12 File B archive from run `31910397962`, job
+`95074505208`, totals `725047451996` cents. The live official FY2024 account
+record independently reports the same `7250474519.96` dollars, so this exact
+pin supersedes the earlier 2026-08-12 snapshot value. Raw artifact
+`9255002876` is retained for 14 days with outer SHA-256
+`6b8e9632a220bf8ef234a033c04931023cd4a63bc84b599465d6b1b2b80b5885`.
+
+The full batch payload is:
 
 ```json
 {
