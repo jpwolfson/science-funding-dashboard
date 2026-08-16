@@ -70,6 +70,20 @@ SHA-256 values
 `ee755e71ce210dce70f58409c6c7a054e2e5d9e5a780507202bc69eaf511753a`
 and `0284c1aa82eed03321ba0b793e24eb324a49039ce83e89eae6cad6047a832811`.
 
+Attempt 5 completed every ORF FY2025 File B period plus File C and exposed an
+exact official source variance at final validation. The retained P12 File B
+CSV has 731 rows totaling `749893110879` cents, and the official
+date-filtered Program Activity endpoint independently totals the same exact
+amount. The live GTAS/File A federal-account record remains `590995523920`
+cents, so File A minus File B is `-158897586959` cents
+(-$1,588,975,869.59). The proposed dual-pin row preserves both exact official
+totals under the existing source-warning contract; File B remains canonical,
+and no synthetic residual or tolerance is introduced. Attempt-specific raw
+artifact `9268819942` is retained for 14 days with outer SHA-256
+`3b6838b3ad267f24376f44c66de76556b39e690910c2465d4dc227de05861a85`;
+its nested official P12 File B ZIP has SHA-256
+`62e8dec24840a47441b146c14aa27bcbb5a3f5690d640b7429162084255d5b2a`.
+
 The full batch payload is:
 
 ```json

@@ -348,6 +348,24 @@ class CommerceObligationTests(unittest.TestCase):
                 self.assertNotIn("fileAFileBVarianceCents", ordinary)
                 self.assertNotIn("fileAFileBVarianceReason", ordinary)
 
+    def test_noaa_orf_fy2025_preserves_exact_file_a_file_b_variance(self):
+        account = self.accounts["commerce/noaa-orf"]
+        baseline = json.loads((REPO / account["baseline"]).read_text())
+        row = baseline["fiscalYears"]["2025"]
+        self.assertEqual(590995523920, row["obligationsCents"])
+        self.assertEqual(749893110879, row["fileBObligationsCents"])
+        self.assertEqual(-158897586959, row["fileAFileBVarianceCents"])
+        self.assertEqual(
+            row["obligationsCents"] - row["fileBObligationsCents"],
+            row["fileAFileBVarianceCents"],
+        )
+        self.assertIn("official source totals", row["fileAFileBVarianceReason"])
+        for fy, ordinary in baseline["fiscalYears"].items():
+            if fy != "2025":
+                self.assertNotIn("fileBObligationsCents", ordinary)
+                self.assertNotIn("fileAFileBVarianceCents", ordinary)
+                self.assertNotIn("fileAFileBVarianceReason", ordinary)
+
     def test_bea_fy2020_probe_or_final_gap_is_explicit(self):
         if "commerce/bea" not in self.accounts:
             return
