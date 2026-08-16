@@ -114,9 +114,17 @@ NOAA_ORF_FY2025_P02_TRANSIENTS = (
     ("1210", "NOAA WIDE SUPPORT SERVICES", 671816022, "0015"),
 )
 
+NOAA_ORF_FY2025_P06_TRANSIENTS = (
+    ("0420", "NATIONAL WEATHER SERVICE", 40646, "0004"),
+    ("0520", "NESDIS", 225000000, "0005"),
+    ("0620", "MISSION SUPPORT", 50000000, "0006"),
+)
+
 TRANSIENT_SOURCE_PAIRS = {
     ("commerce/noaa-orf", code, name)
-    for code, name, _, _ in NOAA_ORF_FY2025_P02_TRANSIENTS
+    for code, name, _, _ in (
+        NOAA_ORF_FY2025_P02_TRANSIENTS + NOAA_ORF_FY2025_P06_TRANSIENTS
+    )
 }
 
 STAGE_PATHS = (("commerce/noaa-orf", "commerce/noaa-pac"),)
@@ -230,6 +238,32 @@ class CommerceObligationTests(unittest.TestCase):
                 parsed_total += parsed_cents
         self.assertEqual(34, len(NOAA_ORF_FY2025_P02_TRANSIENTS))
         self.assertEqual(26829765627, parsed_total)
+
+    def test_noaa_orf_fy2025_p06_transient_aliases_reconcile_exactly(self):
+        account = self.accounts["commerce/noaa-orf"]
+        aliases = alias_map(account)
+        parsed_total = 0
+        for code, name, amount_cents, canonical_code in NOAA_ORF_FY2025_P06_TRANSIENTS:
+            with self.subTest(code=code, name=name):
+                row = {
+                    "federal_account_symbol": account["federalAccount"],
+                    "program_activity_reporting_key": "",
+                    "program_activity_code": code,
+                    "program_activity_name": name,
+                    "obligations_incurred": (
+                        f"{amount_cents // 100}.{amount_cents % 100:02d}"
+                    ),
+                }
+                parsed = parse_file_b_snapshot(
+                    [row], account["federalAccount"], aliases
+                )
+                self.assertEqual(1, len(parsed))
+                key, parsed_cents = next(iter(parsed.items()))
+                self.assertEqual(canonical_code, key[1])
+                self.assertEqual(amount_cents, parsed_cents)
+                parsed_total += parsed_cents
+        self.assertEqual(3, len(NOAA_ORF_FY2025_P06_TRANSIENTS))
+        self.assertEqual(275040646, parsed_total)
 
     def test_baselines_preserve_exact_pins_and_boundaries(self):
         for path in self.stage_paths:

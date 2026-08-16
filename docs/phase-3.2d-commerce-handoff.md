@@ -47,6 +47,14 @@ retained for 14 days with outer SHA-256 values
 `4dcc46b56ec42b955f8c597c2dc4f193be3f4f74082479b1b9b0e20d71509f86`
 and `e2045264e322b42fb7de47fb9c175712d56905eaebfbb860515b7e5ee33f5126`.
 
+The ORF FY2025 attempt-2 P06 archive adds three later transient exact pairs:
+`0420 / NATIONAL WEATHER SERVICE`, `0520 / NESDIS`, and
+`0620 / MISSION SUPPORT`. Their three rows total `275040646` cents and map
+by exact name-qualified alias to the existing NWS, NESDIS, and Program
+Support identities. Raw artifact `9257423821` is retained for 14 days with
+outer SHA-256
+`f78191873d5cb26cf164bd3b2642b4fecbd51a35c6aa4d2f90f6c9d030c53ce0`.
+
 The full batch payload is:
 
 ```json
