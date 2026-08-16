@@ -60,6 +60,13 @@ Support identities. Raw artifact `9257423821` is retained for 14 days with
 outer SHA-256
 `f78191873d5cb26cf164bd3b2642b4fecbd51a35c6aa4d2f90f6c9d030c53ce0`.
 
+The ORF FY2025 attempt-3 P07 archive adds one later transient exact pair:
+`0240 / NATIONAL MARINE FISHERIES SERVICE`. Its single row totals
+`95600000` cents and maps by exact name-qualified alias to the existing NMFS
+identity `0002`. Raw artifact `9268213389` is retained for 14 days with outer
+SHA-256
+`ee755e71ce210dce70f58409c6c7a054e2e5d9e5a780507202bc69eaf511753a`.
+
 The full batch payload is:
 
 ```json
