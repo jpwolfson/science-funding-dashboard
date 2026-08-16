@@ -122,6 +122,7 @@ NOAA_ORF_FY2025_P06_TRANSIENTS = (
 
 NOAA_ORF_FY2025_P07_TRANSIENTS = (
     ("0240", "NATIONAL MARINE FISHERIES SERVICE", 95600000, "0002"),
+    ("0320", "OCEANIC AND ATMOPHERIC RESEARCH", 252100000, "0003"),
 )
 
 TRANSIENT_SOURCE_PAIRS = {
@@ -296,8 +297,8 @@ class CommerceObligationTests(unittest.TestCase):
                 self.assertEqual(canonical_code, key[1])
                 self.assertEqual(amount_cents, parsed_cents)
                 parsed_total += parsed_cents
-        self.assertEqual(1, len(NOAA_ORF_FY2025_P07_TRANSIENTS))
-        self.assertEqual(95600000, parsed_total)
+        self.assertEqual(2, len(NOAA_ORF_FY2025_P07_TRANSIENTS))
+        self.assertEqual(347700000, parsed_total)
 
     def test_baselines_preserve_exact_pins_and_boundaries(self):
         for path in self.stage_paths:
