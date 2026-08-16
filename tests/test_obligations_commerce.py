@@ -77,6 +77,48 @@ OFFICIAL_SOURCE_COUNTS = {
     "commerce/census-periodic-censuses": (13, 4),
 }
 
+NOAA_ORF_FY2025_P02_TRANSIENTS = (
+    ("0100", "NATIONAL OCEAN SERVICE", 361884807, "0001"),
+    ("0101", "NATIONAL OCEAN SERVICE", 1256497384, "0001"),
+    ("0101", "NATIONAL OCEAN SERVICE - IIJA (P.L. 117-58)", 846277, "0001"),
+    ("0102", "NATIONAL OCEAN SERVICE", 647560877, "0001"),
+    ("0201", "NATIONAL MARINE FISHERIES SERVICE", 1551980677, "0002"),
+    ("0202", "NATIONAL MARINE FISHERIES SERVICE", 1257917781, "0002"),
+    ("0203", "NATIONAL MARINE FISHERIES SERVICE", 624970178, "0002"),
+    ("0204", "NATIONAL MARINE FISHERIES SERVICE", 397635684, "0002"),
+    ("0204", "NATIONAL MARINE FISHERIES SERVICE - IIJA (P.L. 117-58)", 2924101, "0002"),
+    ("0210", "NATIONAL MARINE FISHERIES SERVICE - IIJA (P.L. 117-58)", 13375457, "0002"),
+    ("0300", "OCEANIC AND ATMOPHERIC RESEARCH", 340058632, "0003"),
+    ("0301", "OCEANIC AND ATMOPHERIC RESEARCH", 731432413, "0003"),
+    ("0302", "OCEANIC AND ATMOPHERIC RESEARCH", 789373443, "0003"),
+    ("0302", "OCEANIC AND ATMOSPHERIC RESEARCH - IIJA (P.L. 117-58)", 2680453, "0003"),
+    ("0303", "OCEANIC AND ATMOPHERIC RESEARCH", 862793220, "0003"),
+    ("0304", "OCEANIC AND ATMOPHERIC RESEARCH", 52667433, "0003"),
+    ("0400", "NATIONAL WEATHER SERVICE", 404348903, "0004"),
+    ("0401", "NATIONAL WEATHER SERVICE", 1698334256, "0004"),
+    ("0402", "NATIONAL WEATHER SERVICE", 513834805, "0004"),
+    ("0403", "NATIONAL WEATHER SERVICE", 6284552016, "0004"),
+    ("0404", "NATIONAL WEATHER SERVICE", 330000600, "0004"),
+    ("0405", "NATIONAL WEATHER SERVICE", 1169819181, "0004"),
+    ("0405", "NATIONAL WEATHER SERVICE - IIJA (P.L. 117-58)", 4686699, "0004"),
+    ("0500", "NATIONAL ENVIRONMENTAL SATELLITE DATA, AND INFO. S", 3563106, "0005"),
+    ("0501", "NATIONAL ENVIRONMENTAL SATELLITE DATA, AND INFO. S", 1059915698, "0005"),
+    ("0502", "NATIONAL ENVIRONMENTAL SATELLITE DATA, AND INFO. S", 600508081, "0005"),
+    ("0601", "MISSION SUPPORT", 2232602531, "0006"),
+    ("0601", "MISSION SUPPORT - IIJA (P.L. 117-58)", 30888699, "0006"),
+    ("0700", "OFFICE OF MARINE AND AVIATION OPERATIONS", 99057482, "0010"),
+    ("0701", "OFFICE OF MARINE AND AVIATION OPERATIONS", 1660104593, "0010"),
+    ("0702", "OFFICE OF MARINE AND AVIATION OPERATIONS", 236131382, "0010"),
+    ("0705", "OFFICE OF MARINE AND AVIATION OPERATIONS", 34779524, "0010"),
+    ("0706", "OFFICE OF MARINE AND AVIATION OPERATIONS - IIJA (P.L. 117-58)", 900223232, "0010"),
+    ("1210", "NOAA WIDE SUPPORT SERVICES", 671816022, "0015"),
+)
+
+TRANSIENT_SOURCE_PAIRS = {
+    ("commerce/noaa-orf", code, name)
+    for code, name, _, _ in NOAA_ORF_FY2025_P02_TRANSIENTS
+}
+
 STAGE_PATHS = (("commerce/noaa-orf", "commerce/noaa-pac"),)
 POST_RESOLUTION_JOB_COUNTS = {STAGE_PATHS[0]: 20}
 
@@ -133,8 +175,12 @@ class CommerceObligationTests(unittest.TestCase):
                         pac_pairs.append((
                             str(activity["code"]).zfill(4), activity["name"]
                         ))
-                    pac_pairs.extend((str(row["code"]).zfill(4), row["name"])
-                                     for row in activity.get("codeNameAliases", []))
+                    pac_pairs.extend(
+                        (str(row["code"]).zfill(4), row["name"])
+                        for row in activity.get("codeNameAliases", [])
+                        if (path, str(row["code"]).zfill(4), row["name"])
+                        not in TRANSIENT_SOURCE_PAIRS
+                    )
                     parks.extend(filter(None, [
                         activity.get("park"),
                         *activity.get("parkAliases", []),
@@ -158,6 +204,32 @@ class CommerceObligationTests(unittest.TestCase):
             sum(ACCOUNT_META[path][3] for path in self.stage_paths),
             grand_total,
         )
+
+    def test_noaa_orf_fy2025_p02_transient_aliases_reconcile_exactly(self):
+        account = self.accounts["commerce/noaa-orf"]
+        aliases = alias_map(account)
+        parsed_total = 0
+        for code, name, amount_cents, canonical_code in NOAA_ORF_FY2025_P02_TRANSIENTS:
+            with self.subTest(code=code, name=name):
+                row = {
+                    "federal_account_symbol": account["federalAccount"],
+                    "program_activity_reporting_key": "",
+                    "program_activity_code": code,
+                    "program_activity_name": name,
+                    "obligations_incurred": (
+                        f"{amount_cents // 100}.{amount_cents % 100:02d}"
+                    ),
+                }
+                parsed = parse_file_b_snapshot(
+                    [row], account["federalAccount"], aliases
+                )
+                self.assertEqual(1, len(parsed))
+                key, parsed_cents = next(iter(parsed.items()))
+                self.assertEqual(canonical_code, key[1])
+                self.assertEqual(amount_cents, parsed_cents)
+                parsed_total += parsed_cents
+        self.assertEqual(34, len(NOAA_ORF_FY2025_P02_TRANSIENTS))
+        self.assertEqual(26829765627, parsed_total)
 
     def test_baselines_preserve_exact_pins_and_boundaries(self):
         for path in self.stage_paths:

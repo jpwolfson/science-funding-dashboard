@@ -29,6 +29,15 @@ pin supersedes the earlier 2026-08-12 snapshot value. Raw artifact
 `9255002876` is retained for 14 days with outer SHA-256
 `6b8e9632a220bf8ef234a033c04931023cd4a63bc84b599465d6b1b2b80b5885`.
 
+ORF FY2025 P02 also exposes 34 transient exact code/name pairs that do not
+appear in the final all-history Program Activity inventory. They comprise
+842 File B rows; the 34 newly reviewed pairs total `26829765627` cents and
+map by exact name-qualified alias to the existing NOS, NMFS, OAR, NWS,
+NESDIS, Program Support, OMAO, and NOAA Wide Support Services identities.
+No bare-code or new dashboard identity was introduced. Raw artifact
+`9255011172` is retained for 14 days with outer SHA-256
+`c3a7710bdf9546e5b7e6c4ef060b3d9feddc7ffe19a81b51e25fd70061541b6b`.
+
 The full batch payload is:
 
 ```json
