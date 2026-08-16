@@ -13,10 +13,17 @@
   "2022": {"status": "complete", "obligationsCents": 164623381900},
   "2023": {"status": "complete", "obligationsCents": 204331417055},
   "2024": {"status": "complete", "obligationsCents": 240475202079},
-  "2025": {"status": "complete", "obligationsCents": 261595507473},
+  "2025": {
+   "status": "complete",
+   "obligationsCents": 263240345521,
+   "fileBObligationsCents": 261595507473,
+   "fileAFileBVarianceCents": 1644838048,
+   "fileAFileBVarianceReason": "Official FY2025 P12 File B and date-filtered Program Activity totals are $16,448,380.48 below the GTAS/File A federal-account total; preserve both exact official source totals under the source-warning contract"
+  },
   "2026": {"status": "partial", "asOfPeriod": 9, "obligationsCents": 134504769998}
  },
  "notes": [
-  "FY2024 and FY2025 were re-pinned on 2026-08-16 after the accepted P12 File B archives independently reconciled to the official date-filtered federal-account Program Activity totals of 240475202079 and 261595507473 cents; these supersede the earlier 2026-08-12 snapshot values."
+  "FY2024 was re-pinned on 2026-08-16 after the accepted P12 File B archive independently reconciled to the official date-filtered federal-account Program Activity total of 240475202079 cents.",
+  "FY2025 preserves the proposed exact official File A/File B source variance: the GTAS/File A federal-account total is 263240345521 cents and the canonical File B and date-filtered Program Activity total is 261595507473 cents; no synthetic residual or tolerance is created."
  ]
 }

@@ -38,14 +38,19 @@ No bare-code or new dashboard identity was introduced. Raw artifact
 `9255011172` is retained for 14 days with outer SHA-256
 `c3a7710bdf9546e5b7e6c4ef060b3d9feddc7ffe19a81b51e25fd70061541b6b`.
 
-The accepted PAC FY2024 and FY2025 P12 File B archives from jobs
-`95074505756` and `95074505792` total `240475202079` and `261595507473`
-cents. The official date-filtered federal-account Program Activity endpoint
-independently sums to those exact values, so these pins supersede the earlier
-2026-08-12 snapshot values. Raw artifacts `9256753415` and `9256977273` are
-retained for 14 days with outer SHA-256 values
+The accepted PAC FY2024 P12 File B archive from job `95074505756` totals
+`240475202079` cents, exactly matching the official account and date-filtered
+Program Activity totals. FY2025 is an exact-source variance: the accepted
+File B and date-filtered Program Activity total is `261595507473` cents while
+the official GTAS/File A account total is `263240345521` cents, a difference
+of `1644838048` cents. The proposed dual-pin row preserves both exact official
+totals under the source-warning contract; File B remains canonical, and no
+synthetic residual or tolerance is introduced. Raw artifacts `9256753415`,
+`9256977273`, and the full attempt-2 archive `9257775657` are retained for 14
+days with outer SHA-256 values
 `4dcc46b56ec42b955f8c597c2dc4f193be3f4f74082479b1b9b0e20d71509f86`
-and `e2045264e322b42fb7de47fb9c175712d56905eaebfbb860515b7e5ee33f5126`.
+`e2045264e322b42fb7de47fb9c175712d56905eaebfbb860515b7e5ee33f5126`,
+and `c72bf72b4e57d0a86c982154fbbf33cb414f0a2e4ba8fc45806afc6a025a16be`.
 
 The ORF FY2025 attempt-2 P06 archive adds three later transient exact pairs:
 `0420 / NATIONAL WEATHER SERVICE`, `0520 / NESDIS`, and

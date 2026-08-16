@@ -23,7 +23,7 @@ ACCOUNT_META = {
         "013-1460", "Procurement, Acquisition and Construction", 12, 32,
         [218232731360, 229682681660, 194996240784, 161579703991,
          152521312472, 164623381900, 204331417055, 240475202079,
-         261595507473, 134504769998],
+         263240345521, 134504769998],
     ),
     "commerce/nist-strs": (
         "013-0500", "Scientific and Technical Research and Services", 7, 11,
@@ -294,6 +294,24 @@ class CommerceObligationTests(unittest.TestCase):
                      "obligationsCents": pins[-1]},
                     years["2026"],
                 )
+
+    def test_noaa_pac_fy2025_preserves_exact_file_a_file_b_variance(self):
+        account = self.accounts["commerce/noaa-pac"]
+        baseline = json.loads((REPO / account["baseline"]).read_text())
+        row = baseline["fiscalYears"]["2025"]
+        self.assertEqual(263240345521, row["obligationsCents"])
+        self.assertEqual(261595507473, row["fileBObligationsCents"])
+        self.assertEqual(1644838048, row["fileAFileBVarianceCents"])
+        self.assertEqual(
+            row["obligationsCents"] - row["fileBObligationsCents"],
+            row["fileAFileBVarianceCents"],
+        )
+        self.assertIn("official source totals", row["fileAFileBVarianceReason"])
+        for fy, ordinary in baseline["fiscalYears"].items():
+            if fy != "2025":
+                self.assertNotIn("fileBObligationsCents", ordinary)
+                self.assertNotIn("fileAFileBVarianceCents", ordinary)
+                self.assertNotIn("fileAFileBVarianceReason", ordinary)
 
     def test_bea_fy2020_probe_or_final_gap_is_explicit(self):
         if "commerce/bea" not in self.accounts:
