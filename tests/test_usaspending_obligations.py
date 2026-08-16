@@ -52,7 +52,9 @@ class USAspendingObligationTests(unittest.TestCase):
                 pin, _baseline_pin(Path(temp), account, 2024, 12, 100)
             )
             _validate_account_total(2024, 12, 101, 100, pin)
-            with self.assertRaisesRegex(ValueError, "pinned File A"):
+            _validate_account_total(2024, 12, 100, 100, pin)
+            with self.assertRaisesRegex(
+                    ValueError, "pinned File A 101 or pinned File B 100"):
                 _validate_account_total(2024, 12, 102, 100, pin)
             with self.assertRaisesRegex(ValueError, "pinned File B"):
                 _validate_account_total(2024, 12, 101, 99, pin)

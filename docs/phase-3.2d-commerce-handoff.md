@@ -84,6 +84,17 @@ artifact `9268819942` is retained for 14 days with outer SHA-256
 its nested official P12 File B ZIP has SHA-256
 `62e8dec24840a47441b146c14aa27bcbb5a3f5690d640b7429162084255d5b2a`.
 
+After owner approval, attempt 6 reproduced both exact approved source totals
+but exposed a validator endpoint-classification bug. The live GTAS fiscal-year
+snapshot remains `590995523920` cents, while both P12 File B and the separate
+federal-account detail endpoint return exactly `749893110879` cents. The
+validator had assumed the detail endpoint always represented File A. The
+repair remains fail-closed: for a declared dual pin only, the detail endpoint
+must equal either the exact File A pin or the exact File B pin; any third value
+still fails. Single-pin accounts retain the original exact File A check.
+Attempt-specific raw artifact `9269112197` is retained for 14 days with outer
+SHA-256 `6b6e57c4a5b65c9ac0eef48ad56e17563f27c6221b0d1025d5f9f5023f170c6b`.
+
 The full batch payload is:
 
 ```json
