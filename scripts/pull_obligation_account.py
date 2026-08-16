@@ -224,7 +224,17 @@ def _validate_account_total(fy, last_period, detail_total, file_b_total,
             f"{expected_file_b}"
         )
     file_a_total = baseline_pin.get("obligationsCents")
-    if detail_total != file_a_total:
+    if detail_total == file_a_total:
+        return
+    if ("fileBObligationsCents" in baseline_pin
+            and detail_total == expected_file_b):
+        return
+    if "fileBObligationsCents" in baseline_pin:
+        raise ValueError(
+            f"FY{fy}: account snapshot {detail_total} cents != pinned File A "
+            f"{file_a_total} or pinned File B {expected_file_b}"
+        )
+    else:
         raise ValueError(
             f"FY{fy}: account snapshot {detail_total} cents != pinned File A "
             f"{file_a_total}"
