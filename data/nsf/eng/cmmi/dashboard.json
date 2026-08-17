@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-12",
+ "generated": "2026-08-17",
  "node": {
   "name": "Division of Civil, Mechanical, and Manufacturing Innovation",
   "abbrev": "CMMI",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.nsf.gov/services/v1/awards.json?org_code_div=07030000 (NSF Award Search API), month-by-month on Original Award Date",
  "warnings": [],
- "totalAwards": 6653,
+ "totalAwards": 6709,
  "currentFY": 2026,
  "monthly": [
   {
@@ -1291,12 +1291,12 @@
   },
   {
    "month": "2026-08",
-   "awards": 18,
-   "dollars": 8781686,
-   "std": 18,
+   "awards": 74,
+   "dollars": 50638487,
+   "std": 73,
    "cont": 0,
    "fell": 0,
-   "other": 0
+   "other": 1
   }
  ],
  "fiscalYears": [
@@ -1699,10 +1699,10 @@
   {
    "fy": 2026,
    "partial": true,
-   "awards": 241,
-   "dollars": 100477260,
-   "median": 400000,
-   "exTop3Dollars": 93887072,
+   "awards": 297,
+   "dollars": 142334061,
+   "median": 383362,
+   "exTop3Dollars": 116770000,
    "octJul": {
     "awards": 223,
     "dollars": 91695574,
@@ -1713,22 +1713,22 @@
    },
    "top3": [
     {
+     "id": "2620485",
+     "title": "AI Institute for Advances in Optimization",
+     "awardee": "Georgia Tech Research Corporation",
+     "amount": 20000000
+    },
+    {
+     "id": "2511782",
+     "title": "MRI: Track 2 Acquisition of X-ray Microscopy System for in situ Measurements of Submicrometer-scale Features Across Diverse Materials",
+     "awardee": "Montana State University",
+     "amount": 2973872
+    },
+    {
      "id": "2511726",
      "title": "MRI: Track 2 Development of a Multi-Sensor Data Acquisition Remote Tower System to Enable Research for Safe and Secure Airspace Management",
      "awardee": "Kent State University",
      "amount": 2590189
-    },
-    {
-     "id": "2627492",
-     "title": "SCC-IRG Track 1: Strengthening Resilience of Ojibwe Nations Across Generations (STRONG)",
-     "awardee": "Duke University",
-     "amount": 2000000
-    },
-    {
-     "id": "2609958",
-     "title": "LEAP-HI/GOALI: Engineering Crops for Genetic Adaptation to Changing Environments",
-     "awardee": "George Mason University",
-     "amount": 1999999
     }
    ]
   }
@@ -3044,16 +3044,26 @@
     },
     {
      "d": 314,
-     "awards": 241,
-     "dollars": 100477260
+     "awards": 270,
+     "dollars": 114341699
     },
     {
-     "d": 315,
-     "awards": 241,
-     "dollars": 100477260
+     "d": 320,
+     "awards": 297,
+     "dollars": 142334061
     }
    ]
   }
  ],
- "children": []
+ "children": [],
+ "provider": "nsf",
+ "dataComplete": true,
+ "storeFormat": "csv",
+ "amountNote": "Dollar figures are intended totals (estimatedTotalAmt), not outlays.",
+ "mechanismLabels": {
+  "std": "Standard grants",
+  "cont": "Continuing grants",
+  "fell": "Fellowships",
+  "other": "Other awards"
+ }
 }
