@@ -47,7 +47,7 @@ ACCOUNT_META = {
         "013-0401", "Current Surveys and Programs", 7, 10,
         [27593670279, 29213906053, 28888071095, 29214324563,
          30609204710, 31975648211, 34626118161, 34820902232,
-         34371943923, 26361342910],
+         34371943923, 24981703030],
     ),
     "commerce/census-periodic-censuses": (
         "013-0450", "Periodic Censuses and Programs", 12, 17,
@@ -171,6 +171,20 @@ CENSUS_CURRENT_FY2026_P02_PARK_CENTS = {
     ),
 }
 
+CENSUS_CURRENT_FY2026_P09_PARK_CENTS = {
+    "5UW16SD2QT1": (1821770900,),
+    "5ZC1YCV1N61": (
+        5289004510, 51132695, 184116786, 2074232112, 4549581, 299799,
+        5064360, -47697161, 289935985, 80011098, 8669369370, 81491, 0,
+        35326153, 2785495, 0, 6202,
+    ),
+    "5ZC1YCV1N62": (
+        1025190134, 165255393, 23518780, 425188770, 69366337, 6053951,
+        0, 0, 2408650, 4103475, 4787362734, 9778800, 2590960, 2799,
+        856044, 36827, 0,
+    ),
+}
+
 STAGE_PATHS = (
     NOAA_PATHS,
     NOAA_PATHS + NIST_PATHS,
@@ -182,7 +196,7 @@ CURRENT_FY2026_PINS = {
     "commerce/noaa-pac": 105930342662,
     "commerce/nist-strs": 59469231377,
     "commerce/nist-its": 97300322794,
-    "commerce/census-current-surveys": 26361342910,
+    "commerce/census-current-surveys": 24981703030,
 }
 
 
@@ -790,6 +804,37 @@ class CommerceObligationTests(unittest.TestCase):
         self.assertEqual(
             "PROGRAM ACTIVITY NOT SPECIFIED (PARK 0)",
             by_park["0"]["programActivityName"],
+        )
+
+    def test_census_current_fy2026_p09_preserves_exact_current_pin(self):
+        account = self.accounts["commerce/census-current-surveys"]
+        rows = []
+        for park, amounts in CENSUS_CURRENT_FY2026_P09_PARK_CENTS.items():
+            for amount_cents in amounts:
+                rows.append({
+                    "submission_period": "FY2026P09",
+                    "federal_account_symbol": account["federalAccount"],
+                    "program_activity_reporting_key": park,
+                    "program_activity_code": "",
+                    "program_activity_name": "",
+                    "obligations_incurred": (
+                        f"{'-' if amount_cents < 0 else ''}"
+                        f"{abs(amount_cents) // 100}."
+                        f"{abs(amount_cents) % 100:02d}"
+                    ),
+                })
+        values = parse_file_b_snapshot(
+            rows, account["federalAccount"], alias_map(account)
+        )
+        events = file_b_period_events(
+            {"FY2026P09": values}, account["federalAccount"]
+        )
+        self.assertEqual(35, len(rows))
+        self.assertEqual(3, len(events))
+        self.assertEqual(24981703030, sum(row["amountCents"] for row in events))
+        self.assertEqual(
+            set(CENSUS_CURRENT_FY2026_P09_PARK_CENTS),
+            {row["programActivityReportingKey"] for row in events},
         )
 
     def test_nist_strs_fy2026_p05_park_zero_is_distinct_and_exact(self):

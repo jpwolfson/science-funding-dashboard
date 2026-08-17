@@ -27,6 +27,16 @@ into the unrelated PAC `0000 / UNKNOWN/OTHER` identity. Attempt-specific raw
 artifact `9287082564` is retained for 14 days with outer SHA-256
 `9a18679bc5f80524fd21523d955be37c8797657005001dfc104a2aa75988aebd`.
 
+The accepted retry then completed all FY2026 periods through P09. Its official
+P09 File B archive contains 35 rows across three reviewed PARK identities and
+totals exactly `24981703030` cents. The live official FY2026 federal-account
+record independently reports the same `249817030.30` dollars, superseding the
+earlier partial snapshot pin `26361342910` without creating a source variance.
+Attempt-specific raw artifact `9292285360` is retained for 14 days with outer
+SHA-256 `eae34168a0093ca908b519ac1a864982d54fedd2010e594e1e79584a506d0fa6`;
+its nested P09 File B ZIP has SHA-256
+`95d7e9c43b3f5625aea637aee6173f064f5b5a06a9aeca4e2f881ff721cd7d03`.
+
 ## NOAA release evidence
 
 The pair retains all 99 reviewed official Program Activity identities (72
