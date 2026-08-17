@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-12",
+ "generated": "2026-08-17",
  "node": {
   "name": "Translational Impacts",
   "abbrev": "TI",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.nsf.gov/services/v1/awards.json?org_code_div=15030000 (NSF Award Search API), month-by-month on Original Award Date",
  "warnings": [],
- "totalAwards": 8682,
+ "totalAwards": 8728,
  "currentFY": 2026,
  "monthly": [
   {
@@ -1291,12 +1291,12 @@
   },
   {
    "month": "2026-08",
-   "awards": 14,
-   "dollars": 31355324,
-   "std": 8,
+   "awards": 60,
+   "dollars": 39939200,
+   "std": 53,
    "cont": 0,
    "fell": 0,
-   "other": 6
+   "other": 7
   }
  ],
  "fiscalYears": [
@@ -1699,10 +1699,10 @@
   {
    "fy": 2026,
    "partial": true,
-   "awards": 275,
-   "dollars": 162269567,
-   "median": 304489,
-   "exTop3Dollars": 133155355,
+   "awards": 321,
+   "dollars": 170853443,
+   "median": 300165,
+   "exTop3Dollars": 141739231,
    "octJul": {
     "awards": 261,
     "dollars": 130914243,
@@ -3044,16 +3044,26 @@
     },
     {
      "d": 314,
-     "awards": 275,
-     "dollars": 162269567
+     "awards": 307,
+     "dollars": 168369685
     },
     {
-     "d": 315,
-     "awards": 275,
-     "dollars": 162269567
+     "d": 320,
+     "awards": 321,
+     "dollars": 170853443
     }
    ]
   }
  ],
- "children": []
+ "children": [],
+ "provider": "nsf",
+ "dataComplete": true,
+ "storeFormat": "csv",
+ "amountNote": "Dollar figures are intended totals (estimatedTotalAmt), not outlays.",
+ "mechanismLabels": {
+  "std": "Standard grants",
+  "cont": "Continuing grants",
+  "fell": "Fellowships",
+  "other": "Other awards"
+ }
 }
