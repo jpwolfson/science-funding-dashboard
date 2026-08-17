@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-12",
+ "generated": "2026-08-17",
  "node": {
   "name": "Oia-office of Integrative Activities",
   "abbrev": "OIA",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.nsf.gov/services/v1/awards.json?org_code_div=01060000 (NSF Award Search API), month-by-month on Original Award Date",
  "warnings": [],
- "totalAwards": 993,
+ "totalAwards": 1047,
  "currentFY": 2026,
  "monthly": [
   {
@@ -1291,10 +1291,10 @@
   },
   {
    "month": "2026-08",
-   "awards": 3,
-   "dollars": 5998412,
-   "std": 3,
-   "cont": 0,
+   "awards": 57,
+   "dollars": 31881338,
+   "std": 44,
+   "cont": 13,
    "fell": 0,
    "other": 0
   }
@@ -1699,10 +1699,10 @@
   {
    "fy": 2026,
    "partial": true,
-   "awards": 54,
-   "dollars": 123916331,
-   "median": 976660,
-   "exTop3Dollars": 93916342,
+   "awards": 108,
+   "dollars": 149799257,
+   "median": 299987,
+   "exTop3Dollars": 119799268,
    "octJul": {
     "awards": 51,
     "dollars": 117917919,
@@ -3044,16 +3044,26 @@
     },
     {
      "d": 314,
-     "awards": 54,
-     "dollars": 123916331
+     "awards": 67,
+     "dollars": 132715723
     },
     {
-     "d": 315,
-     "awards": 54,
-     "dollars": 123916331
+     "d": 320,
+     "awards": 108,
+     "dollars": 149799257
     }
    ]
   }
  ],
- "children": []
+ "children": [],
+ "provider": "nsf",
+ "dataComplete": true,
+ "storeFormat": "csv",
+ "amountNote": "Dollar figures are intended totals (estimatedTotalAmt), not outlays.",
+ "mechanismLabels": {
+  "std": "Standard grants",
+  "cont": "Continuing grants",
+  "fell": "Fellowships",
+  "other": "Other awards"
+ }
 }
