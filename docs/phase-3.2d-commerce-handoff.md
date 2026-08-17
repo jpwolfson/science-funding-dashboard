@@ -156,6 +156,19 @@ retains the reviewed 24 official identities (12 PAC/PAN plus 12 PARK) as 15
 stable account-scoped paths. The normal/special laboratory and MEP PARKs remain
 distinct, as do the account-scoped uses of carryover PARK `EX202600313426`.
 
+The FY2026 P02 ITS source adds one further account-scoped identity: exact PARK
+`0` with blank code/name, represented as `PARK0` **PROGRAM ACTIVITY NOT
+SPECIFIED (PARK 0)**. The sole row is exactly zero cents, so it remains
+distinct from the ordinary unknown bucket without changing material totals.
+The reviewed raw snapshot contains 32 rows, seven exact PARK events, and
+`220186874` cents. Attempt-specific raw artifact `9276831057` is retained for
+14 days with outer SHA-256
+`fa65a1124faed97fc50370c7e6a2d65c55a0e24564dac6b93c697f3e81076f6c`;
+its nested official File B ZIP has SHA-256
+`9d67ecbac96078593b8414b3ce70f0c62eb78e711f367c641de337871e986ff2`.
+The strict exact-cents/distinctness repair passes Commerce `18/18`, the ITS
+registry `10/10`, the whole registry `199/199`, and fast `7/7`.
+
 ```json
 {
   "mode": "full",

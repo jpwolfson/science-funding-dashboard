@@ -32,7 +32,7 @@ ACCOUNT_META = {
          95760889645, 59469231377],
     ),
     "commerce/nist-its": (
-        "013-0525", "Industrial Technology Services", 8, 13,
+        "013-0525", "Industrial Technology Services", 9, 14,
         [19088888306, 15767997657, 15896666508, 22295182247,
          26134557043, 23799236356, 21341065594, 44001741776,
          71946905729, 97300322794],
@@ -71,7 +71,7 @@ OFFICIAL_SOURCE_COUNTS = {
     "commerce/noaa-orf": (49, 18),
     "commerce/noaa-pac": (23, 9),
     "commerce/nist-strs": (5, 6),
-    "commerce/nist-its": (7, 6),
+    "commerce/nist-its": (7, 7),
     "commerce/bea": (4, 1),
     "commerce/census-current-surveys": (6, 3),
     "commerce/census-periodic-censuses": (13, 4),
@@ -136,6 +136,23 @@ TRANSIENT_SOURCE_PAIRS = {
 
 NOAA_PATHS = ("commerce/noaa-orf", "commerce/noaa-pac")
 NIST_PATHS = ("commerce/nist-strs", "commerce/nist-its")
+
+NIST_ITS_FY2026_P02_PARK_CENTS = {
+    "0": (0,),
+    "5ZC2FFLEV5S": (
+        34757034, 73645516, 603766, -79896, 27126079, 5816,
+        -24987776, 0, 0, 0, 18294,
+    ),
+    "5ZC2FFLEV5T": (
+        0, 26170742, 0, 57806493, 2254073, 21677751, 880996,
+        0, 0, 0, 0, 23654, 0, 0,
+    ),
+    "5ZC2FFLEV5U": (0,),
+    "6081W4SGJNC": (0, 0, 0),
+    "EX202600313426": (0,),
+    "EX202600313654": (284332,),
+}
+
 STAGE_PATHS = (NOAA_PATHS, NOAA_PATHS + NIST_PATHS)
 POST_RESOLUTION_JOB_COUNTS = dict(zip(STAGE_PATHS, (20, 40)))
 CURRENT_FY2026_PINS = {
@@ -662,6 +679,45 @@ class CommerceObligationTests(unittest.TestCase):
         self.assertEqual(strs_carryover["_programActivityKey"],
                          its_carryover["_programActivityKey"])
         self.assertNotEqual(strs_carryover["id"], its_carryover["id"])
+
+    def test_nist_its_fy2026_p02_park_zero_is_distinct_and_exact(self):
+        if "commerce/nist-its" not in self.accounts:
+            return
+        account = self.accounts["commerce/nist-its"]
+        rows = []
+        for park, amounts in NIST_ITS_FY2026_P02_PARK_CENTS.items():
+            for amount_cents in amounts:
+                rows.append({
+                    "submission_period": "FY2026P02",
+                    "federal_account_symbol": account["federalAccount"],
+                    "program_activity_reporting_key": park,
+                    "program_activity_code": "",
+                    "program_activity_name": "",
+                    "obligations_incurred": (
+                        f"{'-' if amount_cents < 0 else ''}"
+                        f"{abs(amount_cents) // 100}."
+                        f"{abs(amount_cents) % 100:02d}"
+                    ),
+                })
+        values = parse_file_b_snapshot(
+            rows, account["federalAccount"], alias_map(account)
+        )
+        events = file_b_period_events(
+            {"FY2026P02": values}, account["federalAccount"]
+        )
+        self.assertEqual(32, len(rows))
+        self.assertEqual(7, len(events))
+        self.assertEqual(220186874, sum(row["amountCents"] for row in events))
+        by_park = {
+            row["programActivityReportingKey"]: row for row in events
+        }
+        self.assertEqual(set(NIST_ITS_FY2026_P02_PARK_CENTS), set(by_park))
+        self.assertEqual(0, by_park["0"]["amountCents"])
+        self.assertEqual("PARK0", by_park["0"]["_programActivityKey"])
+        self.assertEqual(
+            "PROGRAM ACTIVITY NOT SPECIFIED (PARK 0)",
+            by_park["0"]["programActivityName"],
+        )
 
     def test_negative_file_c_and_ratio_over_100_percent_are_preserved(self):
         if "commerce/bea" not in self.accounts:
