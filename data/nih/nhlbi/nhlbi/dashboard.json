@@ -8,9 +8,10 @@
  },
  "source": "https://api.reporter.nih.gov/v2/projects/search (NIH RePORTER v2), administering IC NHLBI; one application record per fiscal year; intramural projects excluded; dated by award notice, then budget/project start when unavailable",
  "warnings": [
-  "3 stored awards not returned by this full re-pull; retained from the store"
+  "invariant violated: 2025-09 shrank from 856 to 855 awards",
+  "invariant violated: 2026-08 shrank from 516 to 514 awards"
  ],
- "totalAwards": 69120,
+ "totalAwards": 69117,
  "currentFY": 2026,
  "monthly": [
   {
@@ -1194,11 +1195,11 @@
   },
   {
    "month": "2025-09",
-   "awards": 856,
-   "dollars": 540896890,
+   "awards": 855,
+   "dollars": 540867620,
    "std": 404,
    "cont": 320,
-   "fell": 104,
+   "fell": 103,
    "other": 28
   },
   {
@@ -1293,11 +1294,11 @@
   },
   {
    "month": "2026-08",
-   "awards": 516,
-   "dollars": 327567774,
+   "awards": 514,
+   "dollars": 327467546,
    "std": 191,
    "cont": 316,
-   "fell": 9,
+   "fell": 7,
    "other": 0
   }
  ],
@@ -1665,10 +1666,10 @@
   {
    "fy": 2025,
    "partial": false,
-   "awards": 6060,
-   "dollars": 3506631423,
-   "median": 547599,
-   "exTop3Dollars": 3416251695,
+   "awards": 6059,
+   "dollars": 3506602153,
+   "median": 547671,
+   "exTop3Dollars": 3416222425,
    "octJul": {
     "awards": 3769,
     "dollars": 2261186784,
@@ -1701,10 +1702,10 @@
   {
    "fy": 2026,
    "partial": true,
-   "awards": 3876,
-   "dollars": 2363529087,
-   "median": 599011,
-   "exTop3Dollars": 2321888450,
+   "awards": 3874,
+   "dollars": 2363428859,
+   "median": 599396,
+   "exTop3Dollars": 2321788222,
    "octJul": {
     "awards": 3360,
     "dollars": 2035961313,
@@ -2805,18 +2806,18 @@
     },
     {
      "d": 356,
-     "awards": 5982,
-     "dollars": 3394737124
+     "awards": 5981,
+     "dollars": 3394707854
     },
     {
      "d": 363,
-     "awards": 6058,
-     "dollars": 3501547455
+     "awards": 6057,
+     "dollars": 3501518185
     },
     {
      "d": 364,
-     "awards": 6060,
-     "dollars": 3506631423
+     "awards": 6059,
+     "dollars": 3506602153
     }
    ]
   },
@@ -3046,13 +3047,13 @@
     },
     {
      "d": 314,
-     "awards": 3731,
-     "dollars": 2260930496
+     "awards": 3729,
+     "dollars": 2260830268
     },
     {
      "d": 320,
-     "awards": 3876,
-     "dollars": 2363529087
+     "awards": 3874,
+     "dollars": 2363428859
     }
    ]
   }
