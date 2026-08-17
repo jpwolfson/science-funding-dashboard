@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-12",
+ "generated": "2026-08-17",
  "node": {
   "name": "Division of Behavioral and Cognitive Sciences",
   "abbrev": "BCS",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.nsf.gov/services/v1/awards.json?org_code_div=04040000 (NSF Award Search API), month-by-month on Original Award Date",
  "warnings": [],
- "totalAwards": 5069,
+ "totalAwards": 5076,
  "currentFY": 2026,
  "monthly": [
   {
@@ -1291,9 +1291,9 @@
   },
   {
    "month": "2026-08",
-   "awards": 3,
-   "dollars": 3691188,
-   "std": 3,
+   "awards": 10,
+   "dollars": 11235387,
+   "std": 10,
    "cont": 0,
    "fell": 0,
    "other": 0
@@ -1699,10 +1699,10 @@
   {
    "fy": 2026,
    "partial": true,
-   "awards": 77,
-   "dollars": 53851097,
+   "awards": 84,
+   "dollars": 61395296,
    "median": 659257,
-   "exTop3Dollars": 47701869,
+   "exTop3Dollars": 55064209,
    "octJul": {
     "awards": 74,
     "dollars": 50159909,
@@ -1712,6 +1712,12 @@
     "other": 0
    },
    "top3": [
+    {
+     "id": "2605859",
+     "title": "CRCNS US-Israel Research Proposal: Relating anatomy, multi-regional neural dynamics, and behavior during decision-making",
+     "awardee": "Allen Institute",
+     "amount": 2225000
+    },
     {
      "id": "2605721",
      "title": "CRCNS Research Proposal: Generative models of neural activity driving conversational speech in longitudinal dialogues",
@@ -1723,12 +1729,6 @@
      "title": "CRCNS Research Proposal: Attentional Control of Credit Assignment in Learning",
      "awardee": "Dartmouth College",
      "amount": 2048950
-    },
-    {
-     "id": "2605896",
-     "title": "CRCNS Research Proposal: Computational and Neural Mechanisms of Learning in Speech Motor Control",
-     "awardee": "University of California-San Francisco",
-     "amount": 2043141
     }
    ]
   }
@@ -3048,12 +3048,22 @@
      "dollars": 53851097
     },
     {
-     "d": 315,
-     "awards": 77,
-     "dollars": 53851097
+     "d": 320,
+     "awards": 84,
+     "dollars": 61395296
     }
    ]
   }
  ],
- "children": []
+ "children": [],
+ "provider": "nsf",
+ "dataComplete": true,
+ "storeFormat": "csv",
+ "amountNote": "Dollar figures are intended totals (estimatedTotalAmt), not outlays.",
+ "mechanismLabels": {
+  "std": "Standard grants",
+  "cont": "Continuing grants",
+  "fell": "Fellowships",
+  "other": "Other awards"
+ }
 }
