@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-12",
+ "generated": "2026-08-17",
  "node": {
   "name": "Division of Physics",
   "abbrev": "PHY",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.nsf.gov/services/v1/awards.json?org_code_div=03010000 (NSF Award Search API), month-by-month on Original Award Date",
  "warnings": [],
- "totalAwards": 3999,
+ "totalAwards": 4102,
  "currentFY": 2026,
  "monthly": [
   {
@@ -1291,10 +1291,10 @@
   },
   {
    "month": "2026-08",
-   "awards": 81,
-   "dollars": 40927215,
-   "std": 76,
-   "cont": 5,
+   "awards": 184,
+   "dollars": 65301861,
+   "std": 178,
+   "cont": 6,
    "fell": 0,
    "other": 0
   }
@@ -1699,10 +1699,10 @@
   {
    "fy": 2026,
    "partial": true,
-   "awards": 204,
-   "dollars": 152019399,
-   "median": 450000,
-   "exTop3Dollars": 115169358,
+   "awards": 307,
+   "dollars": 176394045,
+   "median": 360000,
+   "exTop3Dollars": 139544004,
    "octJul": {
     "awards": 123,
     "dollars": 111092184,
@@ -3044,16 +3044,26 @@
     },
     {
      "d": 314,
-     "awards": 204,
-     "dollars": 152019399
+     "awards": 295,
+     "dollars": 174060451
     },
     {
-     "d": 315,
-     "awards": 204,
-     "dollars": 152019399
+     "d": 320,
+     "awards": 307,
+     "dollars": 176394045
     }
    ]
   }
  ],
- "children": []
+ "children": [],
+ "provider": "nsf",
+ "dataComplete": true,
+ "storeFormat": "csv",
+ "amountNote": "Dollar figures are intended totals (estimatedTotalAmt), not outlays.",
+ "mechanismLabels": {
+  "std": "Standard grants",
+  "cont": "Continuing grants",
+  "fell": "Fellowships",
+  "other": "Other awards"
+ }
 }
