@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-12",
+ "generated": "2026-08-17",
  "node": {
   "name": "Division of Electrical, Communications and Cyber Systems",
   "abbrev": "ECCS",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.nsf.gov/services/v1/awards.json?org_code_div=07010000 (NSF Award Search API), month-by-month on Original Award Date",
  "warnings": [],
- "totalAwards": 4012,
+ "totalAwards": 4052,
  "currentFY": 2026,
  "monthly": [
   {
@@ -1291,9 +1291,9 @@
   },
   {
    "month": "2026-08",
-   "awards": 36,
-   "dollars": 12325538,
-   "std": 36,
+   "awards": 76,
+   "dollars": 26904564,
+   "std": 76,
    "cont": 0,
    "fell": 0,
    "other": 0
@@ -1699,10 +1699,10 @@
   {
    "fy": 2026,
    "partial": true,
-   "awards": 188,
-   "dollars": 74319819,
-   "median": 421684,
-   "exTop3Dollars": 70279487,
+   "awards": 228,
+   "dollars": 88898845,
+   "median": 400000,
+   "exTop3Dollars": 84858513,
    "octJul": {
     "awards": 152,
     "dollars": 61994281,
@@ -3044,16 +3044,26 @@
     },
     {
      "d": 314,
-     "awards": 188,
-     "dollars": 74319819
+     "awards": 218,
+     "dollars": 86635405
     },
     {
-     "d": 315,
-     "awards": 188,
-     "dollars": 74319819
+     "d": 320,
+     "awards": 228,
+     "dollars": 88898845
     }
    ]
   }
  ],
- "children": []
+ "children": [],
+ "provider": "nsf",
+ "dataComplete": true,
+ "storeFormat": "csv",
+ "amountNote": "Dollar figures are intended totals (estimatedTotalAmt), not outlays.",
+ "mechanismLabels": {
+  "std": "Standard grants",
+  "cont": "Continuing grants",
+  "fell": "Fellowships",
+  "other": "Other awards"
+ }
 }
