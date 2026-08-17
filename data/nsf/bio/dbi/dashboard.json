@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-12",
+ "generated": "2026-08-17",
  "node": {
   "name": "Division of Biological Infrastructure",
   "abbrev": "DBI",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.nsf.gov/services/v1/awards.json?org_code_div=08080000 (NSF Award Search API), month-by-month on Original Award Date",
  "warnings": [],
- "totalAwards": 3431,
+ "totalAwards": 3432,
  "currentFY": 2026,
  "monthly": [
   {
@@ -1291,9 +1291,9 @@
   },
   {
    "month": "2026-08",
-   "awards": 13,
-   "dollars": 7368569,
-   "std": 13,
+   "awards": 14,
+   "dollars": 7850766,
+   "std": 14,
    "cont": 0,
    "fell": 0,
    "other": 0
@@ -1699,10 +1699,10 @@
   {
    "fy": 2026,
    "partial": true,
-   "awards": 152,
-   "dollars": 125739007,
-   "median": 468456,
-   "exTop3Dollars": 83756998,
+   "awards": 153,
+   "dollars": 126221204,
+   "median": 469538,
+   "exTop3Dollars": 84239195,
    "octJul": {
     "awards": 139,
     "dollars": 118370438,
@@ -3044,16 +3044,26 @@
     },
     {
      "d": 314,
-     "awards": 152,
-     "dollars": 125739007
+     "awards": 153,
+     "dollars": 126221204
     },
     {
-     "d": 315,
-     "awards": 152,
-     "dollars": 125739007
+     "d": 320,
+     "awards": 153,
+     "dollars": 126221204
     }
    ]
   }
  ],
- "children": []
+ "children": [],
+ "provider": "nsf",
+ "dataComplete": true,
+ "storeFormat": "csv",
+ "amountNote": "Dollar figures are intended totals (estimatedTotalAmt), not outlays.",
+ "mechanismLabels": {
+  "std": "Standard grants",
+  "cont": "Continuing grants",
+  "fell": "Fellowships",
+  "other": "Other awards"
+ }
 }
