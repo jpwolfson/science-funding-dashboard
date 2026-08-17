@@ -26,13 +26,13 @@ ACCOUNT_META = {
          263240345521, 134504769998],
     ),
     "commerce/nist-strs": (
-        "013-0500", "Scientific and Technical Research and Services", 7, 11,
+        "013-0500", "Scientific and Technical Research and Services", 8, 12,
         [71211674371, 71411863464, 74683941480, 75042249476,
          80361787623, 83310214199, 99850616225, 129647944433,
          95760889645, 59469231377],
     ),
     "commerce/nist-its": (
-        "013-0525", "Industrial Technology Services", 8, 13,
+        "013-0525", "Industrial Technology Services", 9, 14,
         [19088888306, 15767997657, 15896666508, 22295182247,
          26134557043, 23799236356, 21341065594, 44001741776,
          71946905729, 97300322794],
@@ -70,8 +70,8 @@ DISPLAY_ONLY_CANONICALS = {
 OFFICIAL_SOURCE_COUNTS = {
     "commerce/noaa-orf": (49, 18),
     "commerce/noaa-pac": (23, 9),
-    "commerce/nist-strs": (5, 6),
-    "commerce/nist-its": (7, 6),
+    "commerce/nist-strs": (5, 7),
+    "commerce/nist-its": (7, 7),
     "commerce/bea": (4, 1),
     "commerce/census-current-surveys": (6, 3),
     "commerce/census-periodic-censuses": (13, 4),
@@ -134,11 +134,39 @@ TRANSIENT_SOURCE_PAIRS = {
     )
 }
 
-STAGE_PATHS = (("commerce/noaa-orf", "commerce/noaa-pac"),)
-POST_RESOLUTION_JOB_COUNTS = {STAGE_PATHS[0]: 20}
-NOAA_RECONCILED_FY2026_PINS = {
+NOAA_PATHS = ("commerce/noaa-orf", "commerce/noaa-pac")
+NIST_PATHS = ("commerce/nist-strs", "commerce/nist-its")
+
+NIST_ITS_FY2026_P02_PARK_CENTS = {
+    "0": (0,),
+    "5ZC2FFLEV5S": (
+        34757034, 73645516, 603766, -79896, 27126079, 5816,
+        -24987776, 0, 0, 0, 18294,
+    ),
+    "5ZC2FFLEV5T": (
+        0, 26170742, 0, 57806493, 2254073, 21677751, 880996,
+        0, 0, 0, 0, 23654, 0, 0,
+    ),
+    "5ZC2FFLEV5U": (0,),
+    "6081W4SGJNC": (0, 0, 0),
+    "EX202600313426": (0,),
+    "EX202600313654": (284332,),
+}
+
+NIST_STRS_FY2026_FILE_B_EVIDENCE = {
+    "FY2026P02": (85, 7538666122, ()),
+    "FY2026P03": (90, 12817408064, ()),
+    "FY2026P04": (93, 20496206010, ()),
+    "FY2026P05": (100, 25225091620, (0, 0, 0, 0)),
+}
+
+STAGE_PATHS = (NOAA_PATHS, NOAA_PATHS + NIST_PATHS)
+POST_RESOLUTION_JOB_COUNTS = dict(zip(STAGE_PATHS, (20, 40)))
+CURRENT_FY2026_PINS = {
     "commerce/noaa-orf": 303354666643,
     "commerce/noaa-pac": 105930342662,
+    "commerce/nist-strs": 59469231377,
+    "commerce/nist-its": 97300322794,
 }
 
 
@@ -331,7 +359,7 @@ class CommerceObligationTests(unittest.TestCase):
                 self.assertEqual("partial", years["2026"]["status"])
                 self.assertEqual(9, years["2026"]["asOfPeriod"])
                 self.assertEqual(
-                    NOAA_RECONCILED_FY2026_PINS[path],
+                    CURRENT_FY2026_PINS[path],
                     years["2026"]["obligationsCents"],
                 )
 
@@ -659,6 +687,81 @@ class CommerceObligationTests(unittest.TestCase):
                          its_carryover["_programActivityKey"])
         self.assertNotEqual(strs_carryover["id"], its_carryover["id"])
 
+    def test_nist_its_fy2026_p02_park_zero_is_distinct_and_exact(self):
+        if "commerce/nist-its" not in self.accounts:
+            return
+        account = self.accounts["commerce/nist-its"]
+        rows = []
+        for park, amounts in NIST_ITS_FY2026_P02_PARK_CENTS.items():
+            for amount_cents in amounts:
+                rows.append({
+                    "submission_period": "FY2026P02",
+                    "federal_account_symbol": account["federalAccount"],
+                    "program_activity_reporting_key": park,
+                    "program_activity_code": "",
+                    "program_activity_name": "",
+                    "obligations_incurred": (
+                        f"{'-' if amount_cents < 0 else ''}"
+                        f"{abs(amount_cents) // 100}."
+                        f"{abs(amount_cents) % 100:02d}"
+                    ),
+                })
+        values = parse_file_b_snapshot(
+            rows, account["federalAccount"], alias_map(account)
+        )
+        events = file_b_period_events(
+            {"FY2026P02": values}, account["federalAccount"]
+        )
+        self.assertEqual(32, len(rows))
+        self.assertEqual(7, len(events))
+        self.assertEqual(220186874, sum(row["amountCents"] for row in events))
+        by_park = {
+            row["programActivityReportingKey"]: row for row in events
+        }
+        self.assertEqual(set(NIST_ITS_FY2026_P02_PARK_CENTS), set(by_park))
+        self.assertEqual(0, by_park["0"]["amountCents"])
+        self.assertEqual("PARK0", by_park["0"]["_programActivityKey"])
+        self.assertEqual(
+            "PROGRAM ACTIVITY NOT SPECIFIED (PARK 0)",
+            by_park["0"]["programActivityName"],
+        )
+
+    def test_nist_strs_fy2026_p05_park_zero_is_distinct_and_exact(self):
+        if "commerce/nist-strs" not in self.accounts:
+            return
+        account = self.accounts["commerce/nist-strs"]
+        evidence = NIST_STRS_FY2026_FILE_B_EVIDENCE
+        rows = [{
+            "submission_period": "FY2026P05",
+            "federal_account_symbol": account["federalAccount"],
+            "program_activity_reporting_key": "0",
+            "program_activity_code": "",
+            "program_activity_name": "",
+            "obligations_incurred": f"{amount_cents // 100}.{amount_cents % 100:02d}",
+        } for amount_cents in evidence["FY2026P05"][2]]
+        values = parse_file_b_snapshot(
+            rows, account["federalAccount"], alias_map(account)
+        )
+        events = file_b_period_events(
+            {"FY2026P05": values}, account["federalAccount"]
+        )
+        self.assertEqual(
+            ("FY2026P02", "FY2026P03", "FY2026P04", "FY2026P05"),
+            tuple(evidence),
+        )
+        self.assertEqual(368, sum(item[0] for item in evidence.values()))
+        self.assertEqual(66077371816,
+                         sum(item[1] for item in evidence.values()))
+        self.assertEqual(4, len(rows))
+        self.assertEqual(1, len(events))
+        self.assertEqual(0, events[0]["amountCents"])
+        self.assertEqual("0", events[0]["programActivityReportingKey"])
+        self.assertEqual("PARK0", events[0]["_programActivityKey"])
+        self.assertEqual(
+            "PROGRAM ACTIVITY NOT SPECIFIED (PARK 0)",
+            events[0]["programActivityName"],
+        )
+
     def test_negative_file_c_and_ratio_over_100_percent_are_preserved(self):
         if "commerce/bea" not in self.accounts:
             return
@@ -701,14 +804,21 @@ class CommerceObligationTests(unittest.TestCase):
         self.assertEqual(-25, file_c[0]["grossNegativeCents"])
 
     def test_stage_store_transition_is_atomic(self):
-        stores = [REPO / "data" / "obligations" / path
-                  for path in self.stage_paths]
-        self.assertTrue(all(store.is_dir() for store in stores))
+        stores = {
+            path: REPO / "data" / "obligations" / path
+            for path in self.stage_paths
+        }
+        self.assertTrue(all(stores[path].is_dir() for path in NOAA_PATHS))
+        active_present = [stores[path].is_dir() for path in NIST_PATHS]
+        self.assertIn(sum(active_present), {0, len(NIST_PATHS)})
+        if not any(active_present):
+            return
         expected = {"manifest.json"}
         for fy in range(2017, 2027):
             expected.add(f"FY{fy}.csv.gz")
             expected.add(f"FY{fy}.provenance.json")
-        for store in stores:
+        for path in NIST_PATHS:
+            store = stores[path]
             events = store / "events"
             self.assertTrue(events.is_dir())
             self.assertEqual(expected, {

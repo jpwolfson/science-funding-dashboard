@@ -1,15 +1,20 @@
 # Phase 3.2d Commerce release handoff
 
-Prepared from current live main `97fde03c4318957130bbcfd08474ddfe6b7cd2fc`.
+Prepared from current live main `fc74455d275083feaa2c3e1e4d2511870e4d5295`.
 
-## Current batch: NOAA
+## Current batch: NIST pair
 
 This scaffold appends only:
 
-- `commerce/noaa-orf` — federal account `013-1450`, **Operations, Research
-  and Facilities**.
-- `commerce/noaa-pac` — federal account `013-1460`, **Procurement,
-  Acquisition and Construction**.
+- `commerce/nist-strs` — federal account `013-0500`, **Scientific and
+  Technical Research and Services**.
+- `commerce/nist-its` — federal account `013-0525`, **Industrial Technology
+  Services**.
+
+BEA is absent under the parked-account rule. No download, trigger, workflow,
+remote branch, CI run, or pull request is created by the scaffold commit.
+
+## NOAA release evidence
 
 The pair retains all 99 reviewed official Program Activity identities (72
 PAC/PAN and 27 PARK) as 28 stable dashboard paths. Exact code/name matching
@@ -142,6 +147,63 @@ pins with accepted source cents, rebuild obligation rollups, and rebuild the
 combined sentinel before this batch can be called complete. Restore the
 trigger to main's exact weekly/all content after reconcile, then require
 fast/rendered/screens/footprint, PR merge, deploy, and live QA.
+
+## NIST release contract
+
+The NIST batch adds official accounts `013-0500` **Scientific and Technical
+Research and Services** and `013-0525` **Industrial Technology Services**. It
+retains the reviewed 24 official identities (12 PAC/PAN plus 12 PARK) as 15
+stable account-scoped paths. The normal/special laboratory and MEP PARKs remain
+distinct, as do the account-scoped uses of carryover PARK `EX202600313426`.
+
+The FY2026 P02 ITS source adds one further account-scoped identity: exact PARK
+`0` with blank code/name, represented as `PARK0` **PROGRAM ACTIVITY NOT
+SPECIFIED (PARK 0)**. The sole row is exactly zero cents, so it remains
+distinct from the ordinary unknown bucket without changing material totals.
+The reviewed raw snapshot contains 32 rows, seven exact PARK events, and
+`220186874` cents. Attempt-specific raw artifact `9276831057` is retained for
+14 days with outer SHA-256
+`fa65a1124faed97fc50370c7e6a2d65c55a0e24564dac6b93c697f3e81076f6c`;
+its nested official File B ZIP has SHA-256
+`9d67ecbac96078593b8414b3ce70f0c62eb78e711f367c641de337871e986ff2`.
+The strict exact-cents/distinctness repair passes Commerce `18/18`, the ITS
+registry `10/10`, the whole registry `199/199`, and fast `7/7`.
+
+The FY2026 P05 STRS source independently adds the same source spelling as a
+distinct STRS-scoped identity: exact PARK `0` with blank code/name. Its four
+rows are all zero cents, so this repair also preserves material totals and
+does not merge the two NIST account identities. The reviewed raw snapshots
+contain P02 `85` rows / `7538666122` cents, P03 `90` / `12817408064`, P04
+`93` / `20496206010`, and P05 `100` / `25225091620`. Attempt-specific raw
+artifact `9280164407` is retained for 14 days with outer SHA-256
+`c92190766acec5d7d4ba46453575c0ead3625b87a389f513f92edf17a3937d52`.
+The nested official P02-P05 File B ZIP SHA-256 values are, respectively,
+`ea6bc714fb0549f1e787d3937871085874f9f2a62f3b488ec0cb6c513a1a2a88`,
+`c76766a3f13e90937f3ef539f399063d3a284cf7c1997418e1d34721b6ab09cf`,
+`415393622c6444ce50fbe02257f5eb444780bc6a8fc479da769ee49d50582179`,
+and `2ba5da053c2ba441764e361615f1914ec091d34514fb0d0eeaef8fa2f150d87c`.
+The strict STRS repair passes Commerce `19/19`, both focused NIST registries,
+the whole registry, and fast verification before either failed job is retried.
+
+```json
+{
+  "mode": "full",
+  "accounts": "commerce/nist-strs,commerce/nist-its",
+  "from_fy": null,
+  "to_fy": null,
+  "current_period": null
+}
+```
+
+The NIST selector must plan exactly 20 pinned jobs. Its accepted atomic data
+commit must land and pass the full release path before Census Current starts.
+
+Current-main preflight passes Commerce `17/17`, each focused registry `10/10`,
+the 28-account registry `199/199`, exact 20-job selection, and fast `7/7`.
+The pre-store all-account browser matrix passes every materialized account and
+fails only the expected eight light/dark account/Program Activity requests for
+the two NIST dashboard trees that reconcile has not created. Full rendered
+verification is mandatory after the atomic commit.
 
 ## BEA quarantine
 

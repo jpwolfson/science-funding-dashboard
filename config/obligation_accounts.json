@@ -1181,6 +1181,49 @@
     {"slug": "various-accounting", "code": "0050", "park": "", "name": "Various Accounting", "codeNameAliases": [{"code": "0050", "name": "VARIOUS"}]},
     {"slug": "supplemental-2022", "code": "5WK1UYWP9AA", "park": "5WK1UYWP9AA", "name": "2022 Supplemental"}
    ]
+  },
+  {
+   "path": "commerce/nist-strs",
+   "name": "Scientific and Technical Research and Services",
+   "abbrev": "NIST STRS",
+   "agency": "Department of Commerce",
+   "federalAccount": "013-0500",
+   "agencyIdentifier": "013",
+   "adapter": "usaspending_obligations",
+   "baseline": "reference/nist_strs_obligation_baseline.json",
+   "availability": {"firstFiscalYear": 2017, "firstFiscalYearPeriod": 6, "regularFirstPeriod": 2},
+   "programActivities": [
+    {"slug": "unknown-other", "code": "0000", "park": "", "name": "Unknown / other", "codeNameAliases": [{"code": "0000", "name": "UNKNOWN/OTHER"}]},
+    {"slug": "park-0-not-specified", "code": "PARK0", "park": "0", "name": "PROGRAM ACTIVITY NOT SPECIFIED (PARK 0)"},
+    {"slug": "laboratory-programs", "code": "0001", "park": "5ZC2FFJJAYD", "name": "Laboratory Programs"},
+    {"slug": "strs-laboratory-programs", "code": "EX202600313650", "park": "EX202600313650", "name": "STRS Laboratory Programs"},
+    {"slug": "corporate-services", "code": "0201", "park": "5ZC2FFJJAZ9", "name": "Corporate Services"},
+    {"slug": "standards-coordination-special-programs", "code": "0301", "park": "5ZC2FFJJAR7", "name": "Standards Coordination and Special Programs"},
+    {"slug": "chips", "code": "0005", "park": "6081W4QKXDJ", "name": "CHIPS", "codeNameAliases": [{"code": "0005", "name": "CREATING HELPFUL INCENTIVES TO PRODUCE SEMICONDUCTORS (CHIPS) SCIENTIFIC AND TECHNICAL RESEARCH AND SERVICES"}]},
+    {"slug": "nist-carryover-summarized-balances", "code": "EX202600313426", "park": "EX202600313426", "name": "NIST Carryover (Summarized) Balances"}
+   ]
+  },
+  {
+   "path": "commerce/nist-its",
+   "name": "Industrial Technology Services",
+   "abbrev": "NIST ITS",
+   "agency": "Department of Commerce",
+   "federalAccount": "013-0525",
+   "agencyIdentifier": "013",
+   "adapter": "usaspending_obligations",
+   "baseline": "reference/nist_its_obligation_baseline.json",
+   "availability": {"firstFiscalYear": 2017, "firstFiscalYearPeriod": 6, "regularFirstPeriod": 2},
+   "programActivities": [
+    {"slug": "unknown-other", "code": "0000", "park": "", "name": "Unknown / other", "codeNameAliases": [{"code": "0000", "name": "UNKNOWN/OTHER"}]},
+    {"slug": "park-0-not-specified", "code": "PARK0", "park": "0", "name": "PROGRAM ACTIVITY NOT SPECIFIED (PARK 0)"},
+    {"slug": "technology-innovation-program", "code": "0001", "park": "", "name": "Technology Innovation Program", "codeNameAliases": [{"code": "0000", "name": "TECHNOLOGY INNOVATION PROGRAM"}]},
+    {"slug": "hollings-manufacturing-extension-partnership", "code": "0002", "park": "5ZC2FFLEV5S", "name": "Hollings Manufacturing Extension Partnership", "abbrev": "MEP"},
+    {"slug": "its-hollings-manufacturing-extension-partnership", "code": "EX202600313654", "park": "EX202600313654", "name": "ITS: Hollings Manufacturing Extension Partnership"},
+    {"slug": "manufacturing-usa", "code": "0003", "park": "5ZC2FFLEV5T", "name": "Manufacturing USA"},
+    {"slug": "advanced-manufacturing-technology-consortia", "code": "0004", "park": "5ZC2FFLEV5U", "name": "Advanced Manufacturing Technology Consortia"},
+    {"slug": "chips", "code": "0006", "park": "6081W4SGJNC", "name": "CHIPS", "codeNameAliases": [{"code": "0006", "name": "CREATING HELPFUL INCENTIVES TO PRODUCE SEMICONDUCTORS (CHIPS) INDUSTRIAL TECHNOLOGY SERVICES"}]},
+    {"slug": "nist-carryover-summarized-balances", "code": "EX202600313426", "park": "EX202600313426", "name": "NIST Carryover (Summarized) Balances"}
+   ]
   }
  ]
 }
