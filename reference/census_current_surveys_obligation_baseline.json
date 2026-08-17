@@ -3,17 +3,59 @@
  "federalAccount": "013-0401",
  "source": "USAspending federal-account fiscal-year snapshots (GTAS/File A): https://api.usaspending.gov/api/v2/federal_accounts/3666/fiscal_year_snapshot/{fiscal_year}/; retrieved 2026-08-12",
  "fiscalYears": {
-  "2015": {"status": "unavailable", "reason": "Files A/B/C begin in FY2017 Q2"},
-  "2016": {"status": "unavailable", "reason": "Files A/B/C begin in FY2017 Q2"},
-  "2017": {"status": "partial", "firstPeriod": 6, "asOfPeriod": 12, "obligationsCents": 27593670279},
-  "2018": {"status": "complete", "obligationsCents": 29213906053},
-  "2019": {"status": "complete", "obligationsCents": 28888071095},
-  "2020": {"status": "complete", "obligationsCents": 29214324563},
-  "2021": {"status": "complete", "obligationsCents": 30609204710},
-  "2022": {"status": "complete", "obligationsCents": 31975648211},
-  "2023": {"status": "complete", "obligationsCents": 34626118161},
-  "2024": {"status": "complete", "obligationsCents": 34820902232},
-  "2025": {"status": "complete", "obligationsCents": 34371943923, "fileBObligationsCents": 34538417796, "fileAFileBVarianceCents": -166473873, "fileAFileBVarianceReason": "The official FY2025 GTAS/File A fiscal-year snapshot is 34371943923 cents while the accepted P12 File B Program Activity total is 34538417796 cents; the exact -166473873-cent source variance is the File B UNKNOWN/OTHER bucket."},
-  "2026": {"status": "partial", "asOfPeriod": 9, "obligationsCents": 24981703030}
+  "2015": {
+   "status": "unavailable",
+   "reason": "Files A/B/C begin in FY2017 Q2"
+  },
+  "2016": {
+   "status": "unavailable",
+   "reason": "Files A/B/C begin in FY2017 Q2"
+  },
+  "2017": {
+   "asOfPeriod": 12,
+   "firstPeriod": 6,
+   "obligationsCents": 27593670279,
+   "status": "partial"
+  },
+  "2018": {
+   "status": "complete",
+   "obligationsCents": 29213906053
+  },
+  "2019": {
+   "status": "complete",
+   "obligationsCents": 28888071095
+  },
+  "2020": {
+   "status": "complete",
+   "obligationsCents": 29214324563
+  },
+  "2021": {
+   "status": "complete",
+   "obligationsCents": 30609204710
+  },
+  "2022": {
+   "status": "complete",
+   "obligationsCents": 31975648211
+  },
+  "2023": {
+   "status": "complete",
+   "obligationsCents": 34626118161
+  },
+  "2024": {
+   "status": "complete",
+   "obligationsCents": 34820902232
+  },
+  "2025": {
+   "status": "complete",
+   "obligationsCents": 34371943923,
+   "fileBObligationsCents": 34538417796,
+   "fileAFileBVarianceCents": -166473873,
+   "fileAFileBVarianceReason": "The official FY2025 GTAS/File A fiscal-year snapshot is 34371943923 cents while the accepted P12 File B Program Activity total is 34538417796 cents; the exact -166473873-cent source variance is the File B UNKNOWN/OTHER bucket."
+  },
+  "2026": {
+   "asOfPeriod": 9,
+   "obligationsCents": 24981703030,
+   "status": "partial"
+  }
  }
 }
