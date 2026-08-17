@@ -109,10 +109,11 @@ def parse_trans_type(value):
 
 
 class NihReporterPull:
-    def __init__(self, agency, checks, store_path):
+    def __init__(self, agency, checks, store_path, retracted_ids=None):
         self.agency = agency
         self.checks = checks
         self.store_path = store_path
+        self.retracted_ids = set(retracted_ids or ())
         self.warnings = []
 
     def warn(self, message):
@@ -298,11 +299,28 @@ class NihReporterPull:
         merged = dict(stored)
         merged.update(collected)
         if mode == "full":
-            missing = sum(1 for award_id in stored if award_id not in collected)
-            if missing:
+            missing_ids = set(stored) - set(collected)
+            reviewed_retractions = missing_ids & self.retracted_ids
+            for award_id in reviewed_retractions:
+                merged.pop(award_id, None)
+            if reviewed_retractions:
+                print(
+                    f"NOTICE: removed {len(reviewed_retractions)} reviewed "
+                    "RePORTER retraction(s) from the store"
+                )
+            unreviewed_missing = missing_ids - reviewed_retractions
+            if unreviewed_missing:
                 self.warn(
-                    f"{missing} stored awards not returned by this full re-pull; "
+                    f"{len(unreviewed_missing)} stored awards not returned by "
+                    "this full re-pull; "
                     "retained from the store"
+                )
+            returned_retractions = set(collected) & self.retracted_ids
+            if returned_retractions:
+                self.warn(
+                    f"{len(returned_retractions)} reviewed RePORTER "
+                    "retraction(s) returned to the live source; ledger review "
+                    "required"
                 )
 
         awards = list(merged.values())
@@ -329,9 +347,25 @@ class NihReporterPull:
 
 
 def pull_unit(unit_cfg, store_path, full, today, repo_root):
-    del repo_root  # adapter signature shared with NSF
     agency = unit_cfg["params"]["reporter_agency"]
-    puller = NihReporterPull(agency, unit_cfg["checks"], store_path)
+    ledger_path = repo_root / "reference" / "nih_reporter_retractions.json"
+    retracted_ids = set()
+    if ledger_path.exists():
+        ledger = json.loads(ledger_path.read_text())
+        records = ledger.get("records") or []
+        if len({record.get("id") for record in records}) != len(records):
+            raise RuntimeError(f"duplicate NIH retraction ID in {ledger_path}")
+        retracted_ids = {
+            record["id"]
+            for record in records
+            if record.get("reporterAgency") == agency
+        }
+    puller = NihReporterPull(
+        agency,
+        unit_cfg["checks"],
+        store_path,
+        retracted_ids=retracted_ids,
+    )
     awards, warnings = puller.pull(full=full, today=today)
     source = (
         f"{API} (NIH RePORTER v2), administering IC {agency}; "
