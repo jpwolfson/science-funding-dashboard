@@ -136,6 +136,7 @@ TRANSIENT_SOURCE_PAIRS = {
 
 NOAA_PATHS = ("commerce/noaa-orf", "commerce/noaa-pac")
 NIST_PATHS = ("commerce/nist-strs", "commerce/nist-its")
+CENSUS_CURRENT_PATHS = ("commerce/census-current-surveys",)
 
 NIST_ITS_FY2026_P02_PARK_CENTS = {
     "0": (0,),
@@ -160,13 +161,18 @@ NIST_STRS_FY2026_FILE_B_EVIDENCE = {
     "FY2026P05": (100, 25225091620, (0, 0, 0, 0)),
 }
 
-STAGE_PATHS = (NOAA_PATHS, NOAA_PATHS + NIST_PATHS)
-POST_RESOLUTION_JOB_COUNTS = dict(zip(STAGE_PATHS, (20, 40)))
+STAGE_PATHS = (
+    NOAA_PATHS,
+    NOAA_PATHS + NIST_PATHS,
+    NOAA_PATHS + NIST_PATHS + CENSUS_CURRENT_PATHS,
+)
+POST_RESOLUTION_JOB_COUNTS = dict(zip(STAGE_PATHS, (20, 40, 50)))
 CURRENT_FY2026_PINS = {
     "commerce/noaa-orf": 303354666643,
     "commerce/noaa-pac": 105930342662,
     "commerce/nist-strs": 59469231377,
     "commerce/nist-its": 97300322794,
+    "commerce/census-current-surveys": 26361342910,
 }
 
 
