@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-12",
+ "generated": "2026-08-17",
  "node": {
   "name": "Division of Information & Intelligent Systems",
   "abbrev": "IIS",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.nsf.gov/services/v1/awards.json?org_code_div=05020000 (NSF Award Search API), month-by-month on Original Award Date",
  "warnings": [],
- "totalAwards": 6355,
+ "totalAwards": 6356,
  "currentFY": 2026,
  "monthly": [
   {
@@ -1291,9 +1291,9 @@
   },
   {
    "month": "2026-08",
-   "awards": 45,
-   "dollars": 22854009,
-   "std": 22,
+   "awards": 46,
+   "dollars": 23028749,
+   "std": 23,
    "cont": 23,
    "fell": 0,
    "other": 0
@@ -1699,10 +1699,10 @@
   {
    "fy": 2026,
    "partial": true,
-   "awards": 523,
-   "dollars": 279161393,
-   "median": 549205,
-   "exTop3Dollars": 250461393,
+   "awards": 524,
+   "dollars": 279336133,
+   "median": 548813,
+   "exTop3Dollars": 250636133,
    "octJul": {
     "awards": 478,
     "dollars": 256307384,
@@ -3044,16 +3044,26 @@
     },
     {
      "d": 314,
-     "awards": 523,
-     "dollars": 279161393
+     "awards": 524,
+     "dollars": 279336133
     },
     {
-     "d": 315,
-     "awards": 523,
-     "dollars": 279161393
+     "d": 320,
+     "awards": 524,
+     "dollars": 279336133
     }
    ]
   }
  ],
- "children": []
+ "children": [],
+ "provider": "nsf",
+ "dataComplete": true,
+ "storeFormat": "csv",
+ "amountNote": "Dollar figures are intended totals (estimatedTotalAmt), not outlays.",
+ "mechanismLabels": {
+  "std": "Standard grants",
+  "cont": "Continuing grants",
+  "fell": "Fellowships",
+  "other": "Other awards"
+ }
 }
