@@ -134,11 +134,15 @@ TRANSIENT_SOURCE_PAIRS = {
     )
 }
 
-STAGE_PATHS = (("commerce/noaa-orf", "commerce/noaa-pac"),)
-POST_RESOLUTION_JOB_COUNTS = {STAGE_PATHS[0]: 20}
-NOAA_RECONCILED_FY2026_PINS = {
+NOAA_PATHS = ("commerce/noaa-orf", "commerce/noaa-pac")
+NIST_PATHS = ("commerce/nist-strs", "commerce/nist-its")
+STAGE_PATHS = (NOAA_PATHS, NOAA_PATHS + NIST_PATHS)
+POST_RESOLUTION_JOB_COUNTS = dict(zip(STAGE_PATHS, (20, 40)))
+CURRENT_FY2026_PINS = {
     "commerce/noaa-orf": 303354666643,
     "commerce/noaa-pac": 105930342662,
+    "commerce/nist-strs": 59469231377,
+    "commerce/nist-its": 97300322794,
 }
 
 
@@ -331,7 +335,7 @@ class CommerceObligationTests(unittest.TestCase):
                 self.assertEqual("partial", years["2026"]["status"])
                 self.assertEqual(9, years["2026"]["asOfPeriod"])
                 self.assertEqual(
-                    NOAA_RECONCILED_FY2026_PINS[path],
+                    CURRENT_FY2026_PINS[path],
                     years["2026"]["obligationsCents"],
                 )
 
@@ -701,14 +705,21 @@ class CommerceObligationTests(unittest.TestCase):
         self.assertEqual(-25, file_c[0]["grossNegativeCents"])
 
     def test_stage_store_transition_is_atomic(self):
-        stores = [REPO / "data" / "obligations" / path
-                  for path in self.stage_paths]
-        self.assertTrue(all(store.is_dir() for store in stores))
+        stores = {
+            path: REPO / "data" / "obligations" / path
+            for path in self.stage_paths
+        }
+        self.assertTrue(all(stores[path].is_dir() for path in NOAA_PATHS))
+        active_present = [stores[path].is_dir() for path in NIST_PATHS]
+        self.assertIn(sum(active_present), {0, len(NIST_PATHS)})
+        if not any(active_present):
+            return
         expected = {"manifest.json"}
         for fy in range(2017, 2027):
             expected.add(f"FY{fy}.csv.gz")
             expected.add(f"FY{fy}.provenance.json")
-        for store in stores:
+        for path in NIST_PATHS:
+            store = stores[path]
             events = store / "events"
             self.assertTrue(events.is_dir())
             self.assertEqual(expected, {

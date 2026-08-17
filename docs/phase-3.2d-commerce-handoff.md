@@ -1,15 +1,20 @@
 # Phase 3.2d Commerce release handoff
 
-Prepared from current live main `97fde03c4318957130bbcfd08474ddfe6b7cd2fc`.
+Prepared from current live main `fc74455d275083feaa2c3e1e4d2511870e4d5295`.
 
-## Current batch: NOAA
+## Current batch: NIST pair
 
 This scaffold appends only:
 
-- `commerce/noaa-orf` — federal account `013-1450`, **Operations, Research
-  and Facilities**.
-- `commerce/noaa-pac` — federal account `013-1460`, **Procurement,
-  Acquisition and Construction**.
+- `commerce/nist-strs` — federal account `013-0500`, **Scientific and
+  Technical Research and Services**.
+- `commerce/nist-its` — federal account `013-0525`, **Industrial Technology
+  Services**.
+
+BEA is absent under the parked-account rule. No download, trigger, workflow,
+remote branch, CI run, or pull request is created by the scaffold commit.
+
+## NOAA release evidence
 
 The pair retains all 99 reviewed official Program Activity identities (72
 PAC/PAN and 27 PARK) as 28 stable dashboard paths. Exact code/name matching
@@ -142,6 +147,34 @@ pins with accepted source cents, rebuild obligation rollups, and rebuild the
 combined sentinel before this batch can be called complete. Restore the
 trigger to main's exact weekly/all content after reconcile, then require
 fast/rendered/screens/footprint, PR merge, deploy, and live QA.
+
+## NIST release contract
+
+The NIST batch adds official accounts `013-0500` **Scientific and Technical
+Research and Services** and `013-0525` **Industrial Technology Services**. It
+retains the reviewed 24 official identities (12 PAC/PAN plus 12 PARK) as 15
+stable account-scoped paths. The normal/special laboratory and MEP PARKs remain
+distinct, as do the account-scoped uses of carryover PARK `EX202600313426`.
+
+```json
+{
+  "mode": "full",
+  "accounts": "commerce/nist-strs,commerce/nist-its",
+  "from_fy": null,
+  "to_fy": null,
+  "current_period": null
+}
+```
+
+The NIST selector must plan exactly 20 pinned jobs. Its accepted atomic data
+commit must land and pass the full release path before Census Current starts.
+
+Current-main preflight passes Commerce `17/17`, each focused registry `10/10`,
+the 28-account registry `199/199`, exact 20-job selection, and fast `7/7`.
+The pre-store all-account browser matrix passes every materialized account and
+fails only the expected eight light/dark account/Program Activity requests for
+the two NIST dashboard trees that reconcile has not created. Full rendered
+verification is mandatory after the atomic commit.
 
 ## BEA quarantine
 
