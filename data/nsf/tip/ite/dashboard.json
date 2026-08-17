@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-12",
+ "generated": "2026-08-17",
  "node": {
   "name": "Innovation and Technology Ecosystems",
   "abbrev": "ITE",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.nsf.gov/services/v1/awards.json?org_code_div=15020000 (NSF Award Search API), month-by-month on Original Award Date",
  "warnings": [],
- "totalAwards": 834,
+ "totalAwards": 838,
  "currentFY": 2026,
  "monthly": [
   {
@@ -1291,10 +1291,10 @@
   },
   {
    "month": "2026-08",
-   "awards": 1,
-   "dollars": 1040661,
-   "std": 1,
-   "cont": 0,
+   "awards": 5,
+   "dollars": 8740564,
+   "std": 3,
+   "cont": 2,
    "fell": 0,
    "other": 0
   }
@@ -1555,10 +1555,10 @@
   {
    "fy": 2026,
    "partial": true,
-   "awards": 47,
-   "dollars": 609699581,
+   "awards": 51,
+   "dollars": 617399484,
    "median": 15000000,
-   "exTop3Dollars": 522189973,
+   "exTop3Dollars": 529889876,
    "octJul": {
     "awards": 46,
     "dollars": 608658920,
@@ -2900,16 +2900,26 @@
     },
     {
      "d": 314,
-     "awards": 47,
-     "dollars": 609699581
+     "awards": 50,
+     "dollars": 616899581
     },
     {
-     "d": 315,
-     "awards": 47,
-     "dollars": 609699581
+     "d": 320,
+     "awards": 51,
+     "dollars": 617399484
     }
    ]
   }
  ],
- "children": []
+ "children": [],
+ "provider": "nsf",
+ "dataComplete": true,
+ "storeFormat": "csv",
+ "amountNote": "Dollar figures are intended totals (estimatedTotalAmt), not outlays.",
+ "mechanismLabels": {
+  "std": "Standard grants",
+  "cont": "Continuing grants",
+  "fell": "Fellowships",
+  "other": "Other awards"
+ }
 }
