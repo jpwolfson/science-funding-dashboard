@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-12",
+ "generated": "2026-08-17",
  "node": {
   "name": "Office of the Chief of Research Security Strategy and Policy (crsp)",
   "abbrev": "CRSP",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.nsf.gov/services/v1/awards.json?org_code_div=01130000 (NSF Award Search API), month-by-month on Original Award Date",
  "warnings": [],
- "totalAwards": 23,
+ "totalAwards": 24,
  "currentFY": 2026,
  "monthly": [
   {
@@ -1291,9 +1291,9 @@
   },
   {
    "month": "2026-08",
-   "awards": 8,
-   "dollars": 1708826,
-   "std": 8,
+   "awards": 9,
+   "dollars": 2011826,
+   "std": 9,
    "cont": 0,
    "fell": 0,
    "other": 0
@@ -1375,10 +1375,10 @@
   {
    "fy": 2026,
    "partial": true,
-   "awards": 8,
-   "dollars": 1708826,
-   "median": 249998,
-   "exTop3Dollars": 802997,
+   "awards": 9,
+   "dollars": 2011826,
+   "median": 299997,
+   "exTop3Dollars": 1102997,
    "octJul": {
     "awards": 0,
     "dollars": 0,
@@ -1388,6 +1388,12 @@
     "other": 0
    },
    "top3": [
+    {
+     "id": "2628452",
+     "title": "EAGER: Quantifying National and Economic Security Risks and Opportunities in the International Semiconductor R&D Landscape",
+     "awardee": "Carnegie Mellon University",
+     "amount": 303000
+    },
     {
      "id": "2627426",
      "title": "EAGER: Predictive Front-Running of U.S. Research Trajectories",
@@ -1399,12 +1405,6 @@
      "title": "EAGER: Recognizing and Escalating International Research Security Vulnerabilities: Pre-Faculty Researchers in U.S.-Funded Engineering Research Teams",
      "awardee": "University of Florida",
      "amount": 302874
-    },
-    {
-     "id": "2538186",
-     "title": "EAGER: Towards an International Open-source Repository Browser (iORB)",
-     "awardee": "University of California-Santa Cruz",
-     "amount": 300000
     }
    ]
   }
@@ -2182,12 +2182,22 @@
      "dollars": 1708826
     },
     {
-     "d": 315,
-     "awards": 8,
-     "dollars": 1708826
+     "d": 320,
+     "awards": 9,
+     "dollars": 2011826
     }
    ]
   }
  ],
- "children": []
+ "children": [],
+ "provider": "nsf",
+ "dataComplete": true,
+ "storeFormat": "csv",
+ "amountNote": "Dollar figures are intended totals (estimatedTotalAmt), not outlays.",
+ "mechanismLabels": {
+  "std": "Standard grants",
+  "cont": "Continuing grants",
+  "fell": "Fellowships",
+  "other": "Other awards"
+ }
 }
