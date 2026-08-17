@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-12",
+ "generated": "2026-08-17",
  "node": {
   "name": "Division of Astronomical Sciences",
   "abbrev": "AST",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.nsf.gov/services/v1/awards.json?org_code_div=03020000 (NSF Award Search API), month-by-month on Original Award Date",
  "warnings": [],
- "totalAwards": 2524,
+ "totalAwards": 2540,
  "currentFY": 2026,
  "monthly": [
   {
@@ -1291,9 +1291,9 @@
   },
   {
    "month": "2026-08",
-   "awards": 38,
-   "dollars": 17623830,
-   "std": 38,
+   "awards": 54,
+   "dollars": 27652800,
+   "std": 54,
    "cont": 0,
    "fell": 0,
    "other": 0
@@ -1699,10 +1699,10 @@
   {
    "fy": 2026,
    "partial": true,
-   "awards": 84,
-   "dollars": 38311426,
-   "median": 425027,
-   "exTop3Dollars": 35079730,
+   "awards": 100,
+   "dollars": 48340396,
+   "median": 443725,
+   "exTop3Dollars": 44706958,
    "octJul": {
     "awards": 46,
     "dollars": 20687596,
@@ -1712,6 +1712,12 @@
     "other": 0
    },
    "top3": [
+    {
+     "id": "2510185",
+     "title": "MRI: Track 1 Development of a Novel Radio Telescope Designed to Search for Dark Matter",
+     "awardee": "University of Virginia Main Campus",
+     "amount": 1382028
+    },
     {
      "id": "2606946",
      "title": "CASPER: Enabling Discovery Through Open Source Digital Instrumentation for the Radio Astronomy Community",
@@ -1723,12 +1729,6 @@
      "title": "CAREER: Lifting the Veil on the Cosmochemical Cycle of Organic Matter and the Diffuse Interstellar Bands Using Ion Trap Mass Spectrometry and Cryogenic Ion Electronic Spectroscopy",
      "awardee": "University of Colorado at Boulder",
      "amount": 1060680
-    },
-    {
-     "id": "2606512",
-     "title": "Collaborative Research: NSF-BSF The Sephira Project",
-     "awardee": "Carnegie Institution of Washington",
-     "amount": 980286
     }
    ]
   }
@@ -3044,16 +3044,26 @@
     },
     {
      "d": 314,
-     "awards": 84,
-     "dollars": 38311426
+     "awards": 92,
+     "dollars": 44302499
     },
     {
-     "d": 315,
-     "awards": 84,
-     "dollars": 38311426
+     "d": 320,
+     "awards": 100,
+     "dollars": 48340396
     }
    ]
   }
  ],
- "children": []
+ "children": [],
+ "provider": "nsf",
+ "dataComplete": true,
+ "storeFormat": "csv",
+ "amountNote": "Dollar figures are intended totals (estimatedTotalAmt), not outlays.",
+ "mechanismLabels": {
+  "std": "Standard grants",
+  "cont": "Continuing grants",
+  "fell": "Fellowships",
+  "other": "Other awards"
+ }
 }
