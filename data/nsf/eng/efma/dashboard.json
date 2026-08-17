@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-12",
+ "generated": "2026-08-17",
  "node": {
   "name": "Office of Emerging Frontiers in Research and Innovation (efri)",
   "abbrev": "EFMA",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.nsf.gov/services/v1/awards.json?org_code_div=07040000 (NSF Award Search API), month-by-month on Original Award Date",
  "warnings": [],
- "totalAwards": 275,
+ "totalAwards": 277,
  "currentFY": 2026,
  "monthly": [
   {
@@ -1291,12 +1291,12 @@
   },
   {
    "month": "2026-08",
-   "awards": 0,
-   "dollars": 0,
-   "std": 0,
+   "awards": 2,
+   "dollars": 8068286,
+   "std": 1,
    "cont": 0,
    "fell": 0,
-   "other": 0
+   "other": 1
   }
  ],
  "fiscalYears": [
@@ -1699,10 +1699,10 @@
   {
    "fy": 2026,
    "partial": true,
-   "awards": 2,
-   "dollars": 205000,
-   "median": 102500,
-   "exTop3Dollars": 0,
+   "awards": 4,
+   "dollars": 8273286,
+   "median": 147300,
+   "exTop3Dollars": 55000,
    "octJul": {
     "awards": 2,
     "dollars": 205000,
@@ -1713,16 +1713,22 @@
    },
    "top3": [
     {
+     "id": "2628201",
+     "title": "The Engineering Research Visioning Alliance (ERVA) - II",
+     "awardee": "University Industry Demonstration Partnership",
+     "amount": 7923686
+    },
+    {
      "id": "2610387",
      "title": "Conference: Frontiers of Engineering Symposia (2026 USFOE, and 2026 EU-US FOE)",
      "awardee": "National Academy of Sciences",
      "amount": 150000
     },
     {
-     "id": "2614641",
-     "title": "Conference: Trailblazer Engineering Impact Award Workshop",
-     "awardee": "Johns Hopkins University",
-     "amount": 55000
+     "id": "2630851",
+     "title": "Conference: Resilient Phosphorus Supply Chains for National Security: A Workshop for Connecting Across Decision-Makers",
+     "awardee": "University of Arkansas",
+     "amount": 144600
     }
    ]
   }
@@ -3042,12 +3048,22 @@
      "dollars": 205000
     },
     {
-     "d": 315,
-     "awards": 2,
-     "dollars": 205000
+     "d": 320,
+     "awards": 4,
+     "dollars": 8273286
     }
    ]
   }
  ],
- "children": []
+ "children": [],
+ "provider": "nsf",
+ "dataComplete": true,
+ "storeFormat": "csv",
+ "amountNote": "Dollar figures are intended totals (estimatedTotalAmt), not outlays.",
+ "mechanismLabels": {
+  "std": "Standard grants",
+  "cont": "Continuing grants",
+  "fell": "Fellowships",
+  "other": "Other awards"
+ }
 }

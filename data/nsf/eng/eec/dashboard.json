@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-12",
+ "generated": "2026-08-17",
  "node": {
   "name": "Division of Engineering Education and Centers",
   "abbrev": "EEC",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.nsf.gov/services/v1/awards.json?org_code_div=07050000 (NSF Award Search API), month-by-month on Original Award Date",
  "warnings": [],
- "totalAwards": 2001,
+ "totalAwards": 2020,
  "currentFY": 2026,
  "monthly": [
   {
@@ -1291,9 +1291,9 @@
   },
   {
    "month": "2026-08",
-   "awards": 3,
-   "dollars": 399009,
-   "std": 3,
+   "awards": 22,
+   "dollars": 10066282,
+   "std": 22,
    "cont": 0,
    "fell": 0,
    "other": 0
@@ -1699,10 +1699,10 @@
   {
    "fy": 2026,
    "partial": true,
-   "awards": 62,
-   "dollars": 67953491,
-   "median": 410683,
-   "exTop3Dollars": 21357059,
+   "awards": 81,
+   "dollars": 77620764,
+   "median": 414858,
+   "exTop3Dollars": 31024332,
    "octJul": {
     "awards": 59,
     "dollars": 67554482,
@@ -3044,16 +3044,26 @@
     },
     {
      "d": 314,
-     "awards": 62,
-     "dollars": 67953491
+     "awards": 81,
+     "dollars": 77620764
     },
     {
-     "d": 315,
-     "awards": 62,
-     "dollars": 67953491
+     "d": 320,
+     "awards": 81,
+     "dollars": 77620764
     }
    ]
   }
  ],
- "children": []
+ "children": [],
+ "provider": "nsf",
+ "dataComplete": true,
+ "storeFormat": "csv",
+ "amountNote": "Dollar figures are intended totals (estimatedTotalAmt), not outlays.",
+ "mechanismLabels": {
+  "std": "Standard grants",
+  "cont": "Continuing grants",
+  "fell": "Fellowships",
+  "other": "Other awards"
+ }
 }

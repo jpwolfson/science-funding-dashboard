@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-12",
+ "generated": "2026-08-17",
  "node": {
   "name": "Division of Chemical, Bioengineering, Environmental, and Transport Systems",
   "abbrev": "CBET",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.nsf.gov/services/v1/awards.json?org_code_div=07020000 (NSF Award Search API), month-by-month on Original Award Date",
  "warnings": [],
- "totalAwards": 6992,
+ "totalAwards": 7011,
  "currentFY": 2026,
  "monthly": [
   {
@@ -1291,12 +1291,12 @@
   },
   {
    "month": "2026-08",
-   "awards": 11,
-   "dollars": 3131598,
-   "std": 11,
+   "awards": 30,
+   "dollars": 30641561,
+   "std": 29,
    "cont": 0,
    "fell": 0,
-   "other": 0
+   "other": 1
   }
  ],
  "fiscalYears": [
@@ -1699,10 +1699,10 @@
   {
    "fy": 2026,
    "partial": true,
-   "awards": 335,
-   "dollars": 137939437,
-   "median": 435320,
-   "exTop3Dollars": 134532039,
+   "awards": 354,
+   "dollars": 165449400,
+   "median": 436924,
+   "exTop3Dollars": 142874021,
    "octJul": {
     "awards": 324,
     "dollars": 134807839,
@@ -1712,6 +1712,12 @@
     "other": 0
    },
    "top3": [
+    {
+     "id": "2624398",
+     "title": "NSF AI Institute in Dynamic Systems",
+     "awardee": "University of Washington",
+     "amount": 20000000
+    },
     {
      "id": "2511160",
      "title": "Equipment: MRI:  Track 1  Acquisition of a Near Ambient Pressure X-Ray Photoelectron Spectroscopy (NAP-XPS) System for Research and Teaching at the University of South Carolina",
@@ -1723,12 +1729,6 @@
      "title": "ECO-CBET: Collaborative Research: Effect of surface-fuel attributes and forest-thinning patterns on wildfire, carbon storage, and advancing forest restoration",
      "awardee": "University of California-Davis",
      "amount": 1179479
-    },
-    {
-     "id": "2620199",
-     "title": "ISS: Beyond buoyancy: The role of non-gravitational transport phenomena on the melting dynamics of small particles",
-     "awardee": "Washington University",
-     "amount": 832019
     }
    ]
   }
@@ -3048,12 +3048,22 @@
      "dollars": 137939437
     },
     {
-     "d": 315,
-     "awards": 335,
-     "dollars": 137939437
+     "d": 320,
+     "awards": 354,
+     "dollars": 165449400
     }
    ]
   }
  ],
- "children": []
+ "children": [],
+ "provider": "nsf",
+ "dataComplete": true,
+ "storeFormat": "csv",
+ "amountNote": "Dollar figures are intended totals (estimatedTotalAmt), not outlays.",
+ "mechanismLabels": {
+  "std": "Standard grants",
+  "cont": "Continuing grants",
+  "fell": "Fellowships",
+  "other": "Other awards"
+ }
 }

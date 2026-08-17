@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-12",
+ "generated": "2026-08-17",
  "node": {
   "name": "Division of Materials Research",
   "abbrev": "DMR",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.nsf.gov/services/v1/awards.json?org_code_div=03070000 (NSF Award Search API), month-by-month on Original Award Date",
  "warnings": [],
- "totalAwards": 5302,
+ "totalAwards": 5334,
  "currentFY": 2026,
  "monthly": [
   {
@@ -1291,10 +1291,10 @@
   },
   {
    "month": "2026-08",
-   "awards": 16,
-   "dollars": 9476836,
-   "std": 15,
-   "cont": 1,
+   "awards": 48,
+   "dollars": 28744791,
+   "std": 41,
+   "cont": 7,
    "fell": 0,
    "other": 0
   }
@@ -1699,10 +1699,10 @@
   {
    "fy": 2026,
    "partial": true,
-   "awards": 221,
-   "dollars": 275259021,
-   "median": 554081,
-   "exTop3Dollars": 207459021,
+   "awards": 253,
+   "dollars": 294526976,
+   "median": 556374,
+   "exTop3Dollars": 226726976,
    "octJul": {
     "awards": 205,
     "dollars": 265782185,
@@ -3044,16 +3044,26 @@
     },
     {
      "d": 314,
-     "awards": 221,
-     "dollars": 275259021
+     "awards": 237,
+     "dollars": 285897069
     },
     {
-     "d": 315,
-     "awards": 221,
-     "dollars": 275259021
+     "d": 320,
+     "awards": 253,
+     "dollars": 294526976
     }
    ]
   }
  ],
- "children": []
+ "children": [],
+ "provider": "nsf",
+ "dataComplete": true,
+ "storeFormat": "csv",
+ "amountNote": "Dollar figures are intended totals (estimatedTotalAmt), not outlays.",
+ "mechanismLabels": {
+  "std": "Standard grants",
+  "cont": "Continuing grants",
+  "fell": "Fellowships",
+  "other": "Other awards"
+ }
 }

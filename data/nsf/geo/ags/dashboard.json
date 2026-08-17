@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-12",
+ "generated": "2026-08-17",
  "node": {
   "name": "Division of Atmospheric and Geospace Sciences",
   "abbrev": "AGS",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.nsf.gov/services/v1/awards.json?org_code_div=06020000 (NSF Award Search API), month-by-month on Original Award Date",
  "warnings": [],
- "totalAwards": 3438,
+ "totalAwards": 3440,
  "currentFY": 2026,
  "monthly": [
   {
@@ -1291,12 +1291,12 @@
   },
   {
    "month": "2026-08",
-   "awards": 32,
-   "dollars": 13675210,
-   "std": 30,
+   "awards": 34,
+   "dollars": 28593644,
+   "std": 31,
    "cont": 0,
    "fell": 2,
-   "other": 0
+   "other": 1
   }
  ],
  "fiscalYears": [
@@ -1699,10 +1699,10 @@
   {
    "fy": 2026,
    "partial": true,
-   "awards": 127,
-   "dollars": 75354701,
+   "awards": 129,
+   "dollars": 90273135,
    "median": 422645,
-   "exTop3Dollars": 54580820,
+   "exTop3Dollars": 56960320,
    "octJul": {
     "awards": 95,
     "dollars": 61679491,
@@ -1712,6 +1712,12 @@
     "other": 2
    },
    "top3": [
+    {
+     "id": "2526520",
+     "title": "NSF-University of Wyoming King Air Research Aircraft Operations & Maintenance",
+     "awardee": "University of Wyoming",
+     "amount": 14818934
+    },
     {
      "id": "2624916",
      "title": "Atmospheric Science and Chemistry mEasurement NeTwork (ASCENT): Operation, Management, and Scientific Studies",
@@ -1723,12 +1729,6 @@
      "title": "Advancing Atmospheric Sciences Through Radio Occultation",
      "awardee": "University Corporation For Atmospheric Res",
      "amount": 5000000
-    },
-    {
-     "id": "2537345",
-     "title": "Collaborative Research: Research Infrastructure: Active Magnetosphere and Planetary Electrodynamics Response Experiment 4 (AMPERE-4)",
-     "awardee": "Johns Hopkins University",
-     "amount": 2280000
     }
    ]
   }
@@ -3044,16 +3044,26 @@
     },
     {
      "d": 314,
-     "awards": 127,
-     "dollars": 75354701
+     "awards": 129,
+     "dollars": 90273135
     },
     {
-     "d": 315,
-     "awards": 127,
-     "dollars": 75354701
+     "d": 320,
+     "awards": 129,
+     "dollars": 90273135
     }
    ]
   }
  ],
- "children": []
+ "children": [],
+ "provider": "nsf",
+ "dataComplete": true,
+ "storeFormat": "csv",
+ "amountNote": "Dollar figures are intended totals (estimatedTotalAmt), not outlays.",
+ "mechanismLabels": {
+  "std": "Standard grants",
+  "cont": "Continuing grants",
+  "fell": "Fellowships",
+  "other": "Other awards"
+ }
 }

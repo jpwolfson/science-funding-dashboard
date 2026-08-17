@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-12",
+ "generated": "2026-08-17",
  "node": {
   "name": "Division of Research on Learning in Formal and Informal Settings (DRL)",
   "abbrev": "DRL",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.nsf.gov/services/v1/awards.json?org_code_div=11090000 (NSF Award Search API), month-by-month on Original Award Date",
  "warnings": [],
- "totalAwards": 2803,
+ "totalAwards": 2842,
  "currentFY": 2026,
  "monthly": [
   {
@@ -1291,9 +1291,9 @@
   },
   {
    "month": "2026-08",
-   "awards": 9,
-   "dollars": 5394791,
-   "std": 7,
+   "awards": 48,
+   "dollars": 24017877,
+   "std": 46,
    "cont": 2,
    "fell": 0,
    "other": 0
@@ -1699,10 +1699,10 @@
   {
    "fy": 2026,
    "partial": true,
-   "awards": 41,
-   "dollars": 25358400,
-   "median": 626531,
-   "exTop3Dollars": 20433843,
+   "awards": 80,
+   "dollars": 43981486,
+   "median": 520672,
+   "exTop3Dollars": 39056929,
    "octJul": {
     "awards": 32,
     "dollars": 19963609,
@@ -3044,16 +3044,26 @@
     },
     {
      "d": 314,
-     "awards": 41,
-     "dollars": 25358400
+     "awards": 57,
+     "dollars": 32083188
     },
     {
-     "d": 315,
-     "awards": 41,
-     "dollars": 25358400
+     "d": 320,
+     "awards": 80,
+     "dollars": 43981486
     }
    ]
   }
  ],
- "children": []
+ "children": [],
+ "provider": "nsf",
+ "dataComplete": true,
+ "storeFormat": "csv",
+ "amountNote": "Dollar figures are intended totals (estimatedTotalAmt), not outlays.",
+ "mechanismLabels": {
+  "std": "Standard grants",
+  "cont": "Continuing grants",
+  "fell": "Fellowships",
+  "other": "Other awards"
+ }
 }

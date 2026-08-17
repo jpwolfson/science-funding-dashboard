@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-12",
+ "generated": "2026-08-17",
  "node": {
   "name": "Division of Chemistry",
   "abbrev": "CHE",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.nsf.gov/services/v1/awards.json?org_code_div=03090000 (NSF Award Search API), month-by-month on Original Award Date",
  "warnings": [],
- "totalAwards": 5960,
+ "totalAwards": 6017,
  "currentFY": 2026,
  "monthly": [
   {
@@ -1291,10 +1291,10 @@
   },
   {
    "month": "2026-08",
-   "awards": 24,
-   "dollars": 11800549,
-   "std": 21,
-   "cont": 3,
+   "awards": 81,
+   "dollars": 40415446,
+   "std": 73,
+   "cont": 8,
    "fell": 0,
    "other": 0
   }
@@ -1699,10 +1699,10 @@
   {
    "fy": 2026,
    "partial": true,
-   "awards": 225,
-   "dollars": 125222307,
-   "median": 575000,
-   "exTop3Dollars": 120975755,
+   "awards": 282,
+   "dollars": 153837204,
+   "median": 570000,
+   "exTop3Dollars": 149590652,
    "octJul": {
     "awards": 201,
     "dollars": 113421758,
@@ -3044,16 +3044,26 @@
     },
     {
      "d": 314,
-     "awards": 225,
-     "dollars": 125222307
+     "awards": 253,
+     "dollars": 138040265
     },
     {
-     "d": 315,
-     "awards": 225,
-     "dollars": 125222307
+     "d": 320,
+     "awards": 282,
+     "dollars": 153837204
     }
    ]
   }
  ],
- "children": []
+ "children": [],
+ "provider": "nsf",
+ "dataComplete": true,
+ "storeFormat": "csv",
+ "amountNote": "Dollar figures are intended totals (estimatedTotalAmt), not outlays.",
+ "mechanismLabels": {
+  "std": "Standard grants",
+  "cont": "Continuing grants",
+  "fell": "Fellowships",
+  "other": "Other awards"
+ }
 }
