@@ -26,7 +26,7 @@ ACCOUNT_META = {
          263240345521, 134504769998],
     ),
     "commerce/nist-strs": (
-        "013-0500", "Scientific and Technical Research and Services", 7, 11,
+        "013-0500", "Scientific and Technical Research and Services", 8, 12,
         [71211674371, 71411863464, 74683941480, 75042249476,
          80361787623, 83310214199, 99850616225, 129647944433,
          95760889645, 59469231377],
@@ -70,7 +70,7 @@ DISPLAY_ONLY_CANONICALS = {
 OFFICIAL_SOURCE_COUNTS = {
     "commerce/noaa-orf": (49, 18),
     "commerce/noaa-pac": (23, 9),
-    "commerce/nist-strs": (5, 6),
+    "commerce/nist-strs": (5, 7),
     "commerce/nist-its": (7, 7),
     "commerce/bea": (4, 1),
     "commerce/census-current-surveys": (6, 3),
@@ -151,6 +151,13 @@ NIST_ITS_FY2026_P02_PARK_CENTS = {
     "6081W4SGJNC": (0, 0, 0),
     "EX202600313426": (0,),
     "EX202600313654": (284332,),
+}
+
+NIST_STRS_FY2026_FILE_B_EVIDENCE = {
+    "FY2026P02": (85, 7538666122, ()),
+    "FY2026P03": (90, 12817408064, ()),
+    "FY2026P04": (93, 20496206010, ()),
+    "FY2026P05": (100, 25225091620, (0, 0, 0, 0)),
 }
 
 STAGE_PATHS = (NOAA_PATHS, NOAA_PATHS + NIST_PATHS)
@@ -717,6 +724,42 @@ class CommerceObligationTests(unittest.TestCase):
         self.assertEqual(
             "PROGRAM ACTIVITY NOT SPECIFIED (PARK 0)",
             by_park["0"]["programActivityName"],
+        )
+
+    def test_nist_strs_fy2026_p05_park_zero_is_distinct_and_exact(self):
+        if "commerce/nist-strs" not in self.accounts:
+            return
+        account = self.accounts["commerce/nist-strs"]
+        evidence = NIST_STRS_FY2026_FILE_B_EVIDENCE
+        rows = [{
+            "submission_period": "FY2026P05",
+            "federal_account_symbol": account["federalAccount"],
+            "program_activity_reporting_key": "0",
+            "program_activity_code": "",
+            "program_activity_name": "",
+            "obligations_incurred": f"{amount_cents // 100}.{amount_cents % 100:02d}",
+        } for amount_cents in evidence["FY2026P05"][2]]
+        values = parse_file_b_snapshot(
+            rows, account["federalAccount"], alias_map(account)
+        )
+        events = file_b_period_events(
+            {"FY2026P05": values}, account["federalAccount"]
+        )
+        self.assertEqual(
+            ("FY2026P02", "FY2026P03", "FY2026P04", "FY2026P05"),
+            tuple(evidence),
+        )
+        self.assertEqual(368, sum(item[0] for item in evidence.values()))
+        self.assertEqual(66077371816,
+                         sum(item[1] for item in evidence.values()))
+        self.assertEqual(4, len(rows))
+        self.assertEqual(1, len(events))
+        self.assertEqual(0, events[0]["amountCents"])
+        self.assertEqual("0", events[0]["programActivityReportingKey"])
+        self.assertEqual("PARK0", events[0]["_programActivityKey"])
+        self.assertEqual(
+            "PROGRAM ACTIVITY NOT SPECIFIED (PARK 0)",
+            events[0]["programActivityName"],
         )
 
     def test_negative_file_c_and_ratio_over_100_percent_are_preserved(self):

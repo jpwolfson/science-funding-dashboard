@@ -169,6 +169,22 @@ its nested official File B ZIP has SHA-256
 The strict exact-cents/distinctness repair passes Commerce `18/18`, the ITS
 registry `10/10`, the whole registry `199/199`, and fast `7/7`.
 
+The FY2026 P05 STRS source independently adds the same source spelling as a
+distinct STRS-scoped identity: exact PARK `0` with blank code/name. Its four
+rows are all zero cents, so this repair also preserves material totals and
+does not merge the two NIST account identities. The reviewed raw snapshots
+contain P02 `85` rows / `7538666122` cents, P03 `90` / `12817408064`, P04
+`93` / `20496206010`, and P05 `100` / `25225091620`. Attempt-specific raw
+artifact `9280164407` is retained for 14 days with outer SHA-256
+`c92190766acec5d7d4ba46453575c0ead3625b87a389f513f92edf17a3937d52`.
+The nested official P02-P05 File B ZIP SHA-256 values are, respectively,
+`ea6bc714fb0549f1e787d3937871085874f9f2a62f3b488ec0cb6c513a1a2a88`,
+`c76766a3f13e90937f3ef539f399063d3a284cf7c1997418e1d34721b6ab09cf`,
+`415393622c6444ce50fbe02257f5eb444780bc6a8fc479da769ee49d50582179`,
+and `2ba5da053c2ba441764e361615f1914ec091d34514fb0d0eeaef8fa2f150d87c`.
+The strict STRS repair passes Commerce `19/19`, both focused NIST registries,
+the whole registry, and fast verification before either failed job is retried.
+
 ```json
 {
   "mode": "full",
