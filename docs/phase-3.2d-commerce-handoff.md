@@ -1,18 +1,31 @@
 # Phase 3.2d Commerce release handoff
 
-Prepared from current live main `fc74455d275083feaa2c3e1e4d2511870e4d5295`.
+Prepared from current live main `45dc68c4c0ad5a4f0852e87e3f58353b9fc70fbe`.
 
-## Current batch: NIST pair
+## Current batch: Census Current
 
-This scaffold appends only:
+This scaffold appends only `commerce/census-current-surveys`, federal account
+`013-0401`, **Current Surveys and Programs**.
 
-- `commerce/nist-strs` — federal account `013-0500`, **Scientific and
-  Technical Research and Services**.
-- `commerce/nist-its` — federal account `013-0525`, **Industrial Technology
-  Services**.
+BEA is absent under the parked-account rule. The scaffold commit itself created
+no download, trigger, workflow, remote branch, CI run, or pull request.
 
-BEA is absent under the parked-account rule. No download, trigger, workflow,
-remote branch, CI run, or pull request is created by the scaffold commit.
+The accepted FY2025 P12 File B archive from run `32013883488`, job
+`95339201920`, contains 43 rows totaling `34538417796` cents. The live official
+GTAS/File A fiscal-year snapshot independently remains `34371943923` cents.
+The exact File A minus File B variance is `-166473873` cents, entirely equal to
+the File B `0000 / UNKNOWN/OTHER` bucket. The owner-approved dual-pin row preserves
+both exact official source totals under the existing source-warning contract;
+File B remains canonical, and no synthetic residual or tolerance is introduced.
+Attempt-specific raw artifact `9287062264` is retained for 14 days with outer
+SHA-256 `0f31cc6789411e34d9e4ba8e0330f5b5901e67b15642733f4ea47c71df84e06a`.
+
+The retained FY2026 P02 File B archive contains 15 rows totaling `96259604`
+cents across the two reviewed Census PARK identities plus a distinct zero-cent
+PARK `0` row. The repair registers PARK `0` as `PARK0` rather than merging it
+into the unrelated PAC `0000 / UNKNOWN/OTHER` identity. Attempt-specific raw
+artifact `9287082564` is retained for 14 days with outer SHA-256
+`9a18679bc5f80524fd21523d955be37c8797657005001dfc104a2aa75988aebd`.
 
 ## NOAA release evidence
 

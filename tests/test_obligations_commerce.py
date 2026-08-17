@@ -44,7 +44,7 @@ ACCOUNT_META = {
          11996322841, 13080326230, 13157627614, 12876519316, 8352144116],
     ),
     "commerce/census-current-surveys": (
-        "013-0401", "Current Surveys and Programs", 6, 9,
+        "013-0401", "Current Surveys and Programs", 7, 10,
         [27593670279, 29213906053, 28888071095, 29214324563,
          30609204710, 31975648211, 34626118161, 34820902232,
          34371943923, 26361342910],
@@ -73,7 +73,7 @@ OFFICIAL_SOURCE_COUNTS = {
     "commerce/nist-strs": (5, 7),
     "commerce/nist-its": (7, 7),
     "commerce/bea": (4, 1),
-    "commerce/census-current-surveys": (6, 3),
+    "commerce/census-current-surveys": (6, 4),
     "commerce/census-periodic-censuses": (13, 4),
 }
 
@@ -159,6 +159,16 @@ NIST_STRS_FY2026_FILE_B_EVIDENCE = {
     "FY2026P03": (90, 12817408064, ()),
     "FY2026P04": (93, 20496206010, ()),
     "FY2026P05": (100, 25225091620, (0, 0, 0, 0)),
+}
+
+CENSUS_CURRENT_FY2026_P02_PARK_CENTS = {
+    "0": (0,),
+    "5ZC1YCV1N61": (
+        70291069, -664758, 2481004, 31513944, 106282, 0, -20239869, 0,
+    ),
+    "5ZC1YCV1N62": (
+        11048473, 946653, -324980, 6568480, 25249, -5491943,
+    ),
 }
 
 STAGE_PATHS = (
@@ -386,6 +396,19 @@ class CommerceObligationTests(unittest.TestCase):
                 self.assertNotIn("fileBObligationsCents", ordinary)
                 self.assertNotIn("fileAFileBVarianceCents", ordinary)
                 self.assertNotIn("fileAFileBVarianceReason", ordinary)
+
+    def test_census_current_fy2025_preserves_exact_file_a_file_b_variance(self):
+        account = self.accounts["commerce/census-current-surveys"]
+        baseline = json.loads((REPO / account["baseline"]).read_text())
+        row = baseline["fiscalYears"]["2025"]
+        self.assertEqual(34371943923, row["obligationsCents"])
+        self.assertEqual(34538417796, row["fileBObligationsCents"])
+        self.assertEqual(-166473873, row["fileAFileBVarianceCents"])
+        self.assertEqual(
+            row["obligationsCents"] - row["fileBObligationsCents"],
+            row["fileAFileBVarianceCents"],
+        )
+        self.assertIn("UNKNOWN/OTHER", row["fileAFileBVarianceReason"])
 
     def test_noaa_orf_fy2025_preserves_exact_file_a_file_b_variance(self):
         account = self.accounts["commerce/noaa-orf"]
@@ -725,6 +748,43 @@ class CommerceObligationTests(unittest.TestCase):
             row["programActivityReportingKey"]: row for row in events
         }
         self.assertEqual(set(NIST_ITS_FY2026_P02_PARK_CENTS), set(by_park))
+        self.assertEqual(0, by_park["0"]["amountCents"])
+        self.assertEqual("PARK0", by_park["0"]["_programActivityKey"])
+        self.assertEqual(
+            "PROGRAM ACTIVITY NOT SPECIFIED (PARK 0)",
+            by_park["0"]["programActivityName"],
+        )
+
+    def test_census_current_fy2026_p02_park_zero_is_distinct_and_exact(self):
+        account = self.accounts["commerce/census-current-surveys"]
+        rows = []
+        for park, amounts in CENSUS_CURRENT_FY2026_P02_PARK_CENTS.items():
+            for amount_cents in amounts:
+                rows.append({
+                    "submission_period": "FY2026P02",
+                    "federal_account_symbol": account["federalAccount"],
+                    "program_activity_reporting_key": park,
+                    "program_activity_code": "",
+                    "program_activity_name": "",
+                    "obligations_incurred": (
+                        f"{'-' if amount_cents < 0 else ''}"
+                        f"{abs(amount_cents) // 100}."
+                        f"{abs(amount_cents) % 100:02d}"
+                    ),
+                })
+        values = parse_file_b_snapshot(
+            rows, account["federalAccount"], alias_map(account)
+        )
+        events = file_b_period_events(
+            {"FY2026P02": values}, account["federalAccount"]
+        )
+        by_park = {
+            row["programActivityReportingKey"]: row for row in events
+        }
+        self.assertEqual(15, len(rows))
+        self.assertEqual(3, len(events))
+        self.assertEqual(96259604, sum(row["amountCents"] for row in events))
+        self.assertEqual(set(CENSUS_CURRENT_FY2026_P02_PARK_CENTS), set(by_park))
         self.assertEqual(0, by_park["0"]["amountCents"])
         self.assertEqual("PARK0", by_park["0"]["_programActivityKey"])
         self.assertEqual(
