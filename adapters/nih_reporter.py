@@ -18,6 +18,7 @@ import sys
 import time
 import urllib.error
 import urllib.request
+from collections import Counter
 from datetime import date
 
 from .common import SERIES_START, fiscal_year, load_store, store_exists
@@ -30,6 +31,32 @@ FUNDING_MECHANISMS = [
     "SB", "RP", "RC", "OR", "TR", "TI", "CO", "IAA", "RDC", "SRDC",
     "OTHER",
 ]
+
+
+def load_retraction_records(repo_root):
+    ledger_path = repo_root / "reference" / "nih_reporter_retractions.json"
+    if not ledger_path.exists():
+        return []
+    records = json.loads(ledger_path.read_text()).get("records") or []
+    if len({record.get("id") for record in records}) != len(records):
+        raise RuntimeError(f"duplicate NIH retraction ID in {ledger_path}")
+    for record in records:
+        award_date = record.get("awardDate")
+        month = record.get("month")
+        if not isinstance(award_date, str) or not isinstance(month, str) \
+                or award_date[:7] != month:
+            raise RuntimeError(
+                f"invalid month/date evidence for {record.get('id')} "
+                f"in {ledger_path}"
+            )
+    return records
+
+
+def reviewed_retraction_months_by_unit(repo_root):
+    by_unit = {}
+    for record in load_retraction_records(repo_root):
+        by_unit.setdefault(record["unit"], Counter())[record["month"]] += 1
+    return {unit: dict(months) for unit, months in by_unit.items()}
 INCLUDE_FIELDS = [
     "ApplId", "FiscalYear", "ProjectNum", "AwardNoticeDate", "BudgetStart",
     "ProjectStartDate", "AwardAmount", "AwardType", "ActivityCode",
@@ -109,11 +136,17 @@ def parse_trans_type(value):
 
 
 class NihReporterPull:
-    def __init__(self, agency, checks, store_path):
+    def __init__(self, agency, checks, store_path, retracted_ids=None,
+                 retracted_months=None):
         self.agency = agency
         self.checks = checks
         self.store_path = store_path
+        self.retracted_ids = set(retracted_ids or ())
+        self.retracted_months = dict(retracted_months or {})
+        if set(self.retracted_months) - self.retracted_ids:
+            raise ValueError("retracted_months contains an ID outside retracted_ids")
         self.warnings = []
+        self.allowed_monthly_shrink = {}
 
     def warn(self, message):
         self.warnings.append(message)
@@ -298,11 +331,38 @@ class NihReporterPull:
         merged = dict(stored)
         merged.update(collected)
         if mode == "full":
-            missing = sum(1 for award_id in stored if award_id not in collected)
-            if missing:
+            missing_ids = set(stored) - set(collected)
+            reviewed_retractions = missing_ids & self.retracted_ids
+            for award_id in reviewed_retractions:
+                month = stored[award_id]["month"]
+                ledger_month = self.retracted_months.get(award_id)
+                if ledger_month is not None and ledger_month != month:
+                    raise RuntimeError(
+                        f"reviewed retraction {award_id} month changed from "
+                        f"ledger {ledger_month} to stored {month}"
+                    )
+                self.allowed_monthly_shrink[month] = (
+                    self.allowed_monthly_shrink.get(month, 0) + 1
+                )
+                merged.pop(award_id, None)
+            if reviewed_retractions:
+                print(
+                    f"NOTICE: removed {len(reviewed_retractions)} reviewed "
+                    "RePORTER retraction(s) from the store"
+                )
+            unreviewed_missing = missing_ids - reviewed_retractions
+            if unreviewed_missing:
                 self.warn(
-                    f"{missing} stored awards not returned by this full re-pull; "
+                    f"{len(unreviewed_missing)} stored awards not returned by "
+                    "this full re-pull; "
                     "retained from the store"
+                )
+            returned_retractions = set(collected) & self.retracted_ids
+            if returned_retractions:
+                self.warn(
+                    f"{len(returned_retractions)} reviewed RePORTER "
+                    "retraction(s) returned to the live source; ledger review "
+                    "required"
                 )
 
         awards = list(merged.values())
@@ -329,9 +389,28 @@ class NihReporterPull:
 
 
 def pull_unit(unit_cfg, store_path, full, today, repo_root):
-    del repo_root  # adapter signature shared with NSF
     agency = unit_cfg["params"]["reporter_agency"]
-    puller = NihReporterPull(agency, unit_cfg["checks"], store_path)
+    retracted_ids = set()
+    retracted_months = {}
+    records = load_retraction_records(repo_root)
+    if records:
+        retracted_ids = {
+            record["id"]
+            for record in records
+            if record.get("reporterAgency") == agency
+        }
+        retracted_months = {
+            record["id"]: record["month"]
+            for record in records
+            if record.get("reporterAgency") == agency
+        }
+    puller = NihReporterPull(
+        agency,
+        unit_cfg["checks"],
+        store_path,
+        retracted_ids=retracted_ids,
+        retracted_months=retracted_months,
+    )
     awards, warnings = puller.pull(full=full, today=today)
     source = (
         f"{API} (NIH RePORTER v2), administering IC {agency}; "
@@ -339,6 +418,7 @@ def pull_unit(unit_cfg, store_path, full, today, repo_root):
         "dated by award notice, then budget/project start when unavailable"
     )
     metadata = {
+        "_allowedMonthlyShrink": puller.allowed_monthly_shrink,
         "provider": "nih",
         "dataComplete": True,
         "storeFormat": "fiscal-year-gzip",

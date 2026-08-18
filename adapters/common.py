@@ -18,6 +18,10 @@ from pathlib import Path
 SERIES_START = date(2014, 10, 1)  # FY2015 onward
 
 CSV_HEADER = ["id", "date", "estimatedTotalAmt", "transType", "title", "awardeeName"]
+_SHRINK_WARNING_RE = re.compile(
+    r"^invariant violated: (?P<month>\d{4}-\d{2}) shrank from "
+    r"(?P<before>\d+) to (?P<after>\d+) awards$"
+)
 
 
 def norm_type(t):
@@ -260,6 +264,22 @@ def write_dashboard(data_dir, node, source, awards, warnings, today,
     """
     data_dir = Path(data_dir)
     warnings = list(warnings)
+    metadata = dict(metadata or {})
+    allowed_monthly_shrink = metadata.pop("_allowedMonthlyShrink", {})
+    if not isinstance(allowed_monthly_shrink, dict) or any(
+            not isinstance(month, str) or not isinstance(count, int) or count < 0
+            for month, count in allowed_monthly_shrink.items()):
+        raise ValueError("_allowedMonthlyShrink must map months to non-negative integers")
+    retained_warnings = []
+    for warning in warnings:
+        match = _SHRINK_WARNING_RE.fullmatch(warning)
+        if match:
+            month = match.group("month")
+            shrink = int(match.group("before")) - int(match.group("after"))
+            if shrink == allowed_monthly_shrink.get(month, 0):
+                continue
+        retained_warnings.append(warning)
+    warnings = retained_warnings
     agg = aggregate(awards, today, series_start)
 
     prev_path = data_dir / "dashboard.json"
@@ -268,10 +288,12 @@ def write_dashboard(data_dir, node, source, awards, warnings, today,
         prev_counts = {m["month"]: m["awards"] for m in prev.get("monthly", [])}
         new_counts = {m["month"]: m["awards"] for m in agg["monthly"]}
         for month, n in sorted(prev_counts.items()):
-            if new_counts.get(month, 0) < n:
+            new_count = new_counts.get(month, 0)
+            shrink = n - new_count
+            if shrink > allowed_monthly_shrink.get(month, 0):
                 warnings.append(
                     f"invariant violated: {month} shrank from {n} to "
-                    f"{new_counts.get(month, 0)} awards")
+                    f"{new_count} awards")
 
     out = {
         "generated": today.isoformat(),

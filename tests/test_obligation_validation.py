@@ -213,6 +213,68 @@ class ObligationValidationTests(unittest.TestCase):
         finally:
             temp.cleanup()
 
+    def test_source_variance_ledger_exactly_covers_all_dual_pins(self):
+        repo = Path(__file__).resolve().parent.parent
+        registry = json.loads(
+            (repo / "config" / "obligation_accounts.json").read_text()
+        )
+        ledger = json.loads(
+            (repo / "reference" /
+             "obligation_source_variance_ledger.json").read_text()
+        )
+        self.assertEqual(1, ledger["schemaVersion"])
+        entries = {
+            (row["accountPath"], row["fiscalYear"]): row
+            for row in ledger["entries"]
+        }
+        self.assertEqual(len(ledger["entries"]), len(entries))
+
+        expected = {}
+        for account in registry["accounts"]:
+            baseline = json.loads((repo / account["baseline"]).read_text())
+            for fiscal_year, pin in baseline["fiscalYears"].items():
+                if "fileBObligationsCents" in pin:
+                    expected[(account["path"], int(fiscal_year))] = (
+                        account, pin
+                    )
+        self.assertEqual(set(expected), set(entries))
+
+        for key, (account, pin) in expected.items():
+            with self.subTest(account=key[0], fiscal_year=key[1]):
+                row = entries[key]
+                variance = (
+                    pin["obligationsCents"] -
+                    pin["fileBObligationsCents"]
+                )
+                ppm = (
+                    abs(variance) * 1_000_000 +
+                    abs(pin["obligationsCents"]) // 2
+                ) // abs(pin["obligationsCents"])
+                self.assertEqual(account["federalAccount"],
+                                 row["federalAccount"])
+                self.assertEqual(pin["obligationsCents"],
+                                 row["fileAObligationsCents"])
+                self.assertEqual(pin["fileBObligationsCents"],
+                                 row["fileBObligationsCents"])
+                self.assertEqual(pin["fileAFileBVarianceCents"],
+                                 row["fileAFileBVarianceCents"])
+                self.assertEqual(variance, row["fileAFileBVarianceCents"])
+                self.assertEqual(abs(variance),
+                                 row["absoluteVarianceCents"])
+                self.assertEqual(ppm, row["absoluteVariancePpmOfFileA"])
+                self.assertEqual(pin["fileAFileBVarianceReason"],
+                                 row["reason"])
+                self.assertEqual(account["baseline"], row["baseline"])
+                self.assertEqual("approved",
+                                 row["ownerApproval"]["status"])
+                evidence = row["evidence"]
+                self.assertGreater(evidence["workflowRunId"], 0)
+                self.assertGreater(evidence["workflowJobId"], 0)
+                self.assertGreater(evidence["rawArtifactId"], 0)
+                self.assertRegex(
+                    evidence["rawArtifactSha256"], r"^[0-9a-f]{64}$"
+                )
+
 
 if __name__ == "__main__":
     unittest.main()

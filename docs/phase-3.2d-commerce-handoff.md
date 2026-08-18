@@ -1,18 +1,56 @@
 # Phase 3.2d Commerce release handoff
 
-Prepared from current live main `fc74455d275083feaa2c3e1e4d2511870e4d5295`.
+Prepared from current live main `45dc68c4c0ad5a4f0852e87e3f58353b9fc70fbe`.
 
-## Current batch: NIST pair
+## Current batch: Census Current
 
-This scaffold appends only:
+This scaffold appends only `commerce/census-current-surveys`, federal account
+`013-0401`, **Current Surveys and Programs**.
 
-- `commerce/nist-strs` — federal account `013-0500`, **Scientific and
-  Technical Research and Services**.
-- `commerce/nist-its` — federal account `013-0525`, **Industrial Technology
-  Services**.
+BEA is absent under the parked-account rule. The scaffold commit itself created
+no download, trigger, workflow, remote branch, CI run, or pull request.
 
-BEA is absent under the parked-account rule. No download, trigger, workflow,
-remote branch, CI run, or pull request is created by the scaffold commit.
+The accepted FY2025 P12 File B archive from run `32013883488`, job
+`95339201920`, contains 43 rows totaling `34538417796` cents. The live official
+GTAS/File A fiscal-year snapshot independently remains `34371943923` cents.
+The exact File A minus File B variance is `-166473873` cents, entirely equal to
+the File B `0000 / UNKNOWN/OTHER` bucket. The owner-approved dual-pin row preserves
+both exact official source totals under the existing source-warning contract;
+File B remains canonical, and no synthetic residual or tolerance is introduced.
+Attempt-specific raw artifact `9287062264` is retained for 14 days with outer
+SHA-256 `0f31cc6789411e34d9e4ba8e0330f5b5901e67b15642733f4ea47c71df84e06a`.
+
+The retained FY2026 P02 File B archive contains 15 rows totaling `96259604`
+cents across the two reviewed Census PARK identities plus a distinct zero-cent
+PARK `0` row. The repair registers PARK `0` as `PARK0` rather than merging it
+into the unrelated PAC `0000 / UNKNOWN/OTHER` identity. Attempt-specific raw
+artifact `9287082564` is retained for 14 days with outer SHA-256
+`9a18679bc5f80524fd21523d955be37c8797657005001dfc104a2aa75988aebd`.
+
+The accepted retry then completed all FY2026 periods through P09. Its official
+P09 File B archive contains 35 rows across three reviewed PARK identities and
+totals exactly `24981703030` cents. The live official FY2026 federal-account
+record independently reports the same `249817030.30` dollars, superseding the
+earlier partial snapshot pin `26361342910` without creating a source variance.
+Attempt-specific raw artifact `9292285360` is retained for 14 days with outer
+SHA-256 `eae34168a0093ca908b519ac1a864982d54fedd2010e594e1e79584a506d0fa6`;
+its nested P09 File B ZIP has SHA-256
+`95d7e9c43b3f5625aea637aee6173f064f5b5a06a9aeca4e2f881ff721cd7d03`.
+
+Current-main integration encountered a separate scheduled NIH rollup safety
+stop. Fresh full pulls retained 12 previously stored applications that the
+live RePORTER snapshots no longer returned. Exact ascending and descending
+pagination reconciled each affected fiscal year to `meta.total`; a direct
+`appl_ids` request then returned none of the 12 while returning known-live
+control `11126249`. This proves genuine upstream retractions rather than an
+incomplete pull. The adapter now removes only those reviewed exact IDs during
+a full pull; every other missing stored award remains retained and warned.
+The exact IDs, stored values, and evidence method are preserved in
+`reference/nih_reporter_retractions.json`. Each record also preserves its
+historical award date/month. The monthly monotonicity invariant permits only
+the exact month/count shrink represented by those reviewed records; any
+unreviewed, excess, or differently dated shrink remains a published warning
+and fails NIH validation.
 
 ## NOAA release evidence
 

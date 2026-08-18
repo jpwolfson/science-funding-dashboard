@@ -1,0 +1,105 @@
+{
+ "schemaVersion": 1,
+ "updated": "2026-08-17",
+ "varianceDefinition": "fileAFileBVarianceCents = fileAObligationsCents - fileBObligationsCents",
+ "entries": [
+  {
+   "accountPath": "commerce/noaa-orf",
+   "federalAccount": "013-1450",
+   "fiscalYear": 2025,
+   "fileAObligationsCents": 590995523920,
+   "fileBObligationsCents": 749893110879,
+   "fileAFileBVarianceCents": -158897586959,
+   "absoluteVarianceCents": 158897586959,
+   "absoluteVariancePpmOfFileA": 268864,
+   "reason": "Official FY2025 P12 File B and date-filtered Program Activity totals are $1,588,975,869.59 above the GTAS/File A federal-account total; preserve both exact official source totals under the source-warning contract",
+   "baseline": "reference/noaa_orf_obligation_baseline.json",
+   "releaseStatus": "live",
+   "ownerApproval": {
+    "status": "approved",
+    "date": "2026-08-16",
+    "reference": "docs/phase-3.2d-commerce-handoff.md"
+   },
+   "evidence": {
+    "workflowRunId": 31910397962,
+    "workflowJobId": 95212047055,
+    "rawArtifactId": 9268819942,
+    "rawArtifactSha256": "3b6838b3ad267f24376f44c66de76556b39e690910c2465d4dc227de05861a85",
+    "nestedP12FileBSha256": "62e8dec24840a47441b146c14aa27bcbb5a3f5690d640b7429162084255d5b2a"
+   }
+  },
+  {
+   "accountPath": "commerce/noaa-pac",
+   "federalAccount": "013-1460",
+   "fiscalYear": 2025,
+   "fileAObligationsCents": 263240345521,
+   "fileBObligationsCents": 261595507473,
+   "fileAFileBVarianceCents": 1644838048,
+   "absoluteVarianceCents": 1644838048,
+   "absoluteVariancePpmOfFileA": 6248,
+   "reason": "Official FY2025 P12 File B and date-filtered Program Activity totals are $16,448,380.48 below the GTAS/File A federal-account total; preserve both exact official source totals under the source-warning contract",
+   "baseline": "reference/noaa_pac_obligation_baseline.json",
+   "releaseStatus": "live",
+   "ownerApproval": {
+    "status": "approved",
+    "date": "2026-08-16",
+    "reference": "docs/phase-3.2d-commerce-handoff.md"
+   },
+   "evidence": {
+    "workflowRunId": 31910397962,
+    "workflowJobId": 95107812703,
+    "rawArtifactId": 9257775657,
+    "rawArtifactSha256": "c72bf72b4e57d0a86c982154fbbf33cb414f0a2e4ba8fc45806afc6a025a16be"
+   }
+  },
+  {
+   "accountPath": "commerce/census-current-surveys",
+   "federalAccount": "013-0401",
+   "fiscalYear": 2025,
+   "fileAObligationsCents": 34371943923,
+   "fileBObligationsCents": 34538417796,
+   "fileAFileBVarianceCents": -166473873,
+   "absoluteVarianceCents": 166473873,
+   "absoluteVariancePpmOfFileA": 4843,
+   "reason": "The official FY2025 GTAS/File A fiscal-year snapshot is 34371943923 cents while the accepted P12 File B Program Activity total is 34538417796 cents; the exact -166473873-cent source variance is the File B UNKNOWN/OTHER bucket.",
+   "baseline": "reference/census_current_surveys_obligation_baseline.json",
+   "releaseStatus": "approved-pending-retry",
+   "ownerApproval": {
+    "status": "approved",
+    "date": "2026-08-17",
+    "reference": "Phase 3.2d execution thread"
+   },
+   "evidence": {
+    "workflowRunId": 32013883488,
+    "workflowJobId": 95339201920,
+    "rawArtifactId": 9287062264,
+    "rawArtifactSha256": "0f31cc6789411e34d9e4ba8e0330f5b5901e67b15642733f4ea47c71df84e06a",
+    "nestedP12FileBSha256": "ff7e61bb955065460c9458944741e475f2493f296e6933518a71f6593b28320b"
+   }
+  },
+  {
+   "accountPath": "epa/science-technology",
+   "federalAccount": "068-0107",
+   "fiscalYear": 2022,
+   "fileAObligationsCents": 78078798237,
+   "fileBObligationsCents": 78077137843,
+   "fileAFileBVarianceCents": 1660394,
+   "absoluteVarianceCents": 1660394,
+   "absoluteVariancePpmOfFileA": 21,
+   "reason": "USAspending Data Broker rule A19 source warning: retained FY2022 P12 File B and official Program Activity totals are $16,603.94 below GTAS/File A",
+   "baseline": "reference/epa_science_technology_obligation_baseline.json",
+   "releaseStatus": "live",
+   "ownerApproval": {
+    "status": "approved",
+    "date": "2026-08-14",
+    "reference": "8c850bb5136d43092235eaddc1007f765ba70f37"
+   },
+   "evidence": {
+    "workflowRunId": 31787669479,
+    "workflowJobId": 94810063304,
+    "rawArtifactId": 9224418566,
+    "rawArtifactSha256": "4843f4b3cbe4c847e19df03a77daa7d0bd29e45d7a17af80cd5c46677ba7e83f"
+   }
+  }
+ ]
+}
