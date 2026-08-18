@@ -162,6 +162,7 @@ class NihReporterTests(unittest.TestCase):
                 {"min_total": 0, "max_total": 1000, "max_monthly": 1000},
                 store_path,
                 retracted_ids={"nih:2"},
+                retracted_months={"nih:2": "2025-01"},
             )
             write_store(
                 store_path,
@@ -177,6 +178,7 @@ class NihReporterTests(unittest.TestCase):
                 )
         self.assertEqual(["nih:1"], [award["id"] for award in awards])
         self.assertEqual([], warnings)
+        self.assertEqual({"2025-01": 1}, puller.allowed_monthly_shrink)
 
     def test_unreviewed_missing_award_is_still_retained_and_warned(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -205,6 +207,8 @@ class NihReporterTests(unittest.TestCase):
         self.assertEqual(12, len({record["id"] for record in records}))
         self.assertTrue(all(record["id"].startswith("nih:") for record in records))
         self.assertTrue(all(record["reporterAgency"] for record in records))
+        self.assertTrue(all(record["month"] == record["awardDate"][:7]
+                            for record in records))
 
     def test_config_has_all_current_reporter_nih_admin_components(self):
         cfg = json.loads((Path(__file__).parents[1] / "config" / "orgs.json").read_text())

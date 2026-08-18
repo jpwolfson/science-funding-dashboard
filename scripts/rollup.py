@@ -19,6 +19,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
 from adapters.common import load_store, store_exists, write_dashboard  # noqa: E402
+from adapters.nih_reporter import reviewed_retraction_months_by_unit  # noqa: E402
 
 DATA = REPO_ROOT / "data"
 
@@ -84,7 +85,8 @@ def child_warnings(child_cfg, child_path):
     return [f"{child_cfg['abbrev']}: {w}" for w in d.get("warnings", [])]
 
 
-def rollup_node(node_cfg, path, level, leaf_list, children_cfg, today):
+def rollup_node(node_cfg, path, level, leaf_list, children_cfg, today,
+                retraction_months):
     warnings = []
     for c in children_cfg:
         warnings.extend(child_warnings(c, f"{path}/{c['slug']}" if path else c["slug"]))
@@ -131,6 +133,14 @@ def rollup_node(node_cfg, path, level, leaf_list, children_cfg, today):
             },
         }
     metadata["dataComplete"] = pulled == len(leaf_list)
+    allowed_monthly_shrink = {}
+    for leaf_path in leaf_list:
+        for month, count in retraction_months.get(leaf_path, {}).items():
+            allowed_monthly_shrink[month] = (
+                allowed_monthly_shrink.get(month, 0) + count
+            )
+    if allowed_monthly_shrink:
+        metadata["_allowedMonthlyShrink"] = allowed_monthly_shrink
     write_dashboard(DATA / path if path else DATA, node, source, awards,
                     warnings, today, children=children, metadata=metadata)
     print(f"rollup {path or '(root)'}: {len(awards)} awards, "
@@ -146,6 +156,7 @@ def nav_node(cfg_node, path, children):
 def main():
     cfg = json.loads((REPO_ROOT / "config" / "orgs.json").read_text())
     today = date.today()
+    retraction_months = reviewed_retraction_months_by_unit(REPO_ROOT)
 
     nav_agencies = []
     all_leaves = []
@@ -159,16 +170,19 @@ def main():
                            and dr["divisions"][0]["slug"] == dr["slug"])
             visible_divisions = [] if passthrough else dr["divisions"]
             ag_leaves.extend(leaves)
-            rollup_node(dr, dr_path, "directorate", leaves, visible_divisions, today)
+            rollup_node(dr, dr_path, "directorate", leaves, visible_divisions,
+                        today, retraction_months)
             nav_dirs.append(nav_node(dr, dr_path, [
                 nav_node(dv, f"{dr_path}/{dv['slug']}", [])
                 for dv in visible_divisions]))
-        rollup_node(ag, ag["slug"], "agency", ag_leaves, ag["directorates"], today)
+        rollup_node(ag, ag["slug"], "agency", ag_leaves, ag["directorates"],
+                    today, retraction_months)
         nav_agencies.append(nav_node(ag, ag["slug"], nav_dirs))
         all_leaves.extend(ag_leaves)
 
     root_cfg = {"name": "Federal science funding", "abbrev": ""}
-    rollup_node(root_cfg, "", "root", all_leaves, cfg["agencies"], today)
+    rollup_node(root_cfg, "", "root", all_leaves, cfg["agencies"], today,
+                retraction_months)
 
     index = {"generated": today.isoformat(),
              "root": {**nav_node(root_cfg, "", nav_agencies)}}

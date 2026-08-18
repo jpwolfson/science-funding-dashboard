@@ -46,7 +46,11 @@ control `11126249`. This proves genuine upstream retractions rather than an
 incomplete pull. The adapter now removes only those reviewed exact IDs during
 a full pull; every other missing stored award remains retained and warned.
 The exact IDs, stored values, and evidence method are preserved in
-`reference/nih_reporter_retractions.json`.
+`reference/nih_reporter_retractions.json`. Each record also preserves its
+historical award date/month. The monthly monotonicity invariant permits only
+the exact month/count shrink represented by those reviewed records; any
+unreviewed, excess, or differently dated shrink remains a published warning
+and fails NIH validation.
 
 ## NOAA release evidence
 
