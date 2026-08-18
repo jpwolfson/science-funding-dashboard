@@ -11,8 +11,8 @@ aggregate() (e.g. a new output key) reaches every leaf without a live pull.
 Each leaf's node/source metadata is preserved by reading it back from that
 leaf's *current* dashboard.json rather than recomputing it (this script has
 no adapter context to rebuild it from). Existing published warnings are
-carried forward too; this is a re-aggregation, not a re-pull, so there is no
-new information to warn about. Finishes by running scripts/rollup.py's build
+carried forward too, except for an exact month/count shrink now explained by
+the reviewed NIH retraction ledger. Finishes by running scripts/rollup.py's build
 so directorate/agency/root dashboards and data/index.json stay consistent
 with the rewritten leaves.
 
@@ -39,6 +39,7 @@ sys.path.insert(0, str(REPO_ROOT))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from adapters.common import load_store, store_exists, write_dashboard  # noqa: E402
+from adapters.nih_reporter import reviewed_retraction_months_by_unit  # noqa: E402
 import rollup  # scripts/rollup.py, run after every leaf is rewritten  # noqa: E402
 
 DATA = REPO_ROOT / "data"
@@ -55,6 +56,7 @@ def leaf_units(cfg):
 def main():
     cfg = json.loads((REPO_ROOT / "config" / "orgs.json").read_text())
     today = date.today()
+    retraction_months = reviewed_retraction_months_by_unit(REPO_ROOT)
 
     reaggregated = 0
     for unit_path, _division in leaf_units(cfg):
@@ -69,8 +71,11 @@ def main():
         prev = json.loads(dash_path.read_text())
         awards = list(load_store(data_dir).values())
         metadata = {key: prev[key] for key in
-                    ("provider", "storeFormat", "amountNote", "mechanismLabels")
+                    ("provider", "dataComplete", "storeFormat", "amountNote",
+                     "mechanismLabels")
                     if key in prev}
+        if unit_path in retraction_months:
+            metadata["_allowedMonthlyShrink"] = retraction_months[unit_path]
         warnings = write_dashboard(data_dir, prev["node"], prev["source"],
                                     awards, prev.get("warnings", []), today,
                                     metadata=metadata)

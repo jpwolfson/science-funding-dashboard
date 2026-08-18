@@ -1,8 +1,11 @@
 import json
+import tempfile
 import unittest
+from datetime import date
 from pathlib import Path
 from unittest.mock import patch
 
+from adapters.common import write_store
 from adapters.nih_reporter import (NihReporterPull, _award_kind,
                                    parse_trans_type)
 
@@ -150,6 +153,62 @@ class NihReporterTests(unittest.TestCase):
             "activity": "R01",
             "mechanism": "Non-SBIR/STTR",
         })
+
+    def test_full_pull_removes_only_reviewed_reporter_retractions(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store_path = Path(tmp) / "awards"
+            puller = NihReporterPull(
+                "NIGMS",
+                {"min_total": 0, "max_total": 1000, "max_monthly": 1000},
+                store_path,
+                retracted_ids={"nih:2"},
+                retracted_months={"nih:2": "2025-01"},
+            )
+            write_store(
+                store_path,
+                [puller.normalize(row(1))[0], puller.normalize(row(2))[0]],
+            )
+            with patch.object(
+                puller,
+                "fetch_year",
+                side_effect=lambda fy: {1: row(1)} if fy == 2025 else {},
+            ):
+                awards, warnings = puller.pull(
+                    full=True, today=date(2026, 8, 17)
+                )
+        self.assertEqual(["nih:1"], [award["id"] for award in awards])
+        self.assertEqual([], warnings)
+        self.assertEqual({"2025-01": 1}, puller.allowed_monthly_shrink)
+
+    def test_unreviewed_missing_award_is_still_retained_and_warned(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store_path = Path(tmp) / "awards"
+            puller = NihReporterPull(
+                "NIGMS",
+                {"min_total": 0, "max_total": 1000, "max_monthly": 1000},
+                store_path,
+            )
+            write_store(store_path, [puller.normalize(row(2))[0]])
+            with patch.object(puller, "fetch_year", return_value={}):
+                awards, warnings = puller.pull(
+                    full=True, today=date(2026, 8, 17)
+                )
+        self.assertEqual(["nih:2"], [award["id"] for award in awards])
+        self.assertEqual(1, len(warnings))
+        self.assertIn("retained from the store", warnings[0])
+
+    def test_retraction_ledger_has_unique_namespaced_ids(self):
+        ledger = json.loads(
+            (Path(__file__).parents[1] / "reference" /
+             "nih_reporter_retractions.json").read_text()
+        )
+        records = ledger["records"]
+        self.assertEqual(12, len(records))
+        self.assertEqual(12, len({record["id"] for record in records}))
+        self.assertTrue(all(record["id"].startswith("nih:") for record in records))
+        self.assertTrue(all(record["reporterAgency"] for record in records))
+        self.assertTrue(all(record["month"] == record["awardDate"][:7]
+                            for record in records))
 
     def test_config_has_all_current_reporter_nih_admin_components(self):
         cfg = json.loads((Path(__file__).parents[1] / "config" / "orgs.json").read_text())

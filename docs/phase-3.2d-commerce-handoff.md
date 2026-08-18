@@ -37,6 +37,21 @@ SHA-256 `eae34168a0093ca908b519ac1a864982d54fedd2010e594e1e79584a506d0fa6`;
 its nested P09 File B ZIP has SHA-256
 `95d7e9c43b3f5625aea637aee6173f064f5b5a06a9aeca4e2f881ff721cd7d03`.
 
+Current-main integration encountered a separate scheduled NIH rollup safety
+stop. Fresh full pulls retained 12 previously stored applications that the
+live RePORTER snapshots no longer returned. Exact ascending and descending
+pagination reconciled each affected fiscal year to `meta.total`; a direct
+`appl_ids` request then returned none of the 12 while returning known-live
+control `11126249`. This proves genuine upstream retractions rather than an
+incomplete pull. The adapter now removes only those reviewed exact IDs during
+a full pull; every other missing stored award remains retained and warned.
+The exact IDs, stored values, and evidence method are preserved in
+`reference/nih_reporter_retractions.json`. Each record also preserves its
+historical award date/month. The monthly monotonicity invariant permits only
+the exact month/count shrink represented by those reviewed records; any
+unreviewed, excess, or differently dated shrink remains a published warning
+and fails NIH validation.
+
 ## NOAA release evidence
 
 The pair retains all 99 reviewed official Program Activity identities (72

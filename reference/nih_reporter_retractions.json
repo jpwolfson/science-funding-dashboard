@@ -1,0 +1,25 @@
+{
+ "schemaVersion": 1,
+ "observedAt": "2026-08-17",
+ "source": "https://api.reporter.nih.gov/v2/projects/search",
+ "method": "Each affected fiscal-year snapshot was fetched in complete ascending and descending application-ID order and reconciled to meta.total. The 12 retained IDs were then queried directly in one exact appl_ids request alongside live control 11126249. The control returned and all 12 retained IDs did not.",
+ "control": {
+  "applId": 11126249,
+  "unit": "nih/nei/nei",
+  "returned": true
+ },
+ "records": [
+  {"id": "nih:11388824", "reporterAgency": "NEI", "unit": "nih/nei/nei", "fiscalYear": 2026, "awardDate": "2026-05-13", "month": "2026-05", "amount": 119057, "title": "Investigating the Effect of Arousal on Visual Processing"},
+  {"id": "nih:10996221", "reporterAgency": "NHLBI", "unit": "nih/nhlbi/nhlbi", "fiscalYear": 2025, "awardDate": "2025-09-17", "month": "2025-09", "amount": 29270, "title": "The growth factor meteorin-like and its receptor KIT in heart failure"},
+  {"id": "nih:11314935", "reporterAgency": "NHLBI", "unit": "nih/nhlbi/nhlbi", "fiscalYear": 2026, "awardDate": "2026-08-06", "month": "2026-08", "amount": 50114, "title": "Interrogating the Role of Nuclear Heparan Sulfates in Hematopoietic Cells"},
+  {"id": "nih:11459839", "reporterAgency": "NHLBI", "unit": "nih/nhlbi/nhlbi", "fiscalYear": 2026, "awardDate": "2026-08-07", "month": "2026-08", "amount": 50114, "title": "Defining the Role of RBM3 in Cardiac Stress Response"},
+  {"id": "nih:10825742", "reporterAgency": "NIA", "unit": "nih/nia/nia", "fiscalYear": 2024, "awardDate": "2024-05-24", "month": "2024-05", "amount": 83392, "title": "Leveraging pre-existing immunity to enhance pro-regenerative T-cell responses in aged mice"},
+  {"id": "nih:11172607", "reporterAgency": "NIA", "unit": "nih/nia/nia", "fiscalYear": 2025, "awardDate": "2025-08-01", "month": "2025-08", "amount": 38633, "title": "Interactions between Mitochondria, ER, and Amyloid"},
+  {"id": "nih:11225088", "reporterAgency": "NIAID", "unit": "nih/niaid/niaid", "fiscalYear": 2025, "awardDate": "2025-07-29", "month": "2025-07", "amount": 806466, "title": "Defining Protective IgGs to Food Allergy"},
+  {"id": "nih:11393581", "reporterAgency": "NIDA", "unit": "nih/nida/nida", "fiscalYear": 2026, "awardDate": "2026-07-22", "month": "2026-07", "amount": 50114, "title": "Examining linkage to care after nonfatal opioid overdoses: A mixed-methods study."},
+  {"id": "nih:11467202", "reporterAgency": "NIDA", "unit": "nih/nida/nida", "fiscalYear": 2026, "awardDate": "2026-07-20", "month": "2026-07", "amount": 50114, "title": "Examining the Association Between Buprenorphine Dose Trajectories and Opioid Use Disorder-Related Outcomes Among Pregnant and Postpartum Women"},
+  {"id": "nih:10973969", "reporterAgency": "NINDS", "unit": "nih/ninds/ninds", "fiscalYear": 2026, "awardDate": "2026-05-19", "month": "2026-05", "amount": 476611, "title": "Dissecting modular and redundant organization of cortical circuits"},
+  {"id": "nih:11294928", "reporterAgency": "NINDS", "unit": "nih/ninds/ninds", "fiscalYear": 2026, "awardDate": "2026-08-07", "month": "2026-08", "amount": 76000, "title": "Stimulating bulbospinal plasticity to improve baroreflex regulation of sympathetic cardiovascular activity after spinal cord injury."},
+  {"id": "nih:11377238", "reporterAgency": "OD", "unit": "nih/od/od", "fiscalYear": 2026, "awardDate": "2026-05-27", "month": "2026-05", "amount": 6668, "title": "MicroRNA-375 regulation of enteroendocrine cell biology in diet-induced obesity and bariatric surgery"}
+ ]
+}
