@@ -18,7 +18,7 @@ negative value means File B is higher.
 | ---: | --- | ---: | ---: | ---: | ---: | --- |
 | 1 | NOAA ORF `013-1450` / FY2025 | $5,909,955,239.20 | $7,498,931,108.79 | −$1,588,975,869.59 | **26.8864%** | Live |
 | 2 | NOAA PAC `013-1460` / FY2025 | $2,632,403,455.21 | $2,615,955,074.73 | $16,448,380.48 | **0.6248%** | Live |
-| 3 | Census Current `013-0401` / FY2025 | $343,719,439.23 | $345,384,177.96 | −$1,664,738.73 | **0.4843%** | Approved; retry/reconcile pending |
+| 3 | Census Current `013-0401` / FY2025 | $343,719,439.23 | $345,384,177.96 | −$1,664,738.73 | **0.4843%** | Live |
 | 4 | EPA S&T `068-0107` / FY2022 | $780,787,982.37 | $780,771,378.43 | $16,603.94 | **0.0021%** | Live |
 
 NOAA ORF is the clear magnitude outlier: its File B total exceeds File A by
@@ -38,7 +38,10 @@ dollars, not the first large one.
 - **Census Current FY2025:** workflow run `32013883488`, job `95339201920`,
   raw artifact `9287062264`. Its 43-row P12 File B archive totals
   `34538417796` cents; the entire `-166473873`-cent variance is the exact
-  `0000 / UNKNOWN/OTHER` File B bucket.
+  `0000 / UNKNOWN/OTHER` File B bucket. PR `#43` merged at
+  `4b99fe8b81653d1ca79095631c12af344a8f5e81`; post-merge Test run
+  `32097824562` and Deploy Pages run `32097824547` succeeded, and the live
+  account JSON matched the merged file byte-for-byte.
 - **EPA S&T FY2022:** workflow run `31787669479`, accepted retry job
   `94810063304`, raw artifact `9224418566`, and owner-approval commit
   `8c850bb5136d43092235eaddc1007f765ba70f37`. File B independently matched
