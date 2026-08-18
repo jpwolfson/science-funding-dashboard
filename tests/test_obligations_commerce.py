@@ -50,10 +50,10 @@ ACCOUNT_META = {
          34371943923, 24981703030],
     ),
     "commerce/census-periodic-censuses": (
-        "013-0450", "Periodic Censuses and Programs", 12, 17,
+        "013-0450", "Periodic Censuses and Programs", 13, 18,
         [124608213991, 152216377156, 343510920269, 658360397941,
          208540540023, 119117937899, 113692592505, 110423499944,
-         105107725694, 87727386199],
+         112688603058, 87542123033],
     ),
 }
 
@@ -74,7 +74,7 @@ OFFICIAL_SOURCE_COUNTS = {
     "commerce/nist-its": (7, 7),
     "commerce/bea": (4, 1),
     "commerce/census-current-surveys": (6, 4),
-    "commerce/census-periodic-censuses": (13, 4),
+    "commerce/census-periodic-censuses": (13, 5),
 }
 
 NOAA_ORF_FY2025_P02_TRANSIENTS = (
@@ -137,6 +137,7 @@ TRANSIENT_SOURCE_PAIRS = {
 NOAA_PATHS = ("commerce/noaa-orf", "commerce/noaa-pac")
 NIST_PATHS = ("commerce/nist-strs", "commerce/nist-its")
 CENSUS_CURRENT_PATHS = ("commerce/census-current-surveys",)
+CENSUS_PERIODIC_PATHS = ("commerce/census-periodic-censuses",)
 
 NIST_ITS_FY2026_P02_PARK_CENTS = {
     "0": (0,),
@@ -185,18 +186,37 @@ CENSUS_CURRENT_FY2026_P09_PARK_CENTS = {
     ),
 }
 
+CENSUS_PERIODIC_FY2026_P02_PARK_CENTS = {
+    "0": (0,),
+    "5ZC1YD0ZBVU": (
+        480321937, 2371610, 483471, 188472381, -33273197, 125443150,
+        51713300, 0, -237179177, 0, 0,
+    ),
+    "5ZC1YD0ZBW1": (
+        -10851207, -337318, 38332, 17338352, 7100, 0, -613249, 0,
+    ),
+    "5ZC1YD0ZBW3": (
+        -8207842, 232070, -2680240, 171164, 0, 0, 0, 0,
+    ),
+    "61U0W6399TD": (
+        -784007, 45843, 47264, 3951509, 734557, 0, 0, 0, 0, 0, 0,
+    ),
+}
+
 STAGE_PATHS = (
     NOAA_PATHS,
     NOAA_PATHS + NIST_PATHS,
     NOAA_PATHS + NIST_PATHS + CENSUS_CURRENT_PATHS,
+    NOAA_PATHS + NIST_PATHS + CENSUS_CURRENT_PATHS + CENSUS_PERIODIC_PATHS,
 )
-POST_RESOLUTION_JOB_COUNTS = dict(zip(STAGE_PATHS, (20, 40, 50)))
+POST_RESOLUTION_JOB_COUNTS = dict(zip(STAGE_PATHS, (20, 40, 50, 60)))
 CURRENT_FY2026_PINS = {
     "commerce/noaa-orf": 303354666643,
     "commerce/noaa-pac": 105930342662,
     "commerce/nist-strs": 59469231377,
     "commerce/nist-its": 97300322794,
     "commerce/census-current-surveys": 24981703030,
+    "commerce/census-periodic-censuses": 87542123033,
 }
 
 
@@ -371,7 +391,12 @@ class CommerceObligationTests(unittest.TestCase):
                 )
                 self.assertEqual(2, baseline["schemaVersion"])
                 self.assertEqual(symbol, baseline["federalAccount"])
-                self.assertIn("retrieved 2026-08-12", baseline["source"])
+                retrieved = (
+                    "retrieved 2026-08-18"
+                    if path == "commerce/census-periodic-censuses"
+                    else "retrieved 2026-08-12"
+                )
+                self.assertIn(retrieved, baseline["source"])
                 years = baseline["fiscalYears"]
                 self.assertEqual({str(fy) for fy in range(2015, 2027)}, set(years))
                 self.assertEqual("unavailable", years["2015"]["status"])
@@ -799,6 +824,43 @@ class CommerceObligationTests(unittest.TestCase):
         self.assertEqual(3, len(events))
         self.assertEqual(96259604, sum(row["amountCents"] for row in events))
         self.assertEqual(set(CENSUS_CURRENT_FY2026_P02_PARK_CENTS), set(by_park))
+        self.assertEqual(0, by_park["0"]["amountCents"])
+        self.assertEqual("PARK0", by_park["0"]["_programActivityKey"])
+        self.assertEqual(
+            "PROGRAM ACTIVITY NOT SPECIFIED (PARK 0)",
+            by_park["0"]["programActivityName"],
+        )
+
+    def test_census_periodic_fy2026_p02_park_zero_is_distinct_and_exact(self):
+        account = self.accounts["commerce/census-periodic-censuses"]
+        rows = []
+        for park, amounts in CENSUS_PERIODIC_FY2026_P02_PARK_CENTS.items():
+            for amount_cents in amounts:
+                rows.append({
+                    "submission_period": "FY2026P02",
+                    "federal_account_symbol": account["federalAccount"],
+                    "program_activity_reporting_key": park,
+                    "program_activity_code": "",
+                    "program_activity_name": "",
+                    "obligations_incurred": (
+                        f"{'-' if amount_cents < 0 else ''}"
+                        f"{abs(amount_cents) // 100}."
+                        f"{abs(amount_cents) % 100:02d}"
+                    ),
+                })
+        values = parse_file_b_snapshot(
+            rows, account["federalAccount"], alias_map(account)
+        )
+        events = file_b_period_events(
+            {"FY2026P02": values}, account["federalAccount"]
+        )
+        by_park = {
+            row["programActivityReportingKey"]: row for row in events
+        }
+        self.assertEqual(39, len(rows))
+        self.assertEqual(5, len(events))
+        self.assertEqual(577445803, sum(row["amountCents"] for row in events))
+        self.assertEqual(set(CENSUS_PERIODIC_FY2026_P02_PARK_CENTS), set(by_park))
         self.assertEqual(0, by_park["0"]["amountCents"])
         self.assertEqual("PARK0", by_park["0"]["_programActivityKey"])
         self.assertEqual(
