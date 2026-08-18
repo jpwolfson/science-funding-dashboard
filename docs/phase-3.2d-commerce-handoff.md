@@ -261,12 +261,22 @@ reconcile → trigger restoration → current-main integration → release QA.
 
 The final non-BEA Commerce release adds official account `013-0450`,
 **Periodic Censuses and Programs**, as
-`commerce/census-periodic-censuses`. The reviewed registry preserves all 17
-official source identities: 13 exact PAC/PAN code-name pairs and four exact
-FY2026 PARKs, represented by 12 stable account-scoped dashboard paths. The
+`commerce/census-periodic-censuses`. The reviewed registry preserves all 18
+official source identities: 13 exact PAC/PAN code-name pairs and five exact
+FY2026 PARKs, represented by 13 stable account-scoped dashboard paths. The
 legacy `0008 / DECENNIAL CENSUS` identity remains distinct from the current
 `0010` identity, while both exact `0010` source names resolve to the same
 current Decennial Census path.
+
+The FY2026 P02 File B source adds one distinct, exact PARK `0` identity with
+blank code/name. Its sole row is zero cents, so the registry represents it as
+`PARK0` **PROGRAM ACTIVITY NOT SPECIFIED (PARK 0)** rather than merging it
+into PAC `0000 / UNKNOWN/OTHER`. The retained raw snapshot contains 39 rows,
+five exact PARK events, and `577445803` cents. Attempt-specific raw artifact
+`9317475323` is retained for 14 days with outer SHA-256
+`79344cf24e24f7c2b8dd8239a12688b0b82be5b60f762a12cf786a9e119c8eb0`;
+its nested official File B ZIP has SHA-256
+`130cf9e3d1bcd74d99762daa4999fd26e9dc90436ceb0bca21bef7d5803ed4ee`.
 
 The live official GTAS/File A preflight on 2026-08-18 confirms the ten pinned
 FY2017–FY2026 totals. FY2025 is `112688603058` cents and FY2026 P09 is
