@@ -52,3 +52,17 @@ exact File B ledger total while retaining the File A account pin.
 This local scaffold is not release-ready. Each authorized stage still requires
 its serialized File B/File C backfill, exact baseline reconciliation, accepted
 provenance, zero warnings, rendered review, and coordinator integration.
+
+## Stage B release checkpoint (2026-08-18)
+
+Stage A is merged, deployed, and live-QA green on the authoritative 30-account
+`main` at `c654b32dc56d41bff10da3ebf199208472dc6cc5`. The approved EPA
+FY2022 dual exact pins remain unchanged.
+
+Stage B now registers only the three reviewed accounts
+`usda/ars-salaries-expenses`, `usda/ars-buildings-facilities`, and
+`usda/forest-rangeland-research`. Their exact FY2017--FY2026 GTAS/File A
+pins and 27 canonical Program Activity identities come directly from the
+reviewed ten-account scaffold. Stages C and D remain unregistered. The Stage B
+full selector must plan exactly 30 jobs and fail closed on every new source
+identity before an atomic reconcile is accepted.

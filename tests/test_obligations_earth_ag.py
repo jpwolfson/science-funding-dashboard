@@ -105,9 +105,20 @@ EXPECTED_CENTS = {
                  24973409109, 9568182251],
 }
 
-REGISTERED = {"014-0804", "068-0107"}
+REGISTERED = {
+    "014-0804",
+    "068-0107",
+    "012-1400",
+    "012-1401",
+    "012-1104",
+}
 STAGE_SELECTORS = {
     "doi/usgs-sir,epa/science-technology": 20,
+    (
+        "usda/ars-salaries-expenses,"
+        "usda/ars-buildings-facilities,"
+        "usda/forest-rangeland-research"
+    ): 30,
 }
 
 

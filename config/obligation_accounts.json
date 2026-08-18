@@ -471,8 +471,7 @@
       "name": "ADMINISTRATION FOR STRATEGIC PREPAREDNESS AND RESPONSE"
      }
     ]
-   }
-  ,
+   },
   {
    "path": "nasa/science",
    "name": "Science",
@@ -1270,6 +1269,225 @@
     {"slug": "data-processing-systems", "code": "0014", "park": "", "name": "Data Processing Systems"},
     {"slug": "enterprise-data-collection-dissemination-systems", "code": "0015", "park": "5ZC1YD0ZBW3", "name": "Enterprise Data Collection and Dissemination Systems"}
    ]
-  }
+  },
+  {
+    "path": "usda/ars-salaries-expenses",
+    "name": "Salaries and Expenses, Agricultural Research Service",
+    "abbrev": "ARS S&E",
+    "agency": "Department of Agriculture",
+    "federalAccount": "012-1400",
+    "agencyIdentifier": "012",
+    "adapter": "usaspending_obligations",
+    "baseline": "reference/usda_ars_salaries_expenses_obligation_baseline.json",
+    "availability": {
+     "firstFiscalYear": 2017,
+     "firstFiscalYearPeriod": 6,
+     "regularFirstPeriod": 2
+    },
+    "programActivities": [
+     {
+      "slug": "unknown-other",
+      "code": "0000",
+      "name": "Unknown / other",
+      "codeNameAliases": [
+       {
+        "code": "0000",
+        "name": "OTHER/UNKNOWN"
+       },
+       {
+        "code": "0000",
+        "name": "UNKNOWN/OTHER"
+       }
+      ]
+     },
+     {
+      "slug": "crop-production",
+      "code": "0003",
+      "park": "5ZBXSS9QSGJ",
+      "name": "CROP PRODUCTION"
+     },
+     {
+      "slug": "crop-protection",
+      "code": "0006",
+      "park": "5ZBXSS9QSGM",
+      "name": "CROP PROTECTION"
+     },
+     {
+      "slug": "decentralized-gsa-and-security-payments",
+      "code": "0011",
+      "park": "5ZBXSS9QSGR",
+      "name": "DECENTRALIZED GSA AND SECURITY PAYMENTS"
+     },
+     {
+      "slug": "environmental-stewardship",
+      "code": "0008",
+      "park": "5ZBXSS9QSGZ",
+      "name": "ENVIRONMENTAL STEWARDSHIP"
+     },
+     {
+      "slug": "financial-adjustment-program-not-specified",
+      "code": "EX202500290511",
+      "park": "EX202500290511",
+      "name": "FINANCIAL ADJUSTMENT: PROGRAM NOT SPECIFIED"
+     },
+     {
+      "slug": "food-safety",
+      "code": "0004",
+      "park": "5ZBXSS9QSGK",
+      "name": "FOOD SAFETY"
+     },
+     {
+      "slug": "homeland-security",
+      "code": "0012",
+      "park": "5ZBXSS9QSGS",
+      "name": "HOMELAND SECURITY"
+     },
+     {
+      "slug": "human-nutrition-research",
+      "code": "0007",
+      "park": "5ZBXSS9QSGN",
+      "name": "HUMAN NUTRITION RESEARCH"
+     },
+     {
+      "slug": "livestock-production",
+      "code": "0002",
+      "park": "5ZBXSS9QSGY",
+      "name": "LIVESTOCK PRODUCTION"
+     },
+     {
+      "slug": "livestock-protection",
+      "code": "0005",
+      "park": "5ZBXSS9QSGL",
+      "name": "LIVESTOCK PROTECTION"
+     },
+     {
+      "slug": "miscellaneous-fees-supplementals",
+      "code": "5ZBXSS9QSGU",
+      "park": "5ZBXSS9QSGU",
+      "name": "MISCELLANEOUS FEES/SUPPLEMENTALS"
+     },
+     {
+      "slug": "national-agricultural-library",
+      "code": "0009",
+      "park": "5ZBXSS9QSGP",
+      "name": "NATIONAL AGRICULTURAL LIBRARY"
+     },
+     {
+      "slug": "national-bio-agro-defense-facility",
+      "code": "0013",
+      "park": "5PXXPW5A3V3",
+      "name": "NATIONAL BIO-AGRO DEFENSE FACILITY"
+     },
+     {
+      "slug": "product-quality-value-added",
+      "code": "0001",
+      "park": "5ZBXSS9QSGH",
+      "name": "PRODUCT QUALITY/VALUE ADDED"
+     },
+     {
+      "slug": "repair-and-maintenance-of-facilities",
+      "code": "0010",
+      "park": "5ZBXSS9QSGQ",
+      "name": "REPAIR AND MAINTENANCE OF FACILITIES"
+     },
+     {
+      "slug": "salaries-and-expenses-reimbursable",
+      "code": "0881",
+      "park": "5ZBXSS9QT8D",
+      "name": "SALARIES AND EXPENSES (REIMBURSABLE)"
+     },
+     {
+      "slug": "fsdw-financial-statement-data-warehouse",
+      "code": "FS09",
+      "name": "FSDW (FINANCIAL STATEMENT DATA WAREHOUSE)"
+     },
+     {
+      "slug": "pending-mapping",
+      "code": "PM08",
+      "name": "PENDING MAPPING"
+     }
+    ]
+   },
+  {
+    "path": "usda/ars-buildings-facilities",
+    "name": "Buildings and Facilities, Agricultural Research Service",
+    "abbrev": "ARS B&F",
+    "agency": "Department of Agriculture",
+    "federalAccount": "012-1401",
+    "agencyIdentifier": "012",
+    "adapter": "usaspending_obligations",
+    "baseline": "reference/usda_ars_buildings_facilities_obligation_baseline.json",
+    "availability": {
+     "firstFiscalYear": 2017,
+     "firstFiscalYearPeriod": 6,
+     "regularFirstPeriod": 2
+    },
+    "programActivities": [
+     {
+      "slug": "building-and-facilities-projects",
+      "code": "0001",
+      "park": "5ZBXSS9TCXN",
+      "name": "BUILDING AND FACILITIES PROJECTS"
+     },
+     {
+      "slug": "fsdw-financial-statement-data-warehouse",
+      "code": "FS09",
+      "name": "FSDW (FINANCIAL STATEMENT DATA WAREHOUSE)"
+     }
+    ]
+   }
+  ,
+  {
+    "path": "usda/forest-rangeland-research",
+    "name": "Forest and Rangeland Research, Forest Service",
+    "abbrev": "FS FRR",
+    "agency": "Department of Agriculture",
+    "federalAccount": "012-1104",
+    "agencyIdentifier": "012",
+    "adapter": "usaspending_obligations",
+    "baseline": "reference/usda_forest_rangeland_research_obligation_baseline.json",
+    "availability": {
+     "firstFiscalYear": 2017,
+     "firstFiscalYearPeriod": 6,
+     "regularFirstPeriod": 2
+    },
+    "programActivities": [
+     {
+      "slug": "financial-adjustment-program-not-specified",
+      "code": "EX202500290511",
+      "park": "EX202500290511",
+      "name": "FINANCIAL ADJUSTMENT: PROGRAM NOT SPECIFIED"
+     },
+     {
+      "slug": "forest-and-rangeland-research",
+      "code": "0006",
+      "park": "5ZC1BAC6JDG",
+      "name": "FOREST AND RANGELAND RESEARCH"
+     },
+     {
+      "slug": "forest-and-rangeland-research-reimbursable",
+      "code": "0801",
+      "park": "5ZC1BAC6K2T",
+      "name": "FOREST AND RANGELAND RESEARCH (REIMBURSABLE)"
+     },
+     {
+      "slug": "frr-bipartisan-infrastructure-law",
+      "code": "0002",
+      "park": "6080RXJ87UQ",
+      "name": "FRR BIPARTISAN INFRASTRUCTURE LAW"
+     },
+     {
+      "slug": "frr-disaster-supplemental",
+      "code": "0001",
+      "park": "6080RXJ87UP",
+      "name": "FRR DISASTER SUPPLEMENTAL"
+     },
+     {
+      "slug": "fsdw-financial-statement-data-warehouse",
+      "code": "FS09",
+      "name": "FSDW (FINANCIAL STATEMENT DATA WAREHOUSE)"
+     }
+    ]
+   }
  ]
 }
