@@ -257,6 +257,37 @@ After NOAA is fully live, release NIST STRS + NIST ITS, then Census Current,
 then Census Periodic. Each batch follows register → full backfill → atomic
 reconcile → trigger restoration → current-main integration → release QA.
 
+## Census Periodic release
+
+The final non-BEA Commerce release adds official account `013-0450`,
+**Periodic Censuses and Programs**, as
+`commerce/census-periodic-censuses`. The reviewed registry preserves all 17
+official source identities: 13 exact PAC/PAN code-name pairs and four exact
+FY2026 PARKs, represented by 12 stable account-scoped dashboard paths. The
+legacy `0008 / DECENNIAL CENSUS` identity remains distinct from the current
+`0010` identity, while both exact `0010` source names resolve to the same
+current Decennial Census path.
+
+The live official GTAS/File A preflight on 2026-08-18 confirms the ten pinned
+FY2017–FY2026 totals. FY2025 is `112688603058` cents and FY2026 P09 is
+`87542123033` cents, superseding the older staged expectations. The normal
+full selector must plan exactly ten jobs:
+
+```json
+{
+  "mode": "full",
+  "accounts": "commerce/census-periodic-censuses",
+  "from_fy": null,
+  "to_fy": null,
+  "current_period": null
+}
+```
+
+BEA remains absent and quarantined. Do not call Census Periodic complete until
+its ten-partition store reconciles atomically, the weekly/all trigger is
+restored, current main is integrated, all release gates pass, and the deployed
+JSON and rendered account page pass live QA.
+
 ## Official evidence
 
 - Account records:

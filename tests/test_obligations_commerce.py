@@ -53,7 +53,7 @@ ACCOUNT_META = {
         "013-0450", "Periodic Censuses and Programs", 12, 17,
         [124608213991, 152216377156, 343510920269, 658360397941,
          208540540023, 119117937899, 113692592505, 110423499944,
-         105107725694, 87727386199],
+         112688603058, 87542123033],
     ),
 }
 
@@ -137,6 +137,7 @@ TRANSIENT_SOURCE_PAIRS = {
 NOAA_PATHS = ("commerce/noaa-orf", "commerce/noaa-pac")
 NIST_PATHS = ("commerce/nist-strs", "commerce/nist-its")
 CENSUS_CURRENT_PATHS = ("commerce/census-current-surveys",)
+CENSUS_PERIODIC_PATHS = ("commerce/census-periodic-censuses",)
 
 NIST_ITS_FY2026_P02_PARK_CENTS = {
     "0": (0,),
@@ -189,14 +190,16 @@ STAGE_PATHS = (
     NOAA_PATHS,
     NOAA_PATHS + NIST_PATHS,
     NOAA_PATHS + NIST_PATHS + CENSUS_CURRENT_PATHS,
+    NOAA_PATHS + NIST_PATHS + CENSUS_CURRENT_PATHS + CENSUS_PERIODIC_PATHS,
 )
-POST_RESOLUTION_JOB_COUNTS = dict(zip(STAGE_PATHS, (20, 40, 50)))
+POST_RESOLUTION_JOB_COUNTS = dict(zip(STAGE_PATHS, (20, 40, 50, 60)))
 CURRENT_FY2026_PINS = {
     "commerce/noaa-orf": 303354666643,
     "commerce/noaa-pac": 105930342662,
     "commerce/nist-strs": 59469231377,
     "commerce/nist-its": 97300322794,
     "commerce/census-current-surveys": 24981703030,
+    "commerce/census-periodic-censuses": 87542123033,
 }
 
 
@@ -371,7 +374,12 @@ class CommerceObligationTests(unittest.TestCase):
                 )
                 self.assertEqual(2, baseline["schemaVersion"])
                 self.assertEqual(symbol, baseline["federalAccount"])
-                self.assertIn("retrieved 2026-08-12", baseline["source"])
+                retrieved = (
+                    "retrieved 2026-08-18"
+                    if path == "commerce/census-periodic-censuses"
+                    else "retrieved 2026-08-12"
+                )
+                self.assertIn(retrieved, baseline["source"])
                 years = baseline["fiscalYears"]
                 self.assertEqual({str(fy) for fy in range(2015, 2027)}, set(years))
                 self.assertEqual("unavailable", years["2015"]["status"])

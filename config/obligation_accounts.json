@@ -1244,6 +1244,31 @@
     {"slug": "survey-program-dynamics", "code": "0004", "park": "", "name": "Survey of Program Dynamics"},
     {"slug": "state-childrens-health-insurance-program", "code": "0005", "park": "5UW16SD2QT1", "name": "State Children's Health Insurance Program", "abbrev": "SCHIP"}
    ]
+  },
+  {
+   "path": "commerce/census-periodic-censuses",
+   "name": "Periodic Censuses and Programs",
+   "abbrev": "Census Periodic",
+   "agency": "Department of Commerce",
+   "federalAccount": "013-0450",
+   "agencyIdentifier": "013",
+   "adapter": "usaspending_obligations",
+   "baseline": "reference/census_periodic_censuses_obligation_baseline.json",
+   "availability": {"firstFiscalYear": 2017, "firstFiscalYearPeriod": 6, "regularFirstPeriod": 2},
+   "programActivities": [
+    {"slug": "unknown-other", "code": "0000", "park": "", "name": "Unknown / other", "codeNameAliases": [{"code": "0000", "name": "UNKNOWN/OTHER"}]},
+    {"slug": "economic-censuses", "code": "0001", "park": "", "name": "Economic Censuses"},
+    {"slug": "census-of-governments", "code": "0002", "park": "", "name": "Census of Governments"},
+    {"slug": "periodic-economic-statistics-programs", "code": "0003", "park": "61U0W6399TD", "name": "Periodic Economic Statistics Programs"},
+    {"slug": "intercensal-demographic-estimates", "code": "0006", "park": "", "name": "Intercensal Demographic Estimates"},
+    {"slug": "decennial-census-legacy-0008", "code": "0008", "park": "", "name": "Decennial Census (legacy PAC 0008)", "codeNameAliases": [{"code": "0008", "name": "DECENNIAL CENSUS"}]},
+    {"slug": "2010-decennial-census", "code": "0009", "park": "", "name": "2010 Decennial Census"},
+    {"slug": "decennial-census", "code": "0010", "park": "5ZC1YD0ZBVU", "name": "Decennial Census", "codeNameAliases": [{"code": "0010", "name": "2020 DECENNIAL CENSUS"}]},
+    {"slug": "demographic-surveys-sample-redesign", "code": "0011", "park": "", "name": "Demographic Surveys Sample Redesign"},
+    {"slug": "geographic-support", "code": "0013", "park": "5ZC1YD0ZBW1", "name": "Geographic Support"},
+    {"slug": "data-processing-systems", "code": "0014", "park": "", "name": "Data Processing Systems"},
+    {"slug": "enterprise-data-collection-dissemination-systems", "code": "0015", "park": "5ZC1YD0ZBW3", "name": "Enterprise Data Collection and Dissemination Systems"}
+   ]
   }
  ]
 }
