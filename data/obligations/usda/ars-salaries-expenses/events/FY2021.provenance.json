@@ -1,0 +1,763 @@
+{
+ "acceptedAt": "2026-08-18T15:00:33+00:00",
+ "accountPath": "usda/ars-salaries-expenses",
+ "asOfPeriod": 12,
+ "baselinePin": {
+  "obligationsCents": 167334681459,
+  "status": "complete"
+ },
+ "collectionStatus": "accepted",
+ "diff": {
+  "addedCount": 60229,
+  "addedIdsSha256": "6a41013fb9dd2b80fad7ed7d19b019d515b2fad22f401a1ad773a5d3381f6406",
+  "changedCount": 0,
+  "changedIdsSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "netAmountChangeCents": 167334681459,
+  "previousRecordCount": 0,
+  "recordCount": 60229,
+  "removedCount": 0,
+  "removedIdsSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+ },
+ "downloads": [
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "3486",
+     "fy": 2021,
+     "period": 2,
+     "quarter": null,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "04f53f1302df2d7c3328e90903670145a97cc682dbb0103af8934f9a2e826728",
+   "memberRowCounts": {
+    "FY2021P01-P02_All_FA_AccountBreakdownByPA-OC_2026-08-18_H14M42S03_1.csv": 345
+   },
+   "parsedRowCount": 345,
+   "rawArtifactFile": "usda--ars-salaries-expenses-FY2021P02-object_class_program_activity-04f53f1302df.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "3486",
+     "fy": 2021,
+     "period": 2,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 345,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "3486",
+     "fy": 2021,
+     "period": 3,
+     "quarter": 1,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "09558e99ec7da3f759914ca75a30f44549a61bac386b42378e81d9e159ef5ea8",
+   "memberRowCounts": {
+    "FY2021P01-P03_All_FA_AccountBreakdownByPA-OC_2026-08-18_H14M42S40_1.csv": 350
+   },
+   "parsedRowCount": 350,
+   "rawArtifactFile": "usda--ars-salaries-expenses-FY2021P03-object_class_program_activity-09558e99ec7d.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "3486",
+     "fy": 2021,
+     "period": 3,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 350,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "3486",
+     "fy": 2021,
+     "period": 4,
+     "quarter": 1,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "10faa871aa2f256d301ab810fc878e56683b4dc9fb51a32dae7af66592285170",
+   "memberRowCounts": {
+    "FY2021P01-P04_All_FA_AccountBreakdownByPA-OC_2026-08-18_H14M43S16_1.csv": 356
+   },
+   "parsedRowCount": 356,
+   "rawArtifactFile": "usda--ars-salaries-expenses-FY2021P04-object_class_program_activity-10faa871aa2f.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "3486",
+     "fy": 2021,
+     "period": 4,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 356,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "3486",
+     "fy": 2021,
+     "period": 5,
+     "quarter": 1,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "d4c60c421e7a37c833f6a731c95c24c078b5851e1cdc66962b7c35d12b57cac4",
+   "memberRowCounts": {
+    "FY2021P01-P05_All_FA_AccountBreakdownByPA-OC_2026-08-18_H14M43S53_1.csv": 355
+   },
+   "parsedRowCount": 355,
+   "rawArtifactFile": "usda--ars-salaries-expenses-FY2021P05-object_class_program_activity-d4c60c421e7a.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "3486",
+     "fy": 2021,
+     "period": 5,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 355,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "3486",
+     "fy": 2021,
+     "period": 6,
+     "quarter": 2,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "8457ad4fbce5af19ea2e6530bed6096f720e53c92afed11607ae80fdb01735a3",
+   "memberRowCounts": {
+    "FY2021P01-P06_All_FA_AccountBreakdownByPA-OC_2026-08-18_H14M44S30_1.csv": 357
+   },
+   "parsedRowCount": 357,
+   "rawArtifactFile": "usda--ars-salaries-expenses-FY2021P06-object_class_program_activity-8457ad4fbce5.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "3486",
+     "fy": 2021,
+     "period": 6,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 357,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "3486",
+     "fy": 2021,
+     "period": 7,
+     "quarter": 2,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "fc9f8495dfe02cf0973b37d07fe5773b1a0c38c5dc5baffc38a1a1f72cb1d71e",
+   "memberRowCounts": {
+    "FY2021P01-P07_All_FA_AccountBreakdownByPA-OC_2026-08-18_H14M45S08_1.csv": 356
+   },
+   "parsedRowCount": 356,
+   "rawArtifactFile": "usda--ars-salaries-expenses-FY2021P07-object_class_program_activity-fc9f8495dfe0.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "3486",
+     "fy": 2021,
+     "period": 7,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 356,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "3486",
+     "fy": 2021,
+     "period": 8,
+     "quarter": 2,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "166d973c253e9dba95966aec8aa61e2c938514e3530e56123f4f60c0c7a5a180",
+   "memberRowCounts": {
+    "FY2021P01-P08_All_FA_AccountBreakdownByPA-OC_2026-08-18_H14M45S37_1.csv": 359
+   },
+   "parsedRowCount": 359,
+   "rawArtifactFile": "usda--ars-salaries-expenses-FY2021P08-object_class_program_activity-166d973c253e.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "3486",
+     "fy": 2021,
+     "period": 8,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 359,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "3486",
+     "fy": 2021,
+     "period": 9,
+     "quarter": 3,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "42bf3e54e1bb90443ab57a2cf7fd0d3f36b50551658d276d624850ecc8a62507",
+   "memberRowCounts": {
+    "FY2021P01-P09_All_FA_AccountBreakdownByPA-OC_2026-08-18_H14M46S22_1.csv": 359
+   },
+   "parsedRowCount": 359,
+   "rawArtifactFile": "usda--ars-salaries-expenses-FY2021P09-object_class_program_activity-42bf3e54e1bb.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "3486",
+     "fy": 2021,
+     "period": 9,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 359,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "3486",
+     "fy": 2021,
+     "period": 10,
+     "quarter": 3,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "347a7d8954bf4cb13e19ca94bcdb47bbe62842074e0113cb25a38a3f5b6026c1",
+   "memberRowCounts": {
+    "FY2021P01-P10_All_FA_AccountBreakdownByPA-OC_2026-08-18_H14M50S56_1.csv": 368
+   },
+   "parsedRowCount": 368,
+   "rawArtifactFile": "usda--ars-salaries-expenses-FY2021P10-object_class_program_activity-347a7d8954bf.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "3486",
+     "fy": 2021,
+     "period": 10,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 368,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "3486",
+     "fy": 2021,
+     "period": 11,
+     "quarter": 3,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "dc14876e8061751a42a14497d85af982c273c5a11a70f3954d13851954373f18",
+   "memberRowCounts": {
+    "FY2021P01-P11_All_FA_AccountBreakdownByPA-OC_2026-08-18_H14M52S37_1.csv": 369
+   },
+   "parsedRowCount": 369,
+   "rawArtifactFile": "usda--ars-salaries-expenses-FY2021P11-object_class_program_activity-dc14876e8061.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "3486",
+     "fy": 2021,
+     "period": 11,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 369,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "3486",
+     "fy": 2021,
+     "period": 12,
+     "quarter": 4,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "9b6d0d35fe1ed9516cec578cdac38bd3f24fa7482354e62e38d75b53e663b7d7",
+   "memberRowCounts": {
+    "FY2021P01-P12_All_FA_AccountBreakdownByPA-OC_2026-08-18_H14M53S14_1.csv": 370
+   },
+   "parsedRowCount": 370,
+   "rawArtifactFile": "usda--ars-salaries-expenses-FY2021P12-object_class_program_activity-9b6d0d35fe1e.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "3486",
+     "fy": 2021,
+     "period": 12,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 370,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "transaction_obligated_amount",
+     "award_unique_key",
+     "award_id_piid",
+     "parent_award_id_piid",
+     "award_id_fain",
+     "award_id_uri",
+     "recipient_uei",
+     "recipient_name",
+     "prime_award_base_transaction_description",
+     "usaspending_permalink"
+    ],
+    "download_types": [
+     "award_financial"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "3486",
+     "fy": 2021,
+     "period": 12,
+     "quarter": 4,
+     "submission_types": [
+      "award_financial"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "17550209b78e1da4bc022044044205b102aea4330e5c8f52f6f2428cffb4f65c",
+   "memberRowCounts": {
+    "FY2021P01-P12_All_FA_Assistance_AccountBreakdownByAward_2026-08-18_H14M58S38_01.csv": 107455,
+    "FY2021P01-P12_All_FA_Contracts_AccountBreakdownByAward_2026-08-18_H14M58S38_01.csv": 252154,
+    "FY2021P01-P12_All_FA_Unlinked_AccountBreakdownByAward_2026-08-18_H14M58S38_01.csv": 42963
+   },
+   "parsedRowCount": 402572,
+   "rawArtifactFile": "usda--ars-salaries-expenses-FY2021P12-award_financial-17550209b78e.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "transaction_obligated_amount",
+     "award_unique_key",
+     "award_id_piid",
+     "parent_award_id_piid",
+     "award_id_fain",
+     "award_id_uri",
+     "recipient_uei",
+     "recipient_name",
+     "prime_award_base_transaction_description",
+     "usaspending_permalink"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "3486",
+     "fy": 2021,
+     "period": 12,
+     "submission_types": [
+      "award_financial"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 402572,
+   "submissionType": "award_financial"
+  }
+ ],
+ "federalAccount": "012-1400",
+ "fiscalYear": 2021,
+ "normalized": {
+  "eventFingerprint": "f1c10843b43e0528461482b1ac0f083cc03a255236e9b8d2476b67032034bc8b",
+  "netObligationsCents": 167334681459,
+  "recordCount": 60229
+ },
+ "replacement": {
+  "previousEventFingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "previousProvenanceSha256": null
+ },
+ "schemaVersion": 2
+}
