@@ -81,3 +81,25 @@ raw row (source submission label `FY2020Q2`) for PAC `0000`, blank PARK,
 `0000:unknown-other` identity. This is ordinary missing attribution, not the
 distinct nonblank-PARK identity contract used by the Census accounts, and it
 does not alter either source total.
+
+## Stage C release checkpoint (2026-08-19)
+
+Stage B is merged, deployed, and live-QA green on authoritative 33-account
+`main` at `0b1486664c47f76a44249b2d9e8487f1104ef924`. Its complete source graph,
+atomic reconcile, weekly/all trigger restoration, current-main integration,
+fast and rendered tests, screenshots, footprint, post-merge Test and Deploy,
+byte-exact live JSON, and deployed light/dark rendering all passed.
+
+Stage C registers only `usda/nifa-extension`,
+`usda/nifa-research-education`, and `usda/nifa-integrated-activities`.
+Their exact FY2017--FY2026 GTAS/File A pins and reviewed Program Activity
+identities come from the ten-account scaffold. Extension preserves both PAC
+`0036` names as distinct identities. Research and Education keeps PARK
+`Set Aside 1500` separate from generic historical set-aside rows; Integrated
+Activities does the same for `Set Aside 1502`. The current `Homeland
+Security` PARK is not silently merged with the longer legacy PAC label.
+
+The Stage C full selector must plan exactly 30 FY2017--FY2026 jobs and fail
+closed on every new source identity. Stage D remains unregistered until Stage
+C has completed atomic reconcile, trigger restoration, current-main
+integration, all local gates, merge/deploy, and live QA.

@@ -111,6 +111,9 @@ REGISTERED = {
     "012-1400",
     "012-1401",
     "012-1104",
+    "012-0502",
+    "012-1500",
+    "012-1502",
 }
 STAGE_SELECTORS = {
     "doi/usgs-sir,epa/science-technology": 20,
@@ -118,6 +121,11 @@ STAGE_SELECTORS = {
         "usda/ars-salaries-expenses,"
         "usda/ars-buildings-facilities,"
         "usda/forest-rangeland-research"
+    ): 30,
+    (
+        "usda/nifa-extension,"
+        "usda/nifa-research-education,"
+        "usda/nifa-integrated-activities"
     ): 30,
 }
 
