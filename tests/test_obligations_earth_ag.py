@@ -39,7 +39,7 @@ EXPECTED = {
     "012-1104": (
         "usda/forest-rangeland-research",
         "Forest and Rangeland Research, Forest Service", "FS FRR",
-        "Department of Agriculture", 6,
+        "Department of Agriculture", 7,
         "reference/usda_forest_rangeland_research_obligation_baseline.json",
     ),
     "012-0502": (
@@ -224,6 +224,44 @@ class EarthAgricultureObligationTests(unittest.TestCase):
                 self.assertNotIn("fileBObligationsCents", ordinary)
                 self.assertNotIn("fileAFileBVarianceCents", ordinary)
                 self.assertNotIn("fileAFileBVarianceReason", ordinary)
+
+    def test_ars_salaries_expenses_transient_0014_alias_matches_raw_evidence(self):
+        aliases = alias_map(self.accounts["012-1400"])
+        raw_rows = [
+            {
+                "federal_account_symbol": "012-1400",
+                "program_activity_code": "0014",
+                "program_activity_name": "MISCELLANEOUS FEES/SUPPLEMENTALS",
+                "obligations_incurred": "0.00",
+            },
+        ]
+        values = parse_file_b_snapshot(raw_rows, "012-1400", aliases)
+        self.assertEqual(1, len(values))
+        (key, amount_cents), = values.items()
+        self.assertEqual("5ZBXSS9QSGU", key[0])
+        self.assertEqual("5ZBXSS9QSGU", key[1])
+        self.assertEqual("MISCELLANEOUS FEES/SUPPLEMENTALS", key[2])
+        self.assertEqual("5ZBXSS9QSGU", key[3])
+        self.assertEqual(0, amount_cents)
+
+    def test_forest_fy2020_unknown_other_matches_exact_raw_evidence(self):
+        aliases = alias_map(self.accounts["012-1104"])
+        raw_rows = [
+            {
+                "federal_account_symbol": "012-1104",
+                "program_activity_code": "0000",
+                "program_activity_name": "UNKNOWN/OTHER",
+                "obligations_incurred": "0.00",
+            },
+        ]
+        values = parse_file_b_snapshot(raw_rows, "012-1104", aliases)
+        self.assertEqual(1, len(values))
+        (key, amount_cents), = values.items()
+        self.assertEqual("0000", key[0])
+        self.assertEqual("0000", key[1])
+        self.assertEqual("Unknown / other", key[2])
+        self.assertEqual("", key[3])
+        self.assertEqual(0, amount_cents)
 
     def test_usgs_reused_0002_identities_remain_distinct(self):
         aliases = alias_map(self.accounts["014-0804"])

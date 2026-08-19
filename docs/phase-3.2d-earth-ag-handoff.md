@@ -66,3 +66,18 @@ pins and 27 canonical Program Activity identities come directly from the
 reviewed ten-account scaffold. Stages C and D remain unregistered. The Stage B
 full selector must plan exactly 30 jobs and fail closed on every new source
 identity before an atomic reconcile is accepted.
+
+The first Stage B source attempt retained exact raw evidence for one later
+Salaries and Expenses identity: PAC `0014`, blank PARK,
+`MISCELLANEOUS FEES/SUPPLEMENTALS`. It occurs once at zero cents in each of
+FY2023 P04, FY2024 P05, and FY2025 P04. Those rows map to the existing
+canonical `5ZBXSS9QSGU:miscellaneous-fees-supplementals` activity by exact
+code-and-name alias; they do not create a new activity and do not alter any
+File A or File B total.
+
+The same attempt retained a single FY2020 P06 Forest and Rangeland Research
+raw row (source submission label `FY2020Q2`) for PAC `0000`, blank PARK,
+`UNKNOWN/OTHER`, at zero cents. It maps to that account's explicit
+`0000:unknown-other` identity. This is ordinary missing attribution, not the
+distinct nonblank-PARK identity contract used by the Census accounts, and it
+does not alter either source total.
