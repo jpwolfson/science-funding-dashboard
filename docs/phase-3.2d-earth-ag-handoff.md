@@ -92,6 +92,58 @@ byte-exact live JSON, and deployed light/dark rendering all passed.
 
 Stage C registers only `usda/nifa-extension`,
 `usda/nifa-research-education`, and `usda/nifa-integrated-activities`.
+
+Stage C source run `32234385011` attempt 1 found one FY2026 P02 NIFA
+Extension mapping gap: blank code/name with PARK `EX202500290511` and
+`89,223,609` cents. That PARK is the already-established exact identity
+`FINANCIAL ADJUSTMENT: PROGRAM NOT SPECIFIED`, so the repair registers the
+same canonical identity for `usda/nifa-extension`; it does not alter any
+source total or introduce a File A/File B variance. The retained raw artifact
+is `9362983381` (14 days), 700 bytes, outer SHA256
+`1c08f67e8dd815ca629dd28dda8d99c3f554dd81efbdfd08b16023e047fa93fa`.
+Its sole inner archive is 522 bytes with SHA256
+`46e853403d16b63dd1fc89e0d3fd72cf8c19402457c9eeb362b3b9a8209699bb`;
+the exact 46-row snapshot totals `491,474,612` cents, including the reviewed
+PARK row. The repair remains local-only until the source graph is terminal.
+
+The same attempt later found one FY2019 P09 NIFA Integrated mapping gap:
+code `FS09`, blank PARK, name `FSDW (FINANCIAL STATEMENT DATA WAREHOUSE)`,
+and `404,906` cents. This is the established FSDW identity used by the other
+NIFA accounts, so it is also an exact mapping repair rather than a source-total
+variance. Retained raw artifact `9363925873` is 6,380 bytes with outer SHA256
+`d201157626787df18d1cbb3b0dcc5bb68cd54741ed91e2bfa41e7a2dd9ce5aae`.
+It preserves eight P02-P09 raw archives; the accepted 22-row P09 archive is
+694 bytes, SHA256
+`4e62fcb7dfd028748b66f537ef46d38858693e2e8d02fd353d60b5b73fe45d62`,
+and totals `2,420,107,405` cents. This repair also remains local-only until
+the source graph is terminal.
+
+The same exact FS09 identity then recurred in four later Integrated Activities
+partitions. The retained raw evidence is:
+
+- FY2022 P02: artifact `9365104344`, 828 bytes, outer SHA256
+  `5f49498b0cbe7a281b4cd22afb112ef7987f9899a888bae3c7003f61f0185cdf`;
+  its 617-byte inner archive has SHA256
+  `14d835d9d9680b20b1ece2cbf764c9046ab0ec07c42040bdae79245119596907`,
+  13 rows totaling `2,425,851` cents, all from the one FS09 row.
+- FY2023 P06: artifact `9365209011`, 4,362 bytes, outer SHA256
+  `66468aa5fb5d583a45f0d9870e33130be9147b6201adcffb93813440e40e746a`;
+  its 791-byte P06 archive has SHA256
+  `64cd2d840073f1b7cc06860fdc75a8da94dba2b1b3d81d9e46ae1355cb34bd6c`,
+  27 rows totaling `1,501,518,558` cents, including FS09 at `157,927` cents.
+- FY2024 P05: artifact `9365292527`, 3,639 bytes, outer SHA256
+  `1ae71739494a51196fa703e3c0e9c90efeb0bdc690739da22b21941944c9af8f`;
+  its 766-byte P05 archive has SHA256
+  `758b520ba220615cf235c4aead560635f60c5eaa76b4a66dc3d1a1a21b6a0ab4`,
+  19 rows totaling `195,723,465` cents, including FS09 at `508,000` cents.
+- FY2025 P02: artifact `9365314464`, 955 bytes, outer SHA256
+  `a6f30483f6197d4247e30b0cb564ad71444bb3c977753c1768ac2793c5266b63`;
+  its 739-byte inner archive has SHA256
+  `2e675efae068bb8a386fa4d71734c0f5a2103a408f4b6e83df29cbfb3e8e0d8b`,
+  17 rows totaling `31,492,400` cents, including FS09 at `187` cents.
+
+All four are exact mapping repairs covered by the single canonical FS09 alias;
+none changes a source total or adds a File A/File B variance.
 Their exact FY2017--FY2026 GTAS/File A pins and reviewed Program Activity
 identities come from the ten-account scaffold. Extension preserves both PAC
 `0036` names as distinct identities. Research and Education keeps PARK
