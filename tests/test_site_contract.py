@@ -40,6 +40,15 @@ class SiteContractTests(unittest.TestCase):
         self.assertIn('"aria-labelledby": plot.getAttribute("aria-labelledby")', self.html)
         self.assertIn("--muted: #73716b", self.html)
 
+    def test_partial_cumulative_charts_stop_at_the_dashboard_as_of_date(self):
+        self.assertIn("const generatedFiscalDay = data => {", self.html)
+        self.assertIn("const displayThroughDay = generatedFiscalDay(data);", self.html)
+        self.assertIn(
+            "s.partial && s.fy === data.currentFY && displayThroughDay != null",
+            self.html,
+        )
+        self.assertIn("s.points.filter(p => p.d <= displayThroughDay)", self.html)
+
     def test_site_shell_uses_a_self_contained_favicon(self):
         self.assertIn('<link rel="icon" href="data:image/svg+xml,', self.html)
 
