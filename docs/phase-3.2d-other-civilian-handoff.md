@@ -243,3 +243,21 @@ Before publishing or running the probe, P must have:
 
 No remote operation, trigger, download, CI run, result evidence, pin, or data
 store is claimed by P.
+
+## VA release — scaffold on current main
+
+The reviewed VA queue entry was replayed onto live main
+`7be7fcc782cbb3d56dbaf86745807b01e37a873b` without changing the first 38
+registry accounts. It appends only `va/medical-prosthetic-research`
+(`036-0161`) and its exact FY2017–FY2026 File A baseline. The registry object
+and baseline match prepared queue commit `e0985f0316bb4e86ad4deae0f39a6786d9e3bb74`;
+legacy Clinical Science identities remain distinct from current CSP.
+
+Pre-source gates passed: VA registry 10/10, whole registry 276/276 with 39
+unique account paths/codes, other-civilian 13/13 (four later-stage skips),
+and fast 7/7. The source selector is exactly
+`va/medical-prosthetic-research`, full FY2017–FY2026 (ten jobs). No source
+run, atomic data store, or release completion is claimed by this scaffold.
+Because reconciliation changes dashboard series geometry, the merged release
+must include rendered verification and a before/after screenshot comparison
+of the affected VA and aggregate charts.
