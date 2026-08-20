@@ -62,12 +62,12 @@ EXPECTED = {
     ),
     "012-1701": (
         "usda/ers", "Economic Research Service", "ERS",
-        "Department of Agriculture", 4,
+        "Department of Agriculture", 5,
         "reference/usda_ers_obligation_baseline.json",
     ),
     "012-1801": (
         "usda/nass", "National Agricultural Statistics Service", "NASS",
-        "Department of Agriculture", 6,
+        "Department of Agriculture", 7,
         "reference/usda_nass_obligation_baseline.json",
     ),
 }
@@ -407,7 +407,15 @@ class EarthAgricultureObligationTests(unittest.TestCase):
         )
         self.assertEqual(
             "financial-adjustment-program-not-specified",
+            ers[("park", "EX202500290511")]["slug"],
+        )
+        self.assertEqual(
+            "financial-adjustment-program-not-specified",
             nass[("park", "EX202500290511")]["slug"],
+        )
+        self.assertEqual(
+            "unknown-other",
+            nass[("code-name", "0000", "unknown/other")]["slug"],
         )
         self.assertEqual(
             "fsdw-financial-statement-data-warehouse",
@@ -416,6 +424,40 @@ class EarthAgricultureObligationTests(unittest.TestCase):
                 "fsdw (financial statement data warehouse)",
             )]["slug"],
         )
+
+    def test_ers_fy2026_financial_adjustment_matches_raw_evidence(self):
+        aliases = alias_map(self.accounts["012-1701"])
+        values = parse_file_b_snapshot([{
+            "federal_account_symbol": "012-1701",
+            "program_activity_reporting_key": "EX202500290511",
+            "program_activity_code": "",
+            "program_activity_name": "",
+            "obligations_incurred": "5143666.08",
+        }], "012-1701", aliases)
+        self.assertEqual(1, len(values))
+        (key, amount_cents), = values.items()
+        self.assertEqual("EX202500290511", key[0])
+        self.assertEqual("EX202500290511", key[1])
+        self.assertEqual("FINANCIAL ADJUSTMENT: PROGRAM NOT SPECIFIED", key[2])
+        self.assertEqual("EX202500290511", key[3])
+        self.assertEqual(514_366_608, amount_cents)
+
+    def test_nass_fy2020_unknown_other_matches_raw_evidence(self):
+        aliases = alias_map(self.accounts["012-1801"])
+        values = parse_file_b_snapshot([{
+            "federal_account_symbol": "012-1801",
+            "program_activity_reporting_key": "",
+            "program_activity_code": "0000",
+            "program_activity_name": "UNKNOWN/OTHER",
+            "obligations_incurred": "0.00",
+        }], "012-1801", aliases)
+        self.assertEqual(1, len(values))
+        (key, amount_cents), = values.items()
+        self.assertEqual("0000", key[0])
+        self.assertEqual("0000", key[1])
+        self.assertEqual("Unknown / other", key[2])
+        self.assertEqual("0000", key[3])
+        self.assertEqual(0, amount_cents)
 
     def test_stage_selectors_are_payload_ready(self):
         for selector, expected_count in STAGE_SELECTORS.items():

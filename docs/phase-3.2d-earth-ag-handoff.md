@@ -174,3 +174,34 @@ remain exact and distinct. The Stage D full selector must plan exactly 20
 FY2017--FY2026 jobs and fail closed on every new source identity. Any exact
 File A/File B disagreement must be added to the source-variance ledger and
 receive explicit owner approval before a dual exact pin is published.
+
+Stage D source run `32327963290` attempt 1 found an ERS FY2026 P02 mapping
+gap after accepting 32 File B rows: blank code/name with PARK
+`EX202500290511`. The PARK is the already-established exact identity
+`FINANCIAL ADJUSTMENT: PROGRAM NOT SPECIFIED`, so the local repair registers
+that canonical identity for ERS without changing any source total or adding a
+File A/File B variance. Retained raw artifact `9395206394` is 689 bytes with
+outer SHA256
+`1bc2934f25b9bc23259daac4ebcf6a6b140d141ffbf9ed2b51fd9ee97d01de72`.
+Its sole 533-byte inner archive has SHA256
+`4385fadf2ccb09034a4c07cffa97a9b17966dfcd9ad95f21e43ec9fdb04eed11`;
+the exact 32-row snapshot has three distinct PARKs and totals `722,313,842`
+cents, including the reviewed PARK row at `514,366,608` cents. The complete
+source graph is terminal, and this exact mapping repair is ready for the
+bounded failed-only rerun once published.
+
+The same source run found a second exact mapping gap in NASS FY2020 P03:
+blank PARK with code `0000` and name `UNKNOWN/OTHER`. Its sole row is zero
+cents and maps to the established `Unknown / other` identity; it does not
+change a source total or require a File A/File B variance pin. Retained raw
+artifact `9396344067` is 1,498 bytes with outer SHA256
+`0775c17292571fc7d30d7dbcdd0f9c0c2c9502d7bf4ea4ae1aebb669c1a1b8af`.
+It preserves the 327-byte empty P02 archive with SHA256
+`1022d4537481ad9d8899a3321d12595f71f20520106c94678e3a253fc5b4421d`
+and the 864-byte P03 archive with SHA256
+`e86f8c3f33b99473ca07dd4ea2464433c39cc86800d0937586e77decd2013499`.
+The exact P03 snapshot contains 52 rows, five distinct source identities, and
+`3,474,243,496` cents, including the one reviewed zero-cent unknown/other
+row. The complete source graph is terminal with no other failures; the
+combined ERS/NASS repair is ready for the bounded failed-only rerun once
+published.
