@@ -1,0 +1,62 @@
+{
+ "schemaVersion": 2,
+ "federalAccount": "012-1701",
+ "source": "USAspending federal account fiscal-year snapshots (GTAS/File A), retrieved 2026-08-12",
+ "fiscalYears": {
+  "2015": {
+   "status": "unavailable",
+   "reason": "Files A/B/C begin in FY2017 Q2"
+  },
+  "2016": {
+   "status": "unavailable",
+   "reason": "Files A/B/C begin in FY2017 Q2"
+  },
+  "2017": {
+   "status": "partial",
+   "asOfPeriod": 12,
+   "obligationsCents": 9077065484,
+   "firstPeriod": 6
+  },
+  "2018": {
+   "status": "complete",
+   "obligationsCents": 9084220806
+  },
+  "2019": {
+   "status": "complete",
+   "obligationsCents": 8869467675
+  },
+  "2020": {
+   "status": "complete",
+   "obligationsCents": 9142571870
+  },
+  "2021": {
+   "status": "complete",
+   "obligationsCents": 9310904270
+  },
+  "2022": {
+   "status": "complete",
+   "obligationsCents": 9437563361
+  },
+  "2023": {
+   "status": "complete",
+   "obligationsCents": 10191498044
+  },
+  "2024": {
+   "status": "complete",
+   "obligationsCents": 9672629695
+  },
+  "2025": {
+   "status": "complete",
+   "obligationsCents": 8825852407
+  },
+  "2026": {
+   "status": "partial",
+   "asOfPeriod": 9,
+   "obligationsCents": 5517026695
+  }
+ },
+ "notes": [
+  "FY2017 is partial from P6; FY2018 is the first full DATA Act year unless the account availability entry states a later first fiscal year.",
+  "FY2026 is a P9 partial pin and must be replaced with the accepted CI provenance pin if the source advances before the backfill runs."
+ ]
+}

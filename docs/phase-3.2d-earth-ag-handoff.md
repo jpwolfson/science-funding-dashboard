@@ -155,3 +155,22 @@ The Stage C full selector must plan exactly 30 FY2017--FY2026 jobs and fail
 closed on every new source identity. Stage D remains unregistered until Stage
 C has completed atomic reconcile, trigger restoration, current-main
 integration, all local gates, merge/deploy, and live QA.
+
+## Stage D release checkpoint (2026-08-20)
+
+Stage C is merged, deployed, and live-QA green on authoritative 36-account
+`main` at `d3aa7e3bc79052f97bb1d3d4c0872371c0609af3`. Its complete source graph,
+atomic reconcile, weekly/all trigger restoration, current-main integration,
+fast and rendered tests, screenshots, footprint, post-merge Test and Deploy,
+byte-exact live JSON, and deployed light/dark rendering all passed. The live
+FY2026 cumulative award and award-dollar lines retain the current-date cutoff.
+
+Stage D registers only `usda/ers` (`012-1701`) and `usda/nass` (`012-1801`).
+Their exact FY2017--FY2026 GTAS/File A pins and ten reviewed Program Activity
+identities come from the serialized ten-account scaffold. ERS and NASS remain
+separate statistical-capacity accounts rather than a synthetic USDA research
+total. Reimbursable, FSDW, unknown/other, and financial-adjustment identities
+remain exact and distinct. The Stage D full selector must plan exactly 20
+FY2017--FY2026 jobs and fail closed on every new source identity. Any exact
+File A/File B disagreement must be added to the source-variance ledger and
+receive explicit owner approval before a dual exact pin is published.

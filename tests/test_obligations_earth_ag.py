@@ -114,6 +114,8 @@ REGISTERED = {
     "012-0502",
     "012-1500",
     "012-1502",
+    "012-1701",
+    "012-1801",
 }
 STAGE_SELECTORS = {
     "doi/usgs-sir,epa/science-technology": 20,
@@ -127,6 +129,7 @@ STAGE_SELECTORS = {
         "usda/nifa-research-education,"
         "usda/nifa-integrated-activities"
     ): 30,
+    "usda/ers,usda/nass": 20,
 }
 
 
@@ -390,6 +393,29 @@ class EarthAgricultureObligationTests(unittest.TestCase):
                     "FSDW (FINANCIAL STATEMENT DATA WAREHOUSE)", key[2])
                 self.assertEqual("", key[3])
                 self.assertEqual(expected_cents, amount_cents)
+
+    def test_statistical_accounts_keep_exact_source_identities(self):
+        ers = alias_map(self.accounts["012-1701"])
+        nass = alias_map(self.accounts["012-1801"])
+        self.assertEqual(
+            "economic-research-service",
+            ers[("park", "5ZBXPKUP513")]["slug"],
+        )
+        self.assertEqual(
+            "economic-research-service-reimbursable",
+            ers[("park", "5ZBXPKUP5ZL")]["slug"],
+        )
+        self.assertEqual(
+            "financial-adjustment-program-not-specified",
+            nass[("park", "EX202500290511")]["slug"],
+        )
+        self.assertEqual(
+            "fsdw-financial-statement-data-warehouse",
+            nass[(
+                "code-name", "FS09",
+                "fsdw (financial statement data warehouse)",
+            )]["slug"],
+        )
 
     def test_stage_selectors_are_payload_ready(self):
         for selector, expected_count in STAGE_SELECTORS.items():

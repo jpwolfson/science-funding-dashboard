@@ -2064,6 +2064,108 @@
      "name": "SET ASIDE"
     }
    ]
+  },
+  {
+   "path": "usda/ers",
+   "name": "Economic Research Service",
+   "abbrev": "ERS",
+   "agency": "Department of Agriculture",
+   "federalAccount": "012-1701",
+   "agencyIdentifier": "012",
+   "adapter": "usaspending_obligations",
+   "baseline": "reference/usda_ers_obligation_baseline.json",
+   "availability": {
+    "firstFiscalYear": 2017,
+    "firstFiscalYearPeriod": 6,
+    "regularFirstPeriod": 2
+   },
+   "programActivities": [
+    {
+     "slug": "unknown-other",
+     "code": "0000",
+     "name": "Unknown / other",
+     "park": "0000",
+     "codeNameAliases": [
+      {
+       "code": "0000",
+       "name": "OTHER/UNKNOWN"
+      },
+      {
+       "code": "0000",
+       "name": "UNKNOWN/OTHER"
+      }
+     ]
+    },
+    {
+     "slug": "economic-research-service",
+     "code": "0001",
+     "park": "5ZBXPKUP513",
+     "name": "ECONOMIC RESEARCH SERVICE"
+    },
+    {
+     "slug": "economic-research-service-reimbursable",
+     "code": "0801",
+     "park": "5ZBXPKUP5ZL",
+     "name": "ECONOMIC RESEARCH SERVICE (REIMBURSABLE)"
+    },
+    {
+     "slug": "fsdw-financial-statement-data-warehouse",
+     "code": "FS09",
+     "name": "FSDW (FINANCIAL STATEMENT DATA WAREHOUSE)"
+    }
+   ]
+  },
+  {
+   "path": "usda/nass",
+   "name": "National Agricultural Statistics Service",
+   "abbrev": "NASS",
+   "agency": "Department of Agriculture",
+   "federalAccount": "012-1801",
+   "agencyIdentifier": "012",
+   "adapter": "usaspending_obligations",
+   "baseline": "reference/usda_nass_obligation_baseline.json",
+   "availability": {
+    "firstFiscalYear": 2017,
+    "firstFiscalYearPeriod": 6,
+    "regularFirstPeriod": 2
+   },
+   "programActivities": [
+    {
+     "slug": "agricultural-estimates",
+     "code": "0001",
+     "park": "5ZBXQV4SXC5",
+     "name": "AGRICULTURAL ESTIMATES"
+    },
+    {
+     "slug": "census-of-agriculture",
+     "code": "0003",
+     "park": "5ZBXQV4SXC7",
+     "name": "CENSUS OF AGRICULTURE"
+    },
+    {
+     "slug": "financial-adjustment-program-not-specified",
+     "code": "EX202500290511",
+     "park": "EX202500290511",
+     "name": "FINANCIAL ADJUSTMENT: PROGRAM NOT SPECIFIED"
+    },
+    {
+     "slug": "national-agricultural-statistics-service-reimbursable",
+     "code": "0801",
+     "park": "5ZBXQV4T01N",
+     "name": "NATIONAL AGRICULTURAL STATISTICS SERVICE (REIMBURSABLE)"
+    },
+    {
+     "slug": "statistical-research-and-service",
+     "code": "0002",
+     "park": "5ZBXQV4SXC6",
+     "name": "STATISTICAL RESEARCH AND SERVICE"
+    },
+    {
+     "slug": "fsdw-financial-statement-data-warehouse",
+     "code": "FS09",
+     "name": "FSDW (FINANCIAL STATEMENT DATA WAREHOUSE)"
+    }
+   ]
   }
  ]
 }
