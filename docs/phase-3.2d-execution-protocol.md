@@ -128,6 +128,21 @@ bar" and "cross-cutting gates" above mean mechanically:
 | Coordinator, after each serial merge | `fast` + `rendered` on the merged tree | Diff against the worker's attached JSON to confirm nothing regressed between the worker's branch tip and the post-merge tree. |
 | Final release gates (goal-complete) | `rendered` (its `smoke_obligation_pages.py --all-accounts` mode covers every registered account) + `screens` + the footprint figures folded into the JSON report | `screens` feeds the working-regime item 5 reader review; footprint feeds the cross-cutting warning/stop gate above. |
 
+## Standing git authority (owner-granted 2026-08-14)
+
+Routine git operations are pre-authorized and MUST NOT be escalated or
+waited on: staging, committing, pushing, rebasing, and restoring files on
+any worker or coordinator branch (trigger-file commits and [skip ci]
+restores included), and merging PRs to main per the coordinator loop once
+their evidence is green. Do not request per-operation authorization for
+these, and never mark the goal blocked waiting for it — earlier
+per-operation approvals were situational, not a precedent. The ONLY git
+operations requiring the owner are the irreversible class: history
+rewrites or force-pushes on main, deleting published data or stores, and
+anything already listed under Owner escalations below. If uncertain
+whether an operation is routine, take the narrow reading, proceed, and
+record it in the evidence handoff.
+
 ## Owner escalations (bring as short option memos with a recommendation)
 
 1. DOD disclosure language before the wave-3 merge (standing sentinel
