@@ -88,7 +88,10 @@ block a wave.
 3. As worker PRs open, MERGE SERIALLY, one at a time: rebase onto current
    main; resolve registry/alias appends; run the full offline validator
    suite plus the rendered obligation matrix; merge on green; confirm the
-   deploy. Never merge two PRs without revalidating between them.
+   deploy. For any PR touching `adapters/common.py` aggregation, series
+   generation, or dashboard series shape, include a before/after screenshot
+   comparison of each affected chart in the merge evidence. Never merge two
+   PRs without revalidating between them.
 4. After each merge, spot-check the live obligations landing table — row
    count, ordering, no rendering regressions as the agency list grows.
 

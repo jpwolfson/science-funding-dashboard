@@ -45,6 +45,12 @@ verifier is agency-uniform; see the module docstring of
 | `rendered` | ~9 s | Existing headless-Chrome smoke matrices (`smoke_obligation_pages.py`, `smoke_sentinel_page.py`) **plus** `smoke_obligation_pages.py --all-accounts`, which renders every registered account page and one Program Activity sub-page per account, both themes, discovered from the registry — never a hardcoded path list. Zero console errors is part of every case. | 0 pass / 1 fail / 2 usage |
 | `screens` | ~6 s (1 account today) | Reader-review screenshot pack: obligations landing, every account page, one Program Activity page per agency, the sentinel page, and the award root, light mode, 1100 px wide, full page, to `--out` (default OS temp dir). Prints the manifest. **Never pass/fails** — it is a release-bar input for a human/fresh-agent reader review (working regime item 5), not a mechanical gate. | always 0 (usage errors still exit 2) |
 
+Any change that can move chart geometry — series endpoints or extents, axis
+ranges, point density, or period boundaries — requires `rendered` plus a
+before/after look at the affected chart's screenshot before merge. The
+`screens` tier may be scoped to touched pages; routine changes do not require
+a full reader review.
+
 Costs above were measured on this branch with 1 registered obligation
 account (DOE SC) and 132 award-ledger dashboards; they will grow with the
 registry, and the ~60 s fast-tier target has substantial headroom.

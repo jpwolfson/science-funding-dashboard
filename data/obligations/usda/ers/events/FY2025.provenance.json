@@ -1,0 +1,763 @@
+{
+ "acceptedAt": "2026-08-20T05:58:14+00:00",
+ "accountPath": "usda/ers",
+ "asOfPeriod": 12,
+ "baselinePin": {
+  "obligationsCents": 8825852407,
+  "status": "complete"
+ },
+ "collectionStatus": "accepted",
+ "diff": {
+  "addedCount": 166,
+  "addedIdsSha256": "db7b528beb4d0d1633c93c11fbe166b8b9fea8fcba2a6d36f30138bd44af8777",
+  "changedCount": 0,
+  "changedIdsSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "netAmountChangeCents": 8825852407,
+  "previousRecordCount": 0,
+  "recordCount": 166,
+  "removedCount": 0,
+  "removedIdsSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+ },
+ "downloads": [
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "3497",
+     "fy": 2025,
+     "period": 2,
+     "quarter": null,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "950b83e5e5af13c91206ce78061858c07315a9c27c29afd0227ab0553ee703c4",
+   "memberRowCounts": {
+    "FY2025P01-P02_All_FA_AccountBreakdownByPA-OC_2026-08-20_H05M41S53_1.csv": 27
+   },
+   "parsedRowCount": 27,
+   "rawArtifactFile": "usda--ers-FY2025P02-object_class_program_activity-950b83e5e5af.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "3497",
+     "fy": 2025,
+     "period": 2,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 27,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "3497",
+     "fy": 2025,
+     "period": 3,
+     "quarter": 1,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "8d27c344db9eead3d4c1b8ad49731e0a7802d620e30c0219742f719de57f320d",
+   "memberRowCounts": {
+    "FY2025P01-P03_All_FA_AccountBreakdownByPA-OC_2026-08-20_H05M42S29_1.csv": 27
+   },
+   "parsedRowCount": 27,
+   "rawArtifactFile": "usda--ers-FY2025P03-object_class_program_activity-8d27c344db9e.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "3497",
+     "fy": 2025,
+     "period": 3,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 27,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "3497",
+     "fy": 2025,
+     "period": 4,
+     "quarter": 1,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "ec32b019534e44ac8283277e4e3a33d3519ce70919a5614607100bc6aa117619",
+   "memberRowCounts": {
+    "FY2025P01-P04_All_FA_AccountBreakdownByPA-OC_2026-08-20_H05M43S21_1.csv": 27
+   },
+   "parsedRowCount": 27,
+   "rawArtifactFile": "usda--ers-FY2025P04-object_class_program_activity-ec32b019534e.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "3497",
+     "fy": 2025,
+     "period": 4,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 27,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "3497",
+     "fy": 2025,
+     "period": 5,
+     "quarter": 1,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "99699c861471bd6aac415d783b01c4710bc6d316a994c23e6331705aec4e512b",
+   "memberRowCounts": {
+    "FY2025P01-P05_All_FA_AccountBreakdownByPA-OC_2026-08-20_H05M43S57_1.csv": 28
+   },
+   "parsedRowCount": 28,
+   "rawArtifactFile": "usda--ers-FY2025P05-object_class_program_activity-99699c861471.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "3497",
+     "fy": 2025,
+     "period": 5,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 28,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "3497",
+     "fy": 2025,
+     "period": 6,
+     "quarter": 2,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "6ede08bf6553c44b4db0cb74a0b660ae82c4b259fb2f4f77d60dc7dd1bd11c3f",
+   "memberRowCounts": {
+    "FY2025P01-P06_All_FA_AccountBreakdownByPA-OC_2026-08-20_H05M44S33_1.csv": 28
+   },
+   "parsedRowCount": 28,
+   "rawArtifactFile": "usda--ers-FY2025P06-object_class_program_activity-6ede08bf6553.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "3497",
+     "fy": 2025,
+     "period": 6,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 28,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "3497",
+     "fy": 2025,
+     "period": 7,
+     "quarter": 2,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "a1ff9280830121a6e6a2028788f2fd571bafe6577a96f30af39b44ff02c67009",
+   "memberRowCounts": {
+    "FY2025P01-P07_All_FA_AccountBreakdownByPA-OC_2026-08-20_H05M45S24_1.csv": 28
+   },
+   "parsedRowCount": 28,
+   "rawArtifactFile": "usda--ers-FY2025P07-object_class_program_activity-a1ff92808301.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "3497",
+     "fy": 2025,
+     "period": 7,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 28,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "3497",
+     "fy": 2025,
+     "period": 8,
+     "quarter": 2,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "6505b66693a3851cb994c783aa41d22556c0ba8d54e3932cbe8859d2cc188016",
+   "memberRowCounts": {
+    "FY2025P01-P08_All_FA_AccountBreakdownByPA-OC_2026-08-20_H05M46S28_1.csv": 28
+   },
+   "parsedRowCount": 28,
+   "rawArtifactFile": "usda--ers-FY2025P08-object_class_program_activity-6505b66693a3.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "3497",
+     "fy": 2025,
+     "period": 8,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 28,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "3497",
+     "fy": 2025,
+     "period": 9,
+     "quarter": 3,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "511d74a665e12274a2831cfdbbbfb5a8f5223670329a730f3ba86c05803ba5d3",
+   "memberRowCounts": {
+    "FY2025P01-P09_All_FA_AccountBreakdownByPA-OC_2026-08-20_H05M47S10_1.csv": 29
+   },
+   "parsedRowCount": 29,
+   "rawArtifactFile": "usda--ers-FY2025P09-object_class_program_activity-511d74a665e1.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "3497",
+     "fy": 2025,
+     "period": 9,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 29,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "3497",
+     "fy": 2025,
+     "period": 10,
+     "quarter": 3,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "1a176029bfe308b899b1da0b6c8fd9199cb412c14430c41259fcf6617182671e",
+   "memberRowCounts": {
+    "FY2025P01-P10_All_FA_AccountBreakdownByPA-OC_2026-08-20_H05M47S50_1.csv": 29
+   },
+   "parsedRowCount": 29,
+   "rawArtifactFile": "usda--ers-FY2025P10-object_class_program_activity-1a176029bfe3.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "3497",
+     "fy": 2025,
+     "period": 10,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 29,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "3497",
+     "fy": 2025,
+     "period": 11,
+     "quarter": 3,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "e7b59d6ff77b30e317d5cffba554bfba3b2b3a98694b2faff15d2cba0bce1ca8",
+   "memberRowCounts": {
+    "FY2025P01-P11_All_FA_AccountBreakdownByPA-OC_2026-08-20_H05M50S32_1.csv": 29
+   },
+   "parsedRowCount": 29,
+   "rawArtifactFile": "usda--ers-FY2025P11-object_class_program_activity-e7b59d6ff77b.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "3497",
+     "fy": 2025,
+     "period": 11,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 29,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "3497",
+     "fy": 2025,
+     "period": 12,
+     "quarter": 4,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "6fc3fbfb250ca15f223be5ce8b536ada6ba22551446cfdaa1947ec2e9ef19a34",
+   "memberRowCounts": {
+    "FY2025P01-P12_All_FA_AccountBreakdownByPA-OC_2026-08-20_H05M51S08_1.csv": 28
+   },
+   "parsedRowCount": 28,
+   "rawArtifactFile": "usda--ers-FY2025P12-object_class_program_activity-6fc3fbfb250c.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "3497",
+     "fy": 2025,
+     "period": 12,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 28,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "transaction_obligated_amount",
+     "award_unique_key",
+     "award_id_piid",
+     "parent_award_id_piid",
+     "award_id_fain",
+     "award_id_uri",
+     "recipient_uei",
+     "recipient_name",
+     "prime_award_base_transaction_description",
+     "usaspending_permalink"
+    ],
+    "download_types": [
+     "award_financial"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "3497",
+     "fy": 2025,
+     "period": 12,
+     "quarter": 4,
+     "submission_types": [
+      "award_financial"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "9aa10e2140431d3bebc3bdc274bdc3c945b2db1da2169341ab50683e2d5faf3d",
+   "memberRowCounts": {
+    "FY2025P01-P12_All_FA_Assistance_AccountBreakdownByAward_2026-08-20_H05M56S37_01.csv": 1203,
+    "FY2025P01-P12_All_FA_Contracts_AccountBreakdownByAward_2026-08-20_H05M56S37_01.csv": 323,
+    "FY2025P01-P12_All_FA_Unlinked_AccountBreakdownByAward_2026-08-20_H05M56S37_01.csv": 250
+   },
+   "parsedRowCount": 1776,
+   "rawArtifactFile": "usda--ers-FY2025P12-award_financial-9aa10e214043.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "transaction_obligated_amount",
+     "award_unique_key",
+     "award_id_piid",
+     "parent_award_id_piid",
+     "award_id_fain",
+     "award_id_uri",
+     "recipient_uei",
+     "recipient_name",
+     "prime_award_base_transaction_description",
+     "usaspending_permalink"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "3497",
+     "fy": 2025,
+     "period": 12,
+     "submission_types": [
+      "award_financial"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 1776,
+   "submissionType": "award_financial"
+  }
+ ],
+ "federalAccount": "012-1701",
+ "fiscalYear": 2025,
+ "normalized": {
+  "eventFingerprint": "8775bf2b714915b6e24b8c2589febda88862ce16496700ace4c68c9ee35875b8",
+  "netObligationsCents": 8825852407,
+  "recordCount": 166
+ },
+ "replacement": {
+  "previousEventFingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "previousProvenanceSha256": null
+ },
+ "schemaVersion": 2
+}
