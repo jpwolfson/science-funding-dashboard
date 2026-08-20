@@ -205,3 +205,28 @@ The exact P03 snapshot contains 52 rows, five distinct source identities, and
 row. The complete source graph is terminal with no other failures; the
 combined ERS/NASS repair is ready for the bounded failed-only rerun once
 published.
+
+The exact-key repair landed as `65e999fb94117587e982ce73fb5f70dcb46d42bb`;
+under the standing authority rule, these unambiguous mappings required no
+owner escalation because they changed no money, pins, tolerances, residuals,
+or published meaning. The single failed-only rerun completed source run
+`32327963290` with 46 raw executions and an explicit empty second page. Its
+latest logical topology is plan plus all 20 pulls and reconcile successful,
+with deploy skipped. Atomic snapshot
+`ef681809ad3b117ef5c000a15d0740e3f384d3e8` contains both exact ten-partition
+stores, rebuilt rollups, zero warnings, and 38-account sentinel coverage.
+Trigger restore `9a49a9006d376ca6c40f92cf2168ce1674d2a6dd` exactly restores weekly/all.
+
+Current-main integration `d139dc642f85e236240906e524fc9310b1f2186a`
+and the chart-geometry verification rule passed Earth/ag plus obligation tests
+27/27, Pages-guard tests 8/8, registry 269/269, fast 7/7, and rendered 4/4
+(5 fixed obligation cases, 152 all-account cases, 59 assembled-artifact
+public-link cases, and 2 sentinel cases). The 49-image screenshot pack was
+reviewed against the retained Stage C pack: the award-root geometry is
+unchanged; FY2026 award and award-dollar lines stop at the latest observed
+month; the aggregate obligation line and the new ERS/NASS FY2026 lines stop at
+June 2026. ERS and NASS had no pre-change page because they were not registered
+on 36-account main; both new pages were reviewed directly with no visual
+diagnostics. The assembled Pages artifact is 252,128,646 bytes across 1,495
+files (747,871,354 bytes headroom): 59/59 NSF award CSV downloads are retained
+and 0/366 obligation event archives are Pages-relative.
