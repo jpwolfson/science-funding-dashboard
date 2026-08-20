@@ -10,6 +10,7 @@ import shutil
 import socket
 import struct
 import subprocess
+import sys
 import tempfile
 import threading
 import time
@@ -20,8 +21,13 @@ from pathlib import Path
 from urllib.parse import quote, urlparse
 from urllib.request import Request, urlopen
 
-
 REPO = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO))
+
+from scripts.assemble_pages_site import (  # noqa: E402
+    assemble_pages_site,
+    rendered_link_problems,
+)
 
 
 class QuietHandler(SimpleHTTPRequestHandler):
@@ -379,7 +385,7 @@ def page_matrix(repo):
     ]
 
 
-def _evaluate_case(document, diagnostic, width, theme):
+def _evaluate_case(document, diagnostic, width, theme, site_root=None):
     """Zero-console-error, keyboard-accessible, real-data checks shared by
     every rendered case, whichever matrix produced it."""
     rendered, visible_text = document["html"], document["text"]
@@ -404,10 +410,15 @@ def _evaluate_case(document, diagnostic, width, theme):
     links.feed(rendered)
     if not links.hrefs:
         case_errors.append("rendered page has no keyboard-native links")
-    invalid_links = [href for href in links.hrefs
-                     if "localhost" in href or href.startswith("file:")]
-    if invalid_links:
-        case_errors.append(f"non-public links remain: {invalid_links[:3]}")
+    if site_root is None:
+        invalid_links = [href for href in links.hrefs
+                         if "localhost" in href or href.startswith("file:")]
+        if invalid_links:
+            case_errors.append(f"non-public links remain: {invalid_links[:3]}")
+    else:
+        link_errors = rendered_link_problems(links.hrefs, site_root)
+        if link_errors:
+            case_errors.append(f"public-link integrity: {link_errors[:3]}")
     if 'tabindex="-1"' in rendered:
         case_errors.append("rendered controls remove keyboard focus")
     return case_errors
@@ -420,9 +431,8 @@ def _run_matrix(repo, matrix, chrome=None):
         raise AssertionError("visible keyboard focus styling is missing")
     executable = chrome_path(chrome)
     assembly = tempfile.TemporaryDirectory()
-    assembly_path = Path(assembly.name)
-    shutil.copy2(repo / "site" / "index.html", assembly_path / "index.html")
-    os.symlink(repo / "data", assembly_path / "data", target_is_directory=True)
+    assembly_path = Path(assembly.name) / "_site"
+    artifact = assemble_pages_site(repo, assembly_path)
     handler = partial(QuietHandler, directory=str(assembly_path))
     server = ThreadingHTTPServer(("127.0.0.1", 0), handler)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
@@ -435,7 +445,18 @@ def _run_matrix(repo, matrix, chrome=None):
             document, diagnostic = render_page(
                 executable, url, width, height, theme
             )
-            case_errors = _evaluate_case(document, diagnostic, width, theme)
+            case_errors = _evaluate_case(
+                document, diagnostic, width, theme, site_root=assembly_path
+            )
+            expected_nsf = assembly_path / "data" / org_path / "awards.csv"
+            if expected_nsf.is_file():
+                links = Links()
+                links.feed(document["html"])
+                expected_href = f"data/{org_path}/awards.csv"
+                if expected_href not in links.hrefs:
+                    case_errors.append(
+                        f"NSF award CSV is not a Pages-relative rendered link: {expected_href}"
+                    )
             if case_errors:
                 failures.append(f"{label}: " + "; ".join(case_errors))
             else:
@@ -446,7 +467,25 @@ def _run_matrix(repo, matrix, chrome=None):
         assembly.cleanup()
     if failures:
         raise AssertionError("\n".join(failures))
+    print(
+        "PASS assembled Pages link contract: "
+        f"{artifact['nsfAwardCsvArtifactCount']}/"
+        f"{artifact['nsfAwardCsvSourceCount']} NSF award CSVs retained; "
+        f"{artifact['obligationEventArchiveArtifactCount']}/"
+        f"{artifact['obligationEventArchiveSourceCount']} obligation event archives published"
+    )
     return len(matrix)
+
+
+def nsf_public_link_matrix(repo):
+    cases = []
+    for awards in sorted((Path(repo) / "data").glob("**/awards.csv")):
+        org_path = awards.parent.relative_to(Path(repo) / "data").as_posix()
+        label = "nsf-awards-" + org_path.replace("/", "-")
+        cases.append((label, org_path, 1440, 1000, "light"))
+    if not cases:
+        raise ValueError("no NSF Pages-relative award CSVs found")
+    return cases
 
 
 def run(repo=REPO, chrome=None):
@@ -459,6 +498,11 @@ def run_all_accounts(repo=REPO, chrome=None):
     return _run_matrix(repo, all_accounts_matrix(repo), chrome=chrome)
 
 
+def run_public_links(repo=REPO, chrome=None):
+    repo = Path(repo)
+    return _run_matrix(repo, nsf_public_link_matrix(repo), chrome=chrome)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--chrome")
@@ -467,8 +511,17 @@ def main():
         help="render every registered account page plus one Program "
              "Activity sub-page per account, in both themes, instead of "
              "the fixed representative-state matrix")
+    parser.add_argument(
+        "--public-links", action="store_true",
+        help="render every NSF award CSV page against the assembled Pages tree"
+    )
     args = parser.parse_args()
-    if args.all_accounts:
+    if args.all_accounts and args.public_links:
+        parser.error("--all-accounts and --public-links are mutually exclusive")
+    if args.public_links:
+        count = run_public_links(chrome=args.chrome)
+        print(f"Rendered assembled-artifact public-link matrix passed ({count} cases)")
+    elif args.all_accounts:
         count = run_all_accounts(chrome=args.chrome)
         print(f"Rendered all-accounts obligation page matrix passed ({count} cases)")
     else:

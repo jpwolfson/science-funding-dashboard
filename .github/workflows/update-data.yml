@@ -270,10 +270,11 @@ jobs:
       - name: Sync to branch tip
         run: git pull --ff-only origin "$BRANCH" || git reset --hard "origin/$BRANCH"
       - name: Assemble site
-        run: |
-          mkdir -p _site
-          cp site/index.html _site/
-          cp -r data _site/data
+        run: python scripts/assemble_pages_site.py --output _site
+      - name: Check GitHub Pages footprint (warn at 850 MB; stop at 950 MB)
+        run: >-
+          python scripts/check_pages_footprint.py
+          --site-root _site --json _pages-footprint.json
       - name: Configure Pages
         uses: actions/configure-pages@v5
         with:

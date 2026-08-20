@@ -54,11 +54,19 @@ jobs:
         run: python scripts/verify.py --tier fast --json _verify-fast.json
       - name: Verify — rendered tier (obligation, all-accounts, and sentinel browser matrices)
         run: python scripts/verify.py --tier rendered --json _verify-rendered.json
+      - name: Assemble the runtime-only Pages artifact
+        run: python scripts/assemble_pages_site.py --output _site
+      - name: Check GitHub Pages footprint (warn at 850 MB; stop at 950 MB)
+        run: >-
+          python scripts/check_pages_footprint.py
+          --site-root _site --json _pages-footprint.json
       - name: Retain verification JSON reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: verify-reports
-          path: _verify-*.json
+          path: |
+            _verify-*.json
+            _pages-footprint.json
           if-no-files-found: ignore
           retention-days: 14
