@@ -174,6 +174,27 @@ runs the rendered browser matrix. Only that exact validated tree is committed
 and uploaded as the Pages artifact. The ordinary award deployment workflow
 does not independently redeploy obligation-only commits.
 
+Publication deliberately separates runtime data from durable audit evidence.
+`scripts/assemble_pages_site.py` publishes the site shell and every JSON file
+used by the browser, including provenance and event manifests, but excludes
+`data/obligations/**/events/*.csv.gz`. Those normalized event shards remain in
+Git and continue to drive validation and deterministic rebuilds; the browser
+has never requested them. This avoids duplicating hundreds of megabytes of
+audit-only archives into GitHub Pages without changing any page, chart, drill-
+down, manifest, or provenance behavior.
+
+Every Pages-producing workflow measures the assembled artifact with
+`scripts/check_pages_footprint.py`: 850 MB emits a warning and 950 MB blocks
+upload, preserving 50 MB below the 1 GB Pages ceiling. If runtime JSON itself
+reaches the warning threshold, the next architecture is content-addressed
+object storage behind a CDN: upload immutable detail JSON first, publish its
+small manifest atomically, and keep aggregate dashboards plus that manifest in
+Git. That migration retains page behavior but is intentionally deferred until
+the in-repository, runtime-only artifact approaches the warning threshold and
+requires a separate owner escalation before any external storage is adopted.
+This guard changes only the Pages artifact; Git repository and clone growth
+remain reported footprint metrics rather than being redesigned here.
+
 The default freshness SLA is ten days. Production publication fails if the
 newest required partition lacks accepted schema-v2 provenance, if its source
 acceptance time exceeds the SLA, or if dashboard freshness metadata does not

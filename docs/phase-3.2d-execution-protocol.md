@@ -102,9 +102,11 @@ block a wave.
   no-build-context reviewer over screenshots of the grown site — the
   obligations landing page, one account page per agency, one PA page, and
   the sentinel page. Findings gate completion.
-- **Footprint check:** report total repo and gzipped-store growth; flag
-  (do not fix) if the trajectory threatens Pages' 1 GB ceiling within a
-  year of weekly refreshes.
+- **Footprint check:** report total repo, gzipped-store, and exact runtime
+  Pages-artifact growth. Every Pages workflow warns at 850 MB and stops before
+  upload at 950 MB, preserving 50 MB of headroom below the 1 GB ceiling.
+  Normalized obligation event CSV archives remain committed audit evidence but
+  are excluded from Pages because the browser never requests them.
 - **Weekly-pipeline soak:** at least one scheduled obligation refresh
   completes green with the full grown registry before the goal closes.
 - **CLAUDE.md updated once:** 3.2d checked off with a terse summary and a
@@ -124,7 +126,22 @@ bar" and "cross-cutting gates" above mean mechanically:
 | Worker, every local iteration | `fast` | The unit suite + full offline validator suite; ~seconds, run as often as useful. |
 | Worker, before opening the PR | `fast` + `rendered` | Attach the `--json` result of both as PR evidence (release-bar item: "an OPEN pull request whose body carries the evidence"). |
 | Coordinator, after each serial merge | `fast` + `rendered` on the merged tree | Diff against the worker's attached JSON to confirm nothing regressed between the worker's branch tip and the post-merge tree. |
-| Final release gates (goal-complete) | `rendered` (its `smoke_obligation_pages.py --all-accounts` mode covers every registered account) + `screens` + the footprint figures folded into the JSON report | `screens` feeds the working-regime item 5 reader review; footprint feeds the cross-cutting "Footprint check" gate above — never fixed on sight, only flagged. |
+| Final release gates (goal-complete) | `rendered` (its `smoke_obligation_pages.py --all-accounts` mode covers every registered account) + `screens` + the footprint figures folded into the JSON report | `screens` feeds the working-regime item 5 reader review; footprint feeds the cross-cutting warning/stop gate above. |
+
+## Standing git authority (owner-granted 2026-08-14)
+
+Routine git operations are pre-authorized and MUST NOT be escalated or
+waited on: staging, committing, pushing, rebasing, and restoring files on
+any worker or coordinator branch (trigger-file commits and [skip ci]
+restores included), and merging PRs to main per the coordinator loop once
+their evidence is green. Do not request per-operation authorization for
+these, and never mark the goal blocked waiting for it — earlier
+per-operation approvals were situational, not a precedent. The ONLY git
+operations requiring the owner are the irreversible class: history
+rewrites or force-pushes on main, deleting published data or stores, and
+anything already listed under Owner escalations below. If uncertain
+whether an operation is routine, take the narrow reading, proceed, and
+record it in the evidence handoff.
 
 ## Owner escalations (bring as short option memos with a recommendation)
 

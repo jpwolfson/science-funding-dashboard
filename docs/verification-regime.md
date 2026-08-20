@@ -99,6 +99,16 @@ summary:
     "perTreeBytes": {"data": 80352642, "reference": 455405, "...": "..."},
     "totalTrackedBytes": 81484660,
     "gzippedStoreBytes": 39084835,   // committed *.gz store files under data/
+    "pagesArtifact": {
+      "fileCount": 1234,
+      "totalBytes": 42000000,        // exact runtime artifact before tar packaging
+      "status": "ok",                // ok | warning | stop
+      "warningThresholdBytes": 850000000,
+      "stopThresholdBytes": 950000000,
+      "pagesLimitBytes": 1000000000,
+      "headroomBytes": 958000000,
+      "excludedFromArtifact": "data/obligations/**/events/*.csv.gz"
+    },
     "trajectory": {                  // null if git history has no data/-touching commit
       "method": "linear extrapolation of the data/ tree's committed byte total "
                 "from the first commit that touched data/ to HEAD, projected 52 weeks forward",
@@ -122,6 +132,23 @@ summary:
 Each check's `evidence` is always the last non-empty line the underlying
 script printed to stdout/stderr — its own pass message, or its own fail
 message, so the JSON evidence is exactly what a human sees on the terminal.
+
+Every Pages-producing workflow uses `scripts/assemble_pages_site.py`, which
+copies all runtime JSON and the site shell while retaining normalized
+obligation event CSV archives in Git only. The browser does not request those
+audit shards. `scripts/check_pages_footprint.py` measures the assembled tree,
+emits a GitHub Actions warning at 850,000,000 bytes, and fails before upload at
+950,000,000 bytes, leaving 50 MB below GitHub Pages' 1 GB site limit. CI runs
+the same assembly and gate before merge. Warning and stop states appear both
+as workflow annotations and in the GitHub job summary; every displayed byte
+count is measured from `_site`, never inferred from the repository tree.
+
+Rendered smoke matrices serve `_site` produced by that assembler. Their link
+gate resolves every relative link against the assembled tree, renders every
+NSF division with an `awards.csv` download, and fails if any normalized
+obligation event archive is Pages-relative. NSF award CSVs remain in Pages;
+obligation event archives remain Git-only and any future public link to one
+must use `github.com`.
 
 ## Specialization schema
 
