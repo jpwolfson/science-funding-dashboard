@@ -45,7 +45,7 @@ EXPECTED = {
     "012-0502": (
         "usda/nifa-extension",
         "Extension Activities, National Institute of Food and Agriculture",
-        "NIFA Extension", "Department of Agriculture", 32,
+        "NIFA Extension", "Department of Agriculture", 33,
         "reference/usda_nifa_extension_obligation_baseline.json",
     ),
     "012-1500": (
@@ -57,7 +57,7 @@ EXPECTED = {
     "012-1502": (
         "usda/nifa-integrated-activities",
         "Integrated Activities, National Institute of Food and Agriculture",
-        "NIFA Integrated", "Department of Agriculture", 19,
+        "NIFA Integrated", "Department of Agriculture", 20,
         "reference/usda_nifa_integrated_activities_obligation_baseline.json",
     ),
     "012-1701": (
@@ -111,6 +111,9 @@ REGISTERED = {
     "012-1400",
     "012-1401",
     "012-1104",
+    "012-0502",
+    "012-1500",
+    "012-1502",
 }
 STAGE_SELECTORS = {
     "doi/usgs-sir,epa/science-technology": 20,
@@ -118,6 +121,11 @@ STAGE_SELECTORS = {
         "usda/ars-salaries-expenses,"
         "usda/ars-buildings-facilities,"
         "usda/forest-rangeland-research"
+    ): 30,
+    (
+        "usda/nifa-extension,"
+        "usda/nifa-research-education,"
+        "usda/nifa-integrated-activities"
     ): 30,
 }
 
@@ -337,6 +345,51 @@ class EarthAgricultureObligationTests(unittest.TestCase):
             integrated[("park", "EX202600312979")]["_identityKey"],
             integrated[("code-name", "9901", "set aside")]["_identityKey"],
         )
+
+    def test_nifa_extension_fy2026_financial_adjustment_matches_raw_evidence(self):
+        aliases = alias_map(self.accounts["012-0502"])
+        values = parse_file_b_snapshot([{
+            "federal_account_symbol": "012-0502",
+            "program_activity_reporting_key": "EX202500290511",
+            "program_activity_code": "",
+            "program_activity_name": "",
+            "obligations_incurred": "892236.09",
+        }], "012-0502", aliases)
+        self.assertEqual(1, len(values))
+        (key, amount_cents), = values.items()
+        self.assertEqual("EX202500290511", key[0])
+        self.assertEqual("EX202500290511", key[1])
+        self.assertEqual("FINANCIAL ADJUSTMENT: PROGRAM NOT SPECIFIED", key[2])
+        self.assertEqual("EX202500290511", key[3])
+        self.assertEqual(89_223_609, amount_cents)
+
+    def test_nifa_integrated_fsdw_matches_raw_evidence(self):
+        aliases = alias_map(self.accounts["012-1502"])
+        cases = {
+            "FY2019P09": ("4049.06", 404_906),
+            "FY2022P02": ("24258.51", 2_425_851),
+            "FY2023P06": ("1579.27", 157_927),
+            "FY2024P05": ("5080.00", 508_000),
+            "FY2025P02": ("1.87", 187),
+        }
+        for period, (raw_amount, expected_cents) in cases.items():
+            with self.subTest(period=period):
+                values = parse_file_b_snapshot([{
+                    "federal_account_symbol": "012-1502",
+                    "program_activity_reporting_key": "",
+                    "program_activity_code": "FS09",
+                    "program_activity_name":
+                        "FSDW (FINANCIAL STATEMENT DATA WAREHOUSE)",
+                    "obligations_incurred": raw_amount,
+                }], "012-1502", aliases)
+                self.assertEqual(1, len(values))
+                (key, amount_cents), = values.items()
+                self.assertEqual("FS09", key[0])
+                self.assertEqual("FS09", key[1])
+                self.assertEqual(
+                    "FSDW (FINANCIAL STATEMENT DATA WAREHOUSE)", key[2])
+                self.assertEqual("", key[3])
+                self.assertEqual(expected_cents, amount_cents)
 
     def test_stage_selectors_are_payload_ready(self):
         for selector, expected_count in STAGE_SELECTORS.items():
