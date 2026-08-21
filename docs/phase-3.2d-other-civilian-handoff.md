@@ -244,7 +244,7 @@ Before publishing or running the probe, P must have:
 No remote operation, trigger, download, CI run, result evidence, pin, or data
 store is claimed by P.
 
-## VA release — scaffold on current main
+## VA release — live-ready reconciled branch
 
 The reviewed VA queue entry was replayed onto live main
 `7be7fcc782cbb3d56dbaf86745807b01e37a873b` without changing the first 38
@@ -256,11 +256,52 @@ legacy Clinical Science identities remain distinct from current CSP.
 Pre-source gates passed: VA registry 10/10, whole registry 276/276 with 39
 unique account paths/codes, other-civilian 13/13 (four later-stage skips),
 and fast 7/7. The source selector is exactly
-`va/medical-prosthetic-research`, full FY2017–FY2026 (ten jobs). No source
-run, atomic data store, or release completion is claimed by this scaffold.
-Because reconciliation changes dashboard series geometry, the merged release
-must include rendered verification and a before/after screenshot comparison
-of the affected VA and aggregate charts.
+`va/medical-prosthetic-research`, full FY2017–FY2026 (ten jobs).
+
+Durable source run
+[`32412548096`](https://github.com/jpwolfson/science-funding-dashboard/actions/runs/32412548096)
+is terminal green after two reconcile-only repairs. Its complete
+`filter=all`, `per_page=100` inventory is 39 raw executions on page 1 with
+page 2 empty. Attempt 1 pulled all ten years successfully but reconcile found
+a stale scaffold assertion. Attempt 2 passed reconciliation but fast testing
+detected that the first connector publication had encoded macOS `base64`
+error text as the test blob. Corrective commit
+`59f3839c6758fd7210478f0ff3a4bf1e961c329b` restored byte-exact UTF-8 test
+and handoff blobs. Attempt 3 then completed the latest logical topology:
+plan, all ten FY2017–FY2026 pulls, and reconcile succeeded; deploy skipped.
+The complete artifact inventory is 20 on page 1 with page 2 empty: ten
+normalized partitions and ten distinct attempt-specific raw archives. No
+normalized recovery artifact was used. There was no File A/File B variance,
+dual pin, tolerance, or residual change.
+
+Atomic commit `23cb0ea4f423a0981062a7894bb8d6e78f7b3970` contains the exact
+21-file, ten-partition event store, accepted provenance and manifest, rebuilt
+VA/root rollups, no warnings, and 39-account sentinel coverage. VA resolves to
+`036-0161`, FY2026P09, 15 child activities, and
+`870,126,042,476` total net obligation cents. Its exact FY2017–FY2026 pins are
+`72,059,060,435`, `73,441,493,028`, `82,205,074,686`, `84,897,709,754`,
+`93,679,357,008`, `98,664,584,822`, `102,409,481,598`, `103,621,061,988`,
+`96,999,597,865`, and `62,148,621,292` cents. Trigger restore
+`d2e1605d236b8584eccf65bd85ad1c5bfa000560` exactly matches main's
+weekly/all blob `8c9688525108cc68160c78494993bb0a91376a19`. Integration merge
+`d4fdb2c0daecc2d0521b20404b13804bad9dcd4c` has the restored VA head as
+primary parent and then-current main `7be7fcc782cbb3d56dbaf86745807b01e37a873b`
+as its second parent; it is zero behind main and preserves an exact
+39-account union.
+
+Post-integration gates passed: other-civilian 13/13, VA registry 10/10,
+whole registry 276/276, fast 7/7, rendered 4/4 (5 core, 156 all-account,
+59 public-link, and 2 sentinel cases), and screenshots 51/51. The mandatory
+before/after chart review compared the 49-page main pack with the 51-page VA
+pack: the root and VA FY2026 cumulative lines stop at P09 (June) rather than
+extending flat through the remaining fiscal-year axis; the VA account,
+representative activity, and sentinel pages have no visible diagnostics.
+The footprint is 553,589,102 tracked bytes, 551,876,034 data bytes,
+333,780,227 compressed-store bytes, and a 253,636,766-byte Pages artifact
+with 746,363,234 bytes of headroom. Relative to pre-VA main, the deltas are
+1,553,139 tracked bytes, 1,547,142 data bytes, 39,022 compressed-store bytes,
+and 1,508,120 Pages bytes. This fulfills the chart-geometry verification rule
+for the VA reconciliation.
 
 Source run `32412548096` completed the plan and all ten FY2017--FY2026 pulls.
 Reconciliation and obligation validation passed, but its fast tier exposed a
