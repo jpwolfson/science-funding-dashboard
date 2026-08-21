@@ -677,7 +677,7 @@ class OtherCivilianObligationTests(unittest.TestCase):
         self.assertEqual("FY2026P09", dashboard.get("asOfPeriod"))
 
     def test_scaffold_does_not_claim_unmaterialized_later_stores(self):
-        for path in set(self.accounts) - {ASPR_PATH}:
+        for path in set(ACCOUNT_META) - set(self.accounts):
             self.assertFalse((REPO / "data" / "obligations" / path).exists())
 
 
