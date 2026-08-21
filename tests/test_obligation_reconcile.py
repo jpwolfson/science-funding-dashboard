@@ -7,12 +7,43 @@ from pathlib import Path
 from adapters.obligation_common import (
     event_fingerprint, file_sha256, normalize_event, partition_diff, write_store,
 )
-from scripts.reconcile_obligation_artifacts import reconcile
+from scripts.reconcile_obligation_artifacts import (
+    _preserve_current_dual_pin, reconcile,
+)
 from scripts.validate_funding_sentinel import validate as validate_sentinel
 from scripts.validate_obligations import validate
 
 
 class ObligationReconcileTests(unittest.TestCase):
+    def test_newer_dual_pin_fails_closed_on_artifact_mismatch(self):
+        current = {
+            "status": "partial", "asOfPeriod": 9,
+            "obligationsCents": 90, "fileBObligationsCents": 100,
+            "fileAFileBVarianceCents": -10,
+            "fileAFileBVarianceReason": "Approved exact source variance.",
+        }
+        artifact = {
+            "status": "partial", "asOfPeriod": 9,
+            "obligationsCents": 100,
+        }
+        self.assertEqual(
+            current,
+            _preserve_current_dual_pin(
+                "doe/sc", 2026, current, artifact, normalized_total=100
+            ),
+        )
+        for bad_artifact, bad_total in (
+            ({**artifact, "obligationsCents": 99}, 100),
+            ({**artifact, "asOfPeriod": 8}, 100),
+            (artifact, 99),
+        ):
+            with self.subTest(artifact=bad_artifact, normalized_total=bad_total):
+                with self.assertRaisesRegex(ValueError, "does not match"):
+                    _preserve_current_dual_pin(
+                        "doe/sc", 2026, current, bad_artifact,
+                        normalized_total=bad_total,
+                    )
+
     def test_account_year_artifact_updates_baseline_and_atomic_tree(self):
         temp = tempfile.TemporaryDirectory()
         try:
@@ -47,8 +78,13 @@ class ObligationReconcileTests(unittest.TestCase):
             (root / "reference" / "doe.json").write_text(json.dumps({
                 "schemaVersion": 2, "federalAccount": "089-0222",
                 "fiscalYears": {"2026": {"status": "partial",
-                                          "asOfPeriod": 8,
-                                          "obligationsCents": 90}},
+                                          "asOfPeriod": 9,
+                                          "firstPeriod": 9,
+                                          "obligationsCents": 90,
+                                          "fileBObligationsCents": 100,
+                                          "fileAFileBVarianceCents": -10,
+                                          "fileAFileBVarianceReason":
+                                              "Approved exact source variance."}},
             }))
             row = normalize_event({
                 "id": "one", "source": "file_b_residual",
@@ -109,11 +145,21 @@ class ObligationReconcileTests(unittest.TestCase):
             self.assertEqual("partial", baseline["fiscalYears"]["2026"]["status"])
             self.assertEqual(9, baseline["fiscalYears"]["2026"]["asOfPeriod"])
             self.assertEqual(9, baseline["fiscalYears"]["2026"]["firstPeriod"])
+            self.assertEqual(90, baseline["fiscalYears"]["2026"]["obligationsCents"])
+            self.assertEqual(
+                100, baseline["fiscalYears"]["2026"]["fileBObligationsCents"]
+            )
+            self.assertEqual(
+                -10, baseline["fiscalYears"]["2026"]["fileAFileBVarianceCents"]
+            )
             accepted = json.loads(
                 (root / "data" / "obligations" / "doe" / "sc" / "events"
                  / "FY2026.provenance.json").read_text()
             )
             self.assertEqual(9, accepted["baselinePin"]["firstPeriod"])
+            self.assertEqual(90, accepted["baselinePin"]["obligationsCents"])
+            self.assertEqual(100,
+                             accepted["baselinePin"]["fileBObligationsCents"])
             self.assertEqual([], validate(root, require_data=True,
                                           require_current_provenance=True))
             self.assertEqual([], validate_sentinel(root, require_data=False))

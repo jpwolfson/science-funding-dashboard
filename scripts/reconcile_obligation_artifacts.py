@@ -11,16 +11,54 @@ REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
 from adapters.obligation_common import (
-    file_sha256, load_store, rebuild_manifest, write_partition_provenance,
+    baseline_file_b_cents, baseline_pin_problems, file_sha256, load_store,
+    rebuild_manifest, write_partition_provenance,
 )
 from adapters.funding_sentinel import build as build_sentinel
 from scripts.rollup_obligations import build as build_obligations
+
+
+def _preserve_current_dual_pin(account_path, fy, current, artifact, normalized_total):
+    """Keep a newer approved dual pin when the accepted shard matches exactly."""
+    if not current or "fileBObligationsCents" not in current:
+        return artifact
+    problems = baseline_pin_problems(current)
+    if problems:
+        raise ValueError(
+            f"{account_path} FY{fy}: invalid current dual pin: {'; '.join(problems)}"
+        )
+    problems = baseline_pin_problems(artifact)
+    if problems:
+        raise ValueError(
+            f"{account_path} FY{fy}: invalid artifact baseline pin: "
+            f"{'; '.join(problems)}"
+        )
+    current_file_b = baseline_file_b_cents(current)
+    artifact_file_b = baseline_file_b_cents(artifact)
+    if artifact_file_b != current_file_b or normalized_total != current_file_b:
+        raise ValueError(
+            f"{account_path} FY{fy}: current dual-pin File B {current_file_b} "
+            f"cents does not match artifact pin {artifact_file_b} and normalized "
+            f"total {normalized_total}"
+        )
+    for field in ("status", "asOfPeriod", "firstPeriod"):
+        if current.get(field) != artifact.get(field):
+            raise ValueError(
+                f"{account_path} FY{fy}: current dual-pin {field} "
+                f"{current.get(field)!r} does not match artifact "
+                f"{artifact.get(field)!r}"
+            )
+    return dict(current)
 
 
 def reconcile(staging, repo=REPO):
     repo, staging = Path(repo), Path(staging)
     config = json.loads((repo / "config" / "obligation_accounts.json").read_text())
     accounts = {row["path"]: row for row in config["accounts"]}
+    baselines = {
+        path: json.loads((repo / account["baseline"]).read_text())
+        for path, account in accounts.items()
+    }
     planned = []
     seen = set()
     for descriptor_path in sorted(staging.rglob("partition.json")):
@@ -77,6 +115,15 @@ def reconcile(staging, repo=REPO):
                         "firstFiscalYearPeriod", 6
                     )
                 )
+                provenance = dict(provenance)
+                provenance["baselinePin"] = pin
+            current_pin = baselines[account["path"]]["fiscalYears"].get(str(fy))
+            preserved = _preserve_current_dual_pin(
+                account["path"], int(fy), current_pin, pin,
+                provenance.get("normalized", {}).get("netObligationsCents"),
+            )
+            if preserved != pin:
+                pin = preserved
                 provenance = dict(provenance)
                 provenance["baselinePin"] = pin
             planned.append((account, int(fy), descriptor_path.parent, provenance))
