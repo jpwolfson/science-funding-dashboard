@@ -476,3 +476,12 @@ only through GitHub.
 
 Release PR [#53](https://github.com/jpwolfson/science-funding-dashboard/pull/53)
 tracks the terminal pre-merge CI evidence for this exact tree.
+
+PR #53 merged at `37bca577ed75d1f9107853179667e21bd7b0114b`. Post-merge
+Test run `32516046467` and Deploy Pages run `32516046481` are each terminal
+with exactly one successful job on page 1 and page 2 empty. Live root,
+obligation index, DHS rollup, all three account dashboards and manifests, and
+sentinel JSON are byte-exact with the merged tree. Live light and dark renders
+of the three accounts, a representative CISA activity, and the sentinel had
+zero diagnostics; the FY2026 account lines visibly stop at P09 (June). DHS and
+the approved CWMD FY2026 File A/File B variance are therefore live.
