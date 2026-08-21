@@ -4,7 +4,7 @@ from pathlib import Path
 
 from adapters.usaspending_obligations import (
     alias_map, combine_file_b_file_c, file_b_period_events,
-    parse_file_b_snapshot,
+    parse_file_b_snapshot, parse_file_c,
 )
 from scripts.plan_obligation_refresh import plan
 
@@ -25,7 +25,7 @@ ACCOUNT_META = {
     ),
     "dhs/science-technology-rd": (
         "070-0803", "Research and Development, Science and Technology Directorate",
-        "Department of Homeland Security", 4, 4, 3,
+        "Department of Homeland Security", 4, 5, 3,
         [36824645268, 53704594842, 49497919865, 55374300397,
          47771031511, 55202808476, 55657115658, 46545944473,
          27208933343, 11473061577],
@@ -33,13 +33,13 @@ ACCOUNT_META = {
     "dhs/cisa-rd": (
         "070-0805",
         "Research and Development, Cybersecurity and Infrastructure Security Agency",
-        "Department of Homeland Security", 5, 5, 2,
+        "Department of Homeland Security", 5, 7, 3,
         [645282569, 681997473, 1634350473, 1105175034, 1252978085,
          679807214, 984707477, 331268308, 9826, 4822],
     ),
     "dhs/cwmd-rd": (
         "070-0860", "Research and Development, Countering Weapons of Mass Destruction Office",
-        "Department of Homeland Security", 14, 14, 5,
+        "Department of Homeland Security", 14, 15, 5,
         [17605832081, 10010791277, 10949230982, 8622406989,
          5901650583, 6920298386, 6846038672, 5270214468,
          2411547147, 2380850844],
@@ -459,8 +459,11 @@ class OtherCivilianObligationTests(unittest.TestCase):
         cisa = self._events("dhs/cisa-rd", [
             {"program_activity_code": "0001",
              "program_activity_name": "CAS - CYBERSECURITY"},
+            {"program_activity_code": "0003",
+             "program_activity_name": "CAS - CYBERSECURITY"},
             {"program_activity_code": "0002",
              "program_activity_name": "CAS - INFRASTRUCTURE PROTECTION"},
+            {"program_activity_reporting_key": "5ZD2V505R8T"},
             {"program_activity_reporting_key": "5TB2MGKNLHN"},
             {"program_activity_reporting_key": "5TB2MGKNLHM"},
         ])
@@ -468,6 +471,7 @@ class OtherCivilianObligationTests(unittest.TestCase):
             "CAS - CYBERSECURITY", "CAS - INFRASTRUCTURE PROTECTION",
             "CAS - INFRASTRUCTURE SECURITY R&D", "CAS - RISK MANAGEMENT R&D",
         }, {row["programActivityName"] for row in cisa})
+        self.assertEqual(4, len({row["_programActivityKey"] for row in cisa}))
 
         pairs = [
             ("0001", "RESEARCH, DEVELOPMENT, AND OPERATIONS"),
@@ -490,6 +494,134 @@ class OtherCivilianObligationTests(unittest.TestCase):
         self.assertEqual({name for _, name in pairs},
                          {row["programActivityName"] for row in cwmd})
         self.assertEqual(12, len({row["_programActivityKey"] for row in cwmd}))
+
+    def test_cisa_fy2020_optional_program_activity_matches_raw_evidence(self):
+        self._require_paths("dhs/cisa-rd")
+        account = self.accounts["dhs/cisa-rd"]
+        amounts = ["-28831.98", "-698.55", "1398848.20", "605844.00",
+                   "469224.00", "1200000.00"]
+        rows = [{
+            "submission_period": f"FY2020P{period:02}",
+            "federal_account_symbol": "070-0805",
+            "program_activity_code": "OPTN",
+            "program_activity_name": "FIELD IS OPTIONAL PRIOR TO FY21",
+            "transaction_obligated_amount": amount,
+            "award_unique_key": f"CISA-FY2020-RAW-{index}",
+        } for index, (period, amount) in enumerate(
+            zip([11, 12, 8, 3, 10, 10], amounts), start=1
+        )]
+        events = parse_file_c({
+            "assistance.csv": [],
+            "contracts.csv": rows,
+            "unlinked.csv": [],
+        }, "070-0805", alias_map(account))
+        self.assertEqual(364438567, sum(row["amountCents"] for row in events))
+        self.assertEqual({"Unknown / other"}, {
+            row["programActivityName"] for row in events
+        })
+        self.assertEqual(1, len({row["_programActivityKey"] for row in events}))
+
+    def test_science_technology_fy2020_optional_pa_matches_raw_evidence(self):
+        self._require_paths("dhs/science-technology-rd")
+        account = self.accounts["dhs/science-technology-rd"]
+        member_shapes = {
+            "assistance.csv": (21, "31221080.56"),
+            "contracts.csv": (332, "255127010.71"),
+            "unlinked.csv": (2, "2652857.20"),
+        }
+        members = {}
+        for member, (count, subtotal) in member_shapes.items():
+            amounts = [subtotal, *(["0.00"] * (count - 1))]
+            members[member] = [{
+                "submission_period": "FY2020P12",
+                "federal_account_symbol": "070-0803",
+                "program_activity_code": "OPTN",
+                "program_activity_name": "FIELD IS OPTIONAL PRIOR TO FY21",
+                "transaction_obligated_amount": amount,
+                "award_unique_key": f"ST-FY2020-{member}-{index}",
+            } for index, amount in enumerate(amounts, start=1)]
+
+        events = parse_file_c(
+            members, "070-0803", alias_map(account)
+        )
+        self.assertEqual(355, sum(len(rows) for rows in members.values()))
+        self.assertEqual(3, len(events))
+        self.assertEqual(28900094847, sum(
+            row["amountCents"] for row in events
+        ))
+        self.assertEqual({"Unknown / other"}, {
+            row["programActivityName"] for row in events
+        })
+        self.assertEqual(1, len({
+            row["_programActivityKey"] for row in events
+        }))
+
+    def test_cisa_fy2026_park_matches_raw_and_official_mapping_evidence(self):
+        self._require_paths("dhs/cisa-rd")
+        account = self.accounts["dhs/cisa-rd"]
+        parks = (
+            ["5TB2MGKNLHM"] * 3
+            + ["5TB2MGKNLHN"] * 4
+            + ["5ZD2V505R8T"] * 2
+        )
+        rows = [{
+            "submission_period": "FY2026P02",
+            "federal_account_symbol": "070-0805",
+            "program_activity_reporting_key": park,
+            "program_activity_code": "",
+            "program_activity_name": "",
+            "obligations_incurred": "0.00",
+        } for park in parks]
+        snapshot = parse_file_b_snapshot(
+            rows, "070-0805", alias_map(account)
+        )
+        events = file_b_period_events(
+            {"FY2026P02": snapshot}, "070-0805"
+        )
+        self.assertEqual(3, len(events))
+        self.assertEqual(0, sum(row["amountCents"] for row in events))
+        cyber = [
+            row for row in events
+            if row["programActivityReportingKey"] == "5ZD2V505R8T"
+        ]
+        self.assertEqual(1, len(cyber))
+        self.assertEqual("CAS - CYBERSECURITY", cyber[0]["programActivityName"])
+
+    def test_cwmd_fy2020_optional_program_activity_matches_raw_evidence(self):
+        self._require_paths("dhs/cwmd-rd")
+        account = self.accounts["dhs/cwmd-rd"]
+        member_shapes = {
+            "assistance.csv": (5, "-753666.02"),
+            "contracts.csv": (92, "47514746.48"),
+            "unlinked.csv": (5, "3806367.91"),
+        }
+        members = {}
+        for member, (count, subtotal) in member_shapes.items():
+            amounts = [subtotal, *(["0.00"] * (count - 1))]
+            members[member] = [{
+                "submission_period": "FY2020P12",
+                "federal_account_symbol": "070-0860",
+                "program_activity_code": "OPTN",
+                "program_activity_name": "FIELD IS OPTIONAL PRIOR TO FY21",
+                "transaction_obligated_amount": amount,
+                "award_unique_key": f"CWMD-FY2020-{member}-{index}",
+            } for index, amount in enumerate(amounts, start=1)]
+
+        events = parse_file_c(
+            members, "070-0860", alias_map(account)
+        )
+        self.assertEqual(102, sum(len(rows) for rows in members.values()))
+        self.assertEqual(3, len(events))
+        self.assertEqual(5056744837, sum(
+            row["amountCents"] for row in events
+        ))
+        self.assertEqual({"Unknown / other"}, {
+            row["programActivityName"] for row in events
+        })
+        self.assertEqual(1, len({
+            row["_programActivityKey"] for row in events
+        }))
+
 
     def test_dot_reused_codes_and_rolling_stock_are_collision_safe(self):
         self._require_paths(

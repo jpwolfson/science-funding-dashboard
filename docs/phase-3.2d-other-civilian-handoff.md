@@ -331,3 +331,79 @@ distinct; PARK-backed current identities remain canonical. No DOT or later
 civilian account is registered by this scaffold. Source, atomic reconcile,
 42-account sentinel, trigger restore, release gates, merge/deploy, and live QA
 remain required before DHS can be called complete.
+
+CISA FY2019 attempt 1 stopped at P03 on the historical exact key
+`0003 / CAS - CYBERSECURITY`. The retained raw artifact is `9435858556`
+(1,048 bytes; SHA256
+`1713eadc6c269bf6700cbc31f7cbd609dd82bae37ebfbd86f947c23acf8e3972`).
+Its P03 archive is 422 bytes with SHA256
+`9389d521126379687e0f01b6a1689a16235fd97074eb590927cba17c72331336`;
+the eight preserved rows include five exact-key rows totaling 101,511 cents.
+The identical activity name and the later canonical `0001` key make this an
+unambiguous historical alias. The repair changes no source total, File A pin,
+tolerance, or residual, and the trigger remains unchanged.
+
+CISA FY2020 attempt 1 later stopped after the complete File B P02--P12 pull
+and File C P12 pull on `OPTN / FIELD IS OPTIONAL PRIOR TO FY21`. The retained
+raw artifact is `9436198050` (8,078 bytes; SHA256
+`7276d507eac06ec9a01c456ac869e3cf53f01ad8878573b871f8021789d73c3c`).
+Its 2,103-byte File C archive has SHA256
+`4d08862a56d3f369bd7d103096b898d384b304ee05c8387a8023578657a95b3c`;
+the six contract rows total 364,438,567 cents. Because the source explicitly
+states that the activity field is unavailable before FY2021, this exact key
+maps to the existing `Unknown / other` identity. The mapping preserves every
+source cent and changes no File A pin, tolerance, or residual.
+
+CISA FY2026 attempt 1 stopped at P02 on blank code/name PARK
+`5ZD2V505R8T`. Retained raw artifact `9438252034` is 547 bytes with SHA256
+`623bcda56b8f15e4329ef0ac9fdcfdcbc2d03248633d6ee2c18d8ca0f7f8d414`;
+its sole 392-byte inner archive has SHA256
+`61bfe10405ec6601c227a1b0ffe8a6f2984ceeec1267c115e484f4de593dbce3`
+and preserves exactly nine File B rows, including two zero-cent rows for the
+new PARK. Treasury's official DATA Broker mapping file at commit
+`dfc87000f6fc88fe1da0beead77e6640897132e0` (file SHA256
+`e0e72fea7838a70d261bf9641e41b84d899d446eecdbc138f9965a1f33753210`)
+maps that exact PARK and federal account `070-0805` to
+`CAS - Cybersecurity`. The repair therefore adds the PARK to the existing
+CISA cybersecurity identity. It changes zero cents and no File A pin,
+tolerance, or residual.
+
+CWMD FY2020 attempt 1 completed the full File B P02--P12 pull and File C P12
+pull before stopping on the same exact pre-FY21 placeholder,
+`OPTN / FIELD IS OPTIONAL PRIOR TO FY21`. Retained raw artifact `9439855008`
+is 16,706 bytes with SHA256
+`95a1b20395d348c716087860f3deeed40f801afdebe837c2158c302fbc374211`.
+Its 7,439-byte File C archive has SHA256
+`9f3983db6fef1e76707f37f1e8c91aced2dfb95098883409aea58f3be10cb0d2`
+and contains exactly 102 rows: five assistance rows totaling
+`-75,366,602` cents, 92 contract rows totaling `4,751,474,648` cents, and
+five unlinked rows totaling `380,636,791` cents. All 102 rows share the one
+exact placeholder key and total `5,056,744,837` cents. The account-scoped
+repair maps that key to CWMD's existing `Unknown / other` identity, preserving
+every source cent and changing no File A pin, tolerance, or residual. It is
+an exact mapping repair, not a File A/File B variance.
+
+Science and Technology FY2020 attempt 1 completed the full File B P02--P12
+pull and File C P12 pull before stopping on the same exact pre-FY21
+placeholder, `OPTN / FIELD IS OPTIONAL PRIOR TO FY21`. Retained raw artifact
+`9444494944` is 35,756 bytes with SHA256
+`f0ea3548fb7e8058263dbdf873848b6882a2632bf93295311a8bef178eb6fca3`.
+Its 27,395-byte File C archive has SHA256
+`808b5289a43737cc9375fac33d0d3cd13b37410525b25d739ecffc2855397664`
+and contains exactly 355 rows: 21 assistance rows totaling `3,122,108,056`
+cents, 332 contract rows totaling `25,512,701,071` cents, and two unlinked
+rows totaling `265,285,720` cents. All 355 rows share the one exact
+placeholder key and total `28,900,094,847` cents. The account-scoped repair
+maps that key to Science and Technology's existing `Unknown / other`
+identity, preserving every source cent and changing no File A pin,
+tolerance, or residual. It is an exact mapping repair, not a File A/File B
+variance.
+
+Attempt 1 source run `32449818249` is terminal after the complete selector.
+Its `filter=all`, `per_page=100` inventory is exactly 33 raw jobs on page 1
+with page 2 empty: plan and 25 pulls succeeded, the five reviewed pulls above
+failed, and reconcile plus deploy skipped. All remaining Science and
+Technology pulls, including FY2026, succeeded; no additional failure or
+mapping gap appeared. The complete artifact inventory is 55 on page 1 with
+page 2 empty. The five repairs therefore constitute the complete semantic
+repair for this attempt.
