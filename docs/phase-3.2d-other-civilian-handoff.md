@@ -473,3 +473,6 @@ compressed-store bytes. The assembled Pages artifact is `258024917` bytes
 across 1,583 files, status `ok`, with `741975083` bytes of headroom below the
 1 GB limit; obligation event archives remain excluded from Pages and linked
 only through GitHub.
+
+Release PR [#53](https://github.com/jpwolfson/science-funding-dashboard/pull/53)
+tracks the terminal pre-merge CI evidence for this exact tree.
