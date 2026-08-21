@@ -407,3 +407,25 @@ Technology pulls, including FY2026, succeeded; no additional failure or
 mapping gap appeared. The complete artifact inventory is 55 on page 1 with
 page 2 empty. The five repairs therefore constitute the complete semantic
 repair for this attempt.
+
+Attempt 2 of source run `32449818249` reran only those five failed pulls. Its
+complete `filter=all`, `per_page=100` inventory is 66 raw executions on page 1
+with page 2 empty: all 30 latest logical pulls succeeded, reconcile failed,
+and deploy skipped. Reconcile assembled and validated the full candidate but
+the fast tier correctly rejected the stale CWMD FY2026 single-pin assertion.
+No candidate commit or normalized recovery artifact was used. The complete
+artifact inventory is 65 on page 1 with page 2 empty.
+
+The official FY2026 P09 GTAS/File A endpoint for CWMD returned
+`2,380,850,844` cents (response SHA256
+`934909ac98b58d81f9bcd3718d9e5343ba63ba5c7311eb5bd691d2d8cff321b8`).
+Source job `96781297151` retained raw artifact `9442894725` (outer SHA256
+`5d7786c826ff264cb07aa24cf6c493b47ab87d24836da4c2d2df66a12f64ef4c`);
+its 36-row P09 File B archive has SHA256
+`f7d5b0868c9b10bc846ffc28e9d7bf04255a1c39f5136a40d22590f0cad60458`
+and totals `2,502,737,329` cents. File A minus File B is exactly
+`-121,886,485` cents (`-$1,218,864.85`, 5.1195% of File A). The owner approved
+publishing File B as canonical on 2026-08-21 while preserving the exact File A
+total. No tolerance or synthetic residual is introduced. The machine-readable
+and human-readable source-variance ledgers record the same evidence and remain
+release-pending until merge, deploy, and live QA.

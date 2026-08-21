@@ -106,6 +106,15 @@ UNKNOWN_DISPLAY_PATHS = {
     }
 }
 
+CWMD_FY2026_FILE_B_CENTS = 2_502_737_329
+CWMD_FY2026_VARIANCE_CENTS = -121_886_485
+CWMD_FY2026_VARIANCE_REASON = (
+    "Official FY2026 P09 GTAS/File A is 2380850844 cents while the accepted "
+    "P09 File B Program Activity total is 2502737329 cents; preserve the exact "
+    "-121886485-cent official source variance with File B canonical and no "
+    "synthetic residual or tolerance."
+)
+
 STAGES = [
     {"hhs/aspr-rd-procurement"},
     {"va/medical-prosthetic-research"},
@@ -239,11 +248,19 @@ class OtherCivilianObligationTests(unittest.TestCase):
                         {"status": "complete", "obligationsCents": pins[offset]},
                         years[str(fy)],
                     )
-                self.assertEqual(
-                    {"status": "partial", "asOfPeriod": 9,
-                     "obligationsCents": pins[-1]},
-                    years["2026"],
-                )
+                expected_2026 = {
+                    "status": "partial", "asOfPeriod": 9,
+                    "obligationsCents": pins[-1],
+                }
+                if path == "dhs/cwmd-rd":
+                    expected_2026.update({
+                        "fileBObligationsCents": CWMD_FY2026_FILE_B_CENTS,
+                        "fileAFileBVarianceCents":
+                            CWMD_FY2026_VARIANCE_CENTS,
+                        "fileAFileBVarianceReason":
+                            CWMD_FY2026_VARIANCE_REASON,
+                    })
+                self.assertEqual(expected_2026, years["2026"])
                 self.assertEqual(2, len(baseline["notes"]))
 
     def _aspr_baseline(self):
