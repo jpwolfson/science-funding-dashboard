@@ -485,3 +485,22 @@ sentinel JSON are byte-exact with the merged tree. Live light and dark renders
 of the three accounts, a representative CISA activity, and the sentinel had
 zero diagnostics; the FY2026 account lines visibly stop at P09 (June). DHS and
 the approved CWMD FY2026 File A/File B variance are therefore live.
+
+## DOT release — scaffold on live DHS main
+
+The DOT batch is based exactly on live DHS main
+`7d39b03abdb7ca74c3fffc87e01924ee50621c56` and preserves all 42 live
+accounts. It appends only `dot/ost-research-technology` (`069-1730`),
+`dot/faa-research-engineering-development` (`069-8108`), and `dot/fra-rd`
+(`069-0745`) with the reviewed FY2017--FY2026 File A baselines. The exact
+source selector is those three paths, full FY2017--FY2026, for 30 mechanical
+pull jobs.
+
+The reviewed collision contract remains intact: OST-R is the parent while
+BTS and ARPA-I remain subsets; reused OST-R codes retain distinct names and
+PARKs; FAA PAC `0012` variants remain distinct; and FRA rolling-stock
+identities remain distinct. No Education or later civilian account is
+registered by this scaffold. Source, atomic reconcile, 45-account sentinel,
+weekly/all trigger restore, current-main integration, release gates including
+affected-chart screenshot comparison, merge/deploy, and live QA remain
+required before DOT can be called complete.
