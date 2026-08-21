@@ -429,3 +429,47 @@ publishing File B as canonical on 2026-08-21 while preserving the exact File A
 total. No tolerance or synthetic residual is introduced. The machine-readable
 and human-readable source-variance ledgers record the same evidence and remain
 release-pending until merge, deploy, and live QA.
+
+The approved dual pin exposed two fail-closed reconcile defects without
+changing source data. Attempt 3 failed because the reconciler still replaced a
+newer approved dual pin with stale retained-artifact metadata. Shared fix PR
+[#52](https://github.com/jpwolfson/science-funding-dashboard/pull/52) merged at
+`0aac02cf7b7b0affce535ab1cbd7d6efe7f5e8b4`; it preserves a dual pin only when
+the current row is schema-valid and its File B total, status, `asOfPeriod`, and
+`firstPeriod` exactly match the accepted artifact. The DHS branch integrated
+that fix at `ef570f72276593e7629d798aa799c79037807827` without changing any DHS
+source subtree. Only the failed attempt-3 reconcile job was rerun; no pull job
+or normalized recovery artifact was replayed.
+
+Attempt 4 is terminal green. The complete `filter=all`, `per_page=100`
+inventory for run `32449818249` is exactly 132 raw executions: page 1 has 100,
+page 2 has 32, and page 3 is empty. Its latest logical topology is exactly 33
+jobs: plan, all 30 carried successful FY2017--FY2026 pulls, and reconcile
+succeeded; deploy skipped. Atomic commit
+`3811989e84bf4b7209fe2e055e916419515cf50f` is a strict child of the integration
+commit. Each DHS account has an exact 21-file, ten-partition event store;
+Science and Technology, CISA, and CWMD respectively resolve to
+`439260355410`, `7315581281`, and `77040747914` total net obligation cents,
+with zero warnings. DHS totals `523616684605` cents, the root totals
+`86716604619486` cents, and the sentinel covers exactly 42 financial accounts.
+The approved CWMD FY2026 row remains File A `2380850844` cents, canonical File B
+`2502737329` cents, and exact variance `-121886485` cents with no tolerance or
+synthetic residual. Trigger restore
+`a23daa6370568597a381148d698a7f99c2dc7038` is a strict child of the atomic
+commit and changes only `.github/triggers/update-obligations.json` to main's
+exact weekly/all blob `8c9688525108cc68160c78494993bb0a91376a19`.
+
+Pre-merge release gates on the restored, zero-behind branch passed:
+other-civilian plus obligation validation 28/28 with three expected later-stage
+skips; registry 297/297 with 42 unique paths and codes; fast 7/7; rendered 4/4
+(5 core, 168 all-account, 59 assembled-artifact public-link, and 2 sentinel
+cases); and screenshots 55/55. The mandatory chart-geometry review compared
+the 51-page pre-DHS main pack with the 55-page DHS pack. The root FY2026
+cumulative line and each of the three new DHS account lines stop at P09 (June)
+rather than extending flat through July--September; the DHS representative
+activity and sentinel pages show no visible diagnostics. Footprint is
+`558588770` tracked bytes, `556843654` data bytes, and `334359696`
+compressed-store bytes. The assembled Pages artifact is `258024917` bytes
+across 1,583 files, status `ok`, with `741975083` bytes of headroom below the
+1 GB limit; obligation event archives remain excluded from Pages and linked
+only through GitHub.
