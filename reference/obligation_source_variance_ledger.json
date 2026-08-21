@@ -1,6 +1,6 @@
 {
  "schemaVersion": 1,
- "updated": "2026-08-18",
+ "updated": "2026-08-21",
  "varianceDefinition": "fileAFileBVarianceCents = fileAObligationsCents - fileBObligationsCents",
  "entries": [
   {
@@ -75,6 +75,32 @@
     "rawArtifactId": 9287062264,
     "rawArtifactSha256": "0f31cc6789411e34d9e4ba8e0330f5b5901e67b15642733f4ea47c71df84e06a",
     "nestedP12FileBSha256": "ff7e61bb955065460c9458944741e475f2493f296e6933518a71f6593b28320b"
+   }
+  },
+  {
+   "accountPath": "dhs/cwmd-rd",
+   "federalAccount": "070-0860",
+   "fiscalYear": 2026,
+   "fileAObligationsCents": 2380850844,
+   "fileBObligationsCents": 2502737329,
+   "fileAFileBVarianceCents": -121886485,
+   "absoluteVarianceCents": 121886485,
+   "absoluteVariancePpmOfFileA": 51195,
+   "reason": "Official FY2026 P09 GTAS/File A is 2380850844 cents while the accepted P09 File B Program Activity total is 2502737329 cents; preserve the exact -121886485-cent official source variance with File B canonical and no synthetic residual or tolerance.",
+   "baseline": "reference/dhs_cwmd_rd_obligation_baseline.json",
+   "releaseStatus": "pending",
+   "ownerApproval": {
+    "status": "approved",
+    "date": "2026-08-21",
+    "reference": "Phase 3.2d execution thread"
+   },
+   "evidence": {
+    "workflowRunId": 32449818249,
+    "workflowJobId": 96781297151,
+    "rawArtifactId": 9442894725,
+    "rawArtifactSha256": "5d7786c826ff264cb07aa24cf6c493b47ab87d24836da4c2d2df66a12f64ef4c",
+    "nestedP09FileBSha256": "f7d5b0868c9b10bc846ffc28e9d7bf04255a1c39f5136a40d22590f0cad60458",
+    "fileASnapshotSha256": "934909ac98b58d81f9bcd3718d9e5343ba63ba5c7311eb5bd691d2d8cff321b8"
    }
   },
   {

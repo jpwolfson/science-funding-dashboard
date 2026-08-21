@@ -1,0 +1,65 @@
+{
+ "schemaVersion": 2,
+ "federalAccount": "070-0860",
+ "source": "USAspending federal account fiscal-year snapshots (GTAS/File A), retrieved 2026-08-12",
+ "fiscalYears": {
+  "2015": {
+   "status": "unavailable",
+   "reason": "Files A/B/C begin in FY2017 Q2"
+  },
+  "2016": {
+   "status": "unavailable",
+   "reason": "Files A/B/C begin in FY2017 Q2"
+  },
+  "2017": {
+   "asOfPeriod": 12,
+   "firstPeriod": 6,
+   "obligationsCents": 17605832081,
+   "status": "partial"
+  },
+  "2018": {
+   "status": "complete",
+   "obligationsCents": 10010791277
+  },
+  "2019": {
+   "status": "complete",
+   "obligationsCents": 10949230982
+  },
+  "2020": {
+   "status": "complete",
+   "obligationsCents": 8622406989
+  },
+  "2021": {
+   "status": "complete",
+   "obligationsCents": 5901650583
+  },
+  "2022": {
+   "status": "complete",
+   "obligationsCents": 6920298386
+  },
+  "2023": {
+   "status": "complete",
+   "obligationsCents": 6846038672
+  },
+  "2024": {
+   "status": "complete",
+   "obligationsCents": 5270214468
+  },
+  "2025": {
+   "status": "complete",
+   "obligationsCents": 2411547147
+  },
+  "2026": {
+   "status": "partial",
+   "asOfPeriod": 9,
+   "obligationsCents": 2380850844,
+   "fileBObligationsCents": 2502737329,
+   "fileAFileBVarianceCents": -121886485,
+   "fileAFileBVarianceReason": "Official FY2026 P09 GTAS/File A is 2380850844 cents while the accepted P09 File B Program Activity total is 2502737329 cents; preserve the exact -121886485-cent official source variance with File B canonical and no synthetic residual or tolerance."
+  }
+ },
+ "notes": [
+  "FY2017 is partial from P6; FY2018 is the first full DATA Act year unless the account availability entry states a later first fiscal year.",
+  "FY2026 preserves the owner-approved exact official File A/File B source variance; File B remains the canonical published ledger and no synthetic residual or tolerance is created."
+ ]
+}
