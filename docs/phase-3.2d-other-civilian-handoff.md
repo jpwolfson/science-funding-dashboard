@@ -315,3 +315,19 @@ files as binary, so attempt 2 again reconciled and validated successfully but
 failed while importing this test module. The corrective descendant restores
 the reviewed UTF-8 blobs exactly; it makes no additional semantic or data
 change.
+
+## DHS release — scaffold on live VA main
+
+The DHS batch is based exactly on live VA main
+`5e83e0c348e75e6d131121baf4a8b0882a79775f` and preserves all 39 live
+accounts. It appends only `dhs/science-technology-rd` (`070-0803`),
+`dhs/cisa-rd` (`070-0805`), and `dhs/cwmd-rd` (`070-0860`) plus their reviewed
+FY2017–FY2026 File A baselines. The exact source selector is those three paths,
+full FY2017–FY2026, for 30 mechanical pull jobs.
+
+The reviewed collision contract remains intact: historical and current CISA
+CAS labels are distinct; CWMD CAS and non-CAS identities sharing codes remain
+distinct; PARK-backed current identities remain canonical. No DOT or later
+civilian account is registered by this scaffold. Source, atomic reconcile,
+42-account sentinel, trigger restore, release gates, merge/deploy, and live QA
+remain required before DHS can be called complete.
