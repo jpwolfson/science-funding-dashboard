@@ -504,3 +504,15 @@ registered by this scaffold. Source, atomic reconcile, 45-account sentinel,
 weekly/all trigger restore, current-main integration, release gates including
 affected-chart screenshot comparison, merge/deploy, and live QA remain
 required before DOT can be called complete.
+
+The first source attempt exposed one reviewed exact-key spelling alias in
+OST-R FY2023 P02: PAC `0004`, blank PARK, `ADVANCES RESEARCH PROJECTS -
+INFRASTRUCTURE`. It is the zero-cent spelling variant of the registered
+`ADVANCED RESEARCH PROJECTS - INFRASTRUCTURE` identity. Retained raw artifact
+`9469274657` is 1,105 bytes with SHA256
+`dccd4492a414bb4efea61d8585e23de91385472413de9d295d1f7770a26e7910`;
+its sole 890-byte source archive has SHA256
+`8357716c8bc50d5e0facd95f26758562e396dcebe709dcb99139cb1a1f8b8305`
+and contains 54 rows totaling 395,096,572 cents, with the exact alias row at
+zero cents. This is a mapping repair only: no File A/File B variance, pin,
+tolerance, residual, or published amount changes.

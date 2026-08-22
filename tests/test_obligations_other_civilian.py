@@ -46,7 +46,7 @@ ACCOUNT_META = {
     ),
     "dot/ost-research-technology": (
         "069-1730", "Research and Technology, Office of the Secretary",
-        "Department of Transportation", 17, 16, 10,
+        "Department of Transportation", 17, 17, 10,
         [1922122897, 2732465563, 2493949479, 3740353690, 2649410694,
          3865268634, 6050409337, 7360729545, 9006554583, 3661176477],
     ),
@@ -653,9 +653,19 @@ class OtherCivilianObligationTests(unittest.TestCase):
             {"program_activity_code": "0004",
              "program_activity_name": "ADVANCED RESEARCH PROJECTS - INFRASTRUCTURE"},
             {"program_activity_code": "0004",
+             "program_activity_name": "ADVANCES RESEARCH PROJECTS - INFRASTRUCTURE"},
+            {"program_activity_code": "0004",
              "program_activity_name": "NATIONWIDE DIFFERENTIAL GLOBAL POSITIONING SYSTEM"},
         ])
         self.assertEqual(4, len({row["_programActivityKey"] for row in ost}))
+        self.assertIn(
+            "ADVANCED RESEARCH PROJECTS - INFRASTRUCTURE",
+            {row["programActivityName"] for row in ost},
+        )
+        self.assertNotIn(
+            "ADVANCES RESEARCH PROJECTS - INFRASTRUCTURE",
+            {row["programActivityName"] for row in ost},
+        )
         self.assertEqual(
             "Research and Technology, Office of the Secretary",
             self.accounts["dot/ost-research-technology"]["name"],
