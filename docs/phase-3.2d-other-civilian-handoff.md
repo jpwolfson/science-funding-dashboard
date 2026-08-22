@@ -556,3 +556,6 @@ with 335,316,536 compressed-store bytes. Relative to main, the deltas are
 7,874,781 tracked bytes, 7,860,899 data bytes, 956,844 compressed-store bytes,
 and 6,904,055 Pages bytes; the historical-backfill trajectory remains flagged
 only as a conservative upper bound.
+
+Release PR [#56](https://github.com/jpwolfson/science-funding-dashboard/pull/56)
+tracks the terminal pre-merge CI evidence for this exact tree.
