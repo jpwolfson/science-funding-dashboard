@@ -485,3 +485,77 @@ sentinel JSON are byte-exact with the merged tree. Live light and dark renders
 of the three accounts, a representative CISA activity, and the sentinel had
 zero diagnostics; the FY2026 account lines visibly stop at P09 (June). DHS and
 the approved CWMD FY2026 File A/File B variance are therefore live.
+
+## DOT release — scaffold on live DHS main
+
+The DOT batch is based exactly on live DHS main
+`7d39b03abdb7ca74c3fffc87e01924ee50621c56` and preserves all 42 live
+accounts. It appends only `dot/ost-research-technology` (`069-1730`),
+`dot/faa-research-engineering-development` (`069-8108`), and `dot/fra-rd`
+(`069-0745`) with the reviewed FY2017--FY2026 File A baselines. The exact
+source selector is those three paths, full FY2017--FY2026, for 30 mechanical
+pull jobs.
+
+The reviewed collision contract remains intact: OST-R is the parent while
+BTS and ARPA-I remain subsets; reused OST-R codes retain distinct names and
+PARKs; FAA PAC `0012` variants remain distinct; and FRA rolling-stock
+identities remain distinct. No Education or later civilian account is
+registered by this scaffold. Source, atomic reconcile, 45-account sentinel,
+weekly/all trigger restore, current-main integration, release gates including
+affected-chart screenshot comparison, merge/deploy, and live QA remain
+required before DOT can be called complete.
+
+The first source attempt exposed one reviewed exact-key spelling alias in
+OST-R FY2023 P02: PAC `0004`, blank PARK, `ADVANCES RESEARCH PROJECTS -
+INFRASTRUCTURE`. It is the zero-cent spelling variant of the registered
+`ADVANCED RESEARCH PROJECTS - INFRASTRUCTURE` identity. Retained raw artifact
+`9469274657` is 1,105 bytes with SHA256
+`dccd4492a414bb4efea61d8585e23de91385472413de9d295d1f7770a26e7910`;
+its sole 890-byte source archive has SHA256
+`8357716c8bc50d5e0facd95f26758562e396dcebe709dcb99139cb1a1f8b8305`
+and contains 54 rows totaling 395,096,572 cents, with the exact alias row at
+zero cents. This is a mapping repair only: no File A/File B variance, pin,
+tolerance, residual, or published amount changes.
+
+The original DOT run `32520795528` is terminal and retired. Its complete
+`filter=all`, `per_page=100` inventory is 66 raw executions on page 1 with
+page 2 empty; artifacts are 61 on page 1 with page 2 empty. The failed-job
+retry resolved the spelling alias, but reconcile then stopped only because
+the already-live DOE SC FY2026 snapshot had aged to 11 days against the
+immutable 0--10-day freshness SLA. DOE SC was refreshed separately in live
+PR #55. No DOT normalized artifact from the retired graph was reused.
+
+Fresh source run `32561912975` attempt 1 is terminal green. Its complete
+`filter=all`, `per_page=100` inventory is exactly 33 jobs on page 1 with page
+2 empty: plan, all 30 fresh FY2017--FY2026 pulls, and reconcile succeeded;
+deploy skipped. The complete artifact inventory is exactly 60 on page 1 with
+page 2 empty, one fresh raw and one normalized artifact for each pull. Atomic
+commit `572371808557f7a368ee4602423543ef49eb71af` is a strict child of source
+commit `753fb7e72007ea8efdd2249c84548d38744ac8bf`. Each account has an exact
+21-file, ten-partition store and exact baseline pins with zero warnings.
+OST-R, FAA RE&D, and FRA R&D respectively resolve to `43,482,440,899`,
+`196,566,776,602`, and `39,414,052,293` total net obligation cents; DOT totals
+`279,463,269,794` cents, the root totals `86,996,067,889,280` cents, and the
+sentinel covers exactly 45 unique financial accounts. Weekly/all restore
+`848836568ef89ffd2bfb34f91b9ef27d57ace013` changes only the trigger to main's
+exact blob `8c9688525108cc68160c78494993bb0a91376a19`. Then-current main remains
+`71f7246839bc14af39c5f9678ffbb638cfdeec78`, already an ancestor through the
+reviewed exact-union integration commit.
+
+Pre-merge release gates passed: other-civilian plus obligation validation
+28/28 with two expected later-stage skips; registry 45/45 unique paths and
+federal accounts; fast 7/7; rendered 4/4 (5 core, 180 all-account, 59 public
+link, and 2 sentinel cases); and screenshots 59/59. The mandatory geometry
+review compared the 55-page main pack with the 59-page DOT pack. The root and
+all three DOT FY2026 cumulative lines end at P09 (June), with no extension
+through July--September; the DOT representative activity and sentinel pages
+show no visible diagnostics. The assembled Pages artifact is 264,928,975
+bytes across 1,655 files, status `ok`, with 735,071,025 bytes of headroom;
+obligation archives remain excluded. The repo is 566,468,174 tracked bytes
+with 335,316,536 compressed-store bytes. Relative to main, the deltas are
+7,874,781 tracked bytes, 7,860,899 data bytes, 956,844 compressed-store bytes,
+and 6,904,055 Pages bytes; the historical-backfill trajectory remains flagged
+only as a conservative upper bound.
+
+Release PR [#56](https://github.com/jpwolfson/science-funding-dashboard/pull/56)
+tracks the terminal pre-merge CI evidence for this exact tree.
