@@ -225,3 +225,16 @@ Attempt 11 elapsed 36h22m35s under the serialized matrix; reconciliation ran
 rendered 3/3, with the rendered tier covering all 60 Wave 1 account/PA/theme
 cases. Fresh deployed reader review also found the DOE landing, EERE account,
 and Solar Energy PA pages legible and internally consistent in light and dark.
+
+## FY2026 freshness prerequisite for DOT
+
+DOT run `32520795528` reconciled all 30 requested partitions but correctly
+failed because the already-live DOE SC FY2026 provenance had aged to 11 days
+against the immutable 10-day SLA. Narrow recovery run `32554236811` refreshed
+only DOE SC FY2026 P09. Its four-row semantic diff is recipient punctuation
+only: row count, event IDs, amounts, period pin, and every dashboard numeric
+series remain exact, with zero net amount change. The recovery retained ten
+FY2017–FY2026 partitions, the `703809162794`-cent FY2026 P09 pin, zero warnings,
+and 42-account sentinel coverage. Fast 7/7, rendered 4/4, 55 screenshots, and
+the 258,024,920-byte assembled Pages footprint passed before PR #55; visual
+review confirmed the FY2026 line still ends at P09.
