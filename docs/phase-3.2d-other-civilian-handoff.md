@@ -559,3 +559,76 @@ only as a conservative upper bound.
 
 Release PR [#56](https://github.com/jpwolfson/science-funding-dashboard/pull/56)
 tracks the terminal pre-merge CI evidence for this exact tree.
+
+PR #56 merged at `cdafdf8ad5a5cc4c87d921f1faecc2093dae10d8`.
+Post-merge Test run `32588659008` and Deploy Pages run `32588659026`
+are each terminal with exactly one successful job on page 1 and page 2 empty;
+the complete head-SHA run inventory is exactly those two runs on page 1 with
+page 2 empty. Live root/index/DOT, all three account dashboards and manifests,
+and sentinel JSON are byte-exact with the merged tree. A fresh 14-case live
+light/dark render matrix covering the root, DOT, all three accounts, one OST-R
+activity, and the sentinel completed with zero render, network, or browser
+diagnostics. The root, DOT, account, and activity FY2026 lines visibly stop at
+P09 (June). DOT is therefore merged, deployed, and live-QA complete.
+
+## IES release — scaffold on live DOT main
+
+The IES batch starts from exact live DOT main
+`cdafdf8ad5a5cc4c87d921f1faecc2093dae10d8` and preserves its 45 live
+accounts. It appends only `ed/ies` (`091-1100`) and the reviewed
+FY2017--FY2026 File A baseline. The exact source selector is `ed/ies`, full
+FY2017--FY2026 through P09, for ten mechanical pull jobs.
+
+IES remains the parent account and NCES remains a subset. Historical PAC and
+current PARK identities reconcile to the same canonical activities, while
+IES Program Admin remains separate. No AHRQ, BLS, OJP, BEA, or DoD account is
+registered by this scaffold.
+
+The first source graph was retired after all ten IES pulls succeeded but
+reconcile found unrelated stale DOE/NSF FY2026 provenance. No normalized
+artifact from that failed graph was reused. Integration commit
+`8d5bf36cd361f952111005d732bfa0c88ae44bcf` has exact parents
+`3b31f6d09ce58be792ddf94c2d3c58d218d05b17` and live main
+`107f1e533d8aa70949a6d244def3e48454195570`; it preserves main's first 45
+accounts byte-for-byte and appends only `ed/ies`. Exact trigger cycling then
+restored weekly/all in `dece517d5a3b53271d002e9698fde1742bb1f730`
+before fresh-source commit `fefe6ae57f27132eee2356b916afd38f4c7c0f3b`.
+
+Fresh source run `32665356363` attempt 1 is terminal green and must not be
+rerun. Its complete `filter=all`, `per_page=100` inventory is exactly 13 jobs
+on page 1 with page 2 empty: plan, all ten FY2017--FY2026 pulls, and reconcile
+succeeded; deploy skipped. The complete artifact inventory is exactly 20 on
+page 1 with page 2 empty. Fresh FY2025 raw artifact `9500971476` hashes to
+`cca385495a0cd8747053b4420c44fe88ca95b25944ea3eb42fee9005402ae293`;
+fresh FY2026 raw artifact `9501092086` hashes to
+`244b94dce90b778a346556aa1e6a1e8c0426e4d9af734e24474d00680dafd532`.
+
+Atomic commit `5c57faaff3356e5d37c7127338098b02180fa758` is a strict child of the
+fresh source and contains the exact 21-file, ten-partition FY2017--FY2026 IES
+store. Its baseline pins are `61936565830`, `62092141499`, `59184361852`,
+`59755153973`, `61697598760`, `76174259406`, `78143351275`, `82090747685`,
+`51698482472`, and `32353725549` cents. IES totals `625126388301` cents with
+14 children and no warnings; ED matches it, the root totals
+`87621194277581` cents, and the sentinel covers exactly 46 unique accounts
+with no review findings. Weekly/all restore
+`c250411ca8219369f0559b3165a024522f32ae0b` is a strict child and changes only
+the trigger to main's exact blob `8c9688525108cc68160c78494993bb0a91376a19`.
+Then-current main remains an ancestor, so the final integration is an exact
+no-op and the branch diff is the reviewed IES union.
+
+Pre-merge gates passed: other-civilian plus obligation validation 28/28 with
+one expected later-stage skip; registry 325/325 with 46 unique accounts; fast
+7/7; rendered 4/4 (5 core, 184 all-account, 59 public-link, and 2 sentinel
+cases); and screenshots 61/61. The required geometry review compared a fresh
+59-page pack from exact main `107f1e5` with the 61-page IES pack. The root,
+IES account, and representative IES activity FY2026 cumulative lines all end
+at P09 (June), with no extension into July--September or visible diagnostics.
+The assembled Pages artifact is 268,361,557 bytes across 1,682 files, status
+`ok`, with 731,638,443 bytes of headroom; all 59 NSF CSV downloads remain and
+all 446 obligation archives remain excluded. The repo is 571,118,883 tracked
+bytes with 336,523,605 compressed-store bytes. Relative to exact main, the
+deltas are 4,645,086 tracked bytes, 4,639,449 data bytes, 1,207,073
+compressed-store bytes, and 3,432,376 Pages bytes. The historical-backfill
+trajectory remains flagged only as a conservative upper bound. Merge/deploy,
+byte-exact live JSON, and light/dark rendered QA remain required before IES is
+complete.
