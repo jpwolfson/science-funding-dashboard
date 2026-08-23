@@ -238,3 +238,27 @@ FY2017–FY2026 partitions, the `703809162794`-cent FY2026 P09 pin, zero warning
 and 42-account sentinel coverage. Fast 7/7, rendered 4/4, 55 screenshots, and
 the 258,024,920-byte assembled Pages footprint passed before PR #55; visual
 review confirmed the FY2026 line still ends at P09.
+
+## FY2026 freshness prerequisite for IES
+
+IES run `32647326219` assembled its ten requested partitions but correctly
+failed when four already-live FY2026 snapshots aged past the immutable
+10-day SLA. Narrow recovery run `32656344404` refreshed only DOE ARPA-E,
+DOE NNSA Weapons Activities, NSF AOAM, and NSF MREFC at FY2026 P09. Its
+complete terminal inventory is seven jobs on page 1 and an empty page 2:
+plan, all four pulls, and reconcile succeeded; branch deploy was skipped.
+The artifact inventory is eight on page 1 and an empty page 2.
+
+Atomic snapshot `96238e2c5689df11d98c20102bc10dc5284878c1`
+retains exact 21-file, ten-partition stores and the accepted DOE FY2026 pins
+of `24729593548` cents for ARPA-E and `2616631401344` cents for Weapons
+Activities. The only event changes are recipient punctuation on one stable
+event per account (`UMARO FOODS, INC` to `UMARO FOODS, INC.` and
+`SYSTEMATIC MANAGEMENT SERVICES INC.` to `SYSTEMATIC MANAGEMENT SERVICES,
+INC.`); event IDs, amounts, periods, totals, and every dashboard numeric
+series are exact. DOE and root chart-geometry projections are byte-equivalent
+before and after, both still ending at FY2026 P09/June. Obligation validation,
+freshness, fast, and rendered gates passed with zero warnings and 45-account
+sentinel coverage. Restore commit
+`8c6bf47d2763722b2c21d3cd62f7c0d755817032` returns the trigger to the
+then-current-main weekly/all payload.

@@ -137,3 +137,22 @@ and post-merge deploy/live spot checks were green.
 
 The existing NSF award-ledger dashboards and data remain untouched regression
 fixtures throughout this work.
+
+## FY2026 freshness prerequisite for IES
+
+Narrow recovery run `32656344404` refreshed NSF AOAM and MREFC FY2026 P09
+together with the two stale DOE prerequisites after IES run `32647326219`
+correctly enforced the immutable 10-day freshness SLA. The recovery's complete
+terminal inventory is seven jobs on page 1 and an empty page 2; plan, all four
+pulls, and reconcile succeeded, while branch deploy was skipped. All eight
+raw/normalized artifacts are retained on page 1 with an empty page 2.
+
+Atomic snapshot `96238e2c5689df11d98c20102bc10dc5284878c1`
+retains exact 21-file, ten-partition AOAM and MREFC stores and their accepted
+FY2026 pins of `22698725776` and `23041217313` cents. Both normalized NSF
+event streams are byte-exact with the prior snapshot. Account, NSF, and root
+numeric series and chart geometry are also exact before and after, with eight
+FY2026 points ending at P09/June. Obligation validation, freshness, fast, and
+rendered gates passed with zero warnings and 45-account sentinel coverage.
+Restore commit `8c6bf47d2763722b2c21d3cd62f7c0d755817032`
+returns the trigger to the then-current-main weekly/all payload.
