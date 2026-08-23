@@ -559,3 +559,30 @@ only as a conservative upper bound.
 
 Release PR [#56](https://github.com/jpwolfson/science-funding-dashboard/pull/56)
 tracks the terminal pre-merge CI evidence for this exact tree.
+
+PR #56 merged at `cdafdf8ad5a5cc4c87d921f1faecc2093dae10d8`.
+Post-merge Test run `32588659008` and Deploy Pages run `32588659026`
+are each terminal with exactly one successful job on page 1 and page 2 empty;
+the complete head-SHA run inventory is exactly those two runs on page 1 with
+page 2 empty. Live root/index/DOT, all three account dashboards and manifests,
+and sentinel JSON are byte-exact with the merged tree. A fresh 14-case live
+light/dark render matrix covering the root, DOT, all three accounts, one OST-R
+activity, and the sentinel completed with zero render, network, or browser
+diagnostics. The root, DOT, account, and activity FY2026 lines visibly stop at
+P09 (June). DOT is therefore merged, deployed, and live-QA complete.
+
+## IES release — scaffold on live DOT main
+
+The IES batch starts from exact live DOT main
+`cdafdf8ad5a5cc4c87d921f1faecc2093dae10d8` and preserves its 45 live
+accounts. It appends only `ed/ies` (`091-1100`) and the reviewed
+FY2017--FY2026 File A baseline. The exact source selector is `ed/ies`, full
+FY2017--FY2026 through P09, for ten mechanical pull jobs.
+
+IES remains the parent account and NCES remains a subset. Historical PAC and
+current PARK identities reconcile to the same canonical activities, while
+IES Program Admin remains separate. No AHRQ, BLS, OJP, BEA, or DoD account is
+registered by this scaffold. Atomic reconcile, 46-account sentinel,
+weekly/all restore, then-current-main integration, fast/rendered/screens and
+footprint gates, merge/deploy, byte-exact live JSON, and affected-chart
+light/dark screenshot comparison remain required before IES is complete.
