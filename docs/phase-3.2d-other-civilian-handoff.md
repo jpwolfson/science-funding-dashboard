@@ -694,7 +694,7 @@ exact main blob `8c9688525108cc68160c78494993bb0a91376a19`.
 
 NIH repair PR #60 merged at
 `b260452e308ab2c0ab297ea5b9c1d6d7a556a162` and is fully deployed/live-QA
-green. Final AHRQ integration `d50a96e1b7bbe665dfdea96f7214f4280a50e3c3`
+green. Final AHRQ integration `52e5ec867dfbb3c0b0215207d13b4e4efa587b04`
 has exact parents `43cae49afb55c1b304865a133842fb78fb56bbfc` and repaired main
 `b260452e308ab2c0ab297ea5b9c1d6d7a556a162`. The merge is conflict-free,
 preserves the AHRQ atomic store and restore, and differs from repaired main
