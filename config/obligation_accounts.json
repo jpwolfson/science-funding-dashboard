@@ -2946,6 +2946,306 @@
      "name": "AHRQ PROGRAM SUPPORT (REIMBURSABLE)"
     }
    ]
+  },
+  {
+   "path": "dol/bls",
+   "name": "Salaries and Expenses, Bureau of Labor Statistics",
+   "abbrev": "BLS",
+   "agency": "Department of Labor",
+   "federalAccount": "016-0200",
+   "agencyIdentifier": "016",
+   "adapter": "usaspending_obligations",
+   "baseline": "reference/dol_bls_obligation_baseline.json",
+   "availability": {
+    "firstFiscalYear": 2017,
+    "firstFiscalYearPeriod": 6,
+    "regularFirstPeriod": 2
+   },
+   "programActivities": [
+    {
+     "slug": "unknown-other",
+     "code": "0000",
+     "name": "Unknown / other",
+     "codeNameAliases": [
+      {
+       "code": "0000",
+       "name": "UNKNOWN"
+      },
+      {
+       "code": "0000",
+       "name": "UNKNOWN/OTHER"
+      },
+      {
+       "code": "0000",
+       "name": "UNKNOWN/OTHERS"
+      }
+     ]
+    },
+    {
+     "slug": "compensation-and-working-conditions",
+     "code": "0003",
+     "park": "5ZCD764X88B",
+     "name": "COMPENSATION AND WORKING CONDITIONS"
+    },
+    {
+     "slug": "executive-direction-and-staff-services",
+     "code": "0006",
+     "park": "5ZCD764X88E",
+     "name": "EXECUTIVE DIRECTION AND STAFF SERVICES"
+    },
+    {
+     "slug": "headquarters-relocation",
+     "code": "0007",
+     "park": "5TACWHPH2H5",
+     "name": "HEADQUARTERS RELOCATION"
+    },
+    {
+     "slug": "labor-force-statistics",
+     "code": "0001",
+     "park": "5ZCD764X889",
+     "name": "LABOR FORCE STATISTICS"
+    },
+    {
+     "slug": "prices-and-cost-of-living",
+     "code": "0002",
+     "park": "5ZCD764X88A",
+     "name": "PRICES AND COST OF LIVING"
+    },
+    {
+     "slug": "productivity-and-technology",
+     "code": "0004",
+     "park": "5ZCD764X88C",
+     "name": "PRODUCTIVITY AND TECHNOLOGY"
+    },
+    {
+     "slug": "salaries-and-expenses-reimbursable",
+     "code": "0801",
+     "park": "5ZCD764X8VR",
+     "name": "SALARIES AND EXPENSES (REIMBURSABLE)",
+     "codeNameAliases": [
+      {
+       "code": "0901",
+       "name": "SALARIES AND EXPENSES (REIMBURSABLE)"
+      }
+     ]
+    },
+    {
+     "slug": "emergency-paid-leave",
+     "code": "9999",
+     "name": "EMERGENCY PAID LEAVE"
+    },
+    {
+     "slug": "emergency-paid-leave-epl1",
+     "code": "EPL1",
+     "name": "EMERGENCY PAID LEAVE"
+    }
+   ]
+  },
+  {
+   "path": "doj/ojp-research-evaluation-statistics",
+   "name": "Research, Evaluation, and Statistics, Office of Justice Programs",
+   "abbrev": "OJP RES",
+   "agency": "Department of Justice",
+   "federalAccount": "015-0401",
+   "agencyIdentifier": "015",
+   "adapter": "usaspending_obligations",
+   "baseline": "reference/doj_ojp_research_evaluation_statistics_obligation_baseline.json",
+   "availability": {
+    "firstFiscalYear": 2017,
+    "firstFiscalYearPeriod": 6,
+    "regularFirstPeriod": 2
+   },
+   "programActivities": [
+    {
+     "slug": "unknown-other",
+     "code": "0000",
+     "name": "Unknown / other",
+     "codeNameAliases": [
+      {
+       "code": "0000",
+       "name": "UNK"
+      },
+      {
+       "code": "0000",
+       "name": "UNKNOWN/OTHER"
+      }
+     ]
+    },
+    {
+     "slug": "activity-from-obligation-before-fy-2018-program-activity-not-specified",
+     "code": "PRE2018",
+     "park": "PRE2018",
+     "name": "ACTIVITY FROM OBLIGATION BEFORE FY 2018: PROGRAM ACTIVITY NOT SPECIFIED"
+    },
+    {
+     "slug": "bureau-of-justice-statistics",
+     "code": "0002",
+     "park": "5ZCBB3MT1CU",
+     "name": "BUREAU OF JUSTICE STATISTICS"
+    },
+    {
+     "slug": "campus-sexual-assault-climate-survey",
+     "code": "0031",
+     "park": "608ARQTUNV5",
+     "name": "CAMPUS SEXUAL ASSAULT CLIMATE SURVEY"
+    },
+    {
+     "slug": "data-collection-on-police-suicide",
+     "code": "0027",
+     "park": "5UWAXJ4U52J",
+     "name": "DATA COLLECTION ON POLICE SUICIDE"
+    },
+    {
+     "slug": "feasibility-study-to-monitor-abuse-in-youth-serving-organizations",
+     "code": "0034",
+     "park": "608ARQTUNV8",
+     "name": "FEASIBILITY STUDY TO MONITOR ABUSE IN YOUTH SERVING ORGANIZATIONS"
+    },
+    {
+     "slug": "first-step-act-evaluation-activities-transfer-from-bop",
+     "code": "0029",
+     "park": "5WKAUN0DEGT",
+     "name": "FIRST STEP ACT EVALUATION ACTIVITIES (TRANSFER FROM BOP)"
+    },
+    {
+     "slug": "law-enforcement-response-to-opioid-overdoses",
+     "code": "0033",
+     "park": "608ARQTUNV7",
+     "name": "LAW ENFORCEMENT RESPONSE TO OPIOID OVERDOSES"
+    },
+    {
+     "slug": "management-and-administration-reimbursable",
+     "code": "0802",
+     "park": "5ZCBB3MT22E",
+     "name": "MANAGEMENT & ADMINISTRATION REIMBURSABLE"
+    },
+    {
+     "slug": "management-and-administration",
+     "code": "0011",
+     "park": "5ZCBB3MT1D5",
+     "name": "MANAGEMENT AND ADMINISTRATION"
+    },
+    {
+     "slug": "national-center-for-restorative-justice",
+     "code": "0018",
+     "park": "5TAB2F9CTM2",
+     "name": "NATIONAL CENTER FOR RESTORATIVE JUSTICE"
+    },
+    {
+     "slug": "national-center-on-forensics",
+     "code": "0022",
+     "park": "5UWAXJ4U52E",
+     "name": "NATIONAL CENTER ON FORENSICS"
+    },
+    {
+     "slug": "national-institute-of-justice",
+     "code": "0001",
+     "park": "5ZCBB3MT1CT",
+     "name": "NATIONAL INSTITUTE OF JUSTICE"
+    },
+    {
+     "slug": "national-model-for-reducing-incarceration-rates",
+     "code": "0025",
+     "park": "5UWAXJ4U52H",
+     "name": "NATIONAL MODEL FOR REDUCING INCARCERATION RATES"
+    },
+    {
+     "slug": "programmatic-reimbursable",
+     "code": "0801",
+     "park": "5ZCBB3MT22D",
+     "name": "PROGRAMMATIC REIMBURSABLE"
+    },
+    {
+     "slug": "regional-information-sharing-system",
+     "code": "0004",
+     "park": "5ZCBB3MT1CW",
+     "name": "REGIONAL INFORMATION SHARING SYSTEM"
+    },
+    {
+     "slug": "research-and-development-in-forensic-science-for-criminal-justice",
+     "code": "0048",
+     "park": "63YAM0KV8Q4",
+     "name": "RESEARCH AND DEVELOPMENT IN FORENSIC SCIENCE FOR CRIMINAL JUSTICE"
+    },
+    {
+     "slug": "research-on-domestic-radicalization",
+     "code": "0013",
+     "park": "5ZCBB3MT1D7",
+     "name": "RESEARCH ON DOMESTIC RADICALIZATION"
+    },
+    {
+     "slug": "research-on-gun-violence-prevention",
+     "code": "0030",
+     "park": "608ARQTUNV4",
+     "name": "RESEARCH ON GUN VIOLENCE PREVENTION"
+    },
+    {
+     "slug": "research-on-multidisciplinary-teams",
+     "code": "0047",
+     "park": "63YAM0KV8Q3",
+     "name": "RESEARCH ON MULTIDISCIPLINARY TEAMS"
+    },
+    {
+     "slug": "research-on-school-safety",
+     "code": "0019",
+     "park": "5TAB2F9CTM3",
+     "name": "RESEARCH ON SCHOOL SAFETY"
+    },
+    {
+     "slug": "research-on-violence-against-women",
+     "code": "0015",
+     "park": "5Q0B87YCARH",
+     "name": "RESEARCH ON VIOLENCE AGAINST WOMEN"
+    },
+    {
+     "slug": "research-to-reduce-trauma-for-child-pornography-victims",
+     "code": "0024",
+     "park": "5UWAXJ4U52G",
+     "name": "RESEARCH TO REDUCE TRAUMA FOR CHILD PORNOGRAPHY VICTIMS"
+    },
+    {
+     "slug": "research-evaluation-and-statistics-set-aside",
+     "code": "0014",
+     "park": "5Q0B87YCARG",
+     "name": "RESEARCH, EVALUATION, AND STATISTICS SET-ASIDE"
+    },
+    {
+     "slug": "violence-against-natives-at-extraction-sites",
+     "code": "0028",
+     "park": "5WKAUN0DEGS",
+     "name": "VIOLENCE AGAINST NATIVES AT EXTRACTION SITES"
+    },
+    {
+     "slug": "forensic-sciences",
+     "code": "0003",
+     "name": "FORENSIC SCIENCES"
+    },
+    {
+     "slug": "crimesolutions-gov",
+     "code": "0012",
+     "name": "CRIMESOLUTIONS.GOV"
+    },
+    {
+     "slug": "national-juvenile-online-victimization-studies",
+     "code": "0020",
+     "name": "NATIONAL JUVENILE ONLINE VICTIMIZATION STUDIES"
+    },
+    {
+     "slug": "national-study-of-law-enforcement-responses-to-sex-trafficking-of-minors",
+     "code": "0021",
+     "name": "NATIONAL STUDY OF LAW ENFORCEMENT RESPONSES TO SEX TRAFFICKING OF MINORS"
+    },
+    {
+     "slug": "safe-policing-database",
+     "code": "0023",
+     "name": "SAFE POLICING DATABASE"
+    },
+    {
+     "slug": "research-on-counter-unmanned-aerial-systems-c-uas",
+     "code": "0026",
+     "name": "RESEARCH ON COUNTER-UNMANNED AERIAL SYSTEMS (C-UAS)"
+    }
+   ]
   }
  ]
 }
