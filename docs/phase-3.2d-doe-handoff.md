@@ -262,3 +262,58 @@ freshness, fast, and rendered gates passed with zero warnings and 45-account
 sentinel coverage. Restore commit
 `8c6bf47d2763722b2c21d3cd62f7c0d755817032` returns the trigger to the
 then-current-main weekly/all payload.
+
+## FY2026 freshness prerequisite for AHRQ
+
+AHRQ run `32675891692` completed all ten requested account-year pulls but
+correctly failed reconciliation when ten already-live DOE/NSF FY2026
+snapshots aged to 11 days against the immutable 0--10-day SLA. No normalized
+artifact from that failed graph was reused. Narrow recovery run
+`32687016719` refreshed only FY2026 P09 for DOE EERE, OCED, Fossil Energy,
+Electricity, CESER, Nuclear Energy, NNSA Defense Nuclear Nonproliferation,
+and EIA plus NSF R&RA and STEM Education.
+
+The recovery graph is terminal green and must not be rerun. Its complete
+`filter=all`, `per_page=100` inventory is exactly 13 jobs on page 1 with page
+2 empty: plan, all ten pulls, and reconcile succeeded; deploy was skipped.
+The artifact inventory is exactly 20 on page 1 with page 2 empty. The NSF
+R&RA raw artifact `9508581626` hashes to
+`16d4b4d1a7cc02490d8c06783d79f96bcab5c9051b27ce65e5d32b611dd1a968`;
+the NSF STEM Education raw artifact `9508865726` hashes to
+`777baf56870ad4cc628432dd4a103607402b3ff5a788f625691ed4a80dafc918`.
+
+Atomic snapshot `7d58040e885081a5437bb6a71cf49b85fc73ba5a` is a strict child of
+the recovery selector commit. It preserves each account's accepted historical
+coverage: eight exact 21-file/ten-partition stores, the exact 11-file/five-
+partition OCED store, and the exact 17-file/eight-partition CESER store. The
+FY2026 P09 pins are respectively `128925541272`, `1485017853`,
+`36455038947`, `18789694949`, `14401635242`, `205784202180`,
+`208994565578`, `8231598334`, `221460262119`, and `6017140516` cents.
+DOE remains `39796059719690` cents, NSF remains `8169949566472` cents,
+the root remains `87621194277581` cents, the sentinel covers exactly 46
+accounts, and validation reports zero warnings.
+
+Seven refreshed FY2026 event partitions are byte-equivalent to live main.
+The other three preserve every event ID, amount, period, row count, and total:
+CESER has one title line-wrap change; Nuclear Energy has two title line-wrap
+changes and one recipient punctuation change; NNSA Defense Nuclear
+Nonproliferation has nine instances of the same recipient punctuation change
+(`SYSTEMATIC MANAGEMENT SERVICES INC.` to `SYSTEMATIC MANAGEMENT SERVICES,
+INC.`). Net amount change is zero. Numeric dashboard projections for all ten
+accounts, DOE, NSF, and root are exact before and after, so chart geometry is
+unchanged.
+
+Weekly/all restore `a3b8a24a05fe389d2e66d5f04643f77458b9ae55` is a strict
+child of the atomic snapshot and changes only the trigger to exact main blob
+`8c9688525108cc68160c78494993bb0a91376a19`. Then-current main
+`d3bf0aa9b6be87324941788a480e566c1ad74486` remains an ancestor, making
+integration an exact no-op. Pre-merge gates passed: obligation validation;
+DOE/NSF/planner 27/27; fast 7/7; rendered 4/4 (5 core, 184 all-account, 59
+public-link, and 2 sentinel cases); and screenshots 61/61. The before/after
+review covered every refreshed account, the root obligations page, and the
+sentinel; all FY2026 cumulative lines still end at P09/June with no visible
+diagnostics. The assembled Pages artifact is 268,362,093 bytes across 1,682
+files with 731,637,907 bytes of headroom and obligation archives excluded.
+The repository is 571,122,370 tracked bytes with 336,523,628 compressed-store
+bytes; the historical-backfill trajectory remains flagged only as a
+conservative upper bound.
