@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-17",
+ "generated": "2026-08-24",
  "node": {
   "name": "Division of Chemistry",
   "abbrev": "CHE",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.nsf.gov/services/v1/awards.json?org_code_div=03090000 (NSF Award Search API), month-by-month on Original Award Date",
  "warnings": [],
- "totalAwards": 6017,
+ "totalAwards": 6042,
  "currentFY": 2026,
  "monthly": [
   {
@@ -1291,12 +1291,12 @@
   },
   {
    "month": "2026-08",
-   "awards": 81,
-   "dollars": 40415446,
-   "std": 73,
-   "cont": 8,
+   "awards": 106,
+   "dollars": 72882003,
+   "std": 96,
+   "cont": 9,
    "fell": 0,
-   "other": 0
+   "other": 1
   }
  ],
  "fiscalYears": [
@@ -1699,10 +1699,10 @@
   {
    "fy": 2026,
    "partial": true,
-   "awards": 282,
-   "dollars": 153837204,
-   "median": 570000,
-   "exTop3Dollars": 149590652,
+   "awards": 307,
+   "dollars": 186303761,
+   "median": 560000,
+   "exTop3Dollars": 163118740,
    "octJul": {
     "awards": 201,
     "dollars": 113421758,
@@ -1712,6 +1712,12 @@
     "other": 0
    },
    "top3": [
+    {
+     "id": "2606383",
+     "title": "NSF Center for the Chemistry of Molecularly Optimized Networks",
+     "awardee": "Duke University",
+     "amount": 19800000
+    },
     {
      "id": "2511211",
      "title": "MRI: Track 2 Development of an Ultrafast Table-top X-ray Spectrometer",
@@ -1723,12 +1729,6 @@
      "title": "CAREER: Enzymatic Sulfur Incorporation and Modification in the Biosynthesis of Natural Products",
      "awardee": "University of Texas at Austin",
      "amount": 865975
-    },
-    {
-     "id": "2604076",
-     "title": "A Novel 263 GHz pulse EPR Spectrometer for Chemical Spectroscopy",
-     "awardee": "University of California-Davis",
-     "amount": 861531
     }
    ]
   }
@@ -3048,9 +3048,14 @@
      "dollars": 138040265
     },
     {
-     "d": 320,
-     "awards": 282,
-     "dollars": 153837204
+     "d": 321,
+     "awards": 302,
+     "dollars": 164391507
+    },
+    {
+     "d": 327,
+     "awards": 307,
+     "dollars": 186303761
     }
    ]
   }
