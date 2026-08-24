@@ -716,3 +716,42 @@ is 575,247,044 tracked bytes with 338,550,966 compressed-store bytes. The
 historical-backfill trajectory remains flagged only as a conservative upper
 bound. Merge/deploy, byte-exact live JSON, and light/dark rendered QA remain
 required before AHRQ is complete.
+
+PR #61 merged at `143635ed1712fb0ddbde01b965815df23039a4bb`.
+Post-merge Test run `32780024693` and Deploy Pages run `32780024704`
+are each terminal with exactly one successful job on page 1 and page 2 empty;
+the complete head-SHA run inventory is exactly those two runs on page 1 with
+page 2 empty. Live root/index/HHS/AHRQ, AHRQ manifest, representative Medical
+Expenditure Panel Survey, and sentinel JSON are byte-exact with the merged
+tree. A fresh ten-case live light/dark matrix covering root, HHS, AHRQ, MEPS,
+and sentinel passed with zero render, network, or browser diagnostics. Every
+obligations case exposes the exact FY2026 P09 (June 2026) endpoint. AHRQ is
+therefore merged, deployed, and live-QA complete.
+
+## BLS/OJP release — scaffold on live AHRQ main
+
+The statistics batch starts from exact live AHRQ main
+`143635ed1712fb0ddbde01b965815df23039a4bb`. Authenticated remote scaffold
+commit `db06d551f354894647936a9f910c2de7c8a062fd` is its strict child. It
+preserves
+the first 47 registry entries exactly and appends only `dol/bls` (`016-0200`)
+and `doj/ojp-research-evaluation-statistics` (`015-0401`) plus their reviewed
+FY2017--FY2026 File A baselines. The exact source selector is
+`dol/bls,doj/ojp-research-evaluation-statistics`, FY2017--FY2026 through P09,
+for twenty mechanical pull jobs.
+
+BLS remains a statistical-capacity account. OJP remains the parent account;
+BJS and NIJ remain Program Activities, not independent accounts. The reviewed
+BLS pins are `63925846257`, `64357597642`, `64776448779`, `66281618319`,
+`68190065221`, `75067753809`, `76026243320`, `74098588934`, `74215786476`,
+and `53798376315` cents. The reviewed OJP pins are `38761103279`,
+`43907394239`, `44832043071`, `42533860704`, `38288230737`, `52133102208`,
+`51684387097`, `53623056361`, `42780201323`, and `15831632937` cents.
+
+Scaffold gates pass: other-civilian plus obligation validation 28/28; registry
+346/346 with 49 unique account paths and federal accounts; the exact custom
+planner emits twenty jobs; JSON, union, and diff checks are clean; and fast is
+7/7 in 245.4 seconds. The weekly/all trigger remains byte-exact with live main
+at blob `8c9688525108cc68160c78494993bb0a91376a19`. No source graph, normalized
+artifact, atomic store, pin replacement, or release result is claimed by this
+scaffold.
