@@ -239,11 +239,7 @@ class NihReporterTests(unittest.TestCase):
             unit = record["unit"]
             if unit not in stores:
                 stores[unit] = load_store(root / "data" / unit)
-            stored = stores[unit][record["id"]]
-            self.assertEqual(record["awardDate"], stored["date"])
-            self.assertEqual(record["month"], stored["month"])
-            self.assertEqual(record["amount"], stored["amount"])
-            self.assertEqual(record["title"], stored["title"])
+            self.assertNotIn(record["id"], stores[unit])
 
     def test_config_has_all_current_reporter_nih_admin_components(self):
         cfg = json.loads((Path(__file__).parents[1] / "config" / "orgs.json").read_text())
