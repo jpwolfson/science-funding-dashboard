@@ -632,3 +632,38 @@ compressed-store bytes, and 3,432,376 Pages bytes. The historical-backfill
 trajectory remains flagged only as a conservative upper bound. Merge/deploy,
 byte-exact live JSON, and light/dark rendered QA remain required before IES is
 complete.
+
+## AHRQ release — scaffold on live IES main
+
+IES PR #58 merged at
+`d3bf0aa9b6be87324941788a480e566c1ad74486`. Post-merge Test run
+`32673233494` and Deploy Pages run `32673233510` are each terminal with one
+successful job on page 1 and page 2 empty; the complete head-SHA run inventory
+is exactly those two runs on page 1 with page 2 empty. Live root/index/ED/IES,
+IES manifest, and sentinel JSON are byte-exact with the merged tree. A fresh
+ten-case live light/dark matrix covering root, ED, IES, one IES activity, and
+the sentinel passed with zero diagnostics; the root and IES FY2026 lines
+visibly end at P09 (June). IES is therefore merged, deployed, and live-QA
+complete.
+
+The AHRQ batch starts from that exact 46-account live main and appends only
+`hhs/ahrq` (`075-1700`) with its reviewed FY2017--FY2026 File A baseline.
+The exact source selector is `hhs/ahrq`, FY2017--FY2026 through P09, for ten
+mechanical pull jobs.
+
+AHRQ remains distinct from the already-live ASPR account `075-1000`. Its
+seven registered activities preserve the three current PARK identities,
+their reimbursable counterparts, and the exact `UNKNOWN/OTHER` and
+`ZERO OBLIGATION` aliases. No BLS, OJP, BEA, or DoD account is registered by
+this scaffold. Source, atomic reconcile, 47-account sentinel, weekly/all
+trigger restore, then-current-main integration, full release gates, affected-
+chart before/after screenshots, merge/deploy, and live QA remain required
+before AHRQ is complete.
+
+Scaffold gates on exact live main passed: other-civilian plus obligation
+validation 28/28 with one expected BLS/OJP later-stage skip; AHRQ registry
+10/10; full registry 332/332 with 47 unique paths and federal accounts; exact
+planner ten jobs; JSON and diff checks clean; and fast 7/7. The scaffold
+changes only the registry, AHRQ baseline, and this evidence handoff; the
+weekly/all trigger remains byte-exact with main until the separate source
+commit.
