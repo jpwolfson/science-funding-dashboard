@@ -5,7 +5,7 @@ from datetime import date
 from pathlib import Path
 from unittest.mock import patch
 
-from adapters.common import write_store
+from adapters.common import load_store, write_store
 from adapters.nih_reporter import (NihReporterPull, _award_kind,
                                    parse_trans_type)
 
@@ -203,12 +203,43 @@ class NihReporterTests(unittest.TestCase):
              "nih_reporter_retractions.json").read_text()
         )
         records = ledger["records"]
-        self.assertEqual(12, len(records))
-        self.assertEqual(12, len({record["id"] for record in records}))
+        self.assertEqual(21, len(records))
+        self.assertEqual(21, len({record["id"] for record in records}))
         self.assertTrue(all(record["id"].startswith("nih:") for record in records))
         self.assertTrue(all(record["reporterAgency"] for record in records))
         self.assertTrue(all(record["month"] == record["awardDate"][:7]
                             for record in records))
+
+    def test_approved_20260824_retractions_match_exact_evidence(self):
+        root = Path(__file__).parents[1]
+        ledger = json.loads(
+            (root / "reference" / "nih_reporter_retractions.json").read_text()
+        )
+        evidence = json.loads(
+            (root / "reference" /
+             "nih_reporter_retraction_evidence_20260824.json").read_text()
+        )
+        expected_ids = {
+            "nih:11161340", "nih:11327923", "nih:11462449",
+            "nih:11380142", "nih:11461896", "nih:11286738",
+            "nih:11290350", "nih:11555862", "nih:11437634",
+        }
+        self.assertTrue(evidence["control"]["returned"])
+        self.assertEqual([], evidence["candidateIdsReturned"])
+        self.assertEqual(expected_ids,
+                         {record["id"] for record in evidence["records"]})
+        self.assertEqual(1288767,
+                         sum(record["amount"] for record in evidence["records"]))
+        ledger_by_id = {record["id"]: record for record in ledger["records"]}
+        self.assertEqual(evidence["records"],
+                         [ledger_by_id[record["id"]]
+                          for record in evidence["records"]])
+        stores = {}
+        for record in evidence["records"]:
+            unit = record["unit"]
+            if unit not in stores:
+                stores[unit] = load_store(root / "data" / unit)
+            self.assertNotIn(record["id"], stores[unit])
 
     def test_config_has_all_current_reporter_nih_admin_components(self):
         cfg = json.loads((Path(__file__).parents[1] / "config" / "orgs.json").read_text())
