@@ -632,3 +632,87 @@ compressed-store bytes, and 3,432,376 Pages bytes. The historical-backfill
 trajectory remains flagged only as a conservative upper bound. Merge/deploy,
 byte-exact live JSON, and light/dark rendered QA remain required before IES is
 complete.
+
+## AHRQ release — scaffold on live IES main
+
+IES PR #58 merged at
+`d3bf0aa9b6be87324941788a480e566c1ad74486`. Post-merge Test run
+`32673233494` and Deploy Pages run `32673233510` are each terminal with one
+successful job on page 1 and page 2 empty; the complete head-SHA run inventory
+is exactly those two runs on page 1 with page 2 empty. Live root/index/ED/IES,
+IES manifest, and sentinel JSON are byte-exact with the merged tree. A fresh
+ten-case live light/dark matrix covering root, ED, IES, one IES activity, and
+the sentinel passed with zero diagnostics; the root and IES FY2026 lines
+visibly end at P09 (June). IES is therefore merged, deployed, and live-QA
+complete.
+
+The AHRQ batch starts from that exact 46-account live main and appends only
+`hhs/ahrq` (`075-1700`) with its reviewed FY2017--FY2026 File A baseline.
+The exact source selector is `hhs/ahrq`, FY2017--FY2026 through P09, for ten
+mechanical pull jobs.
+
+AHRQ remains distinct from the already-live ASPR account `075-1000`. Its
+seven registered activities preserve the three current PARK identities,
+their reimbursable counterparts, and the exact `UNKNOWN/OTHER` and
+`ZERO OBLIGATION` aliases. No BLS, OJP, BEA, or DoD account is registered by
+this scaffold. Source, atomic reconcile, 47-account sentinel, weekly/all
+trigger restore, then-current-main integration, full release gates, affected-
+chart before/after screenshots, merge/deploy, and live QA remain required
+before AHRQ is complete.
+
+Scaffold gates on exact live main passed: other-civilian plus obligation
+validation 28/28 with one expected BLS/OJP later-stage skip; AHRQ registry
+10/10; full registry 332/332 with 47 unique paths and federal accounts; exact
+planner ten jobs; JSON and diff checks clean; and fast 7/7. The scaffold
+changes only the registry, AHRQ baseline, and this evidence handoff; the
+weekly/all trigger remains byte-exact with main until the separate source
+commit.
+
+The first AHRQ graph `32675891692` is terminal failure and must never be
+rerun or supply normalized recovery artifacts. Its ten fresh pulls all
+succeeded; reconcile failed only because ten already-live DOE/NSF FY2026
+snapshots had aged beyond the immutable ten-day provenance SLA. After the
+narrow DOE/NSF freshness recovery was merged and live-QA complete, refreshed-
+main integration `ca30a38ec1cac49820ce27d37a26ac7a2da3b3b6` and the exact
+weekly/all/full trigger cycle produced fresh AHRQ source graph `32707547238`.
+That graph is terminal green and must not be rerun. Its complete
+`filter=all`, `per_page=100` inventory is exactly 13 jobs on page 1 with page
+2 empty: plan, all ten FY2017--FY2026 pulls, and reconcile succeeded; deploy
+skipped. Its complete artifact inventory is exactly 20 artifacts on page 1
+with page 2 empty, one fresh raw and one normalized artifact for every pull.
+
+Atomic commit `8d4aed2e3b19b33c844fb14fb6bb5eb09c848792` is a strict child of the
+fresh source and contains the exact 21-file, ten-partition FY2017--FY2026
+AHRQ event store. Its baseline pins are `34186503619`, `35960661070`,
+`37085850193`, `36577101376`, `35760240268`, `37040853365`, `39800243636`,
+`39737950229`, `29887857911`, and `15512385011` cents. AHRQ totals
+`341549646678` cents with seven preserved activities and no warnings; HHS
+totals `1091937769432` cents, the obligation root totals `87962743924259`
+cents, and the sentinel covers exactly 47 unique accounts. Weekly/all restore
+`d8ee4492a1db825f15e35fb018ff77b8c39d69d9` changes only the trigger to the
+exact main blob `8c9688525108cc68160c78494993bb0a91376a19`.
+
+NIH repair PR #60 merged at
+`b260452e308ab2c0ab297ea5b9c1d6d7a556a162` and is fully deployed/live-QA
+green. Final AHRQ integration `52e5ec867dfbb3c0b0215207d13b4e4efa587b04`
+has exact parents `43cae49afb55c1b304865a133842fb78fb56bbfc` and repaired main
+`b260452e308ab2c0ab297ea5b9c1d6d7a556a162`. The merge is conflict-free,
+preserves the AHRQ atomic store and restore, and differs from repaired main
+only by the reviewed AHRQ registry/store/rollup/baseline/handoff union.
+
+Post-integration release gates passed: other-civilian plus obligation
+validation 28/28 with one expected BLS/OJP later-stage skip; registry 332/332
+with 47 unique accounts; fast 7/7 in 233.9 seconds; rendered 4/4 (5 core, 188
+all-account light/dark, 59 public-link, and 2 sentinel cases); and fresh
+screenshots 62/62. The required geometry review compared a fresh 61-page pack
+from exact repaired main with the 62-page AHRQ pack, plus a dedicated
+representative Medical Expenditure Panel Survey capture. Root, AHRQ, and the
+representative activity FY2026 cumulative lines all end at P09 (June), with
+no extension into July--September or visible render/network/browser
+diagnostics. The assembled Pages artifact is 270,503,026 bytes across 1,701
+files, status `ok`, with 729,496,974 bytes of headroom; all 59 NSF CSV
+downloads remain and all obligation event archives remain excluded. The repo
+is 575,247,044 tracked bytes with 338,550,966 compressed-store bytes. The
+historical-backfill trajectory remains flagged only as a conservative upper
+bound. Merge/deploy, byte-exact live JSON, and light/dark rendered QA remain
+required before AHRQ is complete.

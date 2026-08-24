@@ -2879,6 +2879,73 @@
      "name": "REIMBURSABLE PROGRAM ACTIVITY"
     }
    ]
+  },
+  {
+   "path": "hhs/ahrq",
+   "name": "Healthcare Research and Quality",
+   "abbrev": "AHRQ",
+   "agency": "Department of Health and Human Services",
+   "federalAccount": "075-1700",
+   "agencyIdentifier": "075",
+   "adapter": "usaspending_obligations",
+   "baseline": "reference/hhs_ahrq_obligation_baseline.json",
+   "availability": {
+    "firstFiscalYear": 2017,
+    "firstFiscalYearPeriod": 6,
+    "regularFirstPeriod": 2
+   },
+   "programActivities": [
+    {
+     "slug": "unknown-other",
+     "code": "0000",
+     "name": "Unknown / other",
+     "park": "0000",
+     "codeNameAliases": [
+      {
+       "code": "0000",
+       "name": "UNKNOWN/OTHER"
+      },
+      {
+       "code": "0000",
+       "name": "ZERO OBLIGATION"
+      }
+     ]
+    },
+    {
+     "slug": "ahrq-program-support",
+     "code": "0003",
+     "park": "5ZC7PGQTTSF",
+     "name": "AHRQ PROGRAM SUPPORT"
+    },
+    {
+     "slug": "medical-expenditure-panel-survey",
+     "code": "0002",
+     "park": "5ZC7PGQTTSE",
+     "name": "MEDICAL EXPENDITURE PANEL SURVEY"
+    },
+    {
+     "slug": "research-on-health-costs-quality-and-outcomes",
+     "code": "0001",
+     "park": "5ZC7PGQTTSD",
+     "name": "RESEARCH ON HEALTH COSTS, QUALITY AND OUTCOMES"
+    },
+    {
+     "slug": "research-on-health-costs-quality-and-outcomes-reimbursable",
+     "code": "0803",
+     "park": "5ZC7PGQTUHX",
+     "name": "RESEARCH ON HEALTH COSTS, QUALITY AND OUTCOMES (REIMBURSABLE)"
+    },
+    {
+     "slug": "medical-expenditure-panel-survey-reimbursable",
+     "code": "0804",
+     "name": "MEDICAL EXPENDITURE PANEL SURVEY (REIMBURSABLE)"
+    },
+    {
+     "slug": "ahrq-program-support-reimbursable",
+     "code": "0805",
+     "name": "AHRQ PROGRAM SUPPORT (REIMBURSABLE)"
+    }
+   ]
   }
  ]
 }
