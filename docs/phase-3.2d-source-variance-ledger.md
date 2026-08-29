@@ -20,7 +20,8 @@ negative value means File B is higher.
 | 2 | NOAA PAC `013-1460` / FY2025 | $2,632,403,455.21 | $2,615,955,074.73 | $16,448,380.48 | **0.6248%** | Live |
 | 3 | Census Current `013-0401` / FY2025 | $343,719,439.23 | $345,384,177.96 | −$1,664,738.73 | **0.4843%** | Live |
 | 4 | DHS CWMD `070-0860` / FY2026 | $23,808,508.44 | $25,027,373.29 | −$1,218,864.85 | **5.1195%** | Live |
-| 5 | EPA S&T `068-0107` / FY2022 | $780,787,982.37 | $780,771,378.43 | $16,603.94 | **0.0021%** | Live |
+| 5 | Navy RDT&E `017-1319` / FY2025 | $27,885,355,759.11 | $27,884,886,462.75 | $469,296.36 | **0.0017%** | Pending |
+| 6 | EPA S&T `068-0107` / FY2022 | $780,787,982.37 | $780,771,378.43 | $16,603.94 | **0.0021%** | Live |
 
 NOAA ORF is the clear magnitude outlier: its File B total exceeds File A by
 about $1.589 billion, or 26.9% of File A. It should receive the first post-
@@ -52,6 +53,13 @@ dollars, not the first large one.
   `37bca577ed75d1f9107853179667e21bd7b0114b`; post-merge Test run
   `32516046467` and Deploy Pages run `32516046481` succeeded, and the live
   account/manifest/root/sentinel JSON matched the merged files byte-for-byte.
+- **Navy RDT&E FY2025:** workflow run `33145859877`, source job
+  `98766675969`, and raw artifact `9682337050`. The retained P12 File B
+  archive totals `2788488646275` cents, exactly matching the separate
+  date-filtered 15-row Program Activity response with no next page. The
+  official File A endpoint remains `2788535575911` cents. The owner approved
+  the exact `46929636`-cent dual pin on 2026-08-28; raw, nested File B, File A,
+  and Program Activity digests are recorded in the JSON ledger.
 - **EPA S&T FY2022:** workflow run `31787669479`, accepted retry job
   `94810063304`, raw artifact `9224418566`, and owner-approval commit
   `8c850bb5136d43092235eaddc1007f765ba70f37`. File B independently matched

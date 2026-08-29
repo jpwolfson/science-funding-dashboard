@@ -1,6 +1,6 @@
 {
  "schemaVersion": 1,
- "updated": "2026-08-21",
+ "updated": "2026-08-28",
  "varianceDefinition": "fileAFileBVarianceCents = fileAObligationsCents - fileBObligationsCents",
  "entries": [
   {
@@ -101,6 +101,33 @@
     "rawArtifactSha256": "5d7786c826ff264cb07aa24cf6c493b47ab87d24836da4c2d2df66a12f64ef4c",
     "nestedP09FileBSha256": "f7d5b0868c9b10bc846ffc28e9d7bf04255a1c39f5136a40d22590f0cad60458",
     "fileASnapshotSha256": "934909ac98b58d81f9bcd3718d9e5343ba63ba5c7311eb5bd691d2d8cff321b8"
+   }
+  },
+  {
+   "accountPath": "dod/navy-rdte",
+   "federalAccount": "017-1319",
+   "fiscalYear": 2025,
+   "fileAObligationsCents": 2788535575911,
+   "fileBObligationsCents": 2788488646275,
+   "fileAFileBVarianceCents": 46929636,
+   "absoluteVarianceCents": 46929636,
+   "absoluteVariancePpmOfFileA": 17,
+   "reason": "Official FY2025 GTAS/File A is 2788535575911 cents while the accepted P12 File B and independent date-filtered Program Activity totals are 2788488646275 cents; preserve the exact 46929636-cent official source variance with File B canonical and no synthetic residual or tolerance.",
+   "baseline": "reference/dod_navy_rdte_obligation_baseline.json",
+   "releaseStatus": "pending",
+   "ownerApproval": {
+    "status": "approved",
+    "date": "2026-08-28",
+    "reference": "Phase 3.2d execution thread"
+   },
+   "evidence": {
+    "workflowRunId": 33145859877,
+    "workflowJobId": 98766675969,
+    "rawArtifactId": 9682337050,
+    "rawArtifactSha256": "91c2d7b8ae7ac6e5ab757fbccb35460eb7a09eea370a6d1b041826b6415633d8",
+    "nestedP12FileBSha256": "ffd3b2ef0e0047487f50ccb5beef52cd0142fe82666908dcd17ad3e16af1cca7",
+    "fileASnapshotSha256": "58801fb959910856950313eeba6f123d72540663748d340d29dcdd3bd3edac16",
+    "programActivitySnapshotSha256": "868572fa3d0ec67b006344c4cd75c649676ad5c75430c598399e1b7963f1e030"
    }
   },
   {

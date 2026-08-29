@@ -8,6 +8,15 @@ from scripts.plan_obligation_refresh import plan
 
 REPO = Path(__file__).resolve().parent.parent
 
+NAVY_FY2025_FILE_B_CENTS = 2_788_488_646_275
+NAVY_FY2025_VARIANCE_CENTS = 46_929_636
+NAVY_FY2025_VARIANCE_REASON = (
+    "Official FY2025 GTAS/File A is 2788535575911 cents while the accepted "
+    "P12 File B and independent date-filtered Program Activity totals are "
+    "2788488646275 cents; preserve the exact 46929636-cent official source "
+    "variance with File B canonical and no synthetic residual or tolerance."
+)
+
 ACCOUNT_META = {
     "dod/army-rdte": {
         "federalAccount": "021-2040",
@@ -25,7 +34,7 @@ ACCOUNT_META = {
         "federalAccount": "017-1319",
         "name": "Research, Development, Test, and Evaluation, Navy",
         "baseline": "reference/dod_navy_rdte_obligation_baseline.json",
-        "programActivities": 11,
+        "programActivities": 12,
         "pins": [
             1815670608261, 1906604818960, 1989612897412,
             2110379803523, 2104077406079, 2211161457342,
@@ -72,6 +81,44 @@ class DoDObligationTests(unittest.TestCase):
                 self.assertTrue(aliases)
                 self.assertEqual(len(aliases), len(set(aliases)))
 
+        army_aliases = alias_map(self.accounts["dod/army-rdte"])
+        operational = army_aliases[
+            ("code-name", "0007", "operational systems development")
+        ]
+        self.assertEqual("0007", operational["code"])
+        self.assertEqual("Operational System Development", operational["name"])
+        system_development = army_aliases[
+            ("code-name", "0005",
+             "system development & demonstration ($dd)")
+        ]
+        self.assertEqual("0005", system_development["code"])
+        self.assertEqual(
+            "System Development and Demonstration",
+            system_development["name"],
+        )
+        for code, name in [
+            ("0050", "n/a"),
+            ("OPTN", "field is optional prior to fy21"),
+        ]:
+            with self.subTest(code=code, name=name):
+                unknown = army_aliases[("code-name", code, name)]
+                self.assertEqual("0000", unknown["code"])
+                self.assertEqual("Unknown / other", unknown["name"])
+
+        navy_aliases = alias_map(self.accounts["dod/navy-rdte"])
+        navy_unknown = navy_aliases[
+            ("code-name", "OPTN", "field is optional prior to fy21")
+        ]
+        self.assertEqual("0000", navy_unknown["code"])
+        self.assertEqual("Unknown / other", navy_unknown["name"])
+        navy_pre2018 = navy_aliases[("park", "PRE2018")]
+        self.assertEqual("PRE2018", navy_pre2018["code"])
+        self.assertEqual(
+            "ACTIVITY FROM OBLIGATION BEFORE FY 2018: "
+            "PROGRAM ACTIVITY NOT SPECIFIED",
+            navy_pre2018["name"],
+        )
+
     def test_stage_one_preserves_exact_file_a_pins(self):
         for path, expected in ACCOUNT_META.items():
             with self.subTest(path=path):
@@ -91,6 +138,18 @@ class DoDObligationTests(unittest.TestCase):
                 observed = [years[str(fy)]["obligationsCents"]
                             for fy in range(2017, 2027)]
                 self.assertEqual(expected["pins"], observed)
+
+    def test_navy_fy2025_preserves_approved_exact_source_variance(self):
+        baseline = json.loads(
+            (REPO / "reference/dod_navy_rdte_obligation_baseline.json").read_text()
+        )
+        self.assertEqual({
+            "status": "complete",
+            "obligationsCents": 2_788_535_575_911,
+            "fileBObligationsCents": NAVY_FY2025_FILE_B_CENTS,
+            "fileAFileBVarianceCents": NAVY_FY2025_VARIANCE_CENTS,
+            "fileAFileBVarianceReason": NAVY_FY2025_VARIANCE_REASON,
+        }, baseline["fiscalYears"]["2025"])
 
     def test_stage_one_custom_plan_is_exactly_twenty_serial_partitions(self):
         matrix = plan(
