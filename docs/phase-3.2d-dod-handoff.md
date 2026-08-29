@@ -129,3 +129,17 @@ release. File B remains canonical; no tolerance or synthetic residual is used.
 
 These mappings are exact-key additions only. They neither relax the fail-closed
 parser nor modify a File A pin, File B total, tolerance, or public semantic.
+
+Stage-1 targeted recovery attempt 5 reran only Army FY2023 after the initial
+code-`0050`, name-`N/A` identity repair. The attempt stopped at the later P09
+snapshot on two additional exact source labels: code `0002`, name `N/A`, at
+`25000000` cents and code `0006`, name `N/A`, at `15000000` cents, both with
+blank PARK. The retained raw artifact `9711320717` has SHA-256
+`68ecc4074da33b094eda48328dc32d8ac62c63141534ae89df4974c74cac9407`.
+An exhaustive parse of every retained P02–P09 File B row found no other
+unmapped identity. Both labels follow the account's existing exact `N/A`
+precedent and map to explicit Unknown / other; they do not fall through by
+bare code to canonical Applied Research or Management Support. The exact P09
+File B total remains `1977061254246` cents before and after attribution. This
+is an exact-key attribution repair only: it changes no source dollar, pin,
+tolerance, or public semantic.

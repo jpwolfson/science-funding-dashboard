@@ -97,6 +97,8 @@ class DoDObligationTests(unittest.TestCase):
             system_development["name"],
         )
         for code, name in [
+            ("0002", "n/a"),
+            ("0006", "n/a"),
             ("0050", "n/a"),
             ("OPTN", "field is optional prior to fy21"),
         ]:
