@@ -143,3 +143,14 @@ bare code to canonical Applied Research or Management Support. The exact P09
 File B total remains `1977061254246` cents before and after attribution. This
 is an exact-key attribution repair only: it changes no source dollar, pin,
 tolerance, or public semantic.
+
+Targeted recovery attempt 7 reran only Navy FY2020. The actual execution,
+job `99094394596`, completed successfully with every executed step green.
+GitHub also emitted two duplicate same-partition records, `99094394577` and
+`99094394614`, which remained queued with null conclusions and no executed
+steps even though run `33145859877` itself was terminal. Repeated authenticated
+REST checks found those two records byte-for-byte unchanged for more than
+thirteen hours. The owner approved treating them as inert copied placeholders
+on 2026-08-30. This exception changes neither the successful source result nor
+the one-partition-at-a-time recovery rule; the two placeholder IDs must never
+be rerun or counted as executions.
