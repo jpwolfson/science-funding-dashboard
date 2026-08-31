@@ -306,6 +306,12 @@ class DoDObligationTests(unittest.TestCase):
                 "code-name", "00RB", "reimbursable program",
             )]["slug"],
         )
+        self.assertEqual(
+            "reimbursable",
+            space_force[(
+                "code-name", "NARE", "imbursable program",
+            )]["slug"],
+        )
         for code in ("0004", "0006", "0008"):
             with self.subTest(account="space-force", code=code):
                 self.assertEqual(

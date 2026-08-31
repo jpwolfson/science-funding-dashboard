@@ -290,3 +290,36 @@ tolerate source amounts, add synthetic residuals, change File A pins, nor
 change the public accounting contract. The five failed partitions must be
 retried individually from the latest terminal attempt; the workflow as a whole
 must not be rerun.
+
+### Stage 2 sequential recovery evidence
+
+Attempt 2 reran only Air Force FY2020 and its actual execution job
+`99657731113` succeeded. Attempt 3 reran only Air Force FY2022 and its actual
+execution job `99660621997` succeeded. Attempt 3 is fully terminal: its 19 jobs
+occupy page 1 with page 2 explicitly empty (14 success, three copied failures,
+and two skipped); the cumulative inventory has 57 jobs on page 1 and an empty
+page 2; the artifact inventory has 31 unexpired artifacts on page 1 and an
+empty page 2; and the branch-run inventory has 11 runs on page 1 and an empty
+page 2.
+
+Attempt 4 reran only the latest-attempt Space Force FY2021 copied failure. Its
+actual execution job `99664596938` reached a later exact-key gate after the
+previous `0099` / `N/A` repair. Attempt 4 is fully terminal: its 19 jobs occupy
+page 1 with page 2 explicitly empty (14 success, three copied failures, and two
+skipped); the cumulative inventory has 76 jobs on page 1 and an empty page 2;
+the artifact inventory has 32 unexpired artifacts on page 1 and an empty page
+2; and the branch-run inventory has 11 runs on page 1 and an empty page 2.
+
+Raw-only artifact `9778038097` is preserved byte-for-byte at SHA-256
+`493df01ca1e15fbeb3ee4086141e1ce9d4f0b1be496cefebd81fbdd62ee4c5fd`.
+Adapter-equivalent exhaustive parsing of all 143 retained P02-P06 rows exposes
+exactly one unmapped key: malformed `NARE` / `IMBURSABLE PROGRAM` with blank
+PARK in three FY2021 P06 File B rows totaling `36768447916` cents. This is the
+same source-boundary corruption pattern as `NASO` / `FTWARE...` and `NAAD` /
+`VANCED...`: the `NA` prefix is joined to the first two letters of the source
+label, leaving the remainder in the name field. The exact key therefore maps
+to the existing reimbursable identity; the preceding P05 export uses canonical
+`0801` / `REIMBURSABLE`. The P06 source total remains `374671835455` cents.
+No amount, pin, tolerance, PARK, or synthetic residual changes. The repair is
+exact-key-only and collision checked; accepted job `99664596938` must never be
+retried.
