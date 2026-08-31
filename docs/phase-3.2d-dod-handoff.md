@@ -223,3 +223,16 @@ required because the two accounts have different first available fiscal years;
 the fail-closed custom-range planner correctly rejects an unavailable Space
 Force FY2017. Weekly/all remains in place through scaffold publication;
 activation is a separate strict-child trigger commit.
+
+Independent Test run `33421456165` exercised the published scaffold at commit
+`ee31b59645e0511415b79391046d901aeede7310`. The run and its sole job
+`99584573651` are terminal. The job inventory has one record on page 1 and an
+explicitly empty page 2; the artifact inventory has one unexpired
+`verify-reports` artifact (`9769394592`) on page 1 and an explicitly empty
+page 2. Registry validation passed 360/360 and the fast suite passed 7/7. The
+rendered suite failed only the eight expected pre-backfill URLs for the two
+new account pages and their Basic Research program-activity pages in light and
+dark modes; the general obligation matrix, public-link matrix, and rendered
+sentinel matrix passed. This expected pre-source failure is evidence that the
+registry is published while the two source stores are still absent. The test
+run must not be rerun.
