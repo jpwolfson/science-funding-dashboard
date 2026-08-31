@@ -236,3 +236,57 @@ dark modes; the general obligation matrix, public-link matrix, and rendered
 sentinel matrix passed. This expected pre-source failure is evidence that the
 registry is published while the two source stores are still absent. The test
 run must not be rerun.
+
+### Stage 2 source attempt 1 and exact-key recovery
+
+Source run `33422933441` at trigger commit
+`7ee40e54996dcb0505b88ce2f6283f31a8bc06cd` is terminal failure. Its
+attempt-specific and cumulative job inventories each contain 19 records on
+page 1 and an explicitly empty page 2: the plan and 11 of 16 pull partitions
+succeeded, five pull partitions failed at the identity gate, and reconcile and
+deploy were skipped. The branch run inventory contains 10 records on page 1
+and an explicitly empty page 2. The artifact inventory contains 27 unexpired
+artifacts on page 1 and an explicitly empty page 2: normalized plus raw
+artifacts for all 11 successful pulls and raw-only artifacts for each failed
+pull.
+
+The five raw-only artifacts were retained byte-for-byte and exhaustively
+parsed with adapter-equivalent filtering. They contain 13,019 rows in total,
+of which 12,931 are relevant to the adapter, and expose exactly the following
+five previously unmapped exact keys:
+
+- Air Force FY2020 job `99589659151`, artifact `9771592145`, SHA-256
+  `5bb9f2f916ef732f0d1048275a508617d32f579bcab8ce661e95dc99084d8f0e`:
+  `OPTN` / `FIELD IS OPTIONAL PRIOR TO FY21` maps to explicit Unknown / other.
+  It occurs in 4,526 FY2020 P12 File C rows totaling `39864115830` cents; the
+  P12 source total remains `39864115830` cents.
+- Air Force FY2022 job `99589659156`, artifact `9772174982`, SHA-256
+  `d6126f002f9850b04b4583bba638123dabacd25782d25cce11642fc15db87ccf`:
+  malformed `NASO` / `FTWARE AND DIGITAL PILOT PROGRAM` maps to the existing
+  Software and Digital Pilot Program identity. It occurs in three FY2022 P05
+  File B rows totaling `574556633` cents; the P05 source total remains
+  `1463107537710` cents. The same three source positions used canonical code
+  `0008` / `SOFTWARE AND DIGITAL PILOT PROGRAM` in P04.
+- Space Force FY2021 job `99589659103`, artifact `9774371385`, SHA-256
+  `a08bdf831bac1ba22fa9fd876f73a2602e74d72ced73646c307d423aeae6a170`:
+  `0099` / `N/A` maps to explicit Unknown / other. It occurs in nine FY2021
+  P04 File B rows totaling `27888377017` cents; the P04 source total remains
+  `59149399067` cents.
+- Space Force FY2022 job `99589660640`, artifact `9774416995`, SHA-256
+  `e1d28c646c67f0f82f4e61bfe1fb74f899086c7e94c2c30a5fa3abb012097324`:
+  malformed `NAAD` / `VANCED TECHNOLOGY DEVELOPMENT` maps to the existing
+  Advanced Technology Development identity. It occurs in three FY2022 P03
+  File B rows totaling zero cents; the P03 source total remains
+  `272000285775` cents.
+- Space Force FY2023 job `99589661403`, artifact `9774520749`, SHA-256
+  `4e7f05f494f9ba66638d3280103a3f0f0f865749920b45178f9ab3009d895f26`:
+  `00RB` / `REIMBURSABLE PROGRAM` maps to the existing reimbursable identity.
+  It occurs in one FY2023 P06 File B row totaling `575` cents; the P06 source
+  total remains `1076888034279` cents.
+
+No other exact key is unmapped in the retained failure evidence. These are
+collision-checked, exact-key-only identity repairs. They neither alter nor
+tolerate source amounts, add synthetic residuals, change File A pins, nor
+change the public accounting contract. The five failed partitions must be
+retried individually from the latest terminal attempt; the workflow as a whole
+must not be rerun.

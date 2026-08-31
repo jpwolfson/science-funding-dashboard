@@ -3186,7 +3186,14 @@
     {"slug": "management-support", "code": "0006", "name": "Management Support", "park": "5ZC3NP008BG"},
     {"slug": "operational-system-development", "code": "0007", "name": "Operational System Development", "park": "5ZC3NP008BH"},
     {"slug": "rdte-air-force-five-year", "code": "0007", "name": "RESEARCH DEVELOPMENT TEST AND EVALUATION AIR FORCE (5 YEAR)"},
-    {"slug": "software-digital-pilot-program", "code": "0008", "name": "SOFTWARE AND DIGITAL PILOT PROGRAM"},
+    {
+     "slug": "software-digital-pilot-program",
+     "code": "0008",
+     "name": "SOFTWARE AND DIGITAL PILOT PROGRAM",
+     "codeNameAliases": [
+      {"code": "NASO", "name": "FTWARE AND DIGITAL PILOT PROGRAM"}
+     ]
+    },
     {
      "slug": "undistributed",
      "code": "0020",
@@ -3219,7 +3226,8 @@
       {"code": "0006", "name": "N/A"},
       {"code": "0007", "name": "N/A"},
       {"code": "0020", "name": "N/A"},
-      {"code": "00ZX", "name": "N/A"}
+      {"code": "00ZX", "name": "N/A"},
+      {"code": "OPTN", "name": "FIELD IS OPTIONAL PRIOR TO FY21"}
      ]
     }
    ]
@@ -3246,7 +3254,10 @@
      "code": "0003",
      "name": "Advanced Technology Development",
      "park": "5UW3C6HY83T",
-     "parkAliases": ["63Y30LXJBQR"]
+     "parkAliases": ["63Y30LXJBQR"],
+     "codeNameAliases": [
+      {"code": "NAAD", "name": "VANCED TECHNOLOGY DEVELOPMENT"}
+     ]
     },
     {"slug": "advanced-component-development-prototypes", "code": "0004", "name": "Advanced Component Development and Prototypes", "park": "5TA3F2M0WNM"},
     {"slug": "system-development-demonstration", "code": "0005", "name": "System Development and Demonstration", "park": "5TA3F2M0WNN"},
@@ -3268,7 +3279,8 @@
      "name": "Research, Development, Test, and Evaluation, Space Force (Reimbursable)",
      "park": "5TA3F2M0XD3",
      "codeNameAliases": [
-      {"code": "0801", "name": "REIMBURSABLE"}
+      {"code": "0801", "name": "REIMBURSABLE"},
+      {"code": "00RB", "name": "REIMBURSABLE PROGRAM"}
      ]
     },
     {
@@ -3279,7 +3291,8 @@
       {"code": "0000", "name": "NONE"},
       {"code": "0004", "name": "N/A"},
       {"code": "0006", "name": "N/A"},
-      {"code": "0008", "name": "N/A"}
+      {"code": "0008", "name": "N/A"},
+      {"code": "0099", "name": "N/A"}
      ]
     }
    ]

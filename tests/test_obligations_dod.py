@@ -257,12 +257,24 @@ class DoDObligationTests(unittest.TestCase):
             "unidentified",
             air_force[("code-name", "00ZX", "unidentified")]["slug"],
         )
+        self.assertEqual(
+            "software-digital-pilot-program",
+            air_force[(
+                "code-name", "NASO", "ftware and digital pilot program",
+            )]["slug"],
+        )
         for code in ("0000", "0001", "0004", "0006", "0007", "0020", "00ZX"):
             with self.subTest(account="air-force", code=code):
                 self.assertEqual(
                     "unknown-other",
                     air_force[("code-name", code, "n/a")]["slug"],
                 )
+        self.assertEqual(
+            "unknown-other",
+            air_force[(
+                "code-name", "OPTN", "field is optional prior to fy21",
+            )]["slug"],
+        )
         for park in (
             "5ZC3NP008BB", "5ZC3NP008BC", "5ZC3NP008BD",
             "5ZC3NP008BE", "5ZC3NP008BF", "5ZC3NP008BG",
@@ -282,12 +294,28 @@ class DoDObligationTests(unittest.TestCase):
                 "software & digital technology pilot program",
             )]["slug"],
         )
+        self.assertEqual(
+            "advanced-technology-development",
+            space_force[(
+                "code-name", "NAAD", "vanced technology development",
+            )]["slug"],
+        )
+        self.assertEqual(
+            "reimbursable",
+            space_force[(
+                "code-name", "00RB", "reimbursable program",
+            )]["slug"],
+        )
         for code in ("0004", "0006", "0008"):
             with self.subTest(account="space-force", code=code):
                 self.assertEqual(
                     "unknown-other",
                     space_force[("code-name", code, "n/a")]["slug"],
                 )
+        self.assertEqual(
+            "unknown-other",
+            space_force[("code-name", "0099", "n/a")]["slug"],
+        )
         for park in (
             "60836E8YQW9", "5TA3F2M0WNK", "5UW3C6HY83T",
             "63Y30LXJBQR", "5TA3F2M0WNM", "5TA3F2M0WNN",
