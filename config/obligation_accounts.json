@@ -3162,6 +3162,127 @@
      "park": "PRE2018"
     }
    ]
+  },
+  {
+   "path": "dod/air-force-rdte",
+   "name": "Research, Development, Test, and Evaluation, Air Force",
+   "abbrev": "Air Force RDT&E",
+   "agency": "Department of Defense",
+   "federalAccount": "057-3600",
+   "agencyIdentifier": "057",
+   "adapter": "usaspending_obligations",
+   "baseline": "reference/dod_air_force_rdte_obligation_baseline.json",
+   "availability": {
+    "firstFiscalYear": 2017,
+    "firstFiscalYearPeriod": 6,
+    "regularFirstPeriod": 2
+   },
+   "programActivities": [
+    {"slug": "basic-research", "code": "0001", "name": "Basic Research", "park": "5ZC3NP008BB"},
+    {"slug": "applied-research", "code": "0002", "name": "Applied Research", "park": "5ZC3NP008BC"},
+    {"slug": "advanced-technology-development", "code": "0003", "name": "Advanced Technology Development", "park": "5ZC3NP008BD"},
+    {"slug": "advanced-component-development-prototypes", "code": "0004", "name": "Advanced Component Development and Prototypes", "park": "5ZC3NP008BE"},
+    {"slug": "system-development-demonstration", "code": "0005", "name": "System Development and Demonstration", "park": "5ZC3NP008BF"},
+    {"slug": "management-support", "code": "0006", "name": "Management Support", "park": "5ZC3NP008BG"},
+    {"slug": "operational-system-development", "code": "0007", "name": "Operational System Development", "park": "5ZC3NP008BH"},
+    {"slug": "rdte-air-force-five-year", "code": "0007", "name": "RESEARCH DEVELOPMENT TEST AND EVALUATION AIR FORCE (5 YEAR)"},
+    {"slug": "software-digital-pilot-program", "code": "0008", "name": "SOFTWARE AND DIGITAL PILOT PROGRAM"},
+    {
+     "slug": "undistributed",
+     "code": "0020",
+     "name": "Undistributed",
+     "park": "5ZC3NP008BU",
+     "codeNameAliases": [
+      {"code": "00ZZ", "name": "UNDISTRIBUTED"}
+     ]
+    },
+    {
+     "slug": "reimbursable",
+     "code": "0801",
+     "name": "Research, Development, Test and Evaluation, Air Force (Reimbursable)",
+     "park": "5ZC3NP0090T",
+     "codeNameAliases": [
+      {"code": "0801", "name": "REIMBURSABLE"},
+      {"code": "00RB", "name": "REIMBURSABLE PROGRAM"}
+     ]
+    },
+    {"slug": "unidentified", "code": "00ZX", "name": "UNIDENTIFIED"},
+    {
+     "slug": "unknown-other",
+     "code": "0000",
+     "name": "Unknown / other",
+     "codeNameAliases": [
+      {"code": "0000", "name": "N/A"},
+      {"code": "0000", "name": "UNKNOWN/OTHER"},
+      {"code": "0001", "name": "N/A"},
+      {"code": "0004", "name": "N/A"},
+      {"code": "0006", "name": "N/A"},
+      {"code": "0007", "name": "N/A"},
+      {"code": "0020", "name": "N/A"},
+      {"code": "00ZX", "name": "N/A"}
+     ]
+    }
+   ]
+  },
+  {
+   "path": "dod/space-force-rdte",
+   "name": "Research, Development, Test, and Evaluation, Space Force, Air Force",
+   "abbrev": "Space Force RDT&E",
+   "agency": "Department of Defense",
+   "federalAccount": "057-3620",
+   "agencyIdentifier": "057",
+   "adapter": "usaspending_obligations",
+   "baseline": "reference/dod_space_force_rdte_obligation_baseline.json",
+   "availability": {
+    "firstFiscalYear": 2021,
+    "firstFiscalYearPeriod": 2,
+    "regularFirstPeriod": 2
+   },
+   "programActivities": [
+    {"slug": "basic-research", "code": "0001", "name": "Basic Research", "park": "60836E8YQW9"},
+    {"slug": "applied-research", "code": "0002", "name": "Applied Research", "park": "5TA3F2M0WNK"},
+    {
+     "slug": "advanced-technology-development",
+     "code": "0003",
+     "name": "Advanced Technology Development",
+     "park": "5UW3C6HY83T",
+     "parkAliases": ["63Y30LXJBQR"]
+    },
+    {"slug": "advanced-component-development-prototypes", "code": "0004", "name": "Advanced Component Development and Prototypes", "park": "5TA3F2M0WNM"},
+    {"slug": "system-development-demonstration", "code": "0005", "name": "System Development and Demonstration", "park": "5TA3F2M0WNN"},
+    {"slug": "management-support", "code": "0006", "name": "Management Support", "park": "5TA3F2M0WNZ"},
+    {"slug": "operational-system-development", "code": "0007", "name": "Operational System Development", "park": "5TA3F2M0WNP"},
+    {
+     "slug": "software-digital-technology-pilots",
+     "code": "0008",
+     "name": "Software and Digital Technology Pilot Programs",
+     "park": "5TA3F2M0WNQ",
+     "codeNameAliases": [
+      {"code": "0008", "name": "SOFTWARE & DIGITAL TECHNOLOGY PILOT PROGRAM"}
+     ]
+    },
+    {"slug": "undistributed", "code": "0020", "name": "Undistributed", "park": "5WK39AD1HYK"},
+    {
+     "slug": "reimbursable",
+     "code": "0801",
+     "name": "Research, Development, Test, and Evaluation, Space Force (Reimbursable)",
+     "park": "5TA3F2M0XD3",
+     "codeNameAliases": [
+      {"code": "0801", "name": "REIMBURSABLE"}
+     ]
+    },
+    {
+     "slug": "unknown-other",
+     "code": "0000",
+     "name": "Unknown / other",
+     "codeNameAliases": [
+      {"code": "0000", "name": "NONE"},
+      {"code": "0004", "name": "N/A"},
+      {"code": "0006", "name": "N/A"},
+      {"code": "0008", "name": "N/A"}
+     ]
+    }
+   ]
   }
  ]
 }

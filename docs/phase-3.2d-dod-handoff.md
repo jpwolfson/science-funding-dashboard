@@ -154,3 +154,72 @@ thirteen hours. The owner approved treating them as inert copied placeholders
 on 2026-08-30. This exception changes neither the successful source result nor
 the one-partition-at-a-time recovery rule; the two placeholder IDs must never
 be rerun or counted as executions.
+
+## Stage 1 terminal result
+
+Owner-approved recovery commits `087609a885ca74145ad52b224f99406da4b74804`,
+`a793ee3ad85f46154054e0449d19d083dbcf3bce`, and
+`09340b2838ca0e9c9da66bf5daa0fd6e9f192165` remained strict descendants of
+the exact source trigger. Targeted attempts 8 and 9 then reran only Navy
+FY2025 and FY2026, respectively. Their real executions succeeded; GitHub's
+additional same-partition step-less queued/null records are covered by the
+owner-approved inert-placeholder exception and are neither executions nor
+eligible retry targets.
+
+Run `33145859877` finished attempt 9 successfully. The real Navy FY2026 job
+`99257939661` succeeded, reconcile job `99259101821` succeeded, and deploy job
+`99262371496` was skipped as required. Attempt 9 has 27 jobs on page 1 and an
+empty page 2: 22 successes, four inert queued/null placeholders, and one
+skipped deploy. The cumulative `filter=all`, `per_page=100` inventory is
+100 + 100 + 15 jobs with page 4 empty. The artifact inventory is 48 unexpired
+artifacts with page 2 empty, and the branch run inventory is eight with page 2
+empty.
+
+Reconciliation accepted all 20 account-year partitions. Obligation validation,
+fast 7/7, rendered 4/4, the 196-case all-account matrix, the 59-case public-link
+matrix, and the two-case rendered sentinel matrix passed. Atomic snapshot
+commit `521478974ecbeb5b59d11a73d2b90ca065dc270b` contains the exact Army and
+Navy stores. Every fiscal-year store total matches its pin; Navy FY2025 equals
+the approved canonical File B total, Army plus Navy rolls up exactly to DoD,
+and relevant warning arrays are empty. The branch has 49 accounts: the 47
+deployed accounts plus these two DoD accounts. The older 51-account expectation
+assumed the quarantined Stats/OJP pair and does not apply to this isolated DoD
+branch. Commit `174bc2ac78fc3305eaf3ff5c91b08107d6995ebb` then restored the
+weekly/all trigger as its only file change with `[skip ci]`.
+
+## Stage 2 scaffold — Air Force and Space Force
+
+The second scaffold appends only `dod/air-force-rdte` (`057-3600`) and
+`dod/space-force-rdte` (`057-3620`), their reviewed File A/GTAS pins,
+collision-safe Program Activity identities, this handoff evidence, and
+dedicated tests. It starts from the sealed Stage 1 weekly/all commit and does
+not include either source store or claim source completion.
+
+The official federal-account endpoint was rechecked on 2026-08-31. Air Force
+pins for FY2017–FY2026 are `3039261892426`, `3946023359082`,
+`4926097145714`, `4966143569342`, `4189223395703`, `4358980604532`,
+`5046972337780`, `5092889515726`, `5587181366148`, and `4748612733074`
+cents. FY2017 is partial from P06, FY2018–FY2025 are complete, and FY2026 is
+partial through P09. Space Force has no account balance before FY2021. Its
+FY2021–FY2026 pins are `1052753427202`, `1255327250863`, `1790303171627`,
+`2036070402666`, `2004458733008`, and `1740110018139` cents; FY2021–FY2025
+are complete and FY2026 is partial through P09.
+
+The official Program Activity inventories returned 31 Air Force rows and 25
+Space Force rows on page 1, each with page 2 explicitly empty. Air Force keeps
+code-`0007` Operational System Development separate from the exact code-`0007`
+`RESEARCH DEVELOPMENT TEST AND EVALUATION AIR FORCE (5 YEAR)` identity, and
+keeps code-`00ZX` `UNIDENTIFIED` separate from code-`00ZX` `N/A`. Other exact
+`N/A` rows map only to explicit Unknown / other identities. Space Force's PARK
+`63Y30LXJBQR` spelling variant maps to the same Advanced Technology Development
+identity as PARK `5UW3C6HY83T`; the source PARK remains the authoritative key.
+No bare reused code can collapse these reviewed identities.
+
+The exact Stage 2 selector is
+`dod/air-force-rdte,dod/space-force-rdte` in `full` mode. Registry availability
+yields all FY2017–FY2026 Air Force pins and all FY2021–FY2026 Space Force pins,
+including the P09 current-year pins, for 16 serial pull jobs. `full` mode is
+required because the two accounts have different first available fiscal years;
+the fail-closed custom-range planner correctly rejects an unavailable Space
+Force FY2017. Weekly/all remains in place through scaffold publication;
+activation is a separate strict-child trigger commit.
