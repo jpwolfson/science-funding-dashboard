@@ -323,3 +323,46 @@ to the existing reimbursable identity; the preceding P05 export uses canonical
 No amount, pin, tolerance, PARK, or synthetic residual changes. The repair is
 exact-key-only and collision checked; accepted job `99664596938` must never be
 retried.
+
+Attempt 5 reran only Space Force FY2021 after that exact-key repair. Its real
+execution job `99668850610` succeeded. The attempt has 19 jobs on page 1 and
+an explicitly empty page 2; the cumulative inventory has 95 jobs on page 1
+and an empty page 2; the artifact inventory has 34 unexpired artifacts on
+page 1 and an empty page 2; and the branch-run inventory has 12 runs on page 1
+and an empty page 2.
+
+Attempt 6 reran only Space Force FY2022. Its real execution job `99672615702`
+succeeded. Attempt 6 has 20 rows on page 1 and an explicitly empty page 2:
+16 successes, one copied failure, two skipped jobs, and inert zero-step queued
+placeholder `99672615603`. The cumulative `filter=all`, `per_page=100`
+inventory is 100 + 15 jobs with page 3 empty. The artifact inventory has 36
+unexpired artifacts with page 2 empty, and the branch-run inventory has 12
+runs with page 2 empty.
+
+Attempt 7 reran only Space Force FY2023. Its real execution job `99676527590`
+succeeded; `99676527513` is an inert zero-step queued placeholder. The attempt
+is terminal failure with 20 rows on page 1 and an explicitly empty page 2:
+17 successes, reconcile failure `99679925563`, skipped deploy, and the inert
+placeholder. The cumulative inventory is 100 + 35 jobs with page 3 empty.
+The artifact inventory has 38 unexpired artifacts with page 2 empty, and the
+branch-run inventory has 12 runs with page 2 empty. All five targeted real
+Stage 2 pull partitions therefore succeeded.
+
+Reconcile failed only with `dod/space-force-rdte FY2021: complete baseline
+changed`. Accepted partition artifact `9778828849` is preserved at SHA-256
+`0d5248ce133b85fc8605d40a3c8665cf59b55da04f3dfa90c6c3b015308c1a7a`.
+Its accepted P12 provenance has 318 records, normalized total
+`1052753427202` cents, and a complete baseline pin for exactly
+`1052753427202` cents. The existing registry pin is independently complete at
+the same exact total. The failure therefore has zero dollar impact: the
+reconciler unconditionally downgraded every first fiscal year to partial even
+though the producer correctly preserves an already established complete pin.
+
+The owner approved preserving the established complete Space Force FY2021 pin
+on 2026-09-01 UTC. Reconciliation now retains an existing complete or available
+first-year pin; its existing fail-closed equality check still rejects any pin
+or amount change. Unestablished and partial first years keep the existing
+partial-year coercion and material first-period calculation. No amount, pin
+value, tolerance, residual, source artifact, or public accounting meaning
+changes. Only failed reconcile job `99679925563` may be rerun after this
+recovery is published; no accepted pull job or whole workflow is eligible.

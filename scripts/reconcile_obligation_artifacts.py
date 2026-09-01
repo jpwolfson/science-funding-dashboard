@@ -51,6 +51,37 @@ def _preserve_current_dual_pin(account_path, fy, current, artifact, normalized_t
     return dict(current)
 
 
+def _preserve_current_complete_pin(account_path, fy, current, artifact,
+                                   normalized_total, as_of_period):
+    """Keep an established complete pin only after exact P12 agreement."""
+    if not current or current.get("status") not in {"complete", "available"}:
+        return artifact
+    if "fileBObligationsCents" in current:
+        artifact = _preserve_current_dual_pin(
+            account_path, fy, current, artifact, normalized_total,
+        )
+    current_problems = baseline_pin_problems(current)
+    artifact_problems = baseline_pin_problems(artifact)
+    if current_problems or artifact_problems:
+        problems = current_problems or artifact_problems
+        raise ValueError(
+            f"{account_path} FY{fy}: invalid complete baseline pin: "
+            f"{'; '.join(problems)}"
+        )
+    current_file_b = baseline_file_b_cents(current)
+    artifact_file_b = baseline_file_b_cents(artifact)
+    if (artifact.get("status") not in {"complete", "available"}
+            or int(as_of_period) != 12
+            or artifact_file_b != current_file_b
+            or normalized_total != current_file_b
+            or artifact != current):
+        raise ValueError(
+            f"{account_path} FY{fy}: established complete pin does not match "
+            "the accepted P12 artifact and normalized total"
+        )
+    return dict(current)
+
+
 def reconcile(staging, repo=REPO):
     repo, staging = Path(repo), Path(staging)
     config = json.loads((repo / "config" / "obligation_accounts.json").read_text())
@@ -93,10 +124,18 @@ def reconcile(staging, repo=REPO):
                     or provenance.get("fiscalYear") != int(fy)):
                 raise ValueError(f"{key}: invalid accepted provenance")
             pin = dict(provenance.get("baselinePin") or {})
+            current_pin = baselines[account["path"]]["fiscalYears"].get(str(fy))
+            pin = _preserve_current_complete_pin(
+                account["path"], int(fy), current_pin, pin,
+                provenance.get("normalized", {}).get("netObligationsCents"),
+                provenance.get("asOfPeriod"),
+            )
             first_fy = int(
                 account.get("availability", {}).get("firstFiscalYear", 2017)
             )
-            if int(fy) == first_fy:
+            if (int(fy) == first_fy
+                    and not (current_pin and current_pin.get("status")
+                             in {"complete", "available"})):
                 # Older partitions derived firstPeriod from the request
                 # boundary, or classified the year before a branch repair
                 # established that it was the account's first source year.
@@ -117,7 +156,6 @@ def reconcile(staging, repo=REPO):
                 )
                 provenance = dict(provenance)
                 provenance["baselinePin"] = pin
-            current_pin = baselines[account["path"]]["fiscalYears"].get(str(fy))
             preserved = _preserve_current_dual_pin(
                 account["path"], int(fy), current_pin, pin,
                 provenance.get("normalized", {}).get("netObligationsCents"),

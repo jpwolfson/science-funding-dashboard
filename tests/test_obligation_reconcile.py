@@ -3,18 +3,109 @@ import shutil
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from adapters.obligation_common import (
     event_fingerprint, file_sha256, normalize_event, partition_diff, write_store,
 )
 from scripts.reconcile_obligation_artifacts import (
-    _preserve_current_dual_pin, reconcile,
+    _preserve_current_complete_pin, _preserve_current_dual_pin, reconcile,
 )
 from scripts.validate_funding_sentinel import validate as validate_sentinel
 from scripts.validate_obligations import validate
 
 
 class ObligationReconcileTests(unittest.TestCase):
+    def test_established_complete_pin_fails_closed_on_artifact_mismatch(self):
+        current = {"status": "complete", "obligationsCents": 100}
+        for artifact, normalized_total, as_of_period in (
+            ({"status": "complete", "obligationsCents": 99}, 99, 12),
+            ({"status": "complete", "obligationsCents": 100}, 99, 12),
+            ({"status": "partial", "asOfPeriod": 12,
+              "obligationsCents": 100}, 100, 12),
+            ({"status": "complete", "obligationsCents": 100}, 100, 11),
+        ):
+            with self.subTest(artifact=artifact,
+                              normalized_total=normalized_total,
+                              as_of_period=as_of_period):
+                with self.assertRaisesRegex(ValueError, "does not match"):
+                    _preserve_current_complete_pin(
+                        "dod/space-force-rdte", 2021, current, artifact,
+                        normalized_total, as_of_period,
+                    )
+
+    def test_first_fiscal_year_preserves_matching_complete_pin(self):
+        temp = tempfile.TemporaryDirectory()
+        try:
+            root = Path(temp.name) / "repo"
+            staging = Path(temp.name) / "staging" / "artifact"
+            producer = Path(temp.name) / "producer"
+            for path in (root / "config", root / "reference", staging, producer):
+                path.mkdir(parents=True, exist_ok=True)
+            (root / "config" / "obligation_accounts.json").write_text(json.dumps({
+                "schemaVersion": 2,
+                "accounts": [{
+                    "path": "dod/space-force-rdte", "name": "Space Force",
+                    "abbrev": "USSF", "agency": "Defense",
+                    "federalAccount": "057-3620", "baseline": "reference/dod.json",
+                    "availability": {"firstFiscalYear": 2021,
+                                     "firstFiscalYearPeriod": 2,
+                                     "regularFirstPeriod": 2},
+                    "programActivities": [{"slug": "rdte", "code": "0001",
+                                           "name": "RDT&E"}],
+                }],
+            }))
+            complete_pin = {"status": "complete", "obligationsCents": 100}
+            (root / "reference" / "dod.json").write_text(json.dumps({
+                "schemaVersion": 2, "federalAccount": "057-3620",
+                "fiscalYears": {"2021": complete_pin},
+            }))
+            row = normalize_event({
+                "id": "one", "source": "file_b_residual",
+                "submissionPeriod": "FY2021P12", "federalAccount": "057-3620",
+                "programActivityCode": "0001", "programActivityName": "RDT&E",
+                "amountCents": 100, "awardId": "", "linked": False,
+            })
+            provenance = {
+                "schemaVersion": 2, "collectionStatus": "accepted",
+                "acceptedAt": "2026-08-11T12:00:00+00:00",
+                "accountPath": "dod/space-force-rdte",
+                "federalAccount": "057-3620", "fiscalYear": 2021,
+                "asOfPeriod": 12, "downloads": [],
+                "normalized": {"recordCount": 1,
+                               "eventFingerprint": event_fingerprint([row]),
+                               "netObligationsCents": 100},
+                "replacement": {}, "diff": partition_diff([], [row]),
+                "baselinePin": complete_pin,
+            }
+            write_store(producer, [row], {"federalAccount": "057-3620"},
+                        partition_metadata={2021: provenance})
+            names = ["FY2021.csv.gz", "FY2021.provenance.json"]
+            for name in names:
+                shutil.copy2(producer / name, staging / name)
+            (staging / "partition.json").write_text(json.dumps({
+                "schemaVersion": 2, "accountPath": "dod/space-force-rdte",
+                "federalAccount": "057-3620", "baselinePath": "reference/dod.json",
+                "fiscalYears": [2021],
+                "files": [{"name": name, "sha256": file_sha256(staging / name)}
+                          for name in names],
+            }))
+
+            with patch("scripts.reconcile_obligation_artifacts.build_obligations"), \
+                    patch("scripts.reconcile_obligation_artifacts.build_sentinel"):
+                self.assertEqual(
+                    (1, ["dod/space-force-rdte"]), reconcile(staging.parent, root)
+                )
+            baseline = json.loads((root / "reference" / "dod.json").read_text())
+            self.assertEqual(complete_pin, baseline["fiscalYears"]["2021"])
+            accepted = json.loads(
+                (root / "data" / "obligations" / "dod" / "space-force-rdte"
+                 / "events" / "FY2021.provenance.json").read_text()
+            )
+            self.assertEqual(complete_pin, accepted["baselinePin"])
+        finally:
+            temp.cleanup()
+
     def test_newer_dual_pin_fails_closed_on_artifact_mismatch(self):
         current = {
             "status": "partial", "asOfPeriod": 9,
