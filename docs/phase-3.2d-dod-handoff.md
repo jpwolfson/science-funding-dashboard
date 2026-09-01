@@ -913,3 +913,82 @@ JSON and diff checks are green. The exact delta from published parent
 `66fc1c15...` is only this handoff plus `tests/test_obligations_dod.py`; the
 workflow trigger and every production, source, baseline, pin, and ledger file
 remain byte-identical.
+
+That test-only correction was published as
+`fda1be79d22fd59eacd02cc265be96ccdbfc692e`, tree
+`6902d2e2abe54ea9c460e8cf4cc91c69cfd3f2a0`, a strict child of
+`66fc1c1530d4ca1dc5739414a1250032054c583d`. After a fresh terminal
+attempt-17 inventory, exact current-attempt reconcile job `100017108317` was
+accepted for rerun once. Attempt 18 reconcile job `100038084744` completed
+success with all 16 steps green, including the atomic snapshot, full
+53-account obligation validation, fast tier, and rendered tier. The workflow
+completed success and deploy was skipped. The latest-attempt inventory has 23
+completed rows on page 1 and an explicitly empty page 2: 22 success and one
+deploy skip, with no nonterminal or inert rows. Cumulative jobs occupy 100,
+100, 100, 100, and 25 rows followed by an empty page 6. Artifacts total 56,
+all unexpired, with an empty page 2; branch runs total 20 with an empty page
+2.
+
+The resulting atomic snapshot is
+`640af0afd0ebb53508c2b34bf7769cf471c58c28`, tree
+`b52d3d34378517f23522405f7bfd6e3c22f452ca`, a strict child of the
+test-only recovery. It changes exactly 83 generated data files and the two
+Stage 3 baselines. DHP FY2025 remains complete with File A
+`4692069313553`, canonical File B `4676524125773`, and exact variance
+`15545187780` cents. Defense-Wide FY2025 remains complete with File A
+`3813645882772`, canonical File B `3812362307540`, and exact variance
+`1283575232` cents. There is no tolerance or synthetic residual. Both FY2026
+baselines are partial through P09 and match their accepted store endpoints:
+DHP `3886854960283` cents and Defense-Wide `3644486509517` cents. Both
+account dashboards end at `FY2026P09`, contain no warnings, and roll up
+exactly. The registry contains 53 integrated accounts. Commit
+`c33c1de0697fb6619acc866048d40e5d491a02d5`, tree
+`97dbd0bde6a6e72f816798d90e9ec355d3b0fe97`, is the strict one-file
+`[skip ci]` child restoring the obligation trigger to `weekly` / `all`.
+
+Final integration starts from that sealed Stage 3 commit and current main
+`6f94a81e25451453445ace9f72c90e0f14742b17`, whose merge base is
+`b7753ab1c598c7cad8c7e7251ddffe3067c510fe`. The three-way merge was clean.
+Current main contained all 87 per-unit commits from scheduled Update data run
+`33417507401`, but that run's rollup failed live NIH reconciliation before it
+could commit the regenerated parent dashboards. The exact merge therefore
+initially exposed a stale NIH root (`711155`) against its updated leaf union
+(`712005`). It also exposed two exact records already covered by the approved
+RePORTER retraction ledger: `nih:11462449` in NIA and `nih:11555862` in
+NIEHS. No new retraction judgment was made. Those two ledger records were
+removed mechanically with their stored month and amount checked against the
+approved evidence, their two leaf dashboards were regenerated, and the
+ordinary offline rollup rebuilt the NIH, NSF, and root parents. The focused
+retraction test passed and offline NIH validation reconciled all 28 units at
+`712003` unique awards. This integration normalization changes no obligation
+source, store, baseline, pin, variance, tolerance, residual, or chart
+geometry.
+
+The corrected integrated candidate passed the complete fast tier. The unit
+suite passed 260 tests with one expected skip, the obligation ledger and all
+53 accounts passed, NIH reconciled all 28 units at exactly `712003` unique
+awards, and USAspending calibration, the funding-action sentinel, the DMS
+baseline, and award invariants across 132 dashboards all passed. The retained
+machine-readable result is
+`/private/tmp/dod-phase32d-integration-fast.json`.
+
+The rendered tier then passed all four gates using the integrated artifact:
+five obligation matrix cases, 212 all-account cases, 59 public-link cases, and
+two funding-action sentinel cases. The retained report is
+`/private/tmp/dod-phase32d-integration-rendered.json`. The screenshot tier
+captured 69/69 reader-review images with no capture failures at
+`/private/tmp/dod-phase32d-integration-screens`, with its manifest and
+footprint in `/private/tmp/dod-phase32d-integration-screens.json`. Direct
+review of the obligations landing page, Defense-Wide account, DHP account,
+and sentinel found no clipping, overlap, missing content, or unexpected
+warning. Both Stage 3 account charts end at `FY2026P09`; the in-progress year
+remains visibly partial while completed years remain pinned. There are no
+site-layout or geometry-code changes in the candidate, so no geometry change
+requires a before/after exception.
+
+The assembled Pages artifact contains 1,851 files and `337558773` bytes,
+leaving `662441227` bytes of headroom below the one-gigabyte Pages limit; its
+status is `ok` against the repository's 850 MB warning and 950 MB stop
+thresholds. The conservative 52-week trajectory remains flagged because the
+short sampled history is dominated by historical backfills, as documented by
+the existing footprint model; it is not a release-stop classification.

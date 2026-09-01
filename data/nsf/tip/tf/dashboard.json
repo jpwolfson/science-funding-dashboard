@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-24",
+ "generated": "2026-08-31",
  "node": {
   "name": "Technology Frontiers",
   "abbrev": "TF",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.nsf.gov/services/v1/awards.json?org_code_div=15010000 (NSF Award Search API), month-by-month on Original Award Date",
  "warnings": [],
- "totalAwards": 18,
+ "totalAwards": 20,
  "currentFY": 2026,
  "monthly": [
   {
@@ -1291,12 +1291,12 @@
   },
   {
    "month": "2026-08",
-   "awards": 0,
-   "dollars": 0,
-   "std": 0,
+   "awards": 2,
+   "dollars": 17777446,
+   "std": 1,
    "cont": 0,
    "fell": 0,
-   "other": 0
+   "other": 1
   }
  ],
  "fiscalYears": [
@@ -1411,10 +1411,10 @@
   {
    "fy": 2026,
    "partial": true,
-   "awards": 2,
-   "dollars": 2557414,
-   "median": 1278707,
-   "exTop3Dollars": 0,
+   "awards": 4,
+   "dollars": 20334860,
+   "median": 1345897,
+   "exTop3Dollars": 393066,
    "octJul": {
     "awards": 2,
     "dollars": 2557414,
@@ -1425,16 +1425,22 @@
    },
    "top3": [
     {
+     "id": "2623333",
+     "title": "Laude Institute Moonshots Initiative",
+     "awardee": "LAUDE INSTITUTE",
+     "amount": 17250000
+    },
+    {
      "id": "2538883",
      "title": "SAFE-AI: Sandbox for Accelerated Feedback and Experimentation for AI Innovation",
      "awardee": "University of Utah",
      "amount": 2164348
     },
     {
-     "id": "2546645",
-     "title": "Developing a Rigorous Methodology to Enhance State-Level Technology Innovation and Workforce Development",
-     "awardee": "RENAISSANCE TEAMS, LLC",
-     "amount": 393066
+     "id": "2536713",
+     "title": "NSF Engines Case Studies: Accelerating Regional Innovation",
+     "awardee": "ACCELERATOR FOR AMERICA",
+     "amount": 527446
     }
    ]
   }
@@ -2488,9 +2494,14 @@
      "dollars": 2557414
     },
     {
-     "d": 327,
+     "d": 328,
      "awards": 2,
      "dollars": 2557414
+    },
+    {
+     "d": 334,
+     "awards": 4,
+     "dollars": 20334860
     }
    ]
   }
