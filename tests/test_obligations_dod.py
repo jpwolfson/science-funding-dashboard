@@ -112,11 +112,10 @@ STAGE_THREE_META = {
         "name": "Research, Development, Test, and Evaluation, Defense-Wide",
         "baseline": "reference/dod_defense_wide_rdte_obligation_baseline.json",
         "programActivities": 17,
-        "pins": [
+        "historicalPins": [
             2251362677352, 2457216636704, 2645819709252,
             2710538880746, 2875140199888, 2943303100353,
             3507738978109, 3845905263059, 3813645882772,
-            3644905851774,
         ],
     },
     "dod/defense-health-program": {
@@ -124,11 +123,10 @@ STAGE_THREE_META = {
         "name": "Defense Health Program, Defense",
         "baseline": "reference/dod_defense_health_program_obligation_baseline.json",
         "programActivities": 16,
-        "pins": [
+        "historicalPins": [
             3735497424800, 3815667849023, 3945894755468,
             4144696246716, 4047318547619, 4178537884292,
             4401952664476, 4571628570276, 4692069313553,
-            4108805214110,
         ],
     },
 }
@@ -695,12 +693,24 @@ class DoDObligationTests(unittest.TestCase):
                 self.assertEqual({str(fy) for fy in range(2015, 2027)}, set(years))
                 for fy in (2015, 2016):
                     self.assertEqual("unavailable", years[str(fy)]["status"])
+                self.assertEqual("partial", years["2017"]["status"])
                 self.assertEqual(6, years["2017"]["firstPeriod"])
                 self.assertEqual(12, years["2017"]["asOfPeriod"])
-                self.assertEqual(9, years["2026"]["asOfPeriod"])
+                for fy in range(2018, 2026):
+                    self.assertEqual("complete", years[str(fy)]["status"])
                 observed = [years[str(fy)]["obligationsCents"]
-                            for fy in range(2017, 2027)]
-                self.assertEqual(expected["pins"], observed)
+                            for fy in range(2017, 2026)]
+                self.assertEqual(expected["historicalPins"], observed)
+
+                # The current year is source-refreshable rather than frozen
+                # to the scaffold-time amount. Reconciliation replaces this
+                # partial pin from the accepted P09 artifact while completed
+                # years above remain immutable.
+                current = years["2026"]
+                self.assertEqual("partial", current["status"])
+                self.assertEqual(9, current["asOfPeriod"])
+                self.assertIs(type(current["obligationsCents"]), int)
+                self.assertGreaterEqual(current["obligationsCents"], 0)
 
     def test_stage_three_full_plan_is_exactly_twenty_serial_partitions(self):
         matrix = plan(

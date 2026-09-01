@@ -862,3 +862,54 @@ recovery as one strict child of
 unchanged. Re-inventory the fully terminal graph immediately before action,
 then rerun exactly current-attempt real failed job `99974200547` once. Never
 submit either alias row and never rerun the workflow as a whole.
+
+That recovery was published as commit
+`66fc1c1530d4ca1dc5739414a1250032054c583d`, tree
+`d6f881f4882fd770cb765e51f8330ca3357c3575`, a strict child of
+`49915956f9d683f9b88ebf5f1e27c0596f1381a1`. It changes exactly the
+Defense-Wide baseline, exact source-variance ledger, source-variance
+documentation, this handoff, and the focused DoD test. The Stage 3 trigger
+blob remains `d9eaadbfc12c90ec8bd7d29440a7005db59062dc`.
+
+After a fresh fully terminal attempt-16 inventory, exact real failed job
+`99974200547` was accepted for rerun once. Attempt 17 real Defense-Wide FY2025
+job `100013963202` completed success with all nine steps green. Row
+`100013963389` is an inert alias under the owner-approved reusable success
+contract: the run is terminal, exactly one same-partition execution completed
+success, its complete step array is byte-identical to the real job, and the
+attempt created exactly one normalized artifact (`9819344250`) plus one raw
+artifact (`9819345197`). The alias is not an execution and must never be
+counted or rerun.
+
+Attempt 17 is fully terminal failure. Its latest-attempt inventory has 24 jobs
+on page 1 and an explicitly empty page 2: 21 success, reconcile failure,
+deploy skipped, and the one approved inert alias. Cumulative jobs are 100 plus
+100 plus 100 plus 100 plus two rows and an empty page 6. Artifacts total 56,
+all unexpired, with an empty page 2; branch runs total 19 with an empty page
+2. Reconcile job `100017108317` passed atomic reconciliation and full
+53-account store, baseline, provenance, freshness, and dashboard validation.
+It failed only in the fast unit-test step because
+`test_stage_three_preserves_exact_file_a_pins` froze current partial FY2026 to
+the scaffold-time amounts. The accepted artifacts correctly refreshed
+Defense-Wide FY2026 from `3644905851774` to `3644486509517` cents and DHP
+FY2026 from `4108805214110` to `3886854960283` cents. All complete-year pins
+through FY2025, including both approved FY2025 dual pins, remained exact.
+
+On 2026-09-01 the owner approved a minimal test-only correction: retain exact
+pin assertions for historical FY2017-FY2025 and explicit complete status for
+FY2018-FY2025, while asserting FY2026 as a source-refreshable partial year
+through P09 with an integer source-derived amount rather than freezing its
+scaffold-time value. This changes no production logic, source data, baseline
+amount, dual pin, variance ledger, tolerance, residual, or workflow trigger.
+The production contract remains unchanged: accepted current partial
+partitions advance the dashboard through the latest released submission
+period, while completed years fail closed on any pin change.
+
+The correction passed the focused DoD and reconciliation suite (20/20), then
+the full fast tier: 260 unit tests with one expected skip, obligation-ledger
+validation, NIH validation, USAspending calibration, funding-sentinel
+validation, DMS baseline verification, and award invariants (7/7 checks).
+JSON and diff checks are green. The exact delta from published parent
+`66fc1c15...` is only this handoff plus `tests/test_obligations_dod.py`; the
+workflow trigger and every production, source, baseline, pin, and ledger file
+remain byte-identical.
