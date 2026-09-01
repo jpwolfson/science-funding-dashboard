@@ -437,3 +437,19 @@ pins, for 20 serial pull jobs. Weekly/all remains in place through scaffold
 publication; activation must be a separate strict-child trigger commit. The
 Stage 3 source graph must remain isolated until terminal and uses the same
 one-exact-latest-attempt-job recovery discipline as Stages 1 and 2.
+
+The independent scaffold Test run `33471397410` at published scaffold commit
+`fd7484ede3065d2736e7cfbd7fd5791c05af9ea9` is terminal. Its only job
+`99741711960` passed compilation/JSON, registry, the complete fast tier
+(`7/7`), the five-case obligation matrix, the 59-case public-link matrix, and
+the two-case sentinel matrix. The rendered all-account matrix failed only on
+the eight expected pre-store URLs: the Defense-Wide account and Basic Research
+pages plus the DHP account and Operation and Maintenance pages, each in light
+and dark modes. Each failure was the expected `404` for a dashboard store that
+does not exist before the source backfill. The job listing contains one row on
+page 1 and an explicitly empty page 2. Artifact `9786869460`
+(`verify-reports`, unexpired, 3923 bytes) is the only artifact on page 1 and
+artifact page 2 is explicitly empty. The retained artifact ZIP digest reported
+by the job is
+`65027f60c5abed4956aaf51a61cff5dcacc3a2347b0b847aed88a3d5fe58cc58`.
+This Test run is final and must not be rerun.
