@@ -710,3 +710,58 @@ three-file exact-key recovery only as a strict child of `a59f0bef...`, with
 the Stage 3 trigger blob unchanged, after all local gates and a post-audit of
 the retained attempt-3 raw artifact pass. Then rerun only the exact latest-
 attempt DHP FY2019 failed job once; do not advance to DHP FY2020 first.
+
+That follow-up exact-key recovery was published as commit
+`809e6f61b37f92a2f8a961613393ac3e82b7dca8`, tree
+`e6512288cec8a872cac9b493dd8a550e7274522c`, a strict child of
+`a59f0befbac5dbb2479783836cc057d042ab2f70`. It changes exactly the registry,
+this handoff, and the focused DoD test; the Stage 3 trigger blob remains
+`d9eaadbfc12c90ec8bd7d29440a7005db59062dc`. Local JSON and diff checks,
+DoD 16/16, reconcile/validation 15/15, registry 374/374, fast 7/7, and the
+attempt-3 raw post-audit were green. Independent Test run `33517520837` is
+terminal failure only on the same eight expected pre-store Defense-Wide and
+DHP rendered 404 URLs; its registry and fast gates passed. It has one job and
+one unexpired artifact, `9804729116`, with jobs and artifacts page 2 empty.
+Never rerun that Test.
+
+Source attempt 4 reran only DHP FY2019, whose new execution job
+`99892820843` succeeded. Its terminal attempt inventory was 23 jobs plus an
+empty page 2: ten success, 11 copied failures, and reconcile and deploy
+skipped. Cumulative jobs were 92 plus an empty page 2, artifacts were 32 and
+all unexpired plus an empty page 2, and branch runs were 17 plus an empty page
+2. Attempt 5 reran only DHP FY2020, whose new execution job `99898374359`
+succeeded. Its terminal attempt inventory was 23 jobs plus an empty page 2:
+11 success, ten copied failures, and reconcile and deploy skipped. Cumulative
+jobs were 100 plus 15 plus an empty page 3, artifacts were 34 and all
+unexpired plus an empty page 2, and branch runs page 2 was empty.
+
+Source attempt 6 reran only DHP FY2021, whose new execution job
+`99904790377` succeeded. Its fully terminal inventory has 23 attempt jobs and
+an explicitly empty page 2: 12 success, nine copied failures, and reconcile
+and deploy skipped. Cumulative jobs are 100 plus 38 plus an empty page 3;
+artifacts are 36 and all unexpired plus an empty page 2; branch runs are 17
+plus an empty page 2. No job is nonterminal.
+
+Attempt 7 reran only DHP FY2023. Its new execution job `99911391883`
+accepted P02 through P10, then stopped on the exact spacing variant code
+`0002`, blank PARK, name `RESEARCH  DEVELOPMENT  TEST &  EVALUATION`. Raw
+artifact `9807493441` is preserved at
+`/private/tmp/dod-dhp-fy2023-attempt7.zip` with SHA256
+`bc9dba347910bfce5297293133db69977801a2607e8f4ae5f7a57107ff6644e9`,
+matching GitHub's digest, and its outer and nested ZIP CRCs pass. Exhaustive
+P02-P10 parsing found exactly that one unmapped key: three P10 rows totaling
+`1912432` cents. The P10 File B total remains exactly `3600872654596` cents.
+The spacing-only source label maps to the established
+`research-development-test-evaluation` identity; this is an agent-authorized
+exact-key recovery and changes no source row, pin, total, tolerance, PARK, or
+residual.
+
+Attempt 7 is fully terminal. Its authenticated latest-attempt inventory has
+23 jobs and an explicitly empty page 2: 12 success, nine failure, and
+reconcile and deploy skipped. Cumulative jobs are 100 plus 61 plus an empty
+page 3, artifacts are 37 and all unexpired plus an empty page 2, and branch
+runs are 17 plus an empty page 2. No job is nonterminal. Publish this
+three-file exact-key recovery only as a strict child of `809e6f61...`, with
+the Stage 3 trigger blob unchanged, after all local gates and a post-audit of
+the retained attempt-7 raw artifact pass. Then rerun only the exact latest-
+attempt DHP FY2023 failed job once; do not advance to DHP FY2025 first.

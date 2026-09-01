@@ -182,6 +182,7 @@ STAGE_THREE_REVIEWED_INVENTORY = {
             ("0002", "RDT&E"),
             ("0002", "RESEARCH DEVELOPMENT TEST AND EVALUATION"),
             ("0002", "RESEARCH  DEVELOPMENT  TEST  & EVALUATION"),
+            ("0002", "RESEARCH  DEVELOPMENT  TEST &  EVALUATION"),
             ("0002", "RESEARCH DEVELOPMENT TEST    & EVALUATION"),
             ("0002", "RESEARCH DEVELOPMENT TEST & EVALUATION"),
             ("0002", "RESEARCH DEVELOPMENTTESTEVALUATION"),
@@ -627,6 +628,13 @@ class DoDObligationTests(unittest.TestCase):
             dhp[(
                 "code-name", "0002",
                 "research, development, test, & evaluation",
+            )]["slug"],
+        )
+        self.assertEqual(
+            "research-development-test-evaluation",
+            dhp[(
+                "code-name", "0002",
+                "research  development  test &  evaluation",
             )]["slug"],
         )
         self.assertEqual(
