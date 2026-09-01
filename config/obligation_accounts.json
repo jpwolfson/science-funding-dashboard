@@ -3297,6 +3297,215 @@
      ]
     }
    ]
+  },
+  {
+   "path": "dod/defense-wide-rdte",
+   "name": "Research, Development, Test, and Evaluation, Defense-Wide",
+   "abbrev": "Defense-Wide RDT&E",
+   "agency": "Department of Defense",
+   "federalAccount": "097-0400",
+   "agencyIdentifier": "097",
+   "adapter": "usaspending_obligations",
+   "baseline": "reference/dod_defense_wide_rdte_obligation_baseline.json",
+   "availability": {
+    "firstFiscalYear": 2017,
+    "firstFiscalYearPeriod": 6,
+    "regularFirstPeriod": 2
+   },
+   "programActivities": [
+    {"slug": "basic-research", "code": "0001", "name": "Basic Research", "park": "5ZC3NHWYJZL"},
+    {"slug": "applied-research", "code": "0002", "name": "Applied Research", "park": "5ZC3NHWYJZM"},
+    {"slug": "advanced-technology-development", "code": "0003", "name": "Advanced Technology Development", "park": "5ZC3NHWYJZN"},
+    {
+     "slug": "advanced-component-development-prototypes",
+     "code": "0004",
+     "name": "Advanced Component Development and Prototypes",
+     "park": "5ZC3NHWYJZZ",
+     "codeNameAliases": [
+      {"code": "0007", "name": "ADVANCED COMPONENT DEVELOPMENT AND PROTOTYPES"}
+     ]
+    },
+    {"slug": "system-development-demonstration", "code": "0005", "name": "System Development and Demonstration", "park": "5ZC3NHWYJZP"},
+    {
+     "slug": "management-support",
+     "code": "0006",
+     "name": "Management Support",
+     "park": "5ZC3NHWYJZQ",
+     "codeNameAliases": [
+      {"code": "0000", "name": "MANAGEMENT SUPPORT"}
+     ]
+    },
+    {
+     "slug": "operational-system-development",
+     "code": "0007",
+     "name": "Operational System Development",
+     "park": "5ZC3NHWYJZR",
+     "codeNameAliases": [
+      {"code": "0099", "name": "OPERATIONAL SYSTEMS DEVELOPMENT"}
+     ]
+    },
+    {"slug": "software-digital-technology-pilots", "code": "0008", "name": "Software and Digital Technology Pilot Programs", "park": "5TA3ETJ2DXY"},
+    {
+     "slug": "undistributed",
+     "code": "0020",
+     "name": "Undistributed",
+     "park": "5ZC3NHWYJP6",
+     "codeNameAliases": [
+      {"code": "00ZZ", "name": "UNDISTRIBUTED"}
+     ]
+    },
+    {
+     "slug": "reimbursable",
+     "code": "0801",
+     "name": "Research, Development, Test and Evaluation, Defense-Wide (Reimbursable)",
+     "park": "5ZC3NHWYKE5",
+     "codeNameAliases": [
+      {"code": "0801", "name": "REIMBURSABLE"},
+      {"code": "00RB", "name": "REIMBURSABLE PROGRAM"}
+     ]
+    },
+    {"slug": "unidentified", "code": "00ZX", "name": "UNIDENTIFIED"},
+    {"slug": "closed-account-adjustment", "code": "00CA", "name": "CLOSED ACCOUNT ADJUSTMENT"},
+    {"slug": "miscellaneous", "code": "009S", "name": "MISCELLANEOUS"},
+    {"slug": "recertification-limited-liability", "code": "0009", "name": "RECERT OR LIMITED LIAB"},
+    {"slug": "dod-va-incentive-fund", "code": "0004", "name": "DOD/VA INCENTIVE FUND"},
+    {
+     "slug": "unknown-other",
+     "code": "0000",
+     "name": "Unknown / other",
+     "codeNameAliases": [
+      {"code": "0000", "name": "BUDGET ACTIVITY NOT APPLICABLE"},
+      {"code": "0000", "name": "N/A"},
+      {"code": "0000", "name": "UNKNOWN/OTHER"},
+      {"code": "0000", "name": "UNSPECIFIED"},
+      {"code": "0002", "name": "N/A"},
+      {"code": "0003", "name": "N/A"},
+      {"code": "0004", "name": "N/A"},
+      {"code": "0007", "name": "N/A"},
+      {"code": "0008", "name": "N/A"},
+      {"code": "0009", "name": "N/A"},
+      {"code": "0012", "name": "N/A"},
+      {"code": "0020", "name": "N/A"},
+      {"code": "0070", "name": "N/A"},
+      {"code": "0090", "name": "N/A"},
+      {"code": "0099", "name": "N/A"},
+      {"code": "00CA", "name": "N/A"},
+      {"code": "00ZZ", "name": "N/A"}
+     ]
+    },
+    {
+     "slug": "activity-from-obligation-before-fy-2018-program-activity-not-specified",
+     "code": "PRE2018",
+     "name": "ACTIVITY FROM OBLIGATION BEFORE FY 2018: PROGRAM ACTIVITY NOT SPECIFIED",
+     "park": "PRE2018"
+    }
+   ]
+  },
+  {
+   "path": "dod/defense-health-program",
+   "name": "Defense Health Program, Defense",
+   "abbrev": "Defense Health Program",
+   "agency": "Department of Defense",
+   "federalAccount": "097-0130",
+   "agencyIdentifier": "097",
+   "adapter": "usaspending_obligations",
+   "baseline": "reference/dod_defense_health_program_obligation_baseline.json",
+   "availability": {
+    "firstFiscalYear": 2017,
+    "firstFiscalYearPeriod": 6,
+    "regularFirstPeriod": 2
+   },
+   "programActivities": [
+    {
+     "slug": "operation-maintenance",
+     "code": "0001",
+     "name": "Operation and Maintenance",
+     "park": "5ZC3H196K9V",
+     "codeNameAliases": [
+      {"code": "0001", "name": "OPERATION & MAINTENANCE"}
+     ]
+    },
+    {
+     "slug": "research-development-test-evaluation",
+     "code": "0002",
+     "name": "Research, Development, Test, and Evaluation",
+     "park": "5ZC3H196K9W",
+     "codeNameAliases": [
+      {"code": "0002", "name": "3 YR RDT&E"},
+      {"code": "0002", "name": "RDT&E"},
+      {"code": "0002", "name": "RESEARCH DEVELOPMENT TEST AND EVALUATION"},
+      {"code": "0002", "name": "RESEARCH  DEVELOPMENT  TEST  & EVALUATION"},
+      {"code": "0002", "name": "RESEARCH DEVELOPMENT TEST    & EVALUATION"},
+      {"code": "0002", "name": "RESEARCH DEVELOPMENT TEST & EVALUATION"},
+      {"code": "0003", "name": "RDT&E"}
+     ]
+    },
+    {
+     "slug": "procurement",
+     "code": "0003",
+     "name": "Procurement",
+     "park": "5ZC3H196K9X",
+     "codeNameAliases": [
+      {"code": "0001", "name": "PROCUREMENT"}
+     ]
+    },
+    {
+     "slug": "undistributed",
+     "code": "0020",
+     "name": "Undistributed",
+     "park": "5ZC3H196KAG",
+     "codeNameAliases": [
+      {"code": "0000", "name": "GFEBS UNDISTRIBUTED"},
+      {"code": "00ZZ", "name": "UNDISTRIBUTED"}
+     ]
+    },
+    {
+     "slug": "reimbursable",
+     "code": "0801",
+     "name": "Defense Health Program (Reimbursable)",
+     "park": "5ZC3H196KXF",
+     "codeNameAliases": [
+      {"code": "0801", "name": "REIMBURSABLE"},
+      {"code": "0001", "name": "REIMBURSABLE PROGRAM"},
+      {"code": "00RB", "name": "REIMBURSABLE PROGRAM"}
+     ]
+    },
+    {"slug": "administration-service-wide", "code": "0004", "name": "ADMINISTRATION AND SERVICE-WIDE ACTIVITIES"},
+    {"slug": "basic-research", "code": "0001", "name": "BASIC RESEARCH"},
+    {"slug": "applied-research", "code": "0002", "name": "APPLIED RESEARCH"},
+    {"slug": "major-equipment", "code": "0001", "name": "MAJOR EQUIPMENT"},
+    {"slug": "operating-forces", "code": "0001", "name": "OPERATING FORCES"},
+    {"slug": "unidentified", "code": "00ZX", "name": "UNIDENTIFIED"},
+    {"slug": "uniformed-services-university", "code": "0000", "name": "USUHS"},
+    {
+     "slug": "unknown-other",
+     "code": "0000",
+     "name": "Unknown / other",
+     "codeNameAliases": [
+      {"code": "0000", "name": "BUDGET ACTIVITY NOT APPLICABLE"},
+      {"code": "0000", "name": "NA"},
+      {"code": "0000", "name": "N/A"},
+      {"code": "0000", "name": "UNKNOWN/OTHER"},
+      {"code": "0001", "name": "N/A"},
+      {"code": "0002", "name": "N/A"},
+      {"code": "0003", "name": "N/A"},
+      {"code": "0004", "name": "N/A"},
+      {"code": "0006", "name": "N/A"},
+      {"code": "0009", "name": "N/A"},
+      {"code": "0020", "name": "N/A"},
+      {"code": "0099", "name": "N/A"},
+      {"code": "00B8", "name": "N/A"},
+      {"code": "00Z9", "name": "N/A"},
+      {"code": "00ZX", "name": "N/A"}
+     ]
+    },
+    {
+     "slug": "activity-from-obligation-before-fy-2018-program-activity-not-specified",
+     "code": "PRE2018",
+     "name": "ACTIVITY FROM OBLIGATION BEFORE FY 2018: PROGRAM ACTIVITY NOT SPECIFIED",
+     "park": "PRE2018"
+    }
+   ]
   }
  ]
 }

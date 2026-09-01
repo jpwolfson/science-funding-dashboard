@@ -79,6 +79,100 @@ STAGE_TWO_META = {
     },
 }
 
+STAGE_THREE_META = {
+    "dod/defense-wide-rdte": {
+        "federalAccount": "097-0400",
+        "name": "Research, Development, Test, and Evaluation, Defense-Wide",
+        "baseline": "reference/dod_defense_wide_rdte_obligation_baseline.json",
+        "programActivities": 17,
+        "pins": [
+            2251362677352, 2457216636704, 2645819709252,
+            2710538880746, 2875140199888, 2943303100353,
+            3507738978109, 3845905263059, 3813645882772,
+            3644905851774,
+        ],
+    },
+    "dod/defense-health-program": {
+        "federalAccount": "097-0130",
+        "name": "Defense Health Program, Defense",
+        "baseline": "reference/dod_defense_health_program_obligation_baseline.json",
+        "programActivities": 14,
+        "pins": [
+            3735497424800, 3815667849023, 3945894755468,
+            4144696246716, 4047318547619, 4178537884292,
+            4401952664476, 4571628570276, 4692069313553,
+            4108805214110,
+        ],
+    },
+}
+
+STAGE_THREE_REVIEWED_INVENTORY = {
+    "dod/defense-wide-rdte": {
+        "parks": {
+            "PRE2018", "5ZC3NHWYKE5", "5ZC3NHWYJZZ", "5ZC3NHWYJZR",
+            "5ZC3NHWYJZQ", "5ZC3NHWYJZP", "5ZC3NHWYJZN",
+            "5ZC3NHWYJZM", "5ZC3NHWYJZL", "5ZC3NHWYJP6",
+            "5TA3ETJ2DXY",
+        },
+        "code_names": {
+            ("0801", "REIMBURSABLE"), ("00ZZ", "N/A"),
+            ("00ZZ", "UNDISTRIBUTED"), ("00ZX", "UNIDENTIFIED"),
+            ("00RB", "REIMBURSABLE PROGRAM"),
+            ("00CA", "CLOSED ACCOUNT ADJUSTMENT"), ("00CA", "N/A"),
+            ("009S", "MISCELLANEOUS"), ("0099", "N/A"),
+            ("0099", "OPERATIONAL SYSTEMS DEVELOPMENT"), ("0090", "N/A"),
+            ("0070", "N/A"), ("0020", "N/A"),
+            ("0020", "UNDISTRIBUTED"), ("0012", "N/A"),
+            ("0009", "N/A"), ("0009", "RECERT OR LIMITED LIAB"),
+            ("0008", "N/A"),
+            ("0007", "ADVANCED COMPONENT DEVELOPMENT AND PROTOTYPES"),
+            ("0007", "N/A"), ("0007", "OPERATIONAL SYSTEM DEVELOPMENT"),
+            ("0006", "MANAGEMENT SUPPORT"),
+            ("0005", "SYSTEM DEVELOPMENT AND DEMONSTRATION"),
+            ("0004", "ADVANCED COMPONENT DEVELOPMENT AND PROTOTYPES"),
+            ("0004", "DOD/VA INCENTIVE FUND"), ("0004", "N/A"),
+            ("0003", "ADVANCED TECHNOLOGY DEVELOPMENT"), ("0003", "N/A"),
+            ("0002", "APPLIED RESEARCH"), ("0002", "N/A"),
+            ("0001", "BASIC RESEARCH"),
+            ("0000", "BUDGET ACTIVITY NOT APPLICABLE"),
+            ("0000", "MANAGEMENT SUPPORT"), ("0000", "N/A"),
+            ("0000", "UNKNOWN/OTHER"), ("0000", "UNSPECIFIED"),
+        },
+    },
+    "dod/defense-health-program": {
+        "parks": {
+            "PRE2018", "5ZC3H196KXF", "5ZC3H196KAG", "5ZC3H196K9X",
+            "5ZC3H196K9W", "5ZC3H196K9V",
+        },
+        "code_names": {
+            ("0801", "REIMBURSABLE"), ("00ZZ", "UNDISTRIBUTED"),
+            ("00ZX", "N/A"), ("00ZX", "UNIDENTIFIED"), ("00Z9", "N/A"),
+            ("00RB", "REIMBURSABLE PROGRAM"), ("00B8", "N/A"),
+            ("0099", "N/A"), ("0020", "N/A"),
+            ("0020", "UNDISTRIBUTED"), ("0009", "N/A"),
+            ("0006", "N/A"),
+            ("0004", "ADMINISTRATION AND SERVICE-WIDE ACTIVITIES"),
+            ("0004", "N/A"), ("0003", "N/A"), ("0003", "PROCUREMENT"),
+            ("0003", "RDT&E"), ("0002", "3 YR RDT&E"),
+            ("0002", "APPLIED RESEARCH"), ("0002", "N/A"),
+            ("0002", "RDT&E"),
+            ("0002", "RESEARCH DEVELOPMENT TEST AND EVALUATION"),
+            ("0002", "RESEARCH  DEVELOPMENT  TEST  & EVALUATION"),
+            ("0002", "RESEARCH DEVELOPMENT TEST    & EVALUATION"),
+            ("0002", "RESEARCH DEVELOPMENT TEST & EVALUATION"),
+            ("0001", "BASIC RESEARCH"), ("0001", "MAJOR EQUIPMENT"),
+            ("0001", "N/A"), ("0001", "OPERATING FORCES"),
+            ("0001", "OPERATION AND MAINTENANCE"),
+            ("0001", "OPERATION & MAINTENANCE"), ("0001", "PROCUREMENT"),
+            ("0001", "REIMBURSABLE PROGRAM"),
+            ("0000", "BUDGET ACTIVITY NOT APPLICABLE"),
+            ("0000", "GFEBS UNDISTRIBUTED"), ("0000", "NA"),
+            ("0000", "N/A"), ("0000", "UNKNOWN/OTHER"),
+            ("0000", "USUHS"),
+        },
+    },
+}
+
 
 class DoDObligationTests(unittest.TestCase):
     @classmethod
@@ -93,6 +187,10 @@ class DoDObligationTests(unittest.TestCase):
         cls.stage_two_accounts = {
             row["path"]: row for row in registry["accounts"]
             if row["path"] in STAGE_TWO_META
+        }
+        cls.stage_three_accounts = {
+            row["path"]: row for row in registry["accounts"]
+            if row["path"] in STAGE_THREE_META
         }
 
     def test_stage_one_has_exact_account_contracts(self):
@@ -369,6 +467,129 @@ class DoDObligationTests(unittest.TestCase):
         self.assertEqual(list(range(2021, 2027)),
                          [row["fiscalYear"] for row in space_force])
         self.assertEqual([12] * 5 + [9], [row["period"] for row in space_force])
+
+    def test_stage_three_has_exact_account_contracts(self):
+        self.assertEqual(set(STAGE_THREE_META), set(self.stage_three_accounts))
+        for path, expected in STAGE_THREE_META.items():
+            with self.subTest(path=path):
+                account = self.stage_three_accounts[path]
+                self.assertEqual(expected["federalAccount"],
+                                 account["federalAccount"])
+                self.assertEqual(expected["name"], account["name"])
+                self.assertEqual("Department of Defense", account["agency"])
+                self.assertEqual("097", account["agencyIdentifier"])
+                self.assertEqual("usaspending_obligations", account["adapter"])
+                self.assertEqual(expected["baseline"], account["baseline"])
+                self.assertEqual(expected["programActivities"],
+                                 len(account["programActivities"]))
+                self.assertEqual({
+                    "firstFiscalYear": 2017,
+                    "firstFiscalYearPeriod": 6,
+                    "regularFirstPeriod": 2,
+                }, account["availability"])
+
+    def test_stage_three_reviewed_inventories_resolve_without_collisions(self):
+        for path, reviewed in STAGE_THREE_REVIEWED_INVENTORY.items():
+            with self.subTest(path=path):
+                aliases = alias_map(self.stage_three_accounts[path])
+                self.assertTrue(aliases)
+                self.assertEqual(len(aliases), len(set(aliases)))
+                for park in reviewed["parks"]:
+                    self.assertIn(("park", park), aliases)
+                for code, name in reviewed["code_names"]:
+                    self.assertIn(
+                        ("code-name", code.zfill(4), name.strip().lower()),
+                        aliases,
+                    )
+
+        defense_wide = alias_map(
+            self.stage_three_accounts["dod/defense-wide-rdte"]
+        )
+        self.assertEqual(
+            "advanced-component-development-prototypes",
+            defense_wide[(
+                "code-name", "0007",
+                "advanced component development and prototypes",
+            )]["slug"],
+        )
+        self.assertEqual(
+            "operational-system-development",
+            defense_wide[(
+                "code-name", "0007", "operational system development",
+            )]["slug"],
+        )
+        self.assertEqual(
+            "dod-va-incentive-fund",
+            defense_wide[(
+                "code-name", "0004", "dod/va incentive fund",
+            )]["slug"],
+        )
+        self.assertEqual(
+            "unknown-other",
+            defense_wide[("code-name", "0004", "n/a")]["slug"],
+        )
+
+        dhp = alias_map(self.stage_three_accounts["dod/defense-health-program"])
+        self.assertEqual(
+            "operation-maintenance",
+            dhp[("code-name", "0001", "operation and maintenance")]["slug"],
+        )
+        self.assertEqual(
+            "procurement",
+            dhp[("code-name", "0001", "procurement")]["slug"],
+        )
+        self.assertEqual(
+            "research-development-test-evaluation",
+            dhp[("code-name", "0002", "rdt&e")]["slug"],
+        )
+        self.assertEqual(
+            "applied-research",
+            dhp[("code-name", "0002", "applied research")]["slug"],
+        )
+
+    def test_stage_three_preserves_exact_file_a_pins(self):
+        for path, expected in STAGE_THREE_META.items():
+            with self.subTest(path=path):
+                baseline = json.loads((REPO / expected["baseline"]).read_text())
+                self.assertEqual(2, baseline["schemaVersion"])
+                self.assertEqual(expected["federalAccount"],
+                                 baseline["federalAccount"])
+                self.assertIn("api.usaspending.gov/api/v2/federal_accounts/",
+                              baseline["source"])
+                years = baseline["fiscalYears"]
+                self.assertEqual({str(fy) for fy in range(2015, 2027)}, set(years))
+                for fy in (2015, 2016):
+                    self.assertEqual("unavailable", years[str(fy)]["status"])
+                self.assertEqual(6, years["2017"]["firstPeriod"])
+                self.assertEqual(12, years["2017"]["asOfPeriod"])
+                self.assertEqual(9, years["2026"]["asOfPeriod"])
+                observed = [years[str(fy)]["obligationsCents"]
+                            for fy in range(2017, 2027)]
+                self.assertEqual(expected["pins"], observed)
+
+    def test_stage_three_full_plan_is_exactly_twenty_serial_partitions(self):
+        matrix = plan(
+            repo=REPO,
+            mode="full",
+            selectors="dod/defense-wide-rdte,dod/defense-health-program",
+        )["include"]
+        self.assertEqual(20, len(matrix))
+        self.assertEqual(set(STAGE_THREE_META), {row["account"] for row in matrix})
+        for path in STAGE_THREE_META:
+            rows = [row for row in matrix if row["account"] == path]
+            self.assertEqual(list(range(2017, 2027)),
+                             [row["fiscalYear"] for row in rows])
+            self.assertEqual([12] * 9 + [9], [row["period"] for row in rows])
+
+    def test_darpa_is_included_without_relabeling_defense_wide(self):
+        handoff = (REPO / "docs" / "phase-3.2d-dod-handoff.md").read_text()
+        normalized = " ".join(handoff.split())
+        self.assertIn(
+            "DARPA is included within Defense-Wide RDT&E (`097-0400`)",
+            normalized,
+        )
+        self.assertIn("not a standalone account total", normalized)
+        self.assertIn("must not be labeled as DARPA", normalized)
 
 
 if __name__ == "__main__":

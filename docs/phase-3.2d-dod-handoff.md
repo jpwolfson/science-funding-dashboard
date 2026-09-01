@@ -366,3 +366,74 @@ partial-year coercion and material first-period calculation. No amount, pin
 value, tolerance, residual, source artifact, or public accounting meaning
 changes. Only failed reconcile job `99679925563` may be rerun after this
 recovery is published; no accepted pull job or whole workflow is eligible.
+
+## Stage 2 terminal result
+
+Owner-approved recovery commit
+`7c926aff30f397fc4af7296e5fb192c083ca44ae` remained the strict child of the
+latest exact-key recovery. Attempt 8 then reran only reconcile job
+`99679925563`; its real execution `99732023311` succeeded, and deploy job
+`99737130651` was skipped as required. No pull partition or whole workflow was
+rerun.
+
+Run `33422933441` finished attempt 8 successfully. The attempt-specific
+inventory has 19 jobs on page 1 and an explicitly empty page 2: plan, all 16
+pulls, and reconcile succeeded, while deploy was skipped. The cumulative
+`filter=all`, `per_page=100` inventory is 100 + 54 jobs with page 3 empty. Its
+only queued/null rows are owner-approved inert placeholders `99672615603` and
+`99676527513`; neither represents an execution or eligible retry target. The
+artifact inventory has 38 unexpired artifacts with page 2 empty, and the
+branch-run inventory has 13 runs with page 2 empty.
+
+Reconciliation accepted all 16 account-year partitions. Obligation
+validation, fast 7/7, rendered 4/4, the 204-case all-account matrix, the
+59-case public-link matrix, and the two-case rendered sentinel matrix passed.
+Atomic snapshot commit `207c02b16c2a3b1f15f1faef693c9e8955587d5f`
+contains the exact Air Force and Space Force stores. Every fiscal-year total
+matches its pin, the Space Force FY2021 complete pin remains exactly
+`1052753427202` cents, account and DoD rollups are exact, and relevant warning
+arrays are empty. The isolated branch has 51 accounts: the 47 deployed
+accounts plus four completed DoD accounts. Commit
+`0a0bb8942863895e24a4dc34249b99c8237c3ff7` then restored weekly/all as its
+only file change with `[skip ci]`.
+
+## Stage 3 scaffold — Defense-Wide and Defense Health Program
+
+The final scaffold appends only `dod/defense-wide-rdte` (`097-0400`) and
+`dod/defense-health-program` (`097-0130`), their reviewed File A/GTAS pins,
+collision-safe Program Activity identities, this handoff evidence, and
+dedicated tests. It starts from the sealed Stage 2 weekly/all commit and does
+not include either source store or claim source completion.
+
+DARPA is included within Defense-Wide RDT&E (`097-0400`), not a standalone
+account total. The full Defense-Wide account includes DARPA and other Defense
+Agencies activity and therefore must not be labeled as DARPA. DHP remains its
+own `097-0130` account.
+
+The official federal-account endpoint was rechecked on 2026-09-01 UTC.
+Defense-Wide pins for FY2017–FY2026 are `2251362677352`, `2457216636704`,
+`2645819709252`, `2710538880746`, `2875140199888`, `2943303100353`,
+`3507738978109`, `3845905263059`, `3813645882772`, and `3644905851774`
+cents. DHP pins are `3735497424800`, `3815667849023`, `3945894755468`,
+`4144696246716`, `4047318547619`, `4178537884292`, `4401952664476`,
+`4571628570276`, `4692069313553`, and `4108805214110` cents. For both
+accounts, FY2017 is partial from P06, FY2018–FY2025 are complete, and FY2026
+is partial through P09.
+
+The official Program Activity inventories returned 47 Defense-Wide rows and
+45 DHP rows on page 1, each with page 2 explicitly empty. PARK remains the
+authoritative identity. Exact historical code/name pairs remain separate when
+codes were reused: for example, Defense-Wide code `0004` distinguishes
+Advanced Component Development and Prototypes, the DOD/VA Incentive Fund, and
+`N/A`; DHP code `0001` distinguishes Operation and Maintenance, Basic
+Research, Major Equipment, Operating Forces, Procurement, Reimbursable
+Program, and `N/A`. Every reviewed row resolves through a PARK or exact
+code/name key, and no bare reused code can collapse those identities.
+
+The exact Stage 3 selector is
+`dod/defense-wide-rdte,dod/defense-health-program` in `full` mode. Registry
+availability yields FY2017–FY2026 for both accounts, including P09 current-year
+pins, for 20 serial pull jobs. Weekly/all remains in place through scaffold
+publication; activation must be a separate strict-child trigger commit. The
+Stage 3 source graph must remain isolated until terminal and uses the same
+one-exact-latest-attempt-job recovery discipline as Stages 1 and 2.
