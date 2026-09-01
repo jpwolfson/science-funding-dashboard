@@ -663,3 +663,50 @@ resolved all 46,977 source rows that require Program Activity identity lookup.
 Every archive reports zero unmapped keys under the combined recovery. The
 audit changes no retained raw byte or source amount; it verifies only that the
 approved registry maps the preserved evidence without collision or fallback.
+
+The approved combined recovery was published as commit
+`a59f0befbac5dbb2479783836cc057d042ab2f70`, tree
+`83cb8f7bd460e980ff76ad640f4ae77988df0b52`, a strict child of Stage 3 trigger
+`f871fbd4cab5efac91499beb19862525defe1ce7`. The trigger blob remains exactly
+`d9eaadbfc12c90ec8bd7d29440a7005db59062dc`. The recovery changes exactly the
+registry, this handoff, the source-variance handoff and machine ledger, the two
+Stage 3 baseline files, and the focused DoD test. Focused tests passed 31/31,
+registry validation passed 374/374, fast tests passed 7/7, and JSON, diff, and
+the exhaustive retained-raw audit were green. Independent recovery Test run
+`33514647666` then passed every non-rendered gate and failed only on the eight
+expected pre-store Defense-Wide and DHP 404 URLs. Its sole unexpired artifact
+is `9803537757`; jobs and artifacts each had an explicitly empty page 2. That
+test run is separate from the source graph and must not be rerun.
+
+Source run `33472362131` attempt 2 reran only the exact current-attempt DHP
+FY2017 failure. Its new execution job `99878764394` succeeded. Attempt 2 then
+reached a fully terminal state with 23 attempt-specific jobs on page 1 and an
+explicitly empty page 2: nine success, 12 copied failures, and reconcile and
+deploy skipped. The cumulative inventory contained 46 jobs with the next page
+empty, the artifact inventory contained 29 unexpired artifacts with page 2
+empty, and the branch inventory contained 16 runs with page 2 empty. No job
+was nonterminal.
+
+Attempt 3 reran only the exact attempt-2 DHP FY2019 copied failure. Its new
+execution job `99882395063` checked out recovery commit
+`a59f0befbac5dbb2479783836cc057d042ab2f70`, accepted P02 through P09, and
+stopped at P09 on exact code `0020`, blank PARK, name `UNKNOWN/OTHER`. Raw
+artifact `9803737577` is preserved at
+`/private/tmp/dod-dhp-fy2019-attempt3.zip` with SHA256
+`8c32377e3b5cf2e0dc56d21d9df8852ebd0151b87979c8bcc7e20edeb7d5adf9`,
+matching GitHub's digest. Exhaustive parsing of all retained P02-P09 pages
+found exactly that one unmapped key: two P09 rows totaling `61952301` cents.
+The P09 File B total remains exactly `2809688986544` cents. The exact
+`UNKNOWN/OTHER` label maps to the established `unknown-other` identity; this
+is an agent-authorized exact-key recovery and changes no source row, pin,
+total, tolerance, PARK, or residual.
+
+Attempt 3 is fully terminal. The authenticated latest-attempt inventory has
+23 jobs on page 1 and an explicitly empty page 2: nine success, 12 failure,
+and reconcile and deploy skipped. The cumulative inventory has 69 jobs and an
+empty next page, artifacts have 30 unexpired entries and an empty page 2, and
+the branch has 16 runs and an empty page 2. No job is nonterminal. Publish the
+three-file exact-key recovery only as a strict child of `a59f0bef...`, with
+the Stage 3 trigger blob unchanged, after all local gates and a post-audit of
+the retained attempt-3 raw artifact pass. Then rerun only the exact latest-
+attempt DHP FY2019 failed job once; do not advance to DHP FY2020 first.

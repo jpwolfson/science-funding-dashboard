@@ -171,6 +171,7 @@ STAGE_THREE_REVIEWED_INVENTORY = {
             ("00RB", "REIMBURSABLE PROGRAM"),
             ("NARE", "IMBURSABLE PROGRAM"), ("00B8", "N/A"),
             ("0099", "N/A"), ("0020", "N/A"),
+            ("0020", "UNKNOWN/OTHER"),
             ("0020", "UNDISTRIBUTED"), ("0009", "N/A"),
             ("0006", "N/A"),
             ("0004", "ADMINISTRATION AND SERVICE-WIDE ACTIVITIES"),
@@ -641,6 +642,10 @@ class DoDObligationTests(unittest.TestCase):
             dhp[(
                 "code-name", "OPTN", "field is optional prior to fy21",
             )]["slug"],
+        )
+        self.assertEqual(
+            "unknown-other",
+            dhp[("code-name", "0020", "unknown/other")]["slug"],
         )
         self.assertEqual(
             "defense-health-program",
