@@ -17,6 +17,24 @@ NAVY_FY2025_VARIANCE_REASON = (
     "variance with File B canonical and no synthetic residual or tolerance."
 )
 
+DHP_FY2025_FILE_B_CENTS = 4_676_524_125_773
+DHP_FY2025_VARIANCE_CENTS = 15_545_187_780
+DHP_FY2025_VARIANCE_REASON = (
+    "Official FY2025 GTAS/File A is 4692069313553 cents while the accepted "
+    "P12 File B and independent date-filtered Program Activity totals are "
+    "4676524125773 cents; preserve the exact 15545187780-cent official source "
+    "variance with File B canonical and no synthetic residual or tolerance."
+)
+
+DEFENSE_WIDE_FY2023_FILE_B_CENTS = 3_507_738_877_251
+DEFENSE_WIDE_FY2023_VARIANCE_CENTS = 100_858
+DEFENSE_WIDE_FY2023_VARIANCE_REASON = (
+    "Official FY2023 GTAS/File A is 3507738978109 cents while the accepted "
+    "P12 File B and independent date-filtered Program Activity totals are "
+    "3507738877251 cents; preserve the exact 100858-cent official source "
+    "variance with File B canonical and no synthetic residual or tolerance."
+)
+
 ACCOUNT_META = {
     "dod/army-rdte": {
         "federalAccount": "021-2040",
@@ -96,7 +114,7 @@ STAGE_THREE_META = {
         "federalAccount": "097-0130",
         "name": "Defense Health Program, Defense",
         "baseline": "reference/dod_defense_health_program_obligation_baseline.json",
-        "programActivities": 14,
+        "programActivities": 16,
         "pins": [
             3735497424800, 3815667849023, 3945894755468,
             4144696246716, 4047318547619, 4178537884292,
@@ -118,10 +136,12 @@ STAGE_THREE_REVIEWED_INVENTORY = {
             ("0801", "REIMBURSABLE"), ("00ZZ", "N/A"),
             ("00ZZ", "UNDISTRIBUTED"), ("00ZX", "UNIDENTIFIED"),
             ("00RB", "REIMBURSABLE PROGRAM"),
+            ("00CA", "CLOSED ACCOUNT"),
             ("00CA", "CLOSED ACCOUNT ADJUSTMENT"), ("00CA", "N/A"),
+            ("NAMI", "SCELLANEOUS"),
             ("009S", "MISCELLANEOUS"), ("0099", "N/A"),
             ("0099", "OPERATIONAL SYSTEMS DEVELOPMENT"), ("0090", "N/A"),
-            ("0070", "N/A"), ("0020", "N/A"),
+            ("0070", "N/A"), ("0030", "N/A"), ("0020", "N/A"),
             ("0020", "UNDISTRIBUTED"), ("0012", "N/A"),
             ("0009", "N/A"), ("0009", "RECERT OR LIMITED LIAB"),
             ("0008", "N/A"),
@@ -137,29 +157,34 @@ STAGE_THREE_REVIEWED_INVENTORY = {
             ("0000", "BUDGET ACTIVITY NOT APPLICABLE"),
             ("0000", "MANAGEMENT SUPPORT"), ("0000", "N/A"),
             ("0000", "UNKNOWN/OTHER"), ("0000", "UNSPECIFIED"),
+            ("OPTN", "FIELD IS OPTIONAL PRIOR TO FY21"),
         },
     },
     "dod/defense-health-program": {
         "parks": {
             "PRE2018", "5ZC3H196KXF", "5ZC3H196KAG", "5ZC3H196K9X",
-            "5ZC3H196K9W", "5ZC3H196K9V",
+            "5ZC3H196K9W", "5ZC3H196K9V", "5Q03E54NTZ6",
         },
         "code_names": {
             ("0801", "REIMBURSABLE"), ("00ZZ", "UNDISTRIBUTED"),
             ("00ZX", "N/A"), ("00ZX", "UNIDENTIFIED"), ("00Z9", "N/A"),
-            ("00RB", "REIMBURSABLE PROGRAM"), ("00B8", "N/A"),
+            ("00RB", "REIMBURSABLE PROGRAM"),
+            ("NARE", "IMBURSABLE PROGRAM"), ("00B8", "N/A"),
             ("0099", "N/A"), ("0020", "N/A"),
             ("0020", "UNDISTRIBUTED"), ("0009", "N/A"),
             ("0006", "N/A"),
             ("0004", "ADMINISTRATION AND SERVICE-WIDE ACTIVITIES"),
             ("0004", "N/A"), ("0003", "N/A"), ("0003", "PROCUREMENT"),
             ("0003", "RDT&E"), ("0002", "3 YR RDT&E"),
+            ("008B", "DEFENSE HEALTH PROGRAM"),
             ("0002", "APPLIED RESEARCH"), ("0002", "N/A"),
             ("0002", "RDT&E"),
             ("0002", "RESEARCH DEVELOPMENT TEST AND EVALUATION"),
             ("0002", "RESEARCH  DEVELOPMENT  TEST  & EVALUATION"),
             ("0002", "RESEARCH DEVELOPMENT TEST    & EVALUATION"),
             ("0002", "RESEARCH DEVELOPMENT TEST & EVALUATION"),
+            ("0002", "RESEARCH DEVELOPMENTTESTEVALUATION"),
+            ("0002", "RESEARCH, DEVELOPMENT, TEST, & EVALUATION"),
             ("0001", "BASIC RESEARCH"), ("0001", "MAJOR EQUIPMENT"),
             ("0001", "N/A"), ("0001", "OPERATING FORCES"),
             ("0001", "OPERATION AND MAINTENANCE"),
@@ -169,6 +194,7 @@ STAGE_THREE_REVIEWED_INVENTORY = {
             ("0000", "GFEBS UNDISTRIBUTED"), ("0000", "NA"),
             ("0000", "N/A"), ("0000", "UNKNOWN/OTHER"),
             ("0000", "USUHS"),
+            ("OPTN", "FIELD IS OPTIONAL PRIOR TO FY21"),
         },
     },
 }
@@ -289,6 +315,35 @@ class DoDObligationTests(unittest.TestCase):
             "fileAFileBVarianceCents": NAVY_FY2025_VARIANCE_CENTS,
             "fileAFileBVarianceReason": NAVY_FY2025_VARIANCE_REASON,
         }, baseline["fiscalYears"]["2025"])
+
+    def test_stage_three_preserves_approved_exact_source_variances(self):
+        cases = {
+            "reference/dod_defense_health_program_obligation_baseline.json": {
+                "fiscalYear": "2025",
+                "fileA": 4_692_069_313_553,
+                "fileB": DHP_FY2025_FILE_B_CENTS,
+                "variance": DHP_FY2025_VARIANCE_CENTS,
+                "reason": DHP_FY2025_VARIANCE_REASON,
+            },
+            "reference/dod_defense_wide_rdte_obligation_baseline.json": {
+                "fiscalYear": "2023",
+                "fileA": 3_507_738_978_109,
+                "fileB": DEFENSE_WIDE_FY2023_FILE_B_CENTS,
+                "variance": DEFENSE_WIDE_FY2023_VARIANCE_CENTS,
+                "reason": DEFENSE_WIDE_FY2023_VARIANCE_REASON,
+            },
+        }
+        for path, expected in cases.items():
+            with self.subTest(path=path):
+                baseline = json.loads((REPO / path).read_text())
+                row = baseline["fiscalYears"][expected["fiscalYear"]]
+                self.assertEqual({
+                    "status": "complete",
+                    "obligationsCents": expected["fileA"],
+                    "fileBObligationsCents": expected["fileB"],
+                    "fileAFileBVarianceCents": expected["variance"],
+                    "fileAFileBVarianceReason": expected["reason"],
+                }, row)
 
     def test_stage_one_custom_plan_is_exactly_twenty_serial_partitions(self):
         matrix = plan(
@@ -528,6 +583,24 @@ class DoDObligationTests(unittest.TestCase):
             "unknown-other",
             defense_wide[("code-name", "0004", "n/a")]["slug"],
         )
+        self.assertEqual(
+            "closed-account-adjustment",
+            defense_wide[("code-name", "00CA", "closed account")]["slug"],
+        )
+        self.assertEqual(
+            "miscellaneous",
+            defense_wide[("code-name", "NAMI", "scellaneous")]["slug"],
+        )
+        self.assertEqual(
+            "unknown-other",
+            defense_wide[(
+                "code-name", "OPTN", "field is optional prior to fy21",
+            )]["slug"],
+        )
+        self.assertEqual(
+            "unknown-other",
+            defense_wide[("code-name", "0030", "n/a")]["slug"],
+        )
 
         dhp = alias_map(self.stage_three_accounts["dod/defense-health-program"])
         self.assertEqual(
@@ -543,8 +616,39 @@ class DoDObligationTests(unittest.TestCase):
             dhp[("code-name", "0002", "rdt&e")]["slug"],
         )
         self.assertEqual(
+            "research-development-test-evaluation",
+            dhp[(
+                "code-name", "0002", "research developmenttestevaluation",
+            )]["slug"],
+        )
+        self.assertEqual(
+            "research-development-test-evaluation",
+            dhp[(
+                "code-name", "0002",
+                "research, development, test, & evaluation",
+            )]["slug"],
+        )
+        self.assertEqual(
             "applied-research",
             dhp[("code-name", "0002", "applied research")]["slug"],
+        )
+        self.assertEqual(
+            "reimbursable",
+            dhp[("code-name", "NARE", "imbursable program")]["slug"],
+        )
+        self.assertEqual(
+            "unknown-other",
+            dhp[(
+                "code-name", "OPTN", "field is optional prior to fy21",
+            )]["slug"],
+        )
+        self.assertEqual(
+            "defense-health-program",
+            dhp[("code-name", "008B", "defense health program")]["slug"],
+        )
+        self.assertEqual(
+            "source-label-unavailable-5q03e54ntz6",
+            dhp[("park", "5Q03E54NTZ6")]["slug"],
         )
 
     def test_stage_three_preserves_exact_file_a_pins(self):

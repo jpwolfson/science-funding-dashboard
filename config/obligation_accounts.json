@@ -3365,8 +3365,22 @@
      ]
     },
     {"slug": "unidentified", "code": "00ZX", "name": "UNIDENTIFIED"},
-    {"slug": "closed-account-adjustment", "code": "00CA", "name": "CLOSED ACCOUNT ADJUSTMENT"},
-    {"slug": "miscellaneous", "code": "009S", "name": "MISCELLANEOUS"},
+    {
+     "slug": "closed-account-adjustment",
+     "code": "00CA",
+     "name": "CLOSED ACCOUNT ADJUSTMENT",
+     "codeNameAliases": [
+      {"code": "00CA", "name": "CLOSED ACCOUNT"}
+     ]
+    },
+    {
+     "slug": "miscellaneous",
+     "code": "009S",
+     "name": "MISCELLANEOUS",
+     "codeNameAliases": [
+      {"code": "NAMI", "name": "SCELLANEOUS"}
+     ]
+    },
     {"slug": "recertification-limited-liability", "code": "0009", "name": "RECERT OR LIMITED LIAB"},
     {"slug": "dod-va-incentive-fund", "code": "0004", "name": "DOD/VA INCENTIVE FUND"},
     {
@@ -3386,11 +3400,13 @@
       {"code": "0009", "name": "N/A"},
       {"code": "0012", "name": "N/A"},
       {"code": "0020", "name": "N/A"},
+      {"code": "0030", "name": "N/A"},
       {"code": "0070", "name": "N/A"},
       {"code": "0090", "name": "N/A"},
       {"code": "0099", "name": "N/A"},
       {"code": "00CA", "name": "N/A"},
-      {"code": "00ZZ", "name": "N/A"}
+      {"code": "00ZZ", "name": "N/A"},
+      {"code": "OPTN", "name": "FIELD IS OPTIONAL PRIOR TO FY21"}
      ]
     },
     {
@@ -3437,6 +3453,8 @@
       {"code": "0002", "name": "RESEARCH  DEVELOPMENT  TEST  & EVALUATION"},
       {"code": "0002", "name": "RESEARCH DEVELOPMENT TEST    & EVALUATION"},
       {"code": "0002", "name": "RESEARCH DEVELOPMENT TEST & EVALUATION"},
+      {"code": "0002", "name": "RESEARCH DEVELOPMENTTESTEVALUATION"},
+      {"code": "0002", "name": "RESEARCH, DEVELOPMENT, TEST, & EVALUATION"},
       {"code": "0003", "name": "RDT&E"}
      ]
     },
@@ -3467,14 +3485,22 @@
      "codeNameAliases": [
       {"code": "0801", "name": "REIMBURSABLE"},
       {"code": "0001", "name": "REIMBURSABLE PROGRAM"},
-      {"code": "00RB", "name": "REIMBURSABLE PROGRAM"}
+      {"code": "00RB", "name": "REIMBURSABLE PROGRAM"},
+      {"code": "NARE", "name": "IMBURSABLE PROGRAM"}
      ]
     },
     {"slug": "administration-service-wide", "code": "0004", "name": "ADMINISTRATION AND SERVICE-WIDE ACTIVITIES"},
     {"slug": "basic-research", "code": "0001", "name": "BASIC RESEARCH"},
     {"slug": "applied-research", "code": "0002", "name": "APPLIED RESEARCH"},
+    {"slug": "defense-health-program", "code": "008B", "name": "DEFENSE HEALTH PROGRAM"},
     {"slug": "major-equipment", "code": "0001", "name": "MAJOR EQUIPMENT"},
     {"slug": "operating-forces", "code": "0001", "name": "OPERATING FORCES"},
+    {
+     "slug": "source-label-unavailable-5q03e54ntz6",
+     "code": "5Q03E54NTZ6",
+     "name": "Source label unavailable (PARK 5Q03E54NTZ6)",
+     "park": "5Q03E54NTZ6"
+    },
     {"slug": "unidentified", "code": "00ZX", "name": "UNIDENTIFIED"},
     {"slug": "uniformed-services-university", "code": "0000", "name": "USUHS"},
     {
@@ -3496,7 +3522,8 @@
       {"code": "0099", "name": "N/A"},
       {"code": "00B8", "name": "N/A"},
       {"code": "00Z9", "name": "N/A"},
-      {"code": "00ZX", "name": "N/A"}
+      {"code": "00ZX", "name": "N/A"},
+      {"code": "OPTN", "name": "FIELD IS OPTIONAL PRIOR TO FY21"}
      ]
     },
     {

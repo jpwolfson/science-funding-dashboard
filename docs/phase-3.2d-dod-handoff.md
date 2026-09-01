@@ -453,3 +453,213 @@ artifact page 2 is explicitly empty. The retained artifact ZIP digest reported
 by the job is
 `65027f60c5abed4956aaf51a61cff5dcacc3a2347b0b847aed88a3d5fe58cc58`.
 This Test run is final and must not be rerun.
+
+Stage 3 source run `33472362131` at trigger
+`f871fbd4cab5efac91499beb19862525defe1ce7` planned exactly 20 serial
+partitions. Attempt 1 DHP FY2017 job `99744617364` accepted the official P06
+File B snapshot with 125 rows, then stopped on one previously unseen exact
+historical label: code `0002`, blank PARK, name
+`RESEARCH, DEVELOPMENT, TEST, & EVALUATION`. Raw artifact `9786973589` is
+preserved at `/private/tmp/dod-dhp-fy2017-attempt1.zip` with SHA256
+`014905d96c1f767d95d3c0b45e05ca78a8d1368bcf38d76575c11c3f443fee96`.
+An exhaustive parse found 12 unique exact keys and no other unmapped key. The
+new label totals `35790750341` cents at P06 and maps to the existing
+`research-development-test-evaluation` identity; the complete P06 File B
+snapshot remains exactly `1807576647850` cents. This is an exact-key identity
+repair only: it changes no source row, pin, total, tolerance, or residual.
+Recovery must remain local until every real attempt-1 source job is terminal.
+
+Attempt 1 DHP FY2019 job `99744617286` accepted the official P03 File B
+snapshot with 129 rows, then stopped on one exact historical label: code
+`008B`, blank PARK, name `DEFENSE HEALTH PROGRAM`. Raw artifact `9787349671`
+is preserved at `/private/tmp/dod-dhp-fy2019-attempt1.zip` with SHA256
+`cfcac4d93437f5289e566f9bfa69157f8c9e346c20514711ed0920aa8760433b`.
+An exhaustive parse found 13 unique exact keys and no other unmapped key. The
+label totals `1433217270` cents at P03; the complete P03 File B snapshot totals
+`1420514789985` cents. On 2026-09-01 the owner approved the exact-preservation
+contract: a standalone source identity with slug `defense-health-program`,
+code `008B`, and name `DEFENSE HEALTH PROGRAM`, with no change to any source
+row, pin, total, tolerance, or residual.
+
+Attempt 1 DHP FY2025 job `99744617337` accepted every P02-P12 File B
+snapshot and the P12 File C export, then stopped at the exact source-total
+gate. Raw artifact `9788896971` is preserved at
+`/private/tmp/dod-dhp-fy2025-attempt1.zip` with SHA256
+`7ec29f76839814162b1017bd9be0f3750b62b4d74ef56c414dc62257a00b886b`.
+Adapter-equivalent exhaustive parsing found no unmapped exact key. The
+retained P12 File B total is `4676524125773` cents. A separate official,
+date-filtered Program Activity endpoint request returned 22 rows on page 1,
+an explicitly empty page 2, and the same exact `4676524125773`-cent total.
+The retained endpoint pages are
+`/private/tmp/dod-dhp-fy2025-program-activities.json` (SHA256
+`818405fd14dbad2e39b072442cc88470ef088080836a86010712d0c83918f368`)
+and `/private/tmp/dod-dhp-fy2025-program-activities-page2.json` (SHA256
+`00d9c9fb9040bed5b63e0b50845625e934b7b75328340b464cd277bce2960cb4`).
+The reviewed official GTAS/File A pin remains `4692069313553` cents, so File A
+minus File B is exactly `15545187780` cents (`$155,451,877.80`). On 2026-09-01
+the owner approved preserving File A and canonical File B as two exact official
+totals under the existing dual-pin/source-warning contract, with an exact
+variance-ledger entry and no tolerance or synthetic residual.
+
+Attempt 1 DHP FY2020 job `99744617369` accepted all P02-P12 File B
+snapshots and the P12 File C export, then stopped on the established pre-FY2021
+placeholder `OPTN` / `FIELD IS OPTIONAL PRIOR TO FY21` with blank PARK. Raw
+artifact `9787694836` is preserved at
+`/private/tmp/dod-dhp-fy2020-attempt1.zip` with SHA256
+`15108d6dcae470d700a5a946e91fe3f7b4c056661ab1a05cc7e80dc3fe3cd306`.
+Adapter-equivalent exhaustive parsing found no unmapped File B key; among
+10,636 nonblank-amount File C rows it found exactly that one unmapped key,
+totaling `319267192516` cents. The complete File C total is
+`638897009542` cents and the P12 File B total remains exactly
+`4144696246716` cents. The placeholder maps to explicit `unknown-other`, the
+same contract already established for Army and Navy. No source row, pin,
+total, tolerance, PARK, or residual changes.
+
+Attempt 1 DHP FY2021 job `99744617351` accepted P02-P06 and stopped on the
+malformed exact key `NARE` / `IMBURSABLE PROGRAM` with blank PARK. Raw artifact
+`9787761673` is preserved at `/private/tmp/dod-dhp-fy2021-attempt1.zip` with
+SHA256 `06c9c992f5385ebbe43a760fe70aa7ff5af13155cd9bb0e1eb6c9feffcc4f224`.
+Exhaustive parsing found exactly that one unmapped P06 key in 163 rows and
+eight exact keys, totaling `-102355` cents; the P06 File B total remains
+`2165744325047` cents. This is the same source-boundary corruption already
+reviewed for Space Force and maps to the existing reimbursable identity. No
+source row, pin, total, tolerance, PARK, or residual changes.
+
+Attempt 1 DHP FY2023 job `99744617355` accepted P02-P03 and stopped on the
+spacing-loss variant code `0002`, name `RESEARCH DEVELOPMENTTESTEVALUATION`,
+blank PARK. Raw artifact `9788145439` is preserved at
+`/private/tmp/dod-dhp-fy2023-attempt1.zip` with SHA256
+`9493ba84d378cf8fe1f69d30f199b7d7be3d9bac3a723230c241dd49b2a7f0e3`.
+Exhaustive parsing found exactly that one unmapped P03 key in 207 rows and 22
+exact keys, totaling `530073` cents; the P03 File B total remains
+`1060219630625` cents. It maps to the existing
+`research-development-test-evaluation` identity. No source row, pin, total,
+tolerance, PARK, or residual changes. All three exact-key recoveries remain
+local until every real attempt-1 source job is terminal.
+
+Attempt 1 DHP FY2026 job `99744617378` accepted P02 and P03, then stopped on
+the exact PARK-only key `5Q03E54NTZ6` with blank code and name. Raw artifact
+`9788930625` is preserved at `/private/tmp/dod-dhp-fy2026-attempt1.zip` with
+SHA256 `b3e3023436db32fbf6f8ca5f41730fcb921af8525d2ada19b83716d65420d261`.
+Exhaustive parsing found seven exact P03 keys and only this key unmapped; it
+totals `13824014403` cents, while the complete P03 File B snapshot totals
+`1198476540459` cents. The official DHP Program Activity inventory returned
+45 rows on page 1 and an explicitly empty page 2, but contains no identity for
+this PARK. Those retained pages are
+`/private/tmp/dod-dhp-program-activities-current.json` (SHA256
+`d6277ad96bf4129dd0ac9624f270608cd4683f6a4005888166609ebae7541eb8`) and
+`/private/tmp/dod-dhp-program-activities-current-page2.json` (SHA256
+`222ce99283057c137110933cb8ab3e6c4538a3b91d44841104be9574d473cc97`).
+On 2026-09-01 the owner approved representing this `$138,240,144.03`
+blank-label activity as the standalone neutral PARK-keyed identity
+`source-label-unavailable-5q03e54ntz6`. The display name states only that the
+source label is unavailable and does not infer program meaning. No source row,
+pin, total, tolerance, or residual changes.
+
+Attempt 1 Defense-Wide FY2017 job `99744617489` accepted the official P06
+File B snapshot with 238 rows, then stopped on exact code `00CA`, blank PARK,
+name `CLOSED ACCOUNT`. Raw artifact `9788947797` is preserved at
+`/private/tmp/dod-defense-wide-fy2017-attempt1.zip` with SHA256
+`0491874c8f59fc8347936b77954eadcac8292d96835efd70f360ef291b4f1aa8`.
+Exhaustive parsing found 16 exact keys and only this key unmapped; it totals
+`11429745` cents and the P06 File B snapshot remains exactly `980116494804`
+cents. The exact source label maps to the existing
+`closed-account-adjustment` identity alongside code `00CA` / `CLOSED ACCOUNT
+ADJUSTMENT`. This is an exact-key identity repair only and changes no source
+row, pin, total, tolerance, PARK, or residual. Recovery remains local until
+every real attempt-1 source job is terminal.
+
+Attempt 1 Defense-Wide FY2020 job `99744618307` accepted all P02-P12 File B
+snapshots and the P12 File C export, then stopped on the established pre-FY2021
+placeholder `OPTN` / `FIELD IS OPTIONAL PRIOR TO FY21` with blank PARK. Raw
+artifact `9790299817` is preserved at
+`/private/tmp/dod-defense-wide-fy2020-attempt1.zip` with SHA256
+`7a3d70d692879214fec48e589950b130508f3d5fa54800f7dd52ac2948437ff3`.
+Adapter-equivalent exhaustive parsing found no unmapped File B key; among
+7,941 nonblank-amount File C rows it found exactly that one unmapped key,
+totaling `118057611865` cents. The complete File C total is `687143635686`
+cents and the P12 File B total remains exactly `2710538880746` cents. The
+placeholder maps to explicit `unknown-other`, the same contract already used
+for Army, Navy, and DHP. No source row, pin, total, tolerance, PARK, or
+residual changes.
+
+Attempt 1 Defense-Wide FY2021 job `99744618317` accepted P02-P06 and stopped
+on the exact source-boundary corruption `NAMI` / `SCELLANEOUS` with blank
+PARK. Raw artifact `9790393234` is preserved at
+`/private/tmp/dod-defense-wide-fy2021-attempt1.zip` with SHA256
+`e96cabe63c9a8a8548cc2f63a17fb03995a0eaba446e303d8522a0f94e39c7db`.
+Exhaustive parsing found exactly that one unmapped P06 key in 234 rows and 12
+exact keys, totaling `45000000` cents; the P06 File B total remains
+`1482792692169` cents. `NA` has absorbed the first two letters of
+`MISCELLANEOUS`, the same reviewed boundary-corruption pattern as DHP and
+Space Force reimbursable labels, so the exact key maps to the existing
+`miscellaneous` identity. No source row, pin, total, tolerance, PARK, or
+residual changes.
+
+Attempt 1 Defense-Wide FY2022 job `99744618350` stopped at P02 on the same
+exact `NAMI` / `SCELLANEOUS` source-boundary corruption. Raw artifact
+`9790413421` is preserved at `/private/tmp/dod-defense-wide-fy2022-attempt1.zip`
+with SHA256 `588cca416cd72fece95a12f7ff690add9be7241712ee4baffe11e7d3bd3ac903`.
+Exhaustive parsing found exactly that one unmapped P02 key in 225 rows and 12
+exact keys, totaling `132459489` cents; the P02 File B total remains
+`244709809729` cents. The shared exact alias maps it to the existing
+`miscellaneous` identity without changing any source row, pin, total,
+tolerance, PARK, or residual. All Defense-Wide exact-key recoveries remain
+local until every real attempt-1 source job is terminal.
+
+Attempt 1 Defense-Wide FY2023 job `99744618294` accepted every P02-P12 File B
+snapshot and the P12 File C export, then stopped at the exact source-total
+gate. Raw artifact `9790896334` is preserved at
+`/private/tmp/dod-defense-wide-fy2023-attempt1.zip` with SHA256
+`41515034d1103a432e276a0ddfad1ef5e5aae4bac482973408eb446da0ddc84b`.
+Adapter-equivalent exhaustive parsing found no unmapped exact key. The
+retained P12 File B total is `3507738877251` cents. A separate official,
+date-filtered Program Activity endpoint request returned 28 rows on page 1,
+an explicitly empty page 2, and the same exact `3507738877251`-cent total.
+The retained endpoint pages are
+`/private/tmp/dod-defense-wide-fy2023-program-activities.json` (SHA256
+`32cdaed1c1acf5e7edc54e4f38478490ccd255c9d32838e61f0d9d47c1e21af8`)
+and `/private/tmp/dod-defense-wide-fy2023-program-activities-page2.json`
+(SHA256 `e94f2d2dc2c74024a1f7fb860c2335dc12c3c9294eb19174155544ee91f04e2f`).
+The reviewed official GTAS/File A pin is `3507738978109` cents, so File A
+minus File B is exactly `100858` cents (`$1,008.58`). On 2026-09-01 the owner
+approved preserving File A and canonical File B as two exact official totals
+under the existing dual-pin/source-warning contract, with an exact
+variance-ledger entry and no tolerance or synthetic residual. DARPA is included
+within federal account `097-0400`; this evidence and pin cover the complete
+Defense-Wide account and do not label all Defense-Wide activity as DARPA.
+
+Attempt 1 Defense-Wide FY2025 job `99744618422` accepted P02 and stopped on
+exact code `0030`, blank PARK, name `N/A`. Raw artifact `9791410259` is
+preserved at `/private/tmp/dod-defense-wide-fy2025-attempt1.zip` with SHA256
+`7eed224b5d3163d7c241c7f67705a2972b58860f1444d4013b25895848af975f`.
+Exhaustive parsing found 26 exact P02 keys and only this key unmapped; it
+totals `25000000` cents, while the P02 File B snapshot remains exactly
+`508315589931` cents. The explicit `N/A` label maps to the established
+`unknown-other` identity alongside the reviewed Defense-Wide N/A inventory.
+This is an exact-key repair only and changes no source row, pin, total,
+tolerance, PARK, or residual. Recovery remains local until every real
+attempt-1 source job is terminal.
+
+Attempt 1 is fully terminal. Run `33472362131` completed with failure after
+all 20 real serial pull partitions reached terminal state. The
+attempt-specific authenticated inventory contains 23 jobs on page 1 and an
+explicitly empty page 2: plan and seven pull partitions succeeded, 13 pull
+partitions failed on the exact recoveries and owner gates documented above,
+and reconcile/deploy were skipped. The cumulative `filter=all`,
+`per_page=100` inventory is likewise 23 jobs on page 1 with page 2 empty.
+Artifact inventory contains 27 unexpired artifacts on page 1 with page 2
+empty, and the branch inventory contains 15 runs on page 1 with page 2 empty.
+No attempt-1 job is nonterminal and no inert placeholder is present in this
+attempt. On 2026-09-01 the owner approved all four remaining Stage 3 gates:
+the exact DHP FY2019 identity, the neutral DHP FY2026 PARK identity, and the
+DHP FY2025 and Defense-Wide FY2023 dual pins. The combined recovery may be
+published only after all local gates and exhaustive raw post-audits pass; no
+job may be retried before that publication is verified.
+
+After approval, an adapter-equivalent exhaustive post-audit reverified the
+outer SHA256 and ZIP CRC for all 13 retained failed-partition archives and
+resolved all 46,977 source rows that require Program Activity identity lookup.
+Every archive reports zero unmapped keys under the combined recovery. The
+audit changes no retained raw byte or source amount; it verifies only that the
+approved registry maps the preserved evidence without collision or fallback.
