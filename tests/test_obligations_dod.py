@@ -35,6 +35,15 @@ DEFENSE_WIDE_FY2023_VARIANCE_REASON = (
     "variance with File B canonical and no synthetic residual or tolerance."
 )
 
+DEFENSE_WIDE_FY2025_FILE_B_CENTS = 3_812_362_307_540
+DEFENSE_WIDE_FY2025_VARIANCE_CENTS = 1_283_575_232
+DEFENSE_WIDE_FY2025_VARIANCE_REASON = (
+    "Official FY2025 GTAS/File A is 3813645882772 cents while the accepted "
+    "P12 File B and independent date-filtered Program Activity totals are "
+    "3812362307540 cents; preserve the exact 1283575232-cent official source "
+    "variance with File B canonical and no synthetic residual or tolerance."
+)
+
 ACCOUNT_META = {
     "dod/army-rdte": {
         "federalAccount": "021-2040",
@@ -334,10 +343,19 @@ class DoDObligationTests(unittest.TestCase):
                 "variance": DEFENSE_WIDE_FY2023_VARIANCE_CENTS,
                 "reason": DEFENSE_WIDE_FY2023_VARIANCE_REASON,
             },
+            "reference/dod_defense_wide_rdte_obligation_baseline.json#FY2025": {
+                "baseline": "reference/dod_defense_wide_rdte_obligation_baseline.json",
+                "fiscalYear": "2025",
+                "fileA": 3_813_645_882_772,
+                "fileB": DEFENSE_WIDE_FY2025_FILE_B_CENTS,
+                "variance": DEFENSE_WIDE_FY2025_VARIANCE_CENTS,
+                "reason": DEFENSE_WIDE_FY2025_VARIANCE_REASON,
+            },
         }
         for path, expected in cases.items():
             with self.subTest(path=path):
-                baseline = json.loads((REPO / path).read_text())
+                baseline_path = expected.get("baseline", path)
+                baseline = json.loads((REPO / baseline_path).read_text())
                 row = baseline["fiscalYears"][expected["fiscalYear"]]
                 self.assertEqual({
                     "status": "complete",

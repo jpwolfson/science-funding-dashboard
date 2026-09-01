@@ -765,3 +765,100 @@ three-file exact-key recovery only as a strict child of `809e6f61...`, with
 the Stage 3 trigger blob unchanged, after all local gates and a post-audit of
 the retained attempt-7 raw artifact pass. Then rerun only the exact latest-
 attempt DHP FY2023 failed job once; do not advance to DHP FY2025 first.
+
+That exact-key recovery was published as commit
+`49915956f9d683f9b88ebf5f1e27c0596f1381a1`, tree
+`132bdaa67231b594b3e053d8e413a58b6f666693`, a strict child of
+`809e6f61b37f92a2f8a961613393ac3e82b7dca8`. It changes exactly the registry,
+this handoff, and the focused DoD test; the Stage 3 trigger blob remains
+`d9eaadbfc12c90ec8bd7d29440a7005db59062dc`. Local JSON and diff checks,
+DoD 17/17, reconcile/validation 15/15, registry 374/374, fast 7/7, and the
+attempt-7 raw post-audit were green. Independent Test run `33526494898` is
+terminal failure only on the same eight expected pre-store Defense-Wide and
+DHP rendered 404 URLs. Never rerun that Test.
+
+Attempt 8 reran only DHP FY2023; real execution job `99923532872` succeeded.
+Attempt 9 reran only DHP FY2025; real execution job `99929128861` succeeded.
+Attempt 10 reran only DHP FY2026; real execution job `99933377949` succeeded.
+Attempt 11 reran only Defense-Wide FY2017; real execution job `99938393568`
+succeeded. Each attempt was fully terminal and completely inventoried before
+the next exact latest-attempt failed job was rerun. Copied terminal records
+were not counted as executions.
+
+Attempt 12 reran only Defense-Wide FY2020. Real job `99941937017` completed
+success with all nine steps green. Rows `99941937038` and `99941937361`
+remained queued/null even though each contained the same nine completed-
+success steps, including byte-identical names, statuses, conclusions, and
+timestamps. The run was terminal, and the owner approved these two exact rows
+as inert aliases of `99941937017`. They are documented here, are not counted
+as executions, and must never be rerun.
+
+The owner subsequently approved a narrow reusable success-case inert-alias
+contract. A queued/null row may be treated as an inert alias only when the
+workflow run is terminal, exactly one same-partition row is completed/success,
+the alias's entire completed step array (names, statuses, conclusions, and all
+timestamps) is byte-identical to that successful row, artifact names and
+cardinality show exactly one normalized-plus-raw output pair for the
+partition, and the alias is documented, never counted as an execution, and
+never rerun. Under that exact contract, attempt 13 Defense-Wide FY2021 real
+job `99954172706` succeeded and rows `99954172358` and `99954172401` are inert
+aliases; its sole output pair is normalized artifact `9812770792` and raw
+artifact `9812771320`. Attempt 14 Defense-Wide FY2022 real job `99963508288`
+succeeded and row `99963508058` is an inert alias; its sole output pair is
+normalized artifact `9813818333` and raw artifact `9813819158`. Attempt 15
+Defense-Wide FY2023 real job `99969933018` succeeded and rows `99969932614`,
+`99969932644`, and `99969932762` are inert aliases; its sole output pair is
+normalized artifact `9814280735` and raw artifact `9814281555`. Each run was
+terminal before the next exact current-attempt failed job was rerun.
+
+Attempt 16 reran only Defense-Wide FY2025. The real job `99974200547`
+accepted P02 through P12 and then failed at the exact source-total pin gate:
+current P12 File B is `3812362307540` cents while the existing official
+GTAS/File A pin is `3813645882772` cents. Raw artifact `9814928296` is
+preserved at `/private/tmp/dod-defense-wide-fy2025-attempt16.zip` with SHA256
+`72c1d5417fc851f2320387639c77b203d97df269fd1bb54f67b1771d185b63f5`;
+the nested P12 File B ZIP SHA256 is
+`b8937e70d56ce14c73691ae01839560e97928a840916d23b5d7ce41013619579`.
+Adapter-equivalent exhaustive parsing found zero unmapped keys and exactly
+`3812362307540` cents. A separate official date-filtered Program Activity
+request returned 26 rows on page 1, an explicitly empty page 2, and the same
+exact total. Those pages are preserved as
+`/private/tmp/dod-defense-wide-fy2025-program-activities-attempt16.json`
+(SHA256 `8aeba04e65598ca0c3c524d7340945930d5bdcd52aff1b6d9da7226571178950`)
+and its page-2 response (SHA256
+`e7ade28c7cfb4c39bb3c515aff94e5ab0d207e7c48dd763b12043666a248c422`).
+The official federal-account/GTAS File A response is preserved as
+`/private/tmp/dod-defense-wide-fy2025-federal-account-attempt16.json` with
+SHA256 `29246cee27412be8095e927c289373c72daef91122acab75830b8d170f3384c7`.
+File A minus canonical File B is exactly `1283575232` cents
+(`$12,835,752.32`). On 2026-09-01 the owner approved preserving both exact
+official totals under the dual-pin/source-warning contract, with no tolerance
+or synthetic residual. DARPA is included within federal account `097-0400`;
+this evidence covers the complete Defense-Wide account and does not label all
+Defense-Wide activity as DARPA.
+
+Attempt 16 is fully terminal. Its latest-attempt inventory contains 25 rows on
+page 1 and an explicitly empty page 2: 20 success, the one real FY2025
+failure, reconcile and deploy skipped, and two queued/null envelopes. The
+cumulative inventory is 100 plus 100 plus 100 plus 78 rows and an empty page
+5. Artifacts total 54, all unexpired, with an empty page 2; branch runs total
+18 with an empty page 2. Rows `99974200153` and `99974200296` have completed
+step arrays byte-identical to failed real job `99974200547`, and attempt 16
+created exactly one raw artifact and no normalized artifact. On 2026-09-01
+the owner approved these two exact rows as inert aliases under this narrow
+failure-case evidence only. They are not executions, must never be counted or
+rerun, and do not establish a broader failed-run rule.
+
+The approved FY2025 dual pin, variance ledger, focused test, and this evidence
+record passed all local gates. DoD tests passed 16/16,
+reconcile/validation passed 15/15, registry validation passed 374/374, and the
+full unit suite passed 260 tests with one expected skip. The remaining fast-
+tier validators all passed: obligations, NIH, USAspending calibration,
+funding sentinel, DMS baseline, and award invariants. JSON and diff checks are
+green, and an adapter-equivalent exhaustive post-audit reverified all 14
+retained raw archives with zero unmapped keys. Publish exactly this five-file
+recovery as one strict child of
+`49915956f9d683f9b88ebf5f1e27c0596f1381a1` with the Stage 3 trigger blob
+unchanged. Re-inventory the fully terminal graph immediately before action,
+then rerun exactly current-attempt real failed job `99974200547` once. Never
+submit either alias row and never rerun the workflow as a whole.

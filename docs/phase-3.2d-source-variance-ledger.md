@@ -19,16 +19,17 @@ negative value means File B is higher.
 | 1 | NOAA ORF `013-1450` / FY2025 | $5,909,955,239.20 | $7,498,931,108.79 | −$1,588,975,869.59 | **26.8864%** | Live |
 | 2 | DHP `097-0130` / FY2025 | $46,920,693,135.53 | $46,765,241,257.73 | $155,451,877.80 | **0.3313%** | Pending |
 | 3 | NOAA PAC `013-1460` / FY2025 | $2,632,403,455.21 | $2,615,955,074.73 | $16,448,380.48 | **0.6248%** | Live |
-| 4 | Census Current `013-0401` / FY2025 | $343,719,439.23 | $345,384,177.96 | −$1,664,738.73 | **0.4843%** | Live |
-| 5 | DHS CWMD `070-0860` / FY2026 | $23,808,508.44 | $25,027,373.29 | −$1,218,864.85 | **5.1195%** | Live |
-| 6 | Navy RDT&E `017-1319` / FY2025 | $27,885,355,759.11 | $27,884,886,462.75 | $469,296.36 | **0.0017%** | Pending |
-| 7 | EPA S&T `068-0107` / FY2022 | $780,787,982.37 | $780,771,378.43 | $16,603.94 | **0.0021%** | Live |
-| 8 | Defense-Wide RDT&E `097-0400` / FY2023 | $35,077,389,781.09 | $35,077,388,772.51 | $1,008.58 | **0.0000%** | Pending |
+| 4 | Defense-Wide RDT&E `097-0400` / FY2025 | $38,136,458,827.72 | $38,123,623,075.40 | $12,835,752.32 | **0.0337%** | Pending |
+| 5 | Census Current `013-0401` / FY2025 | $343,719,439.23 | $345,384,177.96 | −$1,664,738.73 | **0.4843%** | Live |
+| 6 | DHS CWMD `070-0860` / FY2026 | $23,808,508.44 | $25,027,373.29 | −$1,218,864.85 | **5.1195%** | Live |
+| 7 | Navy RDT&E `017-1319` / FY2025 | $27,885,355,759.11 | $27,884,886,462.75 | $469,296.36 | **0.0017%** | Pending |
+| 8 | EPA S&T `068-0107` / FY2022 | $780,787,982.37 | $780,771,378.43 | $16,603.94 | **0.0021%** | Live |
+| 9 | Defense-Wide RDT&E `097-0400` / FY2023 | $35,077,389,781.09 | $35,077,388,772.51 | $1,008.58 | **0.0000%** | Pending |
 
 NOAA ORF is the clear magnitude outlier: its File B total exceeds File A by
 about $1.589 billion, or 26.9% of File A. It should receive the first post-
 project spot check. DHP is the second-largest disagreement in absolute dollars;
-Defense-Wide is the smallest.
+Defense-Wide FY2023 is the smallest.
 
 ## Evidence index
 
@@ -77,6 +78,15 @@ Defense-Wide is the smallest.
   the exact `100858`-cent dual pin on 2026-09-01; raw and Program Activity
   response digests are recorded in the JSON ledger. DARPA is included within
   this Defense-Wide federal account; the full account is not labeled DARPA.
+- **Defense-Wide RDT&E FY2025:** workflow run `33472362131`, attempt-16
+  source job `99974200547`, and raw artifact `9814928296`. The retained P12
+  File B archive totals `3812362307540` cents, exactly matching the separate
+  date-filtered 26-row Program Activity response with an explicitly empty
+  page 2. The official File A endpoint remains `3813645882772` cents. The
+  owner approved the exact `1283575232`-cent dual pin on 2026-09-01; raw,
+  nested File B, File A, and Program Activity response digests are recorded
+  in the JSON ledger. DARPA is included within this Defense-Wide federal
+  account; the full account is not labeled DARPA.
 - **EPA S&T FY2022:** workflow run `31787669479`, accepted retry job
   `94810063304`, raw artifact `9224418566`, and owner-approval commit
   `8c850bb5136d43092235eaddc1007f765ba70f37`. File B independently matched
