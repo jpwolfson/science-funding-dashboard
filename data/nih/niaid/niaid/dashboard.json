@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-31",
+ "generated": "2026-09-07",
  "node": {
   "name": "National Institute of Allergy and Infectious Diseases",
   "abbrev": "NIAID",
@@ -7,8 +7,11 @@
   "level": "division"
  },
  "source": "https://api.reporter.nih.gov/v2/projects/search (NIH RePORTER v2), administering IC NIAID; one application record per fiscal year; intramural projects excluded; dated by award notice, then budget/project start when unavailable",
- "warnings": [],
- "totalAwards": 78673,
+ "warnings": [
+  "1 stored awards not returned by this full re-pull; retained from the store",
+  "1 reviewed RePORTER retraction(s) returned to the live source; ledger review required"
+ ],
+ "totalAwards": 79342,
  "currentFY": 2026,
  "monthly": [
   {
@@ -1175,7 +1178,7 @@
   {
    "month": "2025-07",
    "awards": 981,
-   "dollars": 732775782,
+   "dollars": 732466418,
    "std": 414,
    "cont": 471,
    "fell": 93,
@@ -1183,17 +1186,17 @@
   },
   {
    "month": "2025-08",
-   "awards": 1311,
-   "dollars": 873837365,
+   "awards": 1312,
+   "dollars": 874023932,
    "std": 440,
-   "cont": 749,
+   "cont": 750,
    "fell": 116,
    "other": 6
   },
   {
    "month": "2025-09",
    "awards": 822,
-   "dollars": 548697212,
+   "dollars": 548694815,
    "std": 435,
    "cont": 290,
    "fell": 37,
@@ -1201,12 +1204,12 @@
   },
   {
    "month": "2025-10",
-   "awards": 23,
-   "dollars": 58947217,
+   "awards": 28,
+   "dollars": 84328876,
    "std": 0,
    "cont": 0,
    "fell": 0,
-   "other": 23
+   "other": 28
   },
   {
    "month": "2025-11",
@@ -1220,7 +1223,7 @@
   {
    "month": "2025-12",
    "awards": 460,
-   "dollars": 365231923,
+   "dollars": 365213887,
    "std": 24,
    "cont": 397,
    "fell": 34,
@@ -1229,7 +1232,7 @@
   {
    "month": "2026-01",
    "awards": 577,
-   "dollars": 512013266,
+   "dollars": 512080240,
    "std": 95,
    "cont": 449,
    "fell": 29,
@@ -1238,7 +1241,7 @@
   {
    "month": "2026-02",
    "awards": 452,
-   "dollars": 319147693,
+   "dollars": 318718269,
    "std": 267,
    "cont": 175,
    "fell": 9,
@@ -1246,56 +1249,65 @@
   },
   {
    "month": "2026-03",
-   "awards": 204,
-   "dollars": 115901817,
+   "awards": 207,
+   "dollars": 116040011,
    "std": 71,
    "cont": 98,
-   "fell": 35,
+   "fell": 38,
    "other": 0
   },
   {
    "month": "2026-04",
-   "awards": 612,
-   "dollars": 362684259,
-   "std": 215,
+   "awards": 616,
+   "dollars": 363275612,
+   "std": 216,
    "cont": 319,
-   "fell": 77,
+   "fell": 80,
    "other": 1
   },
   {
    "month": "2026-05",
-   "awards": 614,
-   "dollars": 421883662,
+   "awards": 624,
+   "dollars": 422392653,
    "std": 200,
    "cont": 345,
-   "fell": 69,
+   "fell": 79,
    "other": 0
   },
   {
    "month": "2026-06",
-   "awards": 956,
-   "dollars": 641349934,
-   "std": 338,
-   "cont": 550,
-   "fell": 68,
+   "awards": 971,
+   "dollars": 653413740,
+   "std": 341,
+   "cont": 558,
+   "fell": 72,
    "other": 0
   },
   {
    "month": "2026-07",
-   "awards": 986,
-   "dollars": 603294707,
-   "std": 383,
-   "cont": 538,
-   "fell": 65,
+   "awards": 1020,
+   "dollars": 609936805,
+   "std": 388,
+   "cont": 553,
+   "fell": 79,
    "other": 0
   },
   {
    "month": "2026-08",
-   "awards": 665,
-   "dollars": 406377507,
-   "std": 368,
-   "cont": 253,
-   "fell": 44,
+   "awards": 1110,
+   "dollars": 642864139,
+   "std": 554,
+   "cont": 433,
+   "fell": 123,
+   "other": 0
+  },
+  {
+   "month": "2026-09",
+   "awards": 152,
+   "dollars": 76549996,
+   "std": 110,
+   "cont": 36,
+   "fell": 6,
    "other": 0
   }
  ],
@@ -1663,13 +1675,13 @@
   {
    "fy": 2025,
    "partial": false,
-   "awards": 6781,
-   "dollars": 4955400723,
+   "awards": 6782,
+   "dollars": 4955275529,
    "median": 480000,
-   "exTop3Dollars": 4852749803,
+   "exTop3Dollars": 4852624609,
    "octJul": {
     "awards": 4648,
-    "dollars": 3532866146,
+    "dollars": 3532556782,
     "std": 1073,
     "cont": 3029,
     "fell": 299,
@@ -1699,17 +1711,17 @@
   {
    "fy": 2026,
    "partial": true,
-   "awards": 5642,
-   "dollars": 3880203034,
-   "median": 506860,
-   "exTop3Dollars": 3775554157,
+   "awards": 6310,
+   "dollars": 4238185277,
+   "median": 487735,
+   "exTop3Dollars": 4133536400,
    "octJul": {
-    "awards": 4977,
-    "dollars": 3473825527,
-    "std": 1593,
-    "cont": 2956,
-    "fell": 389,
-    "other": 39
+    "awards": 5048,
+    "dollars": 3518771142,
+    "std": 1602,
+    "cont": 2979,
+    "fell": 423,
+    "other": 44
    },
    "top3": [
     {
@@ -2749,72 +2761,72 @@
     {
      "d": 279,
      "awards": 3816,
-     "dollars": 2900388765
+     "dollars": 2900085790
     },
     {
      "d": 286,
      "awards": 3974,
-     "dollars": 3047581673
+     "dollars": 3047278698
     },
     {
      "d": 293,
      "awards": 4227,
-     "dollars": 3230838795
+     "dollars": 3230535820
     },
     {
      "d": 300,
      "awards": 4510,
-     "dollars": 3461045478
+     "dollars": 3460736114
     },
     {
      "d": 307,
-     "awards": 4743,
-     "dollars": 3586476402
+     "awards": 4744,
+     "dollars": 3586377925
     },
     {
      "d": 314,
-     "awards": 5116,
-     "dollars": 3811468085
+     "awards": 5117,
+     "dollars": 3811369608
     },
     {
      "d": 321,
-     "awards": 5411,
-     "dollars": 4036803560
+     "awards": 5412,
+     "dollars": 4036705083
     },
     {
      "d": 328,
-     "awards": 5761,
-     "dollars": 4257561683
+     "awards": 5762,
+     "dollars": 4257463206
     },
     {
      "d": 335,
-     "awards": 5970,
-     "dollars": 4410903594
+     "awards": 5971,
+     "dollars": 4410780797
     },
     {
      "d": 342,
-     "awards": 6229,
-     "dollars": 4582070255
+     "awards": 6230,
+     "dollars": 4581945061
     },
     {
      "d": 349,
-     "awards": 6455,
-     "dollars": 4714754405
+     "awards": 6456,
+     "dollars": 4714629211
     },
     {
      "d": 356,
-     "awards": 6617,
-     "dollars": 4826390340
+     "awards": 6618,
+     "dollars": 4826265146
     },
     {
      "d": 363,
-     "awards": 6747,
-     "dollars": 4907613966
+     "awards": 6748,
+     "dollars": 4907488772
     },
     {
      "d": 364,
-     "awards": 6781,
-     "dollars": 4955400723
+     "awards": 6782,
+     "dollars": 4955275529
     }
    ]
   },
@@ -2824,243 +2836,248 @@
    "points": [
     {
      "d": 6,
-     "awards": 23,
-     "dollars": 58947217
+     "awards": 28,
+     "dollars": 84328876
     },
     {
      "d": 13,
-     "awards": 23,
-     "dollars": 58947217
+     "awards": 28,
+     "dollars": 84328876
     },
     {
      "d": 20,
-     "awards": 23,
-     "dollars": 58947217
+     "awards": 28,
+     "dollars": 84328876
     },
     {
      "d": 27,
-     "awards": 23,
-     "dollars": 58947217
+     "awards": 28,
+     "dollars": 84328876
     },
     {
      "d": 34,
-     "awards": 23,
-     "dollars": 58947217
+     "awards": 28,
+     "dollars": 84328876
     },
     {
      "d": 41,
-     "awards": 23,
-     "dollars": 58947217
+     "awards": 28,
+     "dollars": 84328876
     },
     {
      "d": 48,
-     "awards": 28,
-     "dollars": 86848942
+     "awards": 33,
+     "dollars": 112230601
     },
     {
      "d": 55,
-     "awards": 52,
-     "dollars": 99261402
+     "awards": 57,
+     "dollars": 124643061
     },
     {
      "d": 62,
-     "awards": 159,
-     "dollars": 154067059
+     "awards": 164,
+     "dollars": 179448718
     },
     {
      "d": 69,
-     "awards": 308,
-     "dollars": 254683476
+     "awards": 313,
+     "dollars": 280065135
     },
     {
      "d": 76,
-     "awards": 361,
-     "dollars": 299581395
+     "awards": 366,
+     "dollars": 324963054
     },
     {
      "d": 83,
-     "awards": 424,
-     "dollars": 423507183
+     "awards": 429,
+     "dollars": 448870806
     },
     {
      "d": 90,
-     "awards": 546,
-     "dollars": 483915681
+     "awards": 551,
+     "dollars": 509279304
     },
     {
      "d": 97,
-     "awards": 640,
-     "dollars": 530088165
+     "awards": 645,
+     "dollars": 555443578
     },
     {
      "d": 104,
-     "awards": 772,
-     "dollars": 643422384
+     "awards": 777,
+     "dollars": 668852981
     },
     {
      "d": 111,
-     "awards": 889,
-     "dollars": 746469997
+     "awards": 894,
+     "dollars": 771900594
     },
     {
      "d": 118,
-     "awards": 1038,
-     "dollars": 924732020
+     "awards": 1043,
+     "dollars": 950162617
     },
     {
      "d": 125,
-     "awards": 1212,
-     "dollars": 1065883063
+     "awards": 1217,
+     "dollars": 1091313660
     },
     {
      "d": 132,
-     "awards": 1352,
-     "dollars": 1186694837
+     "awards": 1357,
+     "dollars": 1212125434
     },
     {
      "d": 139,
-     "awards": 1442,
-     "dollars": 1230653460
+     "awards": 1447,
+     "dollars": 1256084057
     },
     {
      "d": 146,
-     "awards": 1580,
-     "dollars": 1316091641
+     "awards": 1585,
+     "dollars": 1341092814
     },
     {
      "d": 153,
-     "awards": 1623,
-     "dollars": 1338777246
+     "awards": 1628,
+     "dollars": 1363778419
     },
     {
      "d": 160,
-     "awards": 1645,
-     "dollars": 1348229327
+     "awards": 1650,
+     "dollars": 1373230500
     },
     {
      "d": 167,
-     "awards": 1646,
-     "dollars": 1348311881
+     "awards": 1651,
+     "dollars": 1373313054
     },
     {
      "d": 174,
-     "awards": 1663,
-     "dollars": 1366101020
+     "awards": 1668,
+     "dollars": 1391102193
     },
     {
      "d": 181,
-     "awards": 1809,
-     "dollars": 1444612965
+     "awards": 1817,
+     "dollars": 1469752332
     },
     {
      "d": 188,
-     "awards": 2037,
-     "dollars": 1572130408
+     "awards": 2046,
+     "dollars": 1597319889
     },
     {
      "d": 195,
-     "awards": 2124,
-     "dollars": 1620640828
+     "awards": 2134,
+     "dollars": 1646270021
     },
     {
      "d": 202,
-     "awards": 2245,
-     "dollars": 1699672532
+     "awards": 2257,
+     "dollars": 1725428139
     },
     {
      "d": 209,
-     "awards": 2395,
-     "dollars": 1791036408
+     "awards": 2407,
+     "dollars": 1816767128
     },
     {
      "d": 216,
-     "awards": 2529,
-     "dollars": 1898489126
+     "awards": 2541,
+     "dollars": 1924219846
     },
     {
      "d": 223,
-     "awards": 2684,
-     "dollars": 2011559993
+     "awards": 2700,
+     "dollars": 2037502062
     },
     {
      "d": 230,
-     "awards": 2765,
-     "dollars": 2068412337
+     "awards": 2782,
+     "dollars": 2094389962
     },
     {
      "d": 237,
-     "awards": 2941,
-     "dollars": 2163772110
+     "awards": 2963,
+     "dollars": 2190011821
     },
     {
      "d": 244,
-     "awards": 3092,
-     "dollars": 2262757876
+     "awards": 3114,
+     "dollars": 2288997587
     },
     {
      "d": 251,
-     "awards": 3346,
-     "dollars": 2425565964
+     "awards": 3371,
+     "dollars": 2452403907
     },
     {
      "d": 258,
-     "awards": 3583,
-     "dollars": 2595612207
+     "awards": 3609,
+     "dollars": 2622526450
     },
     {
      "d": 265,
-     "awards": 3787,
-     "dollars": 2744979837
+     "awards": 3817,
+     "dollars": 2781656403
     },
     {
      "d": 272,
-     "awards": 3991,
-     "dollars": 2870530820
+     "awards": 4028,
+     "dollars": 2908834337
     },
     {
      "d": 279,
-     "awards": 4202,
-     "dollars": 2995028530
+     "awards": 4247,
+     "dollars": 3035897014
     },
     {
      "d": 286,
-     "awards": 4411,
-     "dollars": 3105921365
+     "awards": 4462,
+     "dollars": 3148684478
     },
     {
      "d": 293,
-     "awards": 4633,
-     "dollars": 3269517541
+     "awards": 4686,
+     "dollars": 3312614650
     },
     {
      "d": 300,
-     "awards": 4846,
-     "dollars": 3399116832
+     "awards": 4906,
+     "dollars": 3442993003
     },
     {
      "d": 307,
-     "awards": 5102,
-     "dollars": 3538753937
+     "awards": 5190,
+     "dollars": 3589852577
     },
     {
      "d": 314,
-     "awards": 5301,
-     "dollars": 3655308200
+     "awards": 5435,
+     "dollars": 3726559529
     },
     {
      "d": 321,
-     "awards": 5496,
-     "dollars": 3777532422
+     "awards": 5728,
+     "dollars": 3895869437
     },
     {
      "d": 328,
-     "awards": 5607,
-     "dollars": 3867398324
+     "awards": 5986,
+     "dollars": 4066427242
     },
     {
-     "d": 334,
-     "awards": 5642,
-     "dollars": 3880203034
+     "d": 335,
+     "awards": 6206,
+     "dollars": 4187614002
+    },
+    {
+     "d": 341,
+     "awards": 6310,
+     "dollars": 4238185277
     }
    ]
   }
