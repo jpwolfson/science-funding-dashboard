@@ -16,9 +16,87 @@ from adapters.obligation_common import (
     event_fingerprint, file_sha256, load_partition_provenance, load_store,
     period_info,
 )
+from scripts.obligation_retry_recovery import RecoveryError, RetryRecovery
 
 
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+
+
+def _load_pending_retry_contract(repo, errors):
+    """Load the exact recovery manifest without reading preserved evidence."""
+    path = repo / "reference" / "obligation_retry_recovery.json"
+    if not path.exists():
+        return None, set()
+    try:
+        manifest = json.loads(path.read_text())
+        recovery = RetryRecovery(repo, manifest, blob_reader=lambda _: b"")
+    except (OSError, json.JSONDecodeError, RecoveryError) as error:
+        errors.append(f"invalid obligation retry recovery contract: {error}")
+        return None, set()
+    file_b_periods = {
+        (row["accountPath"], row["fiscalYear"], archive["period"])
+        for row in manifest["rawEvidence"]
+        for archive in row["rawArchives"]
+        if archive["submissionType"] == "object_class_program_activity"
+    }
+    return recovery, file_b_periods
+
+
+def _is_pending_partial_pin_transition(
+        account, fy, pin, provenance, rows, recovery, file_b_periods):
+    """Recognize only the one-period transition sealed by retry evidence."""
+    if recovery is None or not rows:
+        return False
+    last = max(event["fiscalPeriod"] for event in rows)
+    previous_pin = (provenance or {}).get("baselinePin") or {}
+    try:
+        previous_file_b = baseline_file_b_cents(previous_pin)
+    except (KeyError, TypeError, ValueError):
+        return False
+    return (
+        pin.get("status") == "partial"
+        and pin.get("asOfPeriod") == last + 1
+        and recovery.baseline_pin(account["path"], fy) == pin
+        and (account["path"], fy, last + 1) in file_b_periods
+        and provenance.get("schemaVersion") == 2
+        and provenance.get("collectionStatus") == "accepted"
+        and provenance.get("accountPath") == account["path"]
+        and provenance.get("federalAccount") == account["federalAccount"]
+        and provenance.get("fiscalYear") == fy
+        and provenance.get("asOfPeriod") == last
+        and previous_pin.get("status") == "partial"
+        and previous_pin.get("asOfPeriod") == last
+        and not baseline_pin_problems(previous_pin)
+        and sum(event["amountCents"] for event in rows) == previous_file_b
+    )
+
+
+def _is_pending_neutral_child(account, pa, events, stats, file_b_periods):
+    """Allow a source-discovered neutral identity until its retry materializes."""
+    park = pa.get("park")
+    current_fy = stats.get("currentFY")
+    try:
+        period_fy, as_of_period, _ = period_info(stats.get("asOfPeriod"))
+    except (TypeError, ValueError):
+        return False
+    if (
+        not isinstance(park, str)
+        or not isinstance(current_fy, int)
+        or period_fy != current_fy
+    ):
+        return False
+    child_events = [
+        event for event in events
+        if (event["programActivityCode"], event["programActivityName"])
+        == (pa.get("code"), pa.get("name"))
+    ]
+    return (
+        not child_events
+        and pa.get("code") == park
+        and pa.get("slug") == f"source-label-unavailable-{park.lower()}"
+        and pa.get("name") == f"Source label unavailable (PARK {park})"
+        and (account["path"], current_fy, as_of_period + 1) in file_b_periods
+    )
 
 
 def load_baseline(repo, account):
@@ -170,6 +248,9 @@ def validate(repo=REPO, require_data=True, check_freshness=False,
     repo = Path(repo)
     as_of = as_of or date.today()
     errors = []
+    retry_recovery, pending_file_b_periods = _load_pending_retry_contract(
+        repo, errors
+    )
     config = json.loads((repo / "config" / "obligation_accounts.json").read_text())
     if config.get("schemaVersion") != 2:
         errors.append("obligation account registry schema must be v2")
@@ -336,12 +417,18 @@ def validate(repo=REPO, require_data=True, check_freshness=False,
             if pin["status"] == "partial":
                 first = min(e["fiscalPeriod"] for e in rows)
                 last = max(e["fiscalPeriod"] for e in rows)
+                provenance = load_partition_provenance(store, fy) or {}
                 if pin.get("firstPeriod") is not None and pin["firstPeriod"] != first:
                     errors.append(
                         f"FY{fy}: first P{first:02} != pinned P{pin['firstPeriod']:02}"
                     )
                 if pin.get("asOfPeriod") != last:
-                    errors.append(f"FY{fy}: latest P{last:02} has no same-period GTAS pin")
+                    if not _is_pending_partial_pin_transition(
+                            account, fy, pin, provenance, rows,
+                            retry_recovery, pending_file_b_periods):
+                        errors.append(
+                            f"FY{fy}: latest P{last:02} has no same-period GTAS pin"
+                        )
                 elif actual != expected_file_b:
                     errors.append(
                         f"FY{fy} P{last:02}: {actual} cents != pinned File B "
@@ -419,7 +506,12 @@ def validate(repo=REPO, require_data=True, check_freshness=False,
             for pa in account["programActivities"]:
                 child = repo / "data" / "obligations" / account["path"] / pa["slug"] / "dashboard.json"
                 if not child.exists():
-                    errors.append(f"{account['path']}/{pa['slug']}: missing dashboard.json")
+                    if not _is_pending_neutral_child(
+                            account, pa, events, stats,
+                            pending_file_b_periods):
+                        errors.append(
+                            f"{account['path']}/{pa['slug']}: missing dashboard.json"
+                        )
                     continue
                 child_page = json.loads(child.read_text())
                 child_events = [

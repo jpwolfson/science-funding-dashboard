@@ -19,6 +19,19 @@ REPOSITORY = "jpwolfson/science-funding-dashboard"
 RUN_ID = 34141166514
 SOURCE_SHA = "e8fa3b584fa1a66687667804ffa6d0f4f2d0a35d"
 EVIDENCE_SHA = "b2a5055aaec482cc10330ad7a57d09987e21c294"
+CWMD_P10_PIN = {
+    "asOfPeriod": 10,
+    "fileAFileBVarianceCents": -670_286_549,
+    "fileAFileBVarianceReason": (
+        "Official FY2026 P10 GTAS/File A is 1990656262 cents while the "
+        "accepted P10 File B Program Activity total is 2660942811 cents; "
+        "preserve the exact -670286549-cent official source variance with "
+        "File B canonical and no synthetic residual or tolerance."
+    ),
+    "fileBObligationsCents": 2_660_942_811,
+    "obligationsCents": 1_990_656_262,
+    "status": "partial",
+}
 ACCOUNT = {
     "path": "agency/account",
     "federalAccount": "999-0001",
@@ -222,7 +235,20 @@ class ObligationRetryRecoveryTests(unittest.TestCase):
         self.assertEqual(9, len(manifest["preservedArtifacts"]))
         self.assertEqual(8, len(manifest["rawEvidence"]))
         self.assertEqual(1, len(manifest["normalizedPartitions"]))
-        self.assertEqual([], manifest["baselinePins"])
+        self.assertEqual([{
+            "accountPath": "dhs/cwmd-rd",
+            "fiscalYear": 2026,
+            "pin": CWMD_P10_PIN,
+        }], manifest["baselinePins"])
+        baseline = json.loads(
+            (repo / "reference" / "dhs_cwmd_rd_obligation_baseline.json").read_text()
+        )
+        self.assertEqual(CWMD_P10_PIN, baseline["fiscalYears"]["2026"])
+        self.assertEqual(
+            CWMD_P10_PIN["obligationsCents"]
+            - CWMD_P10_PIN["fileBObligationsCents"],
+            CWMD_P10_PIN["fileAFileBVarianceCents"],
+        )
 
     def test_manifest_is_inert_outside_exact_retry(self):
         manifest, _, _, _ = fixture()

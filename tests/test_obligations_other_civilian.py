@@ -42,11 +42,11 @@ ACCOUNT_META = {
         "Department of Homeland Security", 14, 15, 5,
         [17605832081, 10010791277, 10949230982, 8622406989,
          5901650583, 6920298386, 6846038672, 5270214468,
-         2411547147, 2380850844],
+         2411547147, 1990656262],
     ),
     "dot/ost-research-technology": (
         "069-1730", "Research and Technology, Office of the Secretary",
-        "Department of Transportation", 17, 17, 10,
+        "Department of Transportation", 18, 17, 11,
         [1922122897, 2732465563, 2493949479, 3740353690, 2649410694,
          3865268634, 6050409337, 7360729545, 9006554583, 3661176477],
     ),
@@ -106,12 +106,12 @@ UNKNOWN_DISPLAY_PATHS = {
     }
 }
 
-CWMD_FY2026_FILE_B_CENTS = 2_502_737_329
-CWMD_FY2026_VARIANCE_CENTS = -121_886_485
+CWMD_FY2026_FILE_B_CENTS = 2_660_942_811
+CWMD_FY2026_VARIANCE_CENTS = -670_286_549
 CWMD_FY2026_VARIANCE_REASON = (
-    "Official FY2026 P09 GTAS/File A is 2380850844 cents while the accepted "
-    "P09 File B Program Activity total is 2502737329 cents; preserve the exact "
-    "-121886485-cent official source variance with File B canonical and no "
+    "Official FY2026 P10 GTAS/File A is 1990656262 cents while the accepted "
+    "P10 File B Program Activity total is 2660942811 cents; preserve the exact "
+    "-670286549-cent official source variance with File B canonical and no "
     "synthetic residual or tolerance."
 )
 
@@ -249,7 +249,8 @@ class OtherCivilianObligationTests(unittest.TestCase):
                         years[str(fy)],
                     )
                 expected_2026 = {
-                    "status": "partial", "asOfPeriod": 9,
+                    "status": "partial",
+                    "asOfPeriod": 10 if path == "dhs/cwmd-rd" else 9,
                     "obligationsCents": pins[-1],
                 }
                 if path == "dhs/cwmd-rd":
@@ -421,8 +422,10 @@ class OtherCivilianObligationTests(unittest.TestCase):
                 )
                 self.assertEqual(expected, rows)
             else:
+                current_period = 10 if path == "dhs/cwmd-rd" else 9
                 self.assertEqual(
-                    [(fy, 12) for fy in range(2017, 2026)] + [(2026, 9)],
+                    [(fy, 12) for fy in range(2017, 2026)]
+                    + [(2026, current_period)],
                     rows,
                 )
                 self._require_all_planned_pins(

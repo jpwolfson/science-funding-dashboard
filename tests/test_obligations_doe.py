@@ -21,12 +21,12 @@ EXPECTED = {
     "doe/arpa-e": ("089-0337", "Advanced Research Projects Agency-Energy", 4),
     "doe/eere": ("089-0321", "Energy Efficiency and Renewable Energy", 25),
     "doe/oced": ("089-2297", "Clean Energy Demonstrations", 21),
-    "doe/fossil-energy": ("089-0213", "Fossil Energy", 30),
+    "doe/fossil-energy": ("089-0213", "Fossil Energy", 31),
     "doe/electricity": ("089-0318", "Electricity", 19),
     "doe/ceser": (
         "089-2250", "Cybersecurity, Energy Security, and Emergency Response", 11,
     ),
-    "doe/nuclear-energy": ("089-0319", "Nuclear Energy", 26),
+    "doe/nuclear-energy": ("089-0319", "Nuclear Energy", 28),
     "doe/nnsa-weapons-activities": ("089-0240", "Weapons Activities", 23),
     "doe/nnsa-defense-nuclear-nonproliferation": (
         "089-0309", "Defense Nuclear Nonproliferation", 17,
@@ -36,10 +36,10 @@ EXPECTED = {
 
 PARK_ONLY_IDENTITIES = {
     "doe/eere": {"63YPT7SFFAZ"},
-    "doe/fossil-energy": {"5UWQ6Q4BYMT"},
+    "doe/fossil-energy": {"5UWQ6Q4BYMT", "63YPT7KCME5"},
     "doe/electricity": {"63YPT7S7RDC"},
     "doe/ceser": {"63YPTC2RBEP"},
-    "doe/nuclear-energy": {"63YPT7SACCH"},
+    "doe/nuclear-energy": {"63YPT7SACCH", "63YPT7SABUB", "63YPT7SACCY"},
     "doe/nnsa-defense-nuclear-nonproliferation": {"608PP9VRRFG"},
 }
 

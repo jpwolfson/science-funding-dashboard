@@ -6,10 +6,23 @@ from pathlib import Path
 from adapters.obligation_common import (
     event_fingerprint, normalize_event, partition_diff, write_store,
 )
-from scripts.validate_obligations import validate
+from scripts.validate_obligations import (
+    _is_pending_neutral_child,
+    _is_pending_partial_pin_transition,
+    validate,
+)
 
 
 class ObligationValidationTests(unittest.TestCase):
+    class FakeRecovery:
+        def __init__(self, pin):
+            self.pin = pin
+
+        def baseline_pin(self, account_path, fiscal_year):
+            if (account_path, fiscal_year) == ("dhs/cwmd-rd", 2026):
+                return self.pin
+            return None
+
     def fixture(self, expected):
         temp = tempfile.TemporaryDirectory()
         root = Path(temp.name)
@@ -74,6 +87,63 @@ class ObligationValidationTests(unittest.TestCase):
             self.assertEqual([], validate(root, require_data=False))
         finally:
             temp.cleanup()
+
+    def test_exact_pending_partial_pin_transition_passes(self):
+        account = {
+            "path": "dhs/cwmd-rd", "federalAccount": "070-0860",
+        }
+        old_pin = {
+            "status": "partial", "asOfPeriod": 9,
+            "obligationsCents": 100,
+        }
+        new_pin = {
+            "status": "partial", "asOfPeriod": 10,
+            "obligationsCents": 90, "fileBObligationsCents": 110,
+            "fileAFileBVarianceCents": -20,
+            "fileAFileBVarianceReason": "Exact official source variance",
+        }
+        row = normalize_event({
+            "id": "dhs-p09", "source": "file_b_residual",
+            "submissionPeriod": "FY2026P09", "federalAccount": "070-0860",
+            "programActivityCode": "0001", "programActivityName": "CWMD",
+            "amountCents": 100, "awardId": "", "linked": False,
+        })
+        provenance = {
+            "schemaVersion": 2, "collectionStatus": "accepted",
+            "accountPath": "dhs/cwmd-rd", "federalAccount": "070-0860",
+            "fiscalYear": 2026, "asOfPeriod": 9, "baselinePin": old_pin,
+        }
+        recovery = self.FakeRecovery(new_pin)
+        evidence = {("dhs/cwmd-rd", 2026, 10)}
+        self.assertTrue(_is_pending_partial_pin_transition(
+            account, 2026, new_pin, provenance, [row], recovery, evidence
+        ))
+        self.assertFalse(_is_pending_partial_pin_transition(
+            account, 2026, {**new_pin, "asOfPeriod": 11}, provenance,
+            [row], recovery, evidence
+        ))
+        self.assertFalse(_is_pending_partial_pin_transition(
+            account, 2026, new_pin, provenance, [row], recovery, set()
+        ))
+
+    def test_pending_neutral_child_is_exact_and_evidence_scoped(self):
+        account = {"path": "doe/sc"}
+        pa = {
+            "slug": "source-label-unavailable-63ypt7l1yuj",
+            "code": "63YPT7L1YUJ", "park": "63YPT7L1YUJ",
+            "name": "Source label unavailable (PARK 63YPT7L1YUJ)",
+        }
+        stats = {"currentFY": 2026, "asOfPeriod": "FY2026P09"}
+        evidence = {("doe/sc", 2026, 10)}
+        self.assertTrue(_is_pending_neutral_child(
+            account, pa, [], stats, evidence
+        ))
+        self.assertFalse(_is_pending_neutral_child(
+            account, {**pa, "slug": "invented"}, [], stats, evidence
+        ))
+        self.assertFalse(_is_pending_neutral_child(
+            account, pa, [], stats, set()
+        ))
 
     def test_one_cent_difference_fails(self):
         temp, root = self.fixture(101)

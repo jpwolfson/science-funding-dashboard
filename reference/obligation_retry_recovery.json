@@ -1,5 +1,18 @@
 {
- "baselinePins": [],
+ "baselinePins": [
+  {
+   "accountPath": "dhs/cwmd-rd",
+   "fiscalYear": 2026,
+   "pin": {
+    "asOfPeriod": 10,
+    "fileAFileBVarianceCents": -670286549,
+    "fileAFileBVarianceReason": "Official FY2026 P10 GTAS/File A is 1990656262 cents while the accepted P10 File B Program Activity total is 2660942811 cents; preserve the exact -670286549-cent official source variance with File B canonical and no synthetic residual or tolerance.",
+    "fileBObligationsCents": 2660942811,
+    "obligationsCents": 1990656262,
+    "status": "partial"
+   }
+  }
+ ],
  "evidenceBranch": "agent/3-2d-retry-artifact-operation",
  "evidenceCommit": "b2a5055aaec482cc10330ad7a57d09987e21c294",
  "headBranch": "main",
