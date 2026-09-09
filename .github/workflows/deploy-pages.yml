@@ -10,6 +10,8 @@ on:
       - "data/nsf/**"
       - "data/nih/**"
       - "data/sentinel/**"
+      - "scripts/assemble_pages_site.py"
+      - "scripts/check_pages_footprint.py"
       - ".github/workflows/deploy-pages.yml"
   workflow_dispatch:
 
@@ -44,10 +46,11 @@ jobs:
         # every worker and CI job runs.
         run: python scripts/verify.py --tier fast --json _verify-fast.json
       - name: Assemble site
-        run: |
-          mkdir -p _site
-          cp site/index.html _site/
-          cp -r data _site/data
+        run: python scripts/assemble_pages_site.py --output _site
+      - name: Check GitHub Pages footprint (warn at 850 MB; stop at 950 MB)
+        run: >-
+          python scripts/check_pages_footprint.py
+          --site-root _site --json _pages-footprint.json
       - name: Configure Pages
         uses: actions/configure-pages@v5
         with:

@@ -19,9 +19,10 @@ from adapters.obligation_common import canonical_period, cents, normalize_event,
 API = "https://api.usaspending.gov/api/v2"
 _LAST_DOWNLOAD_REQUEST = 0.0
 DOWNLOAD_COOLDOWN_SECONDS = 20
+DOWNLOAD_STATUS_TIMEOUT_SECONDS = 7200
 
 
-def _json(url, payload=None, attempts=10):
+def _json(url, payload=None, attempts=10, retry_not_found=False):
     body = None if payload is None else json.dumps(payload).encode()
     request = urllib.request.Request(url, data=body,
                                      headers={"Content-Type": "application/json",
@@ -33,7 +34,11 @@ def _json(url, payload=None, attempts=10):
         except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError,
                 http.client.RemoteDisconnected) as error:
             code = getattr(error, "code", None)
-            if attempt + 1 == attempts or (code is not None and code not in (429, 500, 502, 503, 504)):
+            retryable_codes = {429, 500, 502, 503, 504}
+            if retry_not_found:
+                retryable_codes.add(404)
+            if (attempt + 1 == attempts
+                    or (code is not None and code not in retryable_codes)):
                 raise
             delay = min(60, 2 ** attempt)
             print(
@@ -43,7 +48,7 @@ def _json(url, payload=None, attempts=10):
             time.sleep(delay)
 
 
-def _bytes(url, attempts=6):
+def _bytes(url, attempts=10):
     for attempt in range(attempts):
         try:
             request = urllib.request.Request(url, headers={"User-Agent": "science-funding-dashboard/1"})
@@ -70,6 +75,50 @@ def resolve_account(account, fiscal_year):
     return str(row["id"]), row
 
 
+def _download_request_payload(
+    account_id, fiscal_year, period, submission_type, columns,
+):
+    return {
+        "account_level": "federal_account",
+        "file_format": "csv",
+        "filters": {
+            "fy": fiscal_year,
+            "period": period,
+            "submission_types": [submission_type],
+            "federal_account": str(account_id),
+        },
+        "columns": list(columns),
+    }
+
+
+def _validate_download_result(result, payload, require_echo=False):
+    echoed = result.get("download_request") or {}
+    filters = echoed.get("filters", {})
+    expected = payload["filters"]
+    mismatched = (
+        filters.get("federal_account") != expected["federal_account"]
+        or int(filters.get("fy", -1)) != expected["fy"]
+        or int(filters.get("period", -1)) != expected["period"]
+        or echoed.get("download_types") != expected["submission_types"]
+        or echoed.get("account_level") != payload["account_level"]
+        or echoed.get("file_format") != payload["file_format"]
+        or echoed.get("columns") != payload["columns"]
+    )
+    if require_echo and not echoed:
+        raise ValueError("USAspending resume result omitted the accepted request scope")
+    if echoed and mismatched:
+        raise ValueError(f"USAspending echoed a different request scope: {echoed}")
+    status_url = str(result.get("status_url", ""))
+    if not (
+        status_url.startswith(
+            "https://api.usaspending.gov/api/v2/download/status"
+        )
+        or status_url.startswith("/api/v2/download/status")
+    ):
+        raise ValueError(f"unexpected download status host: {status_url}")
+    return result, payload
+
+
 def request_download(account_id, fiscal_year, period, submission_type, columns):
     global _LAST_DOWNLOAD_REQUEST
     # Custom-account generation is resource-intensive and the public service
@@ -78,31 +127,37 @@ def request_download(account_id, fiscal_year, period, submission_type, columns):
     elapsed = time.monotonic() - _LAST_DOWNLOAD_REQUEST
     if elapsed < DOWNLOAD_COOLDOWN_SECONDS:
         time.sleep(DOWNLOAD_COOLDOWN_SECONDS - elapsed)
-    payload = {"account_level": "federal_account", "file_format": "csv",
-               "filters": {"fy": fiscal_year, "period": period,
-                           "submission_types": [submission_type],
-                           "federal_account": str(account_id)},
-               "columns": columns}
+    payload = _download_request_payload(
+        account_id, fiscal_year, period, submission_type, columns
+    )
     result = _json(f"{API}/download/accounts/", payload, attempts=20)
     _LAST_DOWNLOAD_REQUEST = time.monotonic()
-    echoed = result.get("download_request") or {}
-    filters = echoed.get("filters", {})
-    if echoed and (filters.get("federal_account") != str(account_id)
-                   or int(filters.get("fy", -1)) != fiscal_year
-                   or int(filters.get("period", -1)) != period
-                   or echoed.get("download_types") != [submission_type]):
-        raise ValueError(f"USAspending echoed a different request scope: {echoed}")
-    return result, payload
+    return _validate_download_result(result, payload)
 
 
-def finish_download(result, timeout=1800, poll_seconds=15):
+def resume_download(account_id, fiscal_year, period, submission_type, columns,
+                    result):
+    """Validate and resume one previously accepted official download."""
+    payload = _download_request_payload(
+        account_id, fiscal_year, period, submission_type, columns
+    )
+    return _validate_download_result(result, payload, require_echo=True)
+
+
+def finish_download(
+    result, timeout=DOWNLOAD_STATUS_TIMEOUT_SECONDS, poll_seconds=15,
+):
     global _LAST_DOWNLOAD_REQUEST
     status_url = result["status_url"]
     if status_url.startswith("/"):
         status_url = "https://api.usaspending.gov" + status_url
     deadline = time.monotonic() + timeout
     while True:
-        status = _json(status_url)
+        # A newly accepted custom-download request can briefly return 404 from
+        # its status URL while USAspending's workers converge.  Treat that as
+        # transient only here; account and inventory 404s must still fail
+        # immediately.
+        status = _json(status_url, attempts=20, retry_not_found=True)
         state = str(status.get("status", "")).lower()
         if state == "finished":
             break

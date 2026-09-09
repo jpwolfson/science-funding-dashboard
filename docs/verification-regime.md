@@ -45,6 +45,12 @@ verifier is agency-uniform; see the module docstring of
 | `rendered` | ~9 s | Existing headless-Chrome smoke matrices (`smoke_obligation_pages.py`, `smoke_sentinel_page.py`) **plus** `smoke_obligation_pages.py --all-accounts`, which renders every registered account page and one Program Activity sub-page per account, both themes, discovered from the registry — never a hardcoded path list. Zero console errors is part of every case. | 0 pass / 1 fail / 2 usage |
 | `screens` | ~6 s (1 account today) | Reader-review screenshot pack: obligations landing, every account page, one Program Activity page per agency, the sentinel page, and the award root, light mode, 1100 px wide, full page, to `--out` (default OS temp dir). Prints the manifest. **Never pass/fails** — it is a release-bar input for a human/fresh-agent reader review (working regime item 5), not a mechanical gate. | always 0 (usage errors still exit 2) |
 
+Any change that can move chart geometry — series endpoints or extents, axis
+ranges, point density, or period boundaries — requires `rendered` plus a
+before/after look at the affected chart's screenshot before merge. The
+`screens` tier may be scoped to touched pages; routine changes do not require
+a full reader review.
+
 Costs above were measured on this branch with 1 registered obligation
 account (DOE SC) and 132 award-ledger dashboards; they will grow with the
 registry, and the ~60 s fast-tier target has substantial headroom.
@@ -99,6 +105,16 @@ summary:
     "perTreeBytes": {"data": 80352642, "reference": 455405, "...": "..."},
     "totalTrackedBytes": 81484660,
     "gzippedStoreBytes": 39084835,   // committed *.gz store files under data/
+    "pagesArtifact": {
+      "fileCount": 1234,
+      "totalBytes": 42000000,        // exact runtime artifact before tar packaging
+      "status": "ok",                // ok | warning | stop
+      "warningThresholdBytes": 850000000,
+      "stopThresholdBytes": 950000000,
+      "pagesLimitBytes": 1000000000,
+      "headroomBytes": 958000000,
+      "excludedFromArtifact": "data/obligations/**/events/*.csv.gz"
+    },
     "trajectory": {                  // null if git history has no data/-touching commit
       "method": "linear extrapolation of the data/ tree's committed byte total "
                 "from the first commit that touched data/ to HEAD, projected 52 weeks forward",
@@ -122,6 +138,23 @@ summary:
 Each check's `evidence` is always the last non-empty line the underlying
 script printed to stdout/stderr — its own pass message, or its own fail
 message, so the JSON evidence is exactly what a human sees on the terminal.
+
+Every Pages-producing workflow uses `scripts/assemble_pages_site.py`, which
+copies all runtime JSON and the site shell while retaining normalized
+obligation event CSV archives in Git only. The browser does not request those
+audit shards. `scripts/check_pages_footprint.py` measures the assembled tree,
+emits a GitHub Actions warning at 850,000,000 bytes, and fails before upload at
+950,000,000 bytes, leaving 50 MB below GitHub Pages' 1 GB site limit. CI runs
+the same assembly and gate before merge. Warning and stop states appear both
+as workflow annotations and in the GitHub job summary; every displayed byte
+count is measured from `_site`, never inferred from the repository tree.
+
+Rendered smoke matrices serve `_site` produced by that assembler. Their link
+gate resolves every relative link against the assembled tree, renders every
+NSF division with an `awards.csv` download, and fails if any normalized
+obligation event archive is Pages-relative. NSF award CSVs remain in Pages;
+obligation event archives remain Git-only and any future public link to one
+must use `github.com`.
 
 ## Specialization schema
 
@@ -152,6 +185,9 @@ a verifier needs is a new column here, added once, not a per-agency branch.
 | `source` | Human-readable citation for the pinned figures (e.g. "USAspending federal account fiscal-year snapshots (GTAS/File A)"). Required non-empty. |
 | `fiscalYears.<FY>.status` | `complete` (or `available`, accepted as a synonym) / `partial` / `unavailable` — the completeness state pinned for that fiscal year. |
 | `fiscalYears.<FY>.obligationsCents` | The pinned GTAS/File A cents total (whole-FY for `complete`, as-of-period for `partial`). |
+| `fiscalYears.<FY>.fileBObligationsCents` | Optional exact canonical File B cents total, used only when the official source exposes a documented File A/File B variance. Omit for ordinary exact-equality rows. |
+| `fiscalYears.<FY>.fileAFileBVarianceCents` | Required with `fileBObligationsCents`; must equal `obligationsCents - fileBObligationsCents` exactly and must be non-zero. |
+| `fiscalYears.<FY>.fileAFileBVarianceReason` | Required non-empty source disclosure when the dual-pin fields are present. |
 | `fiscalYears.<FY>.firstPeriod` / `asOfPeriod` | For `partial` years: the first reporting period covered and the period the pin is as-of. |
 | `fiscalYears.<FY>.reason` | Required for `unavailable` years — why no pin exists (e.g. "Files A/B/C begin in FY2017 Q2"). |
 
@@ -185,18 +221,25 @@ GitHub reruns use the workflow definition and `GITHUB_SHA`/`GITHUB_REF` from
 the original event. An obligation run started before raw audit archives gained
 their `-attempt${{ github.run_attempt }}` suffix will therefore try to reuse an
 attempt-1 raw artifact name when a failed matrix job is rerun. The normalized
-partition name intentionally stays stable and is not part of this recovery.
+partition name intentionally stays stable. It is included in recovery only
+when a job uploaded that accepted partition and then failed while finalizing
+its raw evidence.
 
 Use `preserve-obligation-retry-artifacts.yml` only after the source workflow
 run is terminal. Its input is a schema-v1 manifest pinning one run ID and each
-raw artifact's exact ID, name, and `sha256:` digest. The recovery job:
+conflicting obligation artifact's exact ID, name, and `sha256:` digest. The
+optional `deleteAfterPreserve` flag is `false` for reusable evidence that does
+not conflict on retry; omission defaults to `true` for the legacy raw-only
+operation. The recovery job:
 
-1. rejects normalized/non-obligation names and an active source run;
-2. re-fetches exact remote metadata, downloads every raw ZIP, and verifies its
+1. rejects non-obligation names and an active source run;
+2. re-fetches exact remote metadata, downloads every artifact ZIP, and verifies its
    digest;
-3. uploads the complete preservation bundle with fourteen-day retention; and
-4. revalidates every local ZIP and remote record before deleting only those
-   exact source artifacts.
+3. uploads the complete preservation bundle with fourteen-day retention and,
+   for the dedicated push trigger, commits the same bytes to that operational
+   branch before deletion; and
+4. revalidates every preserved ZIP and remote record before deleting only the
+   exact source artifacts explicitly marked for deletion.
 
 Only after that recovery job succeeds may the source run's failed jobs be
 rerun once. The empty trigger file is inert on `main`; a coordinator changes it

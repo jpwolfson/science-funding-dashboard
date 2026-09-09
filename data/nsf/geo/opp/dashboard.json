@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-12",
+ "generated": "2026-09-07",
  "node": {
   "name": "Office of Polar Programs (OPP)",
   "abbrev": "OPP",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.nsf.gov/services/v1/awards.json?org_code_div=06090000 (NSF Award Search API), month-by-month on Original Award Date",
  "warnings": [],
- "totalAwards": 2346,
+ "totalAwards": 2364,
  "currentFY": 2026,
  "monthly": [
   {
@@ -1291,9 +1291,18 @@
   },
   {
    "month": "2026-08",
-   "awards": 17,
-   "dollars": 6905734,
-   "std": 17,
+   "awards": 35,
+   "dollars": 13355263,
+   "std": 35,
+   "cont": 0,
+   "fell": 0,
+   "other": 0
+  },
+  {
+   "month": "2026-09",
+   "awards": 0,
+   "dollars": 0,
+   "std": 0,
    "cont": 0,
    "fell": 0,
    "other": 0
@@ -1699,10 +1708,10 @@
   {
    "fy": 2026,
    "partial": true,
-   "awards": 72,
-   "dollars": 96943899,
-   "median": 354221,
-   "exTop3Dollars": 30620371,
+   "awards": 90,
+   "dollars": 103393428,
+   "median": 343806,
+   "exTop3Dollars": 37069900,
    "octJul": {
     "awards": 55,
     "dollars": 90038165,
@@ -3044,16 +3053,41 @@
     },
     {
      "d": 314,
-     "awards": 72,
-     "dollars": 96943899
+     "awards": 82,
+     "dollars": 100883878
     },
     {
-     "d": 315,
-     "awards": 72,
-     "dollars": 96943899
+     "d": 321,
+     "awards": 85,
+     "dollars": 101652202
+    },
+    {
+     "d": 328,
+     "awards": 87,
+     "dollars": 102183047
+    },
+    {
+     "d": 335,
+     "awards": 90,
+     "dollars": 103393428
+    },
+    {
+     "d": 341,
+     "awards": 90,
+     "dollars": 103393428
     }
    ]
   }
  ],
- "children": []
+ "children": [],
+ "provider": "nsf",
+ "dataComplete": true,
+ "storeFormat": "csv",
+ "amountNote": "Dollar figures are intended totals (estimatedTotalAmt), not outlays.",
+ "mechanismLabels": {
+  "std": "Standard grants",
+  "cont": "Continuing grants",
+  "fell": "Fellowships",
+  "other": "Other awards"
+ }
 }

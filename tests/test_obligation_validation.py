@@ -49,6 +49,25 @@ class ObligationValidationTests(unittest.TestCase):
         )
         return temp, root
 
+    def set_dual_pin(self, root, file_a=101, file_b=100, variance=1,
+                     reason="Official source warning A19"):
+        pin = {
+            "status": "complete",
+            "obligationsCents": file_a,
+            "fileBObligationsCents": file_b,
+            "fileAFileBVarianceCents": variance,
+            "fileAFileBVarianceReason": reason,
+        }
+        baseline = root / "reference" / "doe_sc_obligation_baseline.json"
+        value = json.loads(baseline.read_text())
+        value["fiscalYears"]["2024"] = pin
+        baseline.write_text(json.dumps(value))
+        provenance = (root / "data" / "obligations" / "doe" / "sc" /
+                      "events" / "FY2024.provenance.json")
+        value = json.loads(provenance.read_text())
+        value["baselinePin"] = pin
+        provenance.write_text(json.dumps(value))
+
     def test_exact_gtas_cents_pass(self):
         temp, root = self.fixture(100)
         try:
@@ -60,6 +79,52 @@ class ObligationValidationTests(unittest.TestCase):
         temp, root = self.fixture(101)
         try:
             self.assertTrue(any("!= GTAS" in e for e in validate(root, require_data=False)))
+        finally:
+            temp.cleanup()
+
+    def test_dual_exact_file_a_file_b_pins_pass(self):
+        temp, root = self.fixture(100)
+        try:
+            self.set_dual_pin(root)
+            self.assertEqual([], validate(root, require_data=False))
+        finally:
+            temp.cleanup()
+
+    def test_dual_pin_variance_arithmetic_fails_closed(self):
+        temp, root = self.fixture(100)
+        try:
+            self.set_dual_pin(root, variance=2)
+            self.assertTrue(any(
+                "File A minus File B" in error
+                for error in validate(root, require_data=False)
+            ))
+        finally:
+            temp.cleanup()
+
+    def test_dual_pin_still_requires_exact_file_b_cents(self):
+        temp, root = self.fixture(100)
+        try:
+            self.set_dual_pin(root, file_b=99, variance=2)
+            self.assertTrue(any(
+                "!= pinned File B 99 cents" in error
+                for error in validate(root, require_data=False)
+            ))
+        finally:
+            temp.cleanup()
+
+    def test_source_unavailable_year_with_events_fails_without_pin_lookup(self):
+        temp, root = self.fixture(100)
+        try:
+            baseline = root / "reference" / "doe_sc_obligation_baseline.json"
+            value = json.loads(baseline.read_text())
+            value["fiscalYears"]["2024"] = {
+                "status": "unavailable", "reason": "No official source",
+            }
+            baseline.write_text(json.dumps(value))
+            self.assertTrue(any(
+                "events exist for a source-unavailable year" in error
+                for error in validate(root, require_data=False)
+            ))
         finally:
             temp.cleanup()
 
@@ -147,6 +212,68 @@ class ObligationValidationTests(unittest.TestCase):
                              errors)
         finally:
             temp.cleanup()
+
+    def test_source_variance_ledger_exactly_covers_all_dual_pins(self):
+        repo = Path(__file__).resolve().parent.parent
+        registry = json.loads(
+            (repo / "config" / "obligation_accounts.json").read_text()
+        )
+        ledger = json.loads(
+            (repo / "reference" /
+             "obligation_source_variance_ledger.json").read_text()
+        )
+        self.assertEqual(1, ledger["schemaVersion"])
+        entries = {
+            (row["accountPath"], row["fiscalYear"]): row
+            for row in ledger["entries"]
+        }
+        self.assertEqual(len(ledger["entries"]), len(entries))
+
+        expected = {}
+        for account in registry["accounts"]:
+            baseline = json.loads((repo / account["baseline"]).read_text())
+            for fiscal_year, pin in baseline["fiscalYears"].items():
+                if "fileBObligationsCents" in pin:
+                    expected[(account["path"], int(fiscal_year))] = (
+                        account, pin
+                    )
+        self.assertEqual(set(expected), set(entries))
+
+        for key, (account, pin) in expected.items():
+            with self.subTest(account=key[0], fiscal_year=key[1]):
+                row = entries[key]
+                variance = (
+                    pin["obligationsCents"] -
+                    pin["fileBObligationsCents"]
+                )
+                ppm = (
+                    abs(variance) * 1_000_000 +
+                    abs(pin["obligationsCents"]) // 2
+                ) // abs(pin["obligationsCents"])
+                self.assertEqual(account["federalAccount"],
+                                 row["federalAccount"])
+                self.assertEqual(pin["obligationsCents"],
+                                 row["fileAObligationsCents"])
+                self.assertEqual(pin["fileBObligationsCents"],
+                                 row["fileBObligationsCents"])
+                self.assertEqual(pin["fileAFileBVarianceCents"],
+                                 row["fileAFileBVarianceCents"])
+                self.assertEqual(variance, row["fileAFileBVarianceCents"])
+                self.assertEqual(abs(variance),
+                                 row["absoluteVarianceCents"])
+                self.assertEqual(ppm, row["absoluteVariancePpmOfFileA"])
+                self.assertEqual(pin["fileAFileBVarianceReason"],
+                                 row["reason"])
+                self.assertEqual(account["baseline"], row["baseline"])
+                self.assertEqual("approved",
+                                 row["ownerApproval"]["status"])
+                evidence = row["evidence"]
+                self.assertGreater(evidence["workflowRunId"], 0)
+                self.assertGreater(evidence["workflowJobId"], 0)
+                self.assertGreater(evidence["rawArtifactId"], 0)
+                self.assertRegex(
+                    evidence["rawArtifactSha256"], r"^[0-9a-f]{64}$"
+                )
 
 
 if __name__ == "__main__":

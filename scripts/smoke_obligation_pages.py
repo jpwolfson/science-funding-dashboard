@@ -10,6 +10,7 @@ import shutil
 import socket
 import struct
 import subprocess
+import sys
 import tempfile
 import threading
 import time
@@ -20,8 +21,13 @@ from pathlib import Path
 from urllib.parse import quote, urlparse
 from urllib.request import Request, urlopen
 
-
 REPO = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO))
+
+from scripts.assemble_pages_site import (  # noqa: E402
+    assemble_pages_site,
+    rendered_link_problems,
+)
 
 
 class QuietHandler(SimpleHTTPRequestHandler):
@@ -135,37 +141,101 @@ def _free_port():
     return port
 
 
+def _stop_chrome(process):
+    """Terminate one isolated Chrome process group and retain a short log tail."""
+    try:
+        os.killpg(process.pid, signal.SIGTERM)
+    except ProcessLookupError:
+        pass
+    try:
+        process.wait(timeout=5)
+    except subprocess.TimeoutExpired:
+        try:
+            os.killpg(process.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+        process.wait(timeout=5)
+    stderr = ""
+    if process.stderr:
+        try:
+            stderr = process.stderr.read()
+        finally:
+            process.stderr.close()
+    return stderr.strip()[-2000:]
+
+
+def _wait_for_devtools(process, port, timeout):
+    endpoint = f"http://127.0.0.1:{port}"
+    deadline = time.monotonic() + timeout
+    last_error = None
+    while True:
+        try:
+            request = Request(
+                endpoint + "/json/new?" + quote("about:blank", safe=""),
+                method="PUT",
+            )
+            return json.load(urlopen(request, timeout=2))
+        except Exception as error:
+            last_error = error
+            returncode = process.poll()
+            if returncode is not None:
+                raise RuntimeError(
+                    f"Chrome exited with status {returncode} before its "
+                    f"DevTools endpoint started: {error}"
+                ) from error
+            if time.monotonic() >= deadline:
+                raise TimeoutError(
+                    f"Chrome DevTools endpoint did not respond within "
+                    f"{timeout}s: {last_error}"
+                ) from error
+            time.sleep(0.1)
+
+
+def _start_chrome(executable, profile_root, attempts=2, startup_timeout=20):
+    """Start Chrome with one bounded cold-start retry.
+
+    Only process startup is retried. Once DevTools answers, every page render,
+    console diagnostic, and contract assertion still runs exactly once.
+    """
+    failures = []
+    last_error = None
+    for attempt in range(1, attempts + 1):
+        port = _free_port()
+        profile = Path(profile_root) / f"attempt-{attempt}"
+        process = None
+        try:
+            process = subprocess.Popen([
+                executable, "--headless=new", "--disable-gpu", "--no-sandbox",
+                "--disable-dev-shm-usage", "--hide-scrollbars",
+                f"--user-data-dir={profile}", f"--remote-debugging-port={port}",
+                "--remote-allow-origins=*", "about:blank",
+            ], stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True,
+               start_new_session=True)
+            page = _wait_for_devtools(process, port, startup_timeout)
+            return process, page
+        except Exception as error:
+            last_error = error
+            stderr = _stop_chrome(process) if process else ""
+            diagnostic = f"attempt {attempt}: {type(error).__name__}: {error}"
+            if stderr:
+                diagnostic += f"; Chrome stderr: {stderr}"
+            failures.append(diagnostic)
+    raise RuntimeError(
+        "Chrome DevTools endpoint did not start after "
+        f"{attempts} attempts: {' | '.join(failures)}"
+    ) from last_error
+
+
 def render_page(executable, url, width, height, theme, screenshot_path=None):
     """Render `url` headlessly and return (document, diagnostics). When
     `screenshot_path` is given, additionally capture a full-page PNG (the
     viewport is grown to the page's actual content height first, so the
     shot is not clipped) and write it there -- used by the screens tier's
     reader-review pack, which never gates pass/fail."""
-    port = _free_port()
-    with tempfile.TemporaryDirectory() as profile:
-        process = subprocess.Popen([
-            executable, "--headless=new", "--disable-gpu", "--no-sandbox",
-            "--disable-dev-shm-usage", "--hide-scrollbars",
-            f"--user-data-dir={profile}", f"--remote-debugging-port={port}",
-            "--remote-allow-origins=*", "about:blank",
-        ], stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True,
-           start_new_session=True)
+    with tempfile.TemporaryDirectory() as profile_root:
+        process, page = _start_chrome(executable, profile_root)
         client = None
         try:
-            endpoint = f"http://127.0.0.1:{port}"
-            deadline = time.monotonic() + 15
-            while True:
-                try:
-                    request = Request(
-                        endpoint + "/json/new?" + quote("about:blank", safe=""),
-                        method="PUT",
-                    )
-                    page = json.load(urlopen(request, timeout=2))
-                    break
-                except Exception:
-                    if process.poll() is not None or time.monotonic() >= deadline:
-                        raise RuntimeError("Chrome DevTools endpoint did not start")
-                    time.sleep(0.1)
             client = DevToolsSocket(page["webSocketDebuggerUrl"])
             client.call("Page.enable")
             client.call("Runtime.enable")
@@ -225,18 +295,7 @@ def render_page(executable, url, width, height, theme, screenshot_path=None):
                     client.close()
                 except OSError:
                     pass
-            try:
-                os.killpg(process.pid, signal.SIGTERM)
-            except ProcessLookupError:
-                pass
-            try:
-                process.wait(timeout=5)
-            except subprocess.TimeoutExpired:
-                try:
-                    os.killpg(process.pid, signal.SIGKILL)
-                except ProcessLookupError:
-                    pass
-                process.wait(timeout=5)
+            _stop_chrome(process)
 
 
 def chrome_path(explicit=None):
@@ -326,7 +385,7 @@ def page_matrix(repo):
     ]
 
 
-def _evaluate_case(document, diagnostic, width, theme):
+def _evaluate_case(document, diagnostic, width, theme, site_root=None):
     """Zero-console-error, keyboard-accessible, real-data checks shared by
     every rendered case, whichever matrix produced it."""
     rendered, visible_text = document["html"], document["text"]
@@ -345,17 +404,21 @@ def _evaluate_case(document, diagnostic, width, theme):
         case_errors.append("page recorded a network failure")
     if "No data yet for this unit" in visible_text:
         case_errors.append("known dashboard rendered as missing data")
-    for marker in ("Uncaught ", "net::ERR_", "exceptionDetails"):
-        if marker in diagnostic:
-            case_errors.append(f"browser diagnostic contains {marker.strip()}")
+    if diagnostic.strip():
+        case_errors.append("browser diagnostic: " + diagnostic.strip())
     links = Links()
     links.feed(rendered)
     if not links.hrefs:
         case_errors.append("rendered page has no keyboard-native links")
-    invalid_links = [href for href in links.hrefs
-                     if "localhost" in href or href.startswith("file:")]
-    if invalid_links:
-        case_errors.append(f"non-public links remain: {invalid_links[:3]}")
+    if site_root is None:
+        invalid_links = [href for href in links.hrefs
+                         if "localhost" in href or href.startswith("file:")]
+        if invalid_links:
+            case_errors.append(f"non-public links remain: {invalid_links[:3]}")
+    else:
+        link_errors = rendered_link_problems(links.hrefs, site_root)
+        if link_errors:
+            case_errors.append(f"public-link integrity: {link_errors[:3]}")
     if 'tabindex="-1"' in rendered:
         case_errors.append("rendered controls remove keyboard focus")
     return case_errors
@@ -368,9 +431,8 @@ def _run_matrix(repo, matrix, chrome=None):
         raise AssertionError("visible keyboard focus styling is missing")
     executable = chrome_path(chrome)
     assembly = tempfile.TemporaryDirectory()
-    assembly_path = Path(assembly.name)
-    shutil.copy2(repo / "site" / "index.html", assembly_path / "index.html")
-    os.symlink(repo / "data", assembly_path / "data", target_is_directory=True)
+    assembly_path = Path(assembly.name) / "_site"
+    artifact = assemble_pages_site(repo, assembly_path)
     handler = partial(QuietHandler, directory=str(assembly_path))
     server = ThreadingHTTPServer(("127.0.0.1", 0), handler)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
@@ -383,7 +445,18 @@ def _run_matrix(repo, matrix, chrome=None):
             document, diagnostic = render_page(
                 executable, url, width, height, theme
             )
-            case_errors = _evaluate_case(document, diagnostic, width, theme)
+            case_errors = _evaluate_case(
+                document, diagnostic, width, theme, site_root=assembly_path
+            )
+            expected_nsf = assembly_path / "data" / org_path / "awards.csv"
+            if expected_nsf.is_file():
+                links = Links()
+                links.feed(document["html"])
+                expected_href = f"data/{org_path}/awards.csv"
+                if expected_href not in links.hrefs:
+                    case_errors.append(
+                        f"NSF award CSV is not a Pages-relative rendered link: {expected_href}"
+                    )
             if case_errors:
                 failures.append(f"{label}: " + "; ".join(case_errors))
             else:
@@ -394,7 +467,25 @@ def _run_matrix(repo, matrix, chrome=None):
         assembly.cleanup()
     if failures:
         raise AssertionError("\n".join(failures))
+    print(
+        "PASS assembled Pages link contract: "
+        f"{artifact['nsfAwardCsvArtifactCount']}/"
+        f"{artifact['nsfAwardCsvSourceCount']} NSF award CSVs retained; "
+        f"{artifact['obligationEventArchiveArtifactCount']}/"
+        f"{artifact['obligationEventArchiveSourceCount']} obligation event archives published"
+    )
     return len(matrix)
+
+
+def nsf_public_link_matrix(repo):
+    cases = []
+    for awards in sorted((Path(repo) / "data").glob("**/awards.csv")):
+        org_path = awards.parent.relative_to(Path(repo) / "data").as_posix()
+        label = "nsf-awards-" + org_path.replace("/", "-")
+        cases.append((label, org_path, 1440, 1000, "light"))
+    if not cases:
+        raise ValueError("no NSF Pages-relative award CSVs found")
+    return cases
 
 
 def run(repo=REPO, chrome=None):
@@ -407,6 +498,11 @@ def run_all_accounts(repo=REPO, chrome=None):
     return _run_matrix(repo, all_accounts_matrix(repo), chrome=chrome)
 
 
+def run_public_links(repo=REPO, chrome=None):
+    repo = Path(repo)
+    return _run_matrix(repo, nsf_public_link_matrix(repo), chrome=chrome)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--chrome")
@@ -415,8 +511,17 @@ def main():
         help="render every registered account page plus one Program "
              "Activity sub-page per account, in both themes, instead of "
              "the fixed representative-state matrix")
+    parser.add_argument(
+        "--public-links", action="store_true",
+        help="render every NSF award CSV page against the assembled Pages tree"
+    )
     args = parser.parse_args()
-    if args.all_accounts:
+    if args.all_accounts and args.public_links:
+        parser.error("--all-accounts and --public-links are mutually exclusive")
+    if args.public_links:
+        count = run_public_links(chrome=args.chrome)
+        print(f"Rendered assembled-artifact public-link matrix passed ({count} cases)")
+    elif args.all_accounts:
         count = run_all_accounts(chrome=args.chrome)
         print(f"Rendered all-accounts obligation page matrix passed ({count} cases)")
     else:

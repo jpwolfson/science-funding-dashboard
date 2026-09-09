@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-12",
+ "generated": "2026-09-07",
  "node": {
   "name": "Integrative and Collaborative Education and Research (icer)",
   "abbrev": "RISE",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.nsf.gov/services/v1/awards.json?org_code_div=06010000 (NSF Award Search API), month-by-month on Original Award Date",
  "warnings": [],
- "totalAwards": 1609,
+ "totalAwards": 1649,
  "currentFY": 2026,
  "monthly": [
   {
@@ -1291,9 +1291,18 @@
   },
   {
    "month": "2026-08",
-   "awards": 35,
-   "dollars": 18533632,
-   "std": 35,
+   "awards": 70,
+   "dollars": 41621877,
+   "std": 69,
+   "cont": 1,
+   "fell": 0,
+   "other": 0
+  },
+  {
+   "month": "2026-09",
+   "awards": 5,
+   "dollars": 1313552,
+   "std": 5,
    "cont": 0,
    "fell": 0,
    "other": 0
@@ -1534,7 +1543,7 @@
    "top3": [
     {
      "id": "2103754",
-     "title": "Large-Scale CoPe: Megalopolitan Coastal Transformation Hub (MACH): Researching Complex Interactions Between Coastal Hazards and Risk",
+     "title": "Large-Scale CoPe: Megalopolitan Coastal Transformation Hub: Researching Complex Interactions Between Coastal Hazards and Risk",
      "awardee": "Rutgers University New Brunswick",
      "amount": 19935916
     },
@@ -1699,10 +1708,10 @@
   {
    "fy": 2026,
    "partial": true,
-   "awards": 95,
-   "dollars": 54598334,
-   "median": 499863,
-   "exTop3Dollars": 48872519,
+   "awards": 135,
+   "dollars": 79000131,
+   "median": 485329,
+   "exTop3Dollars": 71513926,
    "octJul": {
     "awards": 60,
     "dollars": 36064702,
@@ -1713,22 +1722,22 @@
    },
    "top3": [
     {
+     "id": "2623531",
+     "title": "FIRE-WUI: Emerging Wildfire Hazards in High-Biomass Forests and Community Adaptation",
+     "awardee": "Regents of the University of Michigan - Ann Arbor",
+     "amount": 2995072
+    },
+    {
      "id": "2536549",
      "title": "FIRE-WUI: Community Resilience Assessment Framework for Wildfires using Multi-Resolution Digital Twins",
      "awardee": "Purdue University",
      "amount": 2491133
     },
     {
-     "id": "2623416",
-     "title": "FIRE-MODEL: Converging Research and Education for the Next-Generation Physical Chemistry Fire Regime Models",
-     "awardee": "University of Missouri-Columbia",
-     "amount": 1646535
-    },
-    {
-     "id": "2536745",
-     "title": "Collaborative Research: FIRE-WUI: A research-informed fire weather toolkit to advance controlled burning in Alaska",
-     "awardee": "University of Alaska Fairbanks Campus",
-     "amount": 1588147
+     "id": "2623936",
+     "title": "FIRE-WUI: Agentic Artificial Intelligence for Wildfire Evacuation under Mixed Autonomy",
+     "awardee": "University of Southern California",
+     "amount": 2000000
     }
    ]
   }
@@ -3044,16 +3053,41 @@
     },
     {
      "d": 314,
-     "awards": 95,
-     "dollars": 54598334
+     "awards": 102,
+     "dollars": 57938492
     },
     {
-     "d": 315,
-     "awards": 95,
-     "dollars": 54598334
+     "d": 321,
+     "awards": 114,
+     "dollars": 68039915
+    },
+    {
+     "d": 328,
+     "awards": 126,
+     "dollars": 75578405
+    },
+    {
+     "d": 335,
+     "awards": 131,
+     "dollars": 78750131
+    },
+    {
+     "d": 341,
+     "awards": 135,
+     "dollars": 79000131
     }
    ]
   }
  ],
- "children": []
+ "children": [],
+ "provider": "nsf",
+ "dataComplete": true,
+ "storeFormat": "csv",
+ "amountNote": "Dollar figures are intended totals (estimatedTotalAmt), not outlays.",
+ "mechanismLabels": {
+  "std": "Standard grants",
+  "cont": "Continuing grants",
+  "fell": "Fellowships",
+  "other": "Other awards"
+ }
 }

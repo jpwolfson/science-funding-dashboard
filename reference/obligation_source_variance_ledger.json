@@ -1,0 +1,238 @@
+{
+ "schemaVersion": 1,
+ "updated": "2026-09-01",
+ "varianceDefinition": "fileAFileBVarianceCents = fileAObligationsCents - fileBObligationsCents",
+ "entries": [
+  {
+   "accountPath": "commerce/noaa-orf",
+   "federalAccount": "013-1450",
+   "fiscalYear": 2025,
+   "fileAObligationsCents": 590995523920,
+   "fileBObligationsCents": 749893110879,
+   "fileAFileBVarianceCents": -158897586959,
+   "absoluteVarianceCents": 158897586959,
+   "absoluteVariancePpmOfFileA": 268864,
+   "reason": "Official FY2025 P12 File B and date-filtered Program Activity totals are $1,588,975,869.59 above the GTAS/File A federal-account total; preserve both exact official source totals under the source-warning contract",
+   "baseline": "reference/noaa_orf_obligation_baseline.json",
+   "releaseStatus": "live",
+   "ownerApproval": {
+    "status": "approved",
+    "date": "2026-08-16",
+    "reference": "docs/phase-3.2d-commerce-handoff.md"
+   },
+   "evidence": {
+    "workflowRunId": 31910397962,
+    "workflowJobId": 95212047055,
+    "rawArtifactId": 9268819942,
+    "rawArtifactSha256": "3b6838b3ad267f24376f44c66de76556b39e690910c2465d4dc227de05861a85",
+    "nestedP12FileBSha256": "62e8dec24840a47441b146c14aa27bcbb5a3f5690d640b7429162084255d5b2a"
+   }
+  },
+  {
+   "accountPath": "commerce/noaa-pac",
+   "federalAccount": "013-1460",
+   "fiscalYear": 2025,
+   "fileAObligationsCents": 263240345521,
+   "fileBObligationsCents": 261595507473,
+   "fileAFileBVarianceCents": 1644838048,
+   "absoluteVarianceCents": 1644838048,
+   "absoluteVariancePpmOfFileA": 6248,
+   "reason": "Official FY2025 P12 File B and date-filtered Program Activity totals are $16,448,380.48 below the GTAS/File A federal-account total; preserve both exact official source totals under the source-warning contract",
+   "baseline": "reference/noaa_pac_obligation_baseline.json",
+   "releaseStatus": "live",
+   "ownerApproval": {
+    "status": "approved",
+    "date": "2026-08-16",
+    "reference": "docs/phase-3.2d-commerce-handoff.md"
+   },
+   "evidence": {
+    "workflowRunId": 31910397962,
+    "workflowJobId": 95107812703,
+    "rawArtifactId": 9257775657,
+    "rawArtifactSha256": "c72bf72b4e57d0a86c982154fbbf33cb414f0a2e4ba8fc45806afc6a025a16be"
+   }
+  },
+  {
+   "accountPath": "commerce/census-current-surveys",
+   "federalAccount": "013-0401",
+   "fiscalYear": 2025,
+   "fileAObligationsCents": 34371943923,
+   "fileBObligationsCents": 34538417796,
+   "fileAFileBVarianceCents": -166473873,
+   "absoluteVarianceCents": 166473873,
+   "absoluteVariancePpmOfFileA": 4843,
+   "reason": "The official FY2025 GTAS/File A fiscal-year snapshot is 34371943923 cents while the accepted P12 File B Program Activity total is 34538417796 cents; the exact -166473873-cent source variance is the File B UNKNOWN/OTHER bucket.",
+   "baseline": "reference/census_current_surveys_obligation_baseline.json",
+   "releaseStatus": "live",
+   "ownerApproval": {
+    "status": "approved",
+    "date": "2026-08-17",
+    "reference": "Phase 3.2d execution thread"
+   },
+   "evidence": {
+    "workflowRunId": 32013883488,
+    "workflowJobId": 95339201920,
+    "rawArtifactId": 9287062264,
+    "rawArtifactSha256": "0f31cc6789411e34d9e4ba8e0330f5b5901e67b15642733f4ea47c71df84e06a",
+    "nestedP12FileBSha256": "ff7e61bb955065460c9458944741e475f2493f296e6933518a71f6593b28320b"
+   }
+  },
+  {
+   "accountPath": "dhs/cwmd-rd",
+   "federalAccount": "070-0860",
+   "fiscalYear": 2026,
+   "fileAObligationsCents": 2380850844,
+   "fileBObligationsCents": 2502737329,
+   "fileAFileBVarianceCents": -121886485,
+   "absoluteVarianceCents": 121886485,
+   "absoluteVariancePpmOfFileA": 51195,
+   "reason": "Official FY2026 P09 GTAS/File A is 2380850844 cents while the accepted P09 File B Program Activity total is 2502737329 cents; preserve the exact -121886485-cent official source variance with File B canonical and no synthetic residual or tolerance.",
+   "baseline": "reference/dhs_cwmd_rd_obligation_baseline.json",
+   "releaseStatus": "live",
+   "ownerApproval": {
+    "status": "approved",
+    "date": "2026-08-21",
+    "reference": "Phase 3.2d execution thread"
+   },
+   "evidence": {
+    "workflowRunId": 32449818249,
+    "workflowJobId": 96781297151,
+    "rawArtifactId": 9442894725,
+    "rawArtifactSha256": "5d7786c826ff264cb07aa24cf6c493b47ab87d24836da4c2d2df66a12f64ef4c",
+    "nestedP09FileBSha256": "f7d5b0868c9b10bc846ffc28e9d7bf04255a1c39f5136a40d22590f0cad60458",
+    "fileASnapshotSha256": "934909ac98b58d81f9bcd3718d9e5343ba63ba5c7311eb5bd691d2d8cff321b8"
+   }
+  },
+  {
+   "accountPath": "dod/navy-rdte",
+   "federalAccount": "017-1319",
+   "fiscalYear": 2025,
+   "fileAObligationsCents": 2788535575911,
+   "fileBObligationsCents": 2788488646275,
+   "fileAFileBVarianceCents": 46929636,
+   "absoluteVarianceCents": 46929636,
+   "absoluteVariancePpmOfFileA": 17,
+   "reason": "Official FY2025 GTAS/File A is 2788535575911 cents while the accepted P12 File B and independent date-filtered Program Activity totals are 2788488646275 cents; preserve the exact 46929636-cent official source variance with File B canonical and no synthetic residual or tolerance.",
+   "baseline": "reference/dod_navy_rdte_obligation_baseline.json",
+   "releaseStatus": "pending",
+   "ownerApproval": {
+    "status": "approved",
+    "date": "2026-08-28",
+    "reference": "Phase 3.2d execution thread"
+   },
+   "evidence": {
+    "workflowRunId": 33145859877,
+    "workflowJobId": 98766675969,
+    "rawArtifactId": 9682337050,
+    "rawArtifactSha256": "91c2d7b8ae7ac6e5ab757fbccb35460eb7a09eea370a6d1b041826b6415633d8",
+    "nestedP12FileBSha256": "ffd3b2ef0e0047487f50ccb5beef52cd0142fe82666908dcd17ad3e16af1cca7",
+    "fileASnapshotSha256": "58801fb959910856950313eeba6f123d72540663748d340d29dcdd3bd3edac16",
+    "programActivitySnapshotSha256": "868572fa3d0ec67b006344c4cd75c649676ad5c75430c598399e1b7963f1e030"
+   }
+  },
+  {
+   "accountPath": "dod/defense-health-program",
+   "federalAccount": "097-0130",
+   "fiscalYear": 2025,
+   "fileAObligationsCents": 4692069313553,
+   "fileBObligationsCents": 4676524125773,
+   "fileAFileBVarianceCents": 15545187780,
+   "absoluteVarianceCents": 15545187780,
+   "absoluteVariancePpmOfFileA": 3313,
+   "reason": "Official FY2025 GTAS/File A is 4692069313553 cents while the accepted P12 File B and independent date-filtered Program Activity totals are 4676524125773 cents; preserve the exact 15545187780-cent official source variance with File B canonical and no synthetic residual or tolerance.",
+   "baseline": "reference/dod_defense_health_program_obligation_baseline.json",
+   "releaseStatus": "pending",
+   "ownerApproval": {
+    "status": "approved",
+    "date": "2026-09-01",
+    "reference": "Phase 3.2d execution thread"
+   },
+   "evidence": {
+    "workflowRunId": 33472362131,
+    "workflowJobId": 99744617337,
+    "rawArtifactId": 9788896971,
+    "rawArtifactSha256": "7ec29f76839814162b1017bd9be0f3750b62b4d74ef56c414dc62257a00b886b",
+    "programActivitySnapshotSha256": "818405fd14dbad2e39b072442cc88470ef088080836a86010712d0c83918f368",
+    "programActivityPage2Sha256": "00d9c9fb9040bed5b63e0b50845625e934b7b75328340b464cd277bce2960cb4"
+   }
+  },
+  {
+   "accountPath": "dod/defense-wide-rdte",
+   "federalAccount": "097-0400",
+   "fiscalYear": 2023,
+   "fileAObligationsCents": 3507738978109,
+   "fileBObligationsCents": 3507738877251,
+   "fileAFileBVarianceCents": 100858,
+   "absoluteVarianceCents": 100858,
+   "absoluteVariancePpmOfFileA": 0,
+   "reason": "Official FY2023 GTAS/File A is 3507738978109 cents while the accepted P12 File B and independent date-filtered Program Activity totals are 3507738877251 cents; preserve the exact 100858-cent official source variance with File B canonical and no synthetic residual or tolerance.",
+   "baseline": "reference/dod_defense_wide_rdte_obligation_baseline.json",
+   "releaseStatus": "pending",
+   "ownerApproval": {
+    "status": "approved",
+    "date": "2026-09-01",
+    "reference": "Phase 3.2d execution thread"
+   },
+   "evidence": {
+    "workflowRunId": 33472362131,
+    "workflowJobId": 99744618294,
+    "rawArtifactId": 9790896334,
+    "rawArtifactSha256": "41515034d1103a432e276a0ddfad1ef5e5aae4bac482973408eb446da0ddc84b",
+    "programActivitySnapshotSha256": "32cdaed1c1acf5e7edc54e4f38478490ccd255c9d32838e61f0d9d47c1e21af8",
+    "programActivityPage2Sha256": "e94f2d2dc2c74024a1f7fb860c2335dc12c3c9294eb19174155544ee91f04e2f"
+   }
+  },
+  {
+   "accountPath": "dod/defense-wide-rdte",
+   "federalAccount": "097-0400",
+   "fiscalYear": 2025,
+   "fileAObligationsCents": 3813645882772,
+   "fileBObligationsCents": 3812362307540,
+   "fileAFileBVarianceCents": 1283575232,
+   "absoluteVarianceCents": 1283575232,
+   "absoluteVariancePpmOfFileA": 337,
+   "reason": "Official FY2025 GTAS/File A is 3813645882772 cents while the accepted P12 File B and independent date-filtered Program Activity totals are 3812362307540 cents; preserve the exact 1283575232-cent official source variance with File B canonical and no synthetic residual or tolerance.",
+   "baseline": "reference/dod_defense_wide_rdte_obligation_baseline.json",
+   "releaseStatus": "pending",
+   "ownerApproval": {
+    "status": "approved",
+    "date": "2026-09-01",
+    "reference": "Phase 3.2d execution thread"
+   },
+   "evidence": {
+    "workflowRunId": 33472362131,
+    "workflowJobId": 99974200547,
+    "rawArtifactId": 9814928296,
+    "rawArtifactSha256": "72c1d5417fc851f2320387639c77b203d97df269fd1bb54f67b1771d185b63f5",
+    "nestedP12FileBSha256": "b8937e70d56ce14c73691ae01839560e97928a840916d23b5d7ce41013619579",
+    "fileASnapshotSha256": "29246cee27412be8095e927c289373c72daef91122acab75830b8d170f3384c7",
+    "programActivitySnapshotSha256": "8aeba04e65598ca0c3c524d7340945930d5bdcd52aff1b6d9da7226571178950",
+    "programActivityPage2Sha256": "e7ade28c7cfb4c39bb3c515aff94e5ab0d207e7c48dd763b12043666a248c422"
+   }
+  },
+  {
+   "accountPath": "epa/science-technology",
+   "federalAccount": "068-0107",
+   "fiscalYear": 2022,
+   "fileAObligationsCents": 78078798237,
+   "fileBObligationsCents": 78077137843,
+   "fileAFileBVarianceCents": 1660394,
+   "absoluteVarianceCents": 1660394,
+   "absoluteVariancePpmOfFileA": 21,
+   "reason": "USAspending Data Broker rule A19 source warning: retained FY2022 P12 File B and official Program Activity totals are $16,603.94 below GTAS/File A",
+   "baseline": "reference/epa_science_technology_obligation_baseline.json",
+   "releaseStatus": "live",
+   "ownerApproval": {
+    "status": "approved",
+    "date": "2026-08-14",
+    "reference": "8c850bb5136d43092235eaddc1007f765ba70f37"
+   },
+   "evidence": {
+    "workflowRunId": 31787669479,
+    "workflowJobId": 94810063304,
+    "rawArtifactId": 9224418566,
+    "rawArtifactSha256": "4843f4b3cbe4c847e19df03a77daa7d0bd29e45d7a17af80cd5c46677ba7e83f"
+   }
+  }
+ ]
+}

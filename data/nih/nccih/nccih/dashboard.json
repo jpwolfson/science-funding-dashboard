@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-12",
+ "generated": "2026-09-07",
  "node": {
   "name": "National Center for Complementary and Integrative Health",
   "abbrev": "NCCIH",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.reporter.nih.gov/v2/projects/search (NIH RePORTER v2), administering IC NCCIH; one application record per fiscal year; intramural projects excluded; dated by award notice, then budget/project start when unavailable",
  "warnings": [],
- "totalAwards": 3547,
+ "totalAwards": 3614,
  "currentFY": 2026,
  "monthly": [
   {
@@ -1282,19 +1282,28 @@
   },
   {
    "month": "2026-07",
-   "awards": 31,
-   "dollars": 14420577,
+   "awards": 33,
+   "dollars": 14993179,
    "std": 11,
-   "cont": 19,
+   "cont": 21,
    "fell": 1,
    "other": 0
   },
   {
    "month": "2026-08",
-   "awards": 15,
-   "dollars": 7342604,
-   "std": 9,
-   "cont": 6,
+   "awards": 54,
+   "dollars": 30682370,
+   "std": 32,
+   "cont": 22,
+   "fell": 0,
+   "other": 0
+  },
+  {
+   "month": "2026-09",
+   "awards": 26,
+   "dollars": 30927232,
+   "std": 15,
+   "cont": 11,
    "fell": 0,
    "other": 0
   }
@@ -1699,36 +1708,36 @@
   {
    "fy": 2026,
    "partial": true,
-   "awards": 148,
-   "dollars": 74533811,
-   "median": 457599,
-   "exTop3Dollars": 66724191,
+   "awards": 215,
+   "dollars": 129373411,
+   "median": 505477,
+   "exTop3Dollars": 117780880,
    "octJul": {
-    "awards": 133,
-    "dollars": 67191207,
+    "awards": 135,
+    "dollars": 67763809,
     "std": 33,
-    "cont": 93,
+    "cont": 95,
     "fell": 7,
     "other": 0
    },
    "top3": [
     {
+     "id": "nih:11272853",
+     "title": "Developing and Validating a Multi-Omic, Psychosocial, and Environmental Model of Individual Differences in Pain and Placebo Responses",
+     "awardee": "UNIVERSITY OF MARYLAND BALTIMORE",
+     "amount": 4929839
+    },
+    {
+     "id": "nih:11382902",
+     "title": "Whole Body Deep Tissue Characterization of the Human Virome",
+     "awardee": "UNIVERSITY OF CALIFORNIA, SAN FRANCISCO",
+     "amount": 3387987
+    },
+    {
      "id": "nih:11349732",
      "title": "Activity Probes to Guide Precision Microbiome Therapy",
      "awardee": "WEILL MEDICAL COLL OF CORNELL UNIV",
      "amount": 3274705
-    },
-    {
-     "id": "nih:11392558",
-     "title": "Building a somatosensory atlas for interoception",
-     "awardee": "SCRIPPS RESEARCH INSTITUTE, THE",
-     "amount": 2847421
-    },
-    {
-     "id": "nih:11216917",
-     "title": "PAIN: Project Assessing the Mechanisms and Impact of a Novel Cannabinoid Product",
-     "awardee": "MCLEAN HOSPITAL",
-     "amount": 1687494
     }
    ]
   }
@@ -3034,29 +3043,45 @@
     },
     {
      "d": 300,
-     "awards": 131,
-     "dollars": 65880311
+     "awards": 132,
+     "dollars": 66036725
     },
     {
      "d": 307,
-     "awards": 137,
-     "dollars": 68479868
+     "awards": 139,
+     "dollars": 69052470
     },
     {
      "d": 314,
-     "awards": 148,
-     "dollars": 74533811
+     "awards": 152,
+     "dollars": 76435622
     },
     {
-     "d": 315,
-     "awards": 148,
-     "dollars": 74533811
+     "d": 321,
+     "awards": 178,
+     "dollars": 91510494
+    },
+    {
+     "d": 328,
+     "awards": 186,
+     "dollars": 96779569
+    },
+    {
+     "d": 335,
+     "awards": 204,
+     "dollars": 122782606
+    },
+    {
+     "d": 341,
+     "awards": 215,
+     "dollars": 129373411
     }
    ]
   }
  ],
  "children": [],
  "provider": "nih",
+ "dataComplete": true,
  "storeFormat": "fiscal-year-gzip",
  "amountNote": "Dollar figures are RePORTER award amounts, not outlays.",
  "mechanismLabels": {

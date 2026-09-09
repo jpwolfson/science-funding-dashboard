@@ -4,7 +4,6 @@
 import argparse
 import json
 import os
-import shutil
 import sys
 import tempfile
 import threading
@@ -23,6 +22,7 @@ from scripts.smoke_obligation_pages import (
     chrome_path,
     render_page,
 )
+from scripts.assemble_pages_site import assemble_pages_site, rendered_link_problems
 
 # Owner-approved 2026-08-12 rule: agency headlines never occupy heading
 # positions, even quoted. The page has no dedicated "card-heading" class —
@@ -86,9 +86,8 @@ def run(repo=REPO, chrome=None):
         raise AssertionError("sentinel smoke test requires the DOE announcement's sourceTitle")
     executable = chrome_path(chrome)
     assembly = tempfile.TemporaryDirectory()
-    assembly_path = Path(assembly.name)
-    shutil.copy2(repo / "site" / "index.html", assembly_path / "index.html")
-    os.symlink(repo / "data", assembly_path / "data", target_is_directory=True)
+    assembly_path = Path(assembly.name) / "_site"
+    assemble_pages_site(repo, assembly_path)
     handler = partial(QuietHandler, directory=str(assembly_path))
     server = ThreadingHTTPServer(("127.0.0.1", 0), handler)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
@@ -154,9 +153,11 @@ def run(repo=REPO, chrome=None):
             links.feed(rendered)
             if not links.hrefs:
                 case_errors.append("rendered sentinel has no native links")
-            if any("localhost" in href or href.startswith("file:")
-                   for href in links.hrefs):
-                case_errors.append("rendered sentinel has a non-public link")
+            link_errors = rendered_link_problems(links.hrefs, assembly_path)
+            if link_errors:
+                case_errors.append(
+                    f"rendered sentinel public-link integrity: {link_errors[:3]}"
+                )
             for marker in ("Uncaught ", "net::ERR_", "exceptionDetails"):
                 if marker in diagnostic:
                     case_errors.append(f"browser diagnostic contains {marker.strip()}")

@@ -12,8 +12,9 @@ REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
 from adapters.obligation_common import (
-    aggregate, event_fingerprint, file_sha256, load_partition_provenance,
-    load_store, period_info,
+    aggregate, baseline_file_b_cents, baseline_pin_problems,
+    event_fingerprint, file_sha256, load_partition_provenance, load_store,
+    period_info,
 )
 
 
@@ -29,6 +30,13 @@ def load_baseline(repo, account):
         raise ValueError(f"{account['path']}: baseline schema must be v2")
     if baseline.get("federalAccount") != account["federalAccount"]:
         raise ValueError(f"{account['path']}: baseline account mismatch")
+    for fy, pin in (baseline.get("fiscalYears") or {}).items():
+        problems = baseline_pin_problems(pin)
+        if problems:
+            raise ValueError(
+                f"{account['path']} FY{fy}: invalid baseline pin: "
+                + "; ".join(problems)
+            )
     return baseline
 
 
@@ -71,8 +79,14 @@ def _validate_provenance(store, account, fy, rows):
             errors.append(f"{prefix}: replacement lineage has invalid {key}")
     if diff.get("recordCount") != len(rows):
         errors.append(f"{prefix}: replacement diff record count mismatch")
-    if not value.get("baselinePin"):
+    baseline_pin = value.get("baselinePin")
+    if not baseline_pin:
         errors.append(f"{prefix}: provenance is missing its baseline pin")
+    else:
+        errors.extend(
+            f"{prefix}: invalid provenance baseline pin: {problem}"
+            for problem in baseline_pin_problems(baseline_pin)
+        )
 
     status = value.get("collectionStatus")
     if status == "legacy-migrated":
@@ -288,7 +302,7 @@ def validate(repo=REPO, require_data=True, check_freshness=False,
                 errors.append(f"{account['path']}: manifest current acceptance timestamp mismatch")
         expected_fys = {
             int(fy): row for fy, row in baseline["fiscalYears"].items()
-            if row["status"] in {"complete", "partial"}
+            if row["status"] in {"complete", "available", "partial"}
         }
         for fy in sorted(set(expected_fys) - set(by_fy)):
             errors.append(f"FY{fy}: required {expected_fys[fy]['status']} snapshot is missing")
@@ -303,9 +317,22 @@ def validate(repo=REPO, require_data=True, check_freshness=False,
             if not pin:
                 errors.append(f"FY{fy}: missing GTAS baseline")
                 continue
+            if pin["status"] == "unavailable":
+                continue
             actual = sum(e["amountCents"] for e in rows)
-            if pin["status"] == "complete" and actual != pin["obligationsCents"]:
-                errors.append(f"FY{fy}: {actual} cents != GTAS {pin['obligationsCents']} cents")
+            expected_file_b = baseline_file_b_cents(pin)
+            if pin["status"] in {"complete", "available"} and actual != expected_file_b:
+                if "fileBObligationsCents" in pin:
+                    errors.append(
+                        f"FY{fy}: {actual} cents != pinned File B "
+                        f"{expected_file_b} cents (File A {pin['obligationsCents']}; "
+                        f"declared variance {pin['fileAFileBVarianceCents']})"
+                    )
+                else:
+                    errors.append(
+                        f"FY{fy}: {actual} cents != GTAS "
+                        f"{pin['obligationsCents']} cents"
+                    )
             if pin["status"] == "partial":
                 first = min(e["fiscalPeriod"] for e in rows)
                 last = max(e["fiscalPeriod"] for e in rows)
@@ -315,8 +342,11 @@ def validate(repo=REPO, require_data=True, check_freshness=False,
                     )
                 if pin.get("asOfPeriod") != last:
                     errors.append(f"FY{fy}: latest P{last:02} has no same-period GTAS pin")
-                elif actual != pin["obligationsCents"]:
-                    errors.append(f"FY{fy} P{last:02}: {actual} cents != pinned {pin['obligationsCents']} cents")
+                elif actual != expected_file_b:
+                    errors.append(
+                        f"FY{fy} P{last:02}: {actual} cents != pinned File B "
+                        f"{expected_file_b} cents"
+                    )
         partial_fys = {fy for fy, pin in expected_fys.items() if pin["status"] == "partial"}
         latest_fy = max(expected_fys) if expected_fys else None
         if latest_fy and require_current_provenance:

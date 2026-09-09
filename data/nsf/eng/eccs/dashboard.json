@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-12",
+ "generated": "2026-09-07",
  "node": {
   "name": "Division of Electrical, Communications and Cyber Systems",
   "abbrev": "ECCS",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.nsf.gov/services/v1/awards.json?org_code_div=07010000 (NSF Award Search API), month-by-month on Original Award Date",
  "warnings": [],
- "totalAwards": 4012,
+ "totalAwards": 4066,
  "currentFY": 2026,
  "monthly": [
   {
@@ -1291,9 +1291,18 @@
   },
   {
    "month": "2026-08",
-   "awards": 36,
-   "dollars": 12325538,
-   "std": 36,
+   "awards": 90,
+   "dollars": 32819212,
+   "std": 89,
+   "cont": 1,
+   "fell": 0,
+   "other": 0
+  },
+  {
+   "month": "2026-09",
+   "awards": 0,
+   "dollars": 0,
+   "std": 0,
    "cont": 0,
    "fell": 0,
    "other": 0
@@ -1699,10 +1708,10 @@
   {
    "fy": 2026,
    "partial": true,
-   "awards": 188,
-   "dollars": 74319819,
-   "median": 421684,
-   "exTop3Dollars": 70279487,
+   "awards": 242,
+   "dollars": 94813493,
+   "median": 400000,
+   "exTop3Dollars": 90591427,
    "octJul": {
     "awards": 152,
     "dollars": 61994281,
@@ -1725,10 +1734,10 @@
      "amount": 1393726
     },
     {
-     "id": "2511400",
-     "title": "MRI: Track #1 Acquisition of Rapid 3D Prototyping Tool for Advanced Semiconductor, Photonic, and Synthetic Systems Microfabrication",
-     "awardee": "University of California-Santa Barbara",
-     "amount": 1146606
+     "id": "2603080",
+     "title": "EIR: Close-Space Sublimation for Scalable Perovskite Optoelectronics Manufacturing",
+     "awardee": "Albany State University",
+     "amount": 1328340
     }
    ]
   }
@@ -3044,16 +3053,41 @@
     },
     {
      "d": 314,
-     "awards": 188,
-     "dollars": 74319819
+     "awards": 218,
+     "dollars": 86635405
     },
     {
-     "d": 315,
-     "awards": 188,
-     "dollars": 74319819
+     "d": 321,
+     "awards": 232,
+     "dollars": 91323325
+    },
+    {
+     "d": 328,
+     "awards": 242,
+     "dollars": 94813493
+    },
+    {
+     "d": 335,
+     "awards": 242,
+     "dollars": 94813493
+    },
+    {
+     "d": 341,
+     "awards": 242,
+     "dollars": 94813493
     }
    ]
   }
  ],
- "children": []
+ "children": [],
+ "provider": "nsf",
+ "dataComplete": true,
+ "storeFormat": "csv",
+ "amountNote": "Dollar figures are intended totals (estimatedTotalAmt), not outlays.",
+ "mechanismLabels": {
+  "std": "Standard grants",
+  "cont": "Continuing grants",
+  "fell": "Fellowships",
+  "other": "Other awards"
+ }
 }

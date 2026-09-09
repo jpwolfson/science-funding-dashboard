@@ -1,9 +1,12 @@
 import gzip
+import json
 import tempfile
 import unittest
+from datetime import date
 from pathlib import Path
 
-from adapters.common import load_store, store_exists, write_store
+from adapters.common import (load_store, store_exists, write_dashboard,
+                             write_store)
 
 
 def award(award_id, day, amount=1):
@@ -55,6 +58,38 @@ class ShardedStoreTests(unittest.TestCase):
             self.assertTrue(store_exists(store))
             self.assertEqual(load_store(store), {})
             self.assertTrue((store / "manifest.json").exists())
+
+    def test_dashboard_allows_only_the_exact_reviewed_monthly_shrink(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            data_dir = Path(tmp) / "nih" / "nigms" / "nigms"
+            node = {"name": "NIGMS", "abbrev": "NIGMS",
+                    "path": "nih/nigms/nigms", "level": "division"}
+            today = date(2026, 8, 17)
+            awards = [award("nih:1", "2025-01-15"),
+                      award("nih:2", "2025-01-16")]
+            write_dashboard(data_dir, node, "test", awards, [], today)
+
+            warnings = write_dashboard(
+                data_dir, node, "test", awards[:1], [], today,
+                metadata={"_allowedMonthlyShrink": {"2025-01": 1}},
+            )
+            self.assertEqual([], warnings)
+            dashboard = json.loads(
+                (data_dir / "dashboard.json").read_text()
+            )
+            self.assertNotIn("_allowedMonthlyShrink", dashboard)
+
+            warnings = write_dashboard(data_dir, node, "test", [], [], today)
+            self.assertEqual(
+                ["invariant violated: 2025-01 shrank from 1 to 0 awards"],
+                warnings,
+            )
+
+            warnings = write_dashboard(
+                data_dir, node, "test", [], warnings, today,
+                metadata={"_allowedMonthlyShrink": {"2025-01": 1}},
+            )
+            self.assertEqual([], warnings)
 
 
 if __name__ == "__main__":

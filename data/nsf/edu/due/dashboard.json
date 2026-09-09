@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-12",
+ "generated": "2026-09-07",
  "node": {
   "name": "Division of Undergraduate Education",
   "abbrev": "DUE",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.nsf.gov/services/v1/awards.json?org_code_div=11040000 (NSF Award Search API), month-by-month on Original Award Date",
  "warnings": [],
- "totalAwards": 6419,
+ "totalAwards": 6610,
  "currentFY": 2026,
  "monthly": [
   {
@@ -1291,10 +1291,19 @@
   },
   {
    "month": "2026-08",
-   "awards": 92,
-   "dollars": 60908114,
-   "std": 90,
-   "cont": 2,
+   "awards": 282,
+   "dollars": 212318773,
+   "std": 275,
+   "cont": 7,
+   "fell": 0,
+   "other": 0
+  },
+  {
+   "month": "2026-09",
+   "awards": 1,
+   "dollars": 1099481,
+   "std": 1,
+   "cont": 0,
    "fell": 0,
    "other": 0
   }
@@ -1699,10 +1708,10 @@
   {
    "fy": 2026,
    "partial": true,
-   "awards": 219,
-   "dollars": 184132817,
-   "median": 449999,
-   "exTop3Dollars": 169139255,
+   "awards": 410,
+   "dollars": 336642957,
+   "median": 400000,
+   "exTop3Dollars": 314398023,
    "octJul": {
     "awards": 127,
     "dollars": 123224703,
@@ -1713,22 +1722,22 @@
    },
    "top3": [
     {
-     "id": "2629582",
-     "title": "CREST Center for Emergent Chiral Quantum Matter",
-     "awardee": "Norfolk State University",
-     "amount": 4999998
+     "id": "2554108",
+     "title": "Community College Leadership and Innovation in Advancing the Skilled Technical Workforce, 2027-2029",
+     "awardee": "American Association of Community Colleges",
+     "amount": 7994919
     },
     {
-     "id": "2628007",
-     "title": "Center: CREST Phase II: Center for Research, Education, Application, and Technology Transfer Excellence for AI-Driven Agricultural Water Sustainability (CREATE-AI Water)",
-     "awardee": "Texas A&M University-Kingsville",
-     "amount": 4999997
+     "id": "2556246",
+     "title": "National Center for Next Generation Manufacturing (NCNGM)",
+     "awardee": "EDADVANCE",
+     "amount": 7500000
     },
     {
-     "id": "2627161",
-     "title": "Center: Renewal: NSF-CREST Center for Nanotechnology Research and Education",
-     "awardee": "University of the District of Columbia",
-     "amount": 4993567
+     "id": "2600198",
+     "title": "National Cybersecurity Training & Education (NCyTE) Center",
+     "awardee": "Whatcom Community College",
+     "amount": 6750015
     }
    ]
   }
@@ -3044,16 +3053,41 @@
     },
     {
      "d": 314,
-     "awards": 219,
-     "dollars": 184132817
+     "awards": 265,
+     "dollars": 204433729
     },
     {
-     "d": 315,
-     "awards": 219,
-     "dollars": 184132817
+     "d": 321,
+     "awards": 356,
+     "dollars": 287549975
+    },
+    {
+     "d": 328,
+     "awards": 393,
+     "dollars": 329209824
+    },
+    {
+     "d": 335,
+     "awards": 410,
+     "dollars": 336642957
+    },
+    {
+     "d": 341,
+     "awards": 410,
+     "dollars": 336642957
     }
    ]
   }
  ],
- "children": []
+ "children": [],
+ "provider": "nsf",
+ "dataComplete": true,
+ "storeFormat": "csv",
+ "amountNote": "Dollar figures are intended totals (estimatedTotalAmt), not outlays.",
+ "mechanismLabels": {
+  "std": "Standard grants",
+  "cont": "Continuing grants",
+  "fell": "Fellowships",
+  "other": "Other awards"
+ }
 }

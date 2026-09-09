@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-12",
+ "generated": "2026-09-07",
  "node": {
   "name": "Division of Social and Economic Sciences",
   "abbrev": "SES",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.nsf.gov/services/v1/awards.json?org_code_div=04050000 (NSF Award Search API), month-by-month on Original Award Date",
  "warnings": [],
- "totalAwards": 4043,
+ "totalAwards": 4044,
  "currentFY": 2026,
  "monthly": [
   {
@@ -1297,6 +1297,15 @@
    "cont": 0,
    "fell": 0,
    "other": 0
+  },
+  {
+   "month": "2026-09",
+   "awards": 1,
+   "dollars": 348161,
+   "std": 1,
+   "cont": 0,
+   "fell": 0,
+   "other": 0
   }
  ],
  "fiscalYears": [
@@ -1699,10 +1708,10 @@
   {
    "fy": 2026,
    "partial": true,
-   "awards": 20,
-   "dollars": 7824916,
-   "median": 388977,
-   "exTop3Dollars": 5747639,
+   "awards": 21,
+   "dollars": 8173077,
+   "median": 379679,
+   "exTop3Dollars": 6095800,
    "octJul": {
     "awards": 19,
     "dollars": 7459354,
@@ -3048,12 +3057,37 @@
      "dollars": 7824916
     },
     {
-     "d": 315,
+     "d": 321,
      "awards": 20,
      "dollars": 7824916
+    },
+    {
+     "d": 328,
+     "awards": 20,
+     "dollars": 7824916
+    },
+    {
+     "d": 335,
+     "awards": 21,
+     "dollars": 8173077
+    },
+    {
+     "d": 341,
+     "awards": 21,
+     "dollars": 8173077
     }
    ]
   }
  ],
- "children": []
+ "children": [],
+ "provider": "nsf",
+ "dataComplete": true,
+ "storeFormat": "csv",
+ "amountNote": "Dollar figures are intended totals (estimatedTotalAmt), not outlays.",
+ "mechanismLabels": {
+  "std": "Standard grants",
+  "cont": "Continuing grants",
+  "fell": "Fellowships",
+  "other": "Other awards"
+ }
 }

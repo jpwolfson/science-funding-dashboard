@@ -21,6 +21,7 @@ ROW = {
     "name": "obligation-raw-nsf--mrefc-FY2024",
     "digest": DIGEST,
 }
+NORMALIZED_ROW = {**ROW, "deleteAfterPreserve": True}
 
 
 class FakeArtifacts:
@@ -59,15 +60,24 @@ class WorkflowRetryArtifactTests(unittest.TestCase):
         }))
         return path
 
-    def test_only_exact_raw_artifact_manifests_are_accepted(self):
+    def test_only_exact_obligation_retry_artifacts_are_accepted(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             rows = load_source_manifest(
                 self.source_manifest(root), REPOSITORY, RUN_ID
             )
-            self.assertEqual(rows, [ROW])
-            unsafe = {**ROW, "name": "obligation-partition-nsf--mrefc-FY2024"}
-            with self.assertRaisesRegex(ManifestError, "not an obligation raw"):
+            self.assertEqual(rows, [NORMALIZED_ROW])
+            partition = {
+                **ROW,
+                "id": ROW["id"] + 1,
+                "name": "obligation-partition-nsf--mrefc-FY2024",
+            }
+            rows = load_source_manifest(
+                self.source_manifest(root, partition), REPOSITORY, RUN_ID
+            )
+            self.assertEqual(rows, [{**partition, "deleteAfterPreserve": True}])
+            unsafe = {**ROW, "name": "verify-reports"}
+            with self.assertRaisesRegex(ManifestError, "not an obligation retry"):
                 load_source_manifest(
                     self.source_manifest(root, unsafe), REPOSITORY, RUN_ID
                 )
@@ -83,6 +93,18 @@ class WorkflowRetryArtifactTests(unittest.TestCase):
             self.assertEqual(api.deleted, [])
             delete_preserved(record, api)
             self.assertEqual(api.deleted, [ROW["id"]])
+
+    def test_preserve_only_artifact_is_not_deleted(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            preserve_only = {**ROW, "deleteAfterPreserve": False}
+            rows = load_source_manifest(
+                self.source_manifest(root, preserve_only), REPOSITORY, RUN_ID
+            )
+            api = FakeArtifacts()
+            record = preserve(rows, REPOSITORY, RUN_ID, root / "saved", api)
+            delete_preserved(record, api)
+            self.assertEqual(api.deleted, [])
 
     def test_changed_preserved_zip_blocks_every_delete(self):
         with tempfile.TemporaryDirectory() as directory:

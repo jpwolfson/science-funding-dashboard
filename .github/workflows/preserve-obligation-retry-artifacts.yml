@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       manifest_json:
-        description: Exact schema-v1 raw-artifact manifest
+        description: Exact schema-v1 obligation retry-artifact manifest
         required: true
         type: string
   push:
@@ -13,7 +13,7 @@ on:
 
 permissions:
   actions: write
-  contents: read
+  contents: write
 
 concurrency:
   group: obligation-retry-artifact-recovery
@@ -59,6 +59,41 @@ jobs:
           path: _preserved
           if-no-files-found: error
           retention-days: 14
+      - name: Commit the exact preservation bundle to the operational branch
+        if: github.event_name == 'push'
+        env:
+          BRANCH: ${{ github.ref_name }}
+        shell: python
+        run: |
+          import json
+          import os
+          import shutil
+          import subprocess
+          from pathlib import Path
+
+          if os.environ["BRANCH"] != "agent/3-2d-retry-artifact-operation":
+              raise SystemExit("refusing to persist evidence outside the operational branch")
+          record = json.load(open("_preserved/preservation.json"))
+          target = Path("reference/obligation-retry-evidence") / str(record["runId"])
+          if target.exists():
+              raise SystemExit(f"evidence path already exists: {target}")
+          shutil.copytree("_preserved", target)
+          subprocess.run(["git", "config", "user.name", "github-actions[bot]"], check=True)
+          subprocess.run([
+              "git", "config", "user.email",
+              "41898282+github-actions[bot]@users.noreply.github.com",
+          ], check=True)
+          subprocess.run(["git", "add", str(target)], check=True)
+          subprocess.run([
+              "git", "commit", "-m",
+              "Preserve obligation retry source evidence [skip ci]",
+          ], check=True)
+          subprocess.run([
+              "git", "push", "origin", f"HEAD:{os.environ['BRANCH']}",
+          ], check=True)
+          print("Evidence commit " + subprocess.check_output(
+              ["git", "rev-parse", "HEAD"], text=True
+          ).strip())
       - name: Delete only the exact preserved conflicting artifacts
         env:
           GITHUB_TOKEN: ${{ github.token }}

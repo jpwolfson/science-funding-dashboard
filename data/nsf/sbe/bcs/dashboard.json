@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-12",
+ "generated": "2026-09-07",
  "node": {
   "name": "Division of Behavioral and Cognitive Sciences",
   "abbrev": "BCS",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.nsf.gov/services/v1/awards.json?org_code_div=04040000 (NSF Award Search API), month-by-month on Original Award Date",
  "warnings": [],
- "totalAwards": 5069,
+ "totalAwards": 5082,
  "currentFY": 2026,
  "monthly": [
   {
@@ -1291,9 +1291,18 @@
   },
   {
    "month": "2026-08",
-   "awards": 3,
-   "dollars": 3691188,
-   "std": 3,
+   "awards": 15,
+   "dollars": 15945299,
+   "std": 15,
+   "cont": 0,
+   "fell": 0,
+   "other": 0
+  },
+  {
+   "month": "2026-09",
+   "awards": 1,
+   "dollars": 296591,
+   "std": 1,
    "cont": 0,
    "fell": 0,
    "other": 0
@@ -1699,10 +1708,10 @@
   {
    "fy": 2026,
    "partial": true,
-   "awards": 77,
-   "dollars": 53851097,
+   "awards": 90,
+   "dollars": 66401799,
    "median": 659257,
-   "exTop3Dollars": 47701869,
+   "exTop3Dollars": 60069662,
    "octJul": {
     "awards": 74,
     "dollars": 50159909,
@@ -1713,22 +1722,22 @@
    },
    "top3": [
     {
+     "id": "2605859",
+     "title": "CRCNS US-Israel Research Proposal: Relating anatomy, multi-regional neural dynamics, and behavior during decision-making",
+     "awardee": "Allen Institute",
+     "amount": 2225000
+    },
+    {
      "id": "2605721",
      "title": "CRCNS Research Proposal: Generative models of neural activity driving conversational speech in longitudinal dialogues",
      "awardee": "University of Southern California",
      "amount": 2057137
     },
     {
-     "id": "2605609",
-     "title": "CRCNS Research Proposal: Attentional Control of Credit Assignment in Learning",
-     "awardee": "Dartmouth College",
-     "amount": 2048950
-    },
-    {
-     "id": "2605896",
-     "title": "CRCNS Research Proposal: Computational and Neural Mechanisms of Learning in Speech Motor Control",
-     "awardee": "University of California-San Francisco",
-     "amount": 2043141
+     "id": "2605555",
+     "title": "CRCNS Research Proposal: Linking correlated variability to flexible behavior",
+     "awardee": "University of Chicago",
+     "amount": 2050000
     }
    ]
   }
@@ -3048,12 +3057,37 @@
      "dollars": 53851097
     },
     {
-     "d": 315,
-     "awards": 77,
-     "dollars": 53851097
+     "d": 321,
+     "awards": 86,
+     "dollars": 64554858
+    },
+    {
+     "d": 328,
+     "awards": 86,
+     "dollars": 64554858
+    },
+    {
+     "d": 335,
+     "awards": 89,
+     "dollars": 66105208
+    },
+    {
+     "d": 341,
+     "awards": 90,
+     "dollars": 66401799
     }
    ]
   }
  ],
- "children": []
+ "children": [],
+ "provider": "nsf",
+ "dataComplete": true,
+ "storeFormat": "csv",
+ "amountNote": "Dollar figures are intended totals (estimatedTotalAmt), not outlays.",
+ "mechanismLabels": {
+  "std": "Standard grants",
+  "cont": "Continuing grants",
+  "fell": "Fellowships",
+  "other": "Other awards"
+ }
 }

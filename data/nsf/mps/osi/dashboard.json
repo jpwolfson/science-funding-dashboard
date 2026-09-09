@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-12",
+ "generated": "2026-09-07",
  "node": {
   "name": "Office of Strategic Initiatives (OSI)",
   "abbrev": "OSI",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.nsf.gov/services/v1/awards.json?org_code_div=03060000 (NSF Award Search API), month-by-month on Original Award Date",
  "warnings": [],
- "totalAwards": 191,
+ "totalAwards": 200,
  "currentFY": 2026,
  "monthly": [
   {
@@ -1291,9 +1291,18 @@
   },
   {
    "month": "2026-08",
-   "awards": 0,
-   "dollars": 0,
+   "awards": 8,
+   "dollars": 290418000,
    "std": 0,
+   "cont": 0,
+   "fell": 0,
+   "other": 8
+  },
+  {
+   "month": "2026-09",
+   "awards": 1,
+   "dollars": 150000,
+   "std": 1,
    "cont": 0,
    "fell": 0,
    "other": 0
@@ -1651,10 +1660,10 @@
   {
    "fy": 2026,
    "partial": true,
-   "awards": 6,
-   "dollars": 20050000,
-   "median": 4000000,
-   "exTop3Dollars": 8050000,
+   "awards": 15,
+   "dollars": 310618000,
+   "median": 27918000,
+   "exTop3Dollars": 198118000,
    "octJul": {
     "awards": 6,
     "dollars": 20050000,
@@ -1665,22 +1674,22 @@
    },
    "top3": [
     {
-     "id": "2547175",
-     "title": "NQVL:QSTD:Design: Erasure Qubits and Dynamic Circuits for Quantum Advantage (ERASE)",
+     "id": "2552449",
+     "title": "QLCI: The Physics and Engineering of Practical Quantum Error Correction (PRACTIQAL)",
      "awardee": "Yale University",
-     "amount": 4000000
+     "amount": 37500000
     },
     {
-     "id": "2547323",
-     "title": "NQVL:QSTD:Design: Quantum Photonic Integration and Deployment (QuPID)",
-     "awardee": "Regents of the University of Michigan - Ann Arbor",
-     "amount": 4000000
+     "id": "2552714",
+     "title": "QLCI: Quantum Systems through Entangled Science and Engineering (Q-SENSE)",
+     "awardee": "University of Colorado at Boulder",
+     "amount": 37500000
     },
     {
-     "id": "2547444",
-     "title": "NQVL:QSTD:Design: Distributed-Entanglement Quantum Sensing of Chemical Properties (DQS-CP)",
-     "awardee": "OHIO STATE UNIVERSITY, THE",
-     "amount": 4000000
+     "id": "2553574",
+     "title": "QLCI: Institute for Robust Quantum Simulation (RQS)",
+     "awardee": "University of Maryland, College Park",
+     "amount": 37500000
     }
    ]
   }
@@ -3000,12 +3009,37 @@
      "dollars": 20050000
     },
     {
-     "d": 315,
+     "d": 321,
      "awards": 6,
      "dollars": 20050000
+    },
+    {
+     "d": 328,
+     "awards": 14,
+     "dollars": 310468000
+    },
+    {
+     "d": 335,
+     "awards": 14,
+     "dollars": 310468000
+    },
+    {
+     "d": 341,
+     "awards": 15,
+     "dollars": 310618000
     }
    ]
   }
  ],
- "children": []
+ "children": [],
+ "provider": "nsf",
+ "dataComplete": true,
+ "storeFormat": "csv",
+ "amountNote": "Dollar figures are intended totals (estimatedTotalAmt), not outlays.",
+ "mechanismLabels": {
+  "std": "Standard grants",
+  "cont": "Continuing grants",
+  "fell": "Fellowships",
+  "other": "Other awards"
+ }
 }

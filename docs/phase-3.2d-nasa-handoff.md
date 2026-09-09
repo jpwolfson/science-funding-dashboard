@@ -1,0 +1,135 @@
+# Phase 3.2d NASA handoff
+
+Status: Stages A and B are reconciled, merged, deployed, and live through PRs
+[#34](https://github.com/jpwolfson/science-funding-dashboard/pull/34) and
+[#39](https://github.com/jpwolfson/science-funding-dashboard/pull/39).
+Science `080-0120`, Aeronautics `080-0126`, Space Technology `080-0131`, and
+STEM Engagement `080-0128` each have ten accepted FY2017--FY2026 partitions,
+exact-cent baselines, canonical Program Activities, dashboards, and combined
+sentinel coverage. Stage C's Exploration `080-0124` and Space Operations
+`080-0115` registry scaffolds are complete on a current-main candidate with
+official-source exact-cent baselines and canonical Program Activities. Stage C
+has not changed the production trigger or started a custom-account download.
+
+## Staged rollout contract
+
+NASA must be registered and backfilled in three bounded stages because the
+production reconcile validates every registered store:
+
+1. Stage A: Science (`nasa/science`), 10 FY2017–26 jobs.
+2. Stage B: Aeronautics, Space Technology, and STEM Engagement, 30 jobs.
+3. Stage C: Exploration and Space Operations, 20 jobs.
+
+The coordinator owns trigger changes. The worker appends only the accounts for
+the stage about to run; later empty accounts must not be pre-registered.
+
+## Program Activity evidence boundary
+
+The official Science federal account is `080-0120`, titled `Science, National
+Aeronautics and Space Administration`. USAspending Files A/B/C begin at FY2017
+P06, so FY2015–16 are unavailable, FY2017 is partial P06–P12, FY2018–25 are
+complete, and FY2026 is pinned through certified P09 as retrieved 2026-08-12.
+The exact source endpoint is recorded in the baseline file.
+
+Official Science PA evidence contains historical `0001 SCIENCE (DIRECT)` and
+current PARK `5ZD5GGPDU49 SCIENCE (DIRECT)`. Both normalize to the single
+`science-direct` identity. AAAS mission labels such as Astrophysics, Earth
+Science, Heliophysics, and Planetary Science remain crosswalk context and do
+not become File B Program Activity pages.
+
+Aeronautics and Space Technology each use a single current direct Program
+Activity, respectively `0001` / PARK `5ZD5GGPT55B` and `0001` / PARK
+`5ZD5GGQ7TN7`. STEM Engagement retains the canonical historical identity
+`0001 Education (Direct)` / PARK `5ZD5GGQ085N`; the later official label
+`SCIENCE, TECHNOLOGY, ENGINEERING, AND MATHEMATICS ENGAGEMENT (DIRECT)` is a
+code/name alias of that same identity, not a second page.
+
+Exploration's historical `0001 EXPLORATION (DIRECT)` and later `0001 DEEP
+SPACE EXPLORATION SYSTEMS (DIRECT)` labels normalize to the current PARK
+`5RN5AZGZKXF` canonical identity `Deep Space Exploration Systems`. Its
+official `0000 UNKNOWN/OTHER` observation remains an explicit fallback.
+Stage C FY2026 P02 additionally exposed the generic authoritative PARK
+`PRE2018` with blank code/name and exactly zero cents. It remains a distinct
+canonical identity named `ACTIVITY FROM OBLIGATION BEFORE FY 2018: PROGRAM
+ACTIVITY NOT SPECIFIED`, rather than being merged into unknown/other. Failed
+job `95024679498` preserved raw artifact `9250109157`; its artifact ZIP SHA-256
+is `d48c7dabec9be02053335f73b5c62b64dafed2a3621b2dbf0affb10ea6232818`,
+and the nested official File B ZIP SHA-256 is
+`68f959e8f1159c3b821a44a5c69206555a56453f7259f81f4c2e5954f986cb21`.
+Space Operations preserves three distinct identities: direct `0001` / PARK
+`5ZD5GGP15KD`, reimbursable `0801`, and the `0000` fallback with historical
+labels `0`, `OTHER/UNKNOWN`, and `UNKNOWN/OTHER`. Stage C FY2026 P02 exposed
+five zero-cent blank-code/name rows with PARK `5Q15DKKYF0L`. The official PARK
+reference (SHA-256
+`b8195da7c4cab33ef2b033a578169d6b687a43016bbe0900482625db0f0d60f7`)
+maps it to account `080-0115`, compound PAC `0001`, name `Space Operations`,
+so it is a reviewed PARK alias of the direct identity rather than a new page.
+The same raw snapshot also contains a zero-cent `PRE2018` row, preserved as the
+same distinct generic identity used by Exploration. Failed job `95024680075`
+preserved raw artifact `9251996725`; its artifact ZIP SHA-256 is
+`f8151dd2032aae8d3591d704252b2437afc7e492f2e3732b5501f7f2bbf62d2c`,
+and the nested official File B ZIP SHA-256 is
+`db5a7e2974f49f39837add5c0f2783d9300b14bd0fc1cf9fa6e838fc176915e2`.
+
+File B signed obligations remain canonical; File C and its signed residual are
+separate. The accepted Science backfill retains Assistance, Contracts, and
+Unlinked files and does not call File C/net a bounded completeness percentage.
+Stages B and C retain the same signed reconciliation contract.
+
+## Stage A accepted release evidence
+
+Durable run
+[`31776315157`](https://github.com/jpwolfson/science-funding-dashboard/actions/runs/31776315157)
+completed with 13 logical jobs: plan, all ten account-year pulls, and reconcile
+succeeded (12 successes); the branch-only deploy job was skipped. Reconcile
+atomically committed `f6b918ac8b0efcee1907ce43ee8142e096b9bd86`, and PR
+#34 merged it at `dba5ea7c5e6db7076ebfe9ea43a4b5a2ad544a08` after current-main
+integration and exact trigger restoration.
+
+Across all ten accepted years, File A and canonical File B each total
+`6,836,252,778,705` cents. File C totals `5,836,343,689,260` cents and the
+explicit residual totals `999,909,089,445` cents, so File C plus residual
+equals File B exactly. File C/net is `85.37343305151431%`. The store contains
+90,546 signed events normalized from 420,211 parsed rows in 113 accepted
+download snapshots; no Program Activity remains unmapped and validation has
+zero warnings.
+
+The Science subtree is 30,508,064 bytes; compressed event partitions are
+28,873,162 bytes and provenance records are 194,814 bytes. The serialized run
+elapsed 2h47m59s and reconciliation ran 9m24s. NASA tests passed 5/5, registry
+10/10, whole registry 122/122, fast 7/7, and rendered 3/3 including 68
+all-account light/dark cases. The 22-page screenshot pack and live Science
+account/activity pages passed reader review.
+
+## Stage B accepted release evidence
+
+Durable run
+[`31864158299`](https://github.com/jpwolfson/science-funding-dashboard/actions/runs/31864158299)
+completed with the exact terminal topology of 33 jobs: plan, all 30
+account-year pulls, and reconcile succeeded (32 successes); the branch-only
+deploy job was skipped. Reconcile atomically committed
+`3073382a3b7aa51b799bb7d8d3de7d2cc145c55b`, the trigger was restored to
+weekly/all in `33f5519353e3b3596887ed147d28c0604f327c19`, and PR #39 merged at
+`bbc67c0ef11eea612094dc1e51c65f98eb435b63`.
+
+Post-reconcile checks passed NASA 6/6, fast 7/7, rendered 3/3 including 88
+all-account cases, and 31 screenshot cases with zero audit errors or duplicate
+payloads. Post-merge Test `31888320904` and Deploy Pages `31888320902` both
+succeeded. Live Aeronautics, Space Technology, STEM Engagement, obligation
+index, and sentinel JSON match the merged branch byte-for-byte; all four
+rendered pages are populated and produced no browser warnings or errors.
+
+## Remaining rollout work
+
+Stage C must materialize Exploration and Space Operations atomically. It still
+requires its own source run, exact reconciliation, trigger restoration,
+current-main integration, PR, deploy, and live reader review. The worker opens
+but never merges that future NASA pull request.
+
+The pre-download scaffold gate is registry plus fast verification. Rendered
+all-account verification is intentionally deferred until reconcile creates the
+two new dashboard trees: before that atomic commit, its only failures are the
+expected eight light/dark account/activity requests for Exploration and Space
+Operations returning 404. Existing rendered account cases and both sentinel
+cases remain green; after reconcile, the full rendered tier must pass without
+an exception.

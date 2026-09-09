@@ -22,11 +22,14 @@ flagged here.
 
 import json
 import re
+import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import Mock, patch
 
-from scripts.verify import _lint_account
+from scripts.smoke_obligation_pages import _evaluate_case, _start_chrome
+from scripts.verify import _lint_account, _run_command
 
 REPO = Path(__file__).resolve().parent.parent
 CHECKED_FILES = (
@@ -55,6 +58,70 @@ def registry_slugs():
 
 
 class UniformityContractTests(unittest.TestCase):
+    def test_rendered_gate_retries_only_chrome_cold_start(self):
+        first, second = Mock(pid=101), Mock(pid=202)
+        page = {"webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/1"}
+        with tempfile.TemporaryDirectory() as profile_root, patch(
+                "scripts.smoke_obligation_pages._free_port",
+                side_effect=[9101, 9102]), patch(
+                "scripts.smoke_obligation_pages.subprocess.Popen",
+                side_effect=[first, second]) as popen, patch(
+                "scripts.smoke_obligation_pages._wait_for_devtools",
+                side_effect=[TimeoutError("cold start"), page]) as wait, patch(
+                "scripts.smoke_obligation_pages._stop_chrome",
+                return_value="first attempt diagnostics") as stop:
+            process, observed = _start_chrome(
+                "/chrome", profile_root, attempts=2, startup_timeout=20
+            )
+
+        self.assertIs(second, process)
+        self.assertEqual(page, observed)
+        self.assertEqual(2, popen.call_count)
+        self.assertEqual(2, wait.call_count)
+        stop.assert_called_once_with(first)
+        first_command, second_command = (
+            call.args[0] for call in popen.call_args_list
+        )
+        self.assertIn("--remote-debugging-port=9101", first_command)
+        self.assertIn("--remote-debugging-port=9102", second_command)
+        self.assertNotEqual(
+            next(value for value in first_command
+                 if value.startswith("--user-data-dir=")),
+            next(value for value in second_command
+                 if value.startswith("--user-data-dir=")),
+        )
+
+    def test_rendered_gate_rejects_every_collected_browser_error(self):
+        document = {
+            "html": '<html data-render-complete="true"><a href="/">home</a></html>',
+            "text": "home", "width": 1440, "dark": False,
+        }
+        errors = _evaluate_case(
+            document,
+            "Failed to load resource: status 404",
+            1440,
+            "light",
+        )
+        self.assertEqual(
+            ["browser diagnostic: Failed to load resource: status 404"],
+            errors,
+        )
+
+    def test_failed_command_evidence_retains_actionable_trace_tail(self):
+        result = _run_command(
+            "diagnostic",
+            [sys.executable, "-c", (
+                "import sys; "
+                "print('exact failing test'); "
+                "print('Traceback: actionable detail', file=sys.stderr); "
+                "raise SystemExit(1)"
+            )],
+            cwd=REPO,
+        )
+        self.assertFalse(result["passed"])
+        self.assertIn("exact failing test", result["evidence"])
+        self.assertIn("Traceback: actionable detail", result["evidence"])
+
     def account_fixture(self):
         temporary = tempfile.TemporaryDirectory()
         root = Path(temporary.name)
@@ -107,6 +174,34 @@ class UniformityContractTests(unittest.TestCase):
             check = _lint_account(root, account, rows)[-1]
             self.assertFalse(check["passed"])
             self.assertIn("no resolved", check["evidence"])
+        finally:
+            temporary.cleanup()
+
+    def test_registry_lints_dual_exact_file_a_file_b_pins(self):
+        temporary, root, account = self.account_fixture()
+        try:
+            baseline = root / account["baseline"]
+            value = json.loads(baseline.read_text())
+            value["fiscalYears"]["2024"] = {
+                "status": "complete",
+                "obligationsCents": 101,
+                "fileBObligationsCents": 100,
+                "fileAFileBVarianceCents": 1,
+                "fileAFileBVarianceReason": "Official source warning A19",
+            }
+            baseline.write_text(json.dumps(value))
+            checks = _lint_account(root, account, [])
+            status = next(check for check in checks
+                          if "baseline per-FY status map" in check["name"])
+            self.assertTrue(status["passed"], status["evidence"])
+
+            value["fiscalYears"]["2024"].pop("fileAFileBVarianceReason")
+            baseline.write_text(json.dumps(value))
+            checks = _lint_account(root, account, [])
+            status = next(check for check in checks
+                          if "baseline per-FY status map" in check["name"])
+            self.assertFalse(status["passed"])
+            self.assertIn("must be declared together", status["evidence"])
         finally:
             temporary.cleanup()
 

@@ -1,0 +1,64 @@
+{
+ "schemaVersion": 2,
+ "federalAccount": "097-0400",
+ "source": "USAspending federal account fiscal-year snapshots (GTAS/File A), https://api.usaspending.gov/api/v2/federal_accounts/097-0400/?fiscal_year=<FY>, reverified 2026-09-01",
+ "fiscalYears": {
+  "2015": {
+   "status": "unavailable",
+   "reason": "Files A/B/C begin in FY2017 Q2"
+  },
+  "2016": {
+   "status": "unavailable",
+   "reason": "Files A/B/C begin in FY2017 Q2"
+  },
+  "2017": {
+   "asOfPeriod": 12,
+   "firstPeriod": 6,
+   "obligationsCents": 2251362677352,
+   "status": "partial"
+  },
+  "2018": {
+   "status": "complete",
+   "obligationsCents": 2457216636704
+  },
+  "2019": {
+   "status": "complete",
+   "obligationsCents": 2645819709252
+  },
+  "2020": {
+   "status": "complete",
+   "obligationsCents": 2710538880746
+  },
+  "2021": {
+   "status": "complete",
+   "obligationsCents": 2875140199888
+  },
+  "2022": {
+   "status": "complete",
+   "obligationsCents": 2943303100353
+  },
+  "2023": {
+   "status": "complete",
+   "obligationsCents": 3507738978109,
+   "fileBObligationsCents": 3507738877251,
+   "fileAFileBVarianceCents": 100858,
+   "fileAFileBVarianceReason": "Official FY2023 GTAS/File A is 3507738978109 cents while the accepted P12 File B and independent date-filtered Program Activity totals are 3507738877251 cents; preserve the exact 100858-cent official source variance with File B canonical and no synthetic residual or tolerance."
+  },
+  "2024": {
+   "status": "complete",
+   "obligationsCents": 3845905263059
+  },
+  "2025": {
+   "status": "complete",
+   "obligationsCents": 3813645882772,
+   "fileBObligationsCents": 3812362307540,
+   "fileAFileBVarianceCents": 1283575232,
+   "fileAFileBVarianceReason": "Official FY2025 GTAS/File A is 3813645882772 cents while the accepted P12 File B and independent date-filtered Program Activity totals are 3812362307540 cents; preserve the exact 1283575232-cent official source variance with File B canonical and no synthetic residual or tolerance."
+  },
+  "2026": {
+   "asOfPeriod": 9,
+   "obligationsCents": 3644486509517,
+   "status": "partial"
+  }
+ }
+}

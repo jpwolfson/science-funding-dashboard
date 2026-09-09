@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-12",
+ "generated": "2026-09-07",
  "node": {
   "name": "Office of Advanced Cyberinfrastructure (OAC)",
   "abbrev": "OAC",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.nsf.gov/services/v1/awards.json?org_code_div=05090000 (NSF Award Search API), month-by-month on Original Award Date",
  "warnings": [],
- "totalAwards": 3197,
+ "totalAwards": 3201,
  "currentFY": 2026,
  "monthly": [
   {
@@ -1291,9 +1291,18 @@
   },
   {
    "month": "2026-08",
-   "awards": 0,
-   "dollars": 0,
-   "std": 0,
+   "awards": 3,
+   "dollars": 36200000,
+   "std": 2,
+   "cont": 0,
+   "fell": 0,
+   "other": 1
+  },
+  {
+   "month": "2026-09",
+   "awards": 1,
+   "dollars": 158000,
+   "std": 1,
    "cont": 0,
    "fell": 0,
    "other": 0
@@ -1699,10 +1708,10 @@
   {
    "fy": 2026,
    "partial": true,
-   "awards": 205,
-   "dollars": 216252064,
-   "median": 399967,
-   "exTop3Dollars": 157252064,
+   "awards": 209,
+   "dollars": 252610064,
+   "median": 400000,
+   "exTop3Dollars": 168610064,
    "octJul": {
     "awards": 205,
     "dollars": 216252064,
@@ -1712,6 +1721,12 @@
     "other": 12
    },
    "top3": [
+    {
+     "id": "2616251",
+     "title": "NAIRR-OC: Advancing AI Discovery and Innovation for the Nation",
+     "awardee": "University of California-San Diego",
+     "amount": 35000000
+    },
     {
      "id": "2609447",
      "title": "Category I: National Data Platform: A Federated National AI-ready Data Ecosystem for Discovery, Innovation, Education, and Workforce Development",
@@ -1723,12 +1738,6 @@
      "title": "Category I: Fabric for AI-Driven Science (FabAID)",
      "awardee": "Morgridge Institute for Research, Inc.",
      "amount": 24500000
-    },
-    {
-     "id": "2614012",
-     "title": "Category I: Expanse 2 - Continuing to Serve the Long Tail of Science and AI Innovation with New Technologies",
-     "awardee": "University of California-San Diego",
-     "amount": 10000000
     }
    ]
   }
@@ -3048,12 +3057,37 @@
      "dollars": 216252064
     },
     {
-     "d": 315,
-     "awards": 205,
-     "dollars": 216252064
+     "d": 321,
+     "awards": 206,
+     "dollars": 216852064
+    },
+    {
+     "d": 328,
+     "awards": 207,
+     "dollars": 217452064
+    },
+    {
+     "d": 335,
+     "awards": 209,
+     "dollars": 252610064
+    },
+    {
+     "d": 341,
+     "awards": 209,
+     "dollars": 252610064
     }
    ]
   }
  ],
- "children": []
+ "children": [],
+ "provider": "nsf",
+ "dataComplete": true,
+ "storeFormat": "csv",
+ "amountNote": "Dollar figures are intended totals (estimatedTotalAmt), not outlays.",
+ "mechanismLabels": {
+  "std": "Standard grants",
+  "cont": "Continuing grants",
+  "fell": "Fellowships",
+  "other": "Other awards"
+ }
 }

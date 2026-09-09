@@ -186,10 +186,12 @@ jobs:
               subprocess.run(["git", "push", "origin", f"HEAD:{branch}"], check=True)
       - name: Assemble the exact validated Pages snapshot
         if: github.ref_name == 'main'
-        run: |
-          mkdir -p _site
-          cp site/index.html _site/
-          cp -r data _site/data
+        run: python scripts/assemble_pages_site.py --output _site
+      - name: Check GitHub Pages footprint (warn at 850 MB; stop at 950 MB)
+        if: github.ref_name == 'main'
+        run: >-
+          python scripts/check_pages_footprint.py
+          --site-root _site --json _pages-footprint.json
       - name: Upload the exact validated Pages snapshot
         if: github.ref_name == 'main'
         uses: actions/upload-pages-artifact@v3

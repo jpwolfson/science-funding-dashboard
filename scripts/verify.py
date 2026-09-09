@@ -46,6 +46,14 @@ sys.path.insert(0, str(REPO))
 from scripts.smoke_obligation_pages import (  # noqa: E402
     QuietHandler, account_registry, chrome_path, render_page,
 )
+from scripts.assemble_pages_site import pages_source_summary  # noqa: E402
+from scripts.check_pages_footprint import (  # noqa: E402
+    PAGES_LIMIT_BYTES,
+    PAGES_STOP_BYTES,
+    PAGES_WARNING_BYTES,
+    classify as classify_pages_footprint,
+)
+from adapters.obligation_common import baseline_pin_problems  # noqa: E402
 
 SCHEMA_VERSION = 1
 ONE_GIBIBYTE = 1024 ** 3
@@ -88,7 +96,13 @@ def _run_command(name, cmd, cwd=REPO):
     elapsed = time.monotonic() - start
     combined = (result.stdout or "") + (result.stderr or "")
     lines = [line.strip() for line in combined.splitlines() if line.strip()]
-    evidence = lines[-1] if lines else "(no output)"
+    if result.returncode == 0:
+        evidence = lines[-1] if lines else "(no output)"
+    else:
+        # A collapsed unittest summary such as ``FAILED (errors=1)`` is not
+        # actionable in CI.  Preserve a bounded failure tail in both console
+        # and JSON evidence so the exact test and traceback survive the job.
+        evidence = "\n".join(lines[-80:]) if lines else "(no output)"
     return _check(name, result.returncode == 0, evidence, elapsed)
 
 
@@ -208,6 +222,11 @@ def _lint_account(repo, account, crosswalk_rows):
             fy_problems.append(f"FY{fiscal_year}: invalid status {status!r}")
         elif status == "unavailable" and not row.get("reason"):
             fy_problems.append(f"FY{fiscal_year}: unavailable status has no reason")
+        else:
+            fy_problems.extend(
+                f"FY{fiscal_year}: {problem}"
+                for problem in baseline_pin_problems(row)
+            )
     fy_map_ok = bool(fiscal_years) and not fy_problems
     checks.append(_check(
         f"{path}: baseline per-FY status map", fy_map_ok,
@@ -319,6 +338,9 @@ def tier_rendered(repo=REPO, chrome=None):
                      [py, "scripts/smoke_obligation_pages.py", *chrome_args], cwd=repo),
         _run_command("smoke-obligation-pages-all-accounts",
                      [py, "scripts/smoke_obligation_pages.py", "--all-accounts",
+                      *chrome_args], cwd=repo),
+        _run_command("smoke-pages-public-links",
+                     [py, "scripts/smoke_obligation_pages.py", "--public-links",
                       *chrome_args], cwd=repo),
         _run_command("smoke-sentinel-page",
                      [py, "scripts/smoke_sentinel_page.py", *chrome_args], cwd=repo),
@@ -465,6 +487,15 @@ def compute_footprint(repo=REPO):
     files = _tracked_files(repo)
     per_tree = _per_tree_bytes(repo, files)
     gzipped = _gzipped_store_bytes(repo, files)
+    pages = pages_source_summary(repo)
+    pages.update({
+        "status": classify_pages_footprint(pages["totalBytes"]),
+        "warningThresholdBytes": PAGES_WARNING_BYTES,
+        "stopThresholdBytes": PAGES_STOP_BYTES,
+        "pagesLimitBytes": PAGES_LIMIT_BYTES,
+        "headroomBytes": PAGES_LIMIT_BYTES - pages["totalBytes"],
+        "excludedFromArtifact": "data/obligations/**/events/*.csv.gz",
+    })
     trajectory = None
     first_sha, first_iso = _first_commit_touching(repo, "data")
     if first_sha:
@@ -507,6 +538,7 @@ def compute_footprint(repo=REPO):
         "perTreeBytes": per_tree,
         "totalTrackedBytes": sum(per_tree.values()),
         "gzippedStoreBytes": gzipped,
+        "pagesArtifact": pages,
         "trajectory": trajectory,
     }
 

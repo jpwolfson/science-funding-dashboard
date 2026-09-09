@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-12",
+ "generated": "2026-09-07",
  "node": {
   "name": "Translational Impacts",
   "abbrev": "TI",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.nsf.gov/services/v1/awards.json?org_code_div=15030000 (NSF Award Search API), month-by-month on Original Award Date",
  "warnings": [],
- "totalAwards": 8682,
+ "totalAwards": 8866,
  "currentFY": 2026,
  "monthly": [
   {
@@ -1291,12 +1291,21 @@
   },
   {
    "month": "2026-08",
-   "awards": 14,
-   "dollars": 31355324,
-   "std": 8,
+   "awards": 191,
+   "dollars": 91246170,
+   "std": 152,
+   "cont": 1,
+   "fell": 0,
+   "other": 38
+  },
+  {
+   "month": "2026-09",
+   "awards": 7,
+   "dollars": 8738841,
+   "std": 0,
    "cont": 0,
    "fell": 0,
-   "other": 6
+   "other": 7
   }
  ],
  "fiscalYears": [
@@ -1699,10 +1708,10 @@
   {
    "fy": 2026,
    "partial": true,
-   "awards": 275,
-   "dollars": 162269567,
-   "median": 304489,
-   "exTop3Dollars": 133155355,
+   "awards": 459,
+   "dollars": 230899254,
+   "median": 298888,
+   "exTop3Dollars": 199596886,
    "octJul": {
     "awards": 261,
     "dollars": 130914243,
@@ -1725,10 +1734,10 @@
      "amount": 7114212
     },
     {
-     "id": "2612989",
-     "title": "NSF TTP-P: Continuous Process for Manufacturing Softwood Kraft Lignin Carbon Fiber",
-     "awardee": "Iowa State University",
-     "amount": 2000000
+     "id": "2629493",
+     "title": "Pilot on Enhancing EPSCoR State Proposal Success Rate & Mastering Negotiation Skills",
+     "awardee": "QEM Network HQ",
+     "amount": 4188156
     }
    ]
   }
@@ -3044,16 +3053,41 @@
     },
     {
      "d": 314,
-     "awards": 275,
-     "dollars": 162269567
+     "awards": 307,
+     "dollars": 168369685
     },
     {
-     "d": 315,
-     "awards": 275,
-     "dollars": 162269567
+     "d": 321,
+     "awards": 375,
+     "dollars": 182323044
+    },
+    {
+     "d": 328,
+     "awards": 441,
+     "dollars": 211562468
+    },
+    {
+     "d": 335,
+     "awards": 457,
+     "dollars": 228403193
+    },
+    {
+     "d": 341,
+     "awards": 459,
+     "dollars": 230899254
     }
    ]
   }
  ],
- "children": []
+ "children": [],
+ "provider": "nsf",
+ "dataComplete": true,
+ "storeFormat": "csv",
+ "amountNote": "Dollar figures are intended totals (estimatedTotalAmt), not outlays.",
+ "mechanismLabels": {
+  "std": "Standard grants",
+  "cont": "Continuing grants",
+  "fell": "Fellowships",
+  "other": "Other awards"
+ }
 }

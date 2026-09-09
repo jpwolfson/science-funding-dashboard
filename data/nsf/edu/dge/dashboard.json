@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-12",
+ "generated": "2026-09-07",
  "node": {
   "name": "Division of Graduate Education",
   "abbrev": "DGE",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.nsf.gov/services/v1/awards.json?org_code_div=11010000 (NSF Award Search API), month-by-month on Original Award Date",
  "warnings": [],
- "totalAwards": 1859,
+ "totalAwards": 1884,
  "currentFY": 2026,
  "monthly": [
   {
@@ -1291,11 +1291,20 @@
   },
   {
    "month": "2026-08",
-   "awards": 69,
-   "dollars": 145266545,
-   "std": 7,
+   "awards": 91,
+   "dollars": 160136633,
+   "std": 29,
    "cont": 0,
    "fell": 62,
+   "other": 0
+  },
+  {
+   "month": "2026-09",
+   "awards": 3,
+   "dollars": 3816000,
+   "std": 3,
+   "cont": 0,
+   "fell": 0,
    "other": 0
   }
  ],
@@ -1699,10 +1708,10 @@
   {
    "fy": 2026,
    "partial": true,
-   "awards": 112,
-   "dollars": 183175591,
-   "median": 432822,
-   "exTop3Dollars": 109014311,
+   "awards": 137,
+   "dollars": 201861679,
+   "median": 424000,
+   "exTop3Dollars": 127700399,
    "octJul": {
     "awards": 43,
     "dollars": 37909046,
@@ -3044,16 +3053,41 @@
     },
     {
      "d": 314,
-     "awards": 112,
-     "dollars": 183175591
+     "awards": 124,
+     "dollars": 187878358
     },
     {
-     "d": 315,
-     "awards": 112,
-     "dollars": 183175591
+     "d": 321,
+     "awards": 127,
+     "dollars": 188878354
+    },
+    {
+     "d": 328,
+     "awards": 130,
+     "dollars": 191844679
+    },
+    {
+     "d": 335,
+     "awards": 137,
+     "dollars": 201861679
+    },
+    {
+     "d": 341,
+     "awards": 137,
+     "dollars": 201861679
     }
    ]
   }
  ],
- "children": []
+ "children": [],
+ "provider": "nsf",
+ "dataComplete": true,
+ "storeFormat": "csv",
+ "amountNote": "Dollar figures are intended totals (estimatedTotalAmt), not outlays.",
+ "mechanismLabels": {
+  "std": "Standard grants",
+  "cont": "Continuing grants",
+  "fell": "Fellowships",
+  "other": "Other awards"
+ }
 }
