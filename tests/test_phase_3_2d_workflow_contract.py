@@ -67,15 +67,20 @@ class Phase32dWorkflowContractTests(unittest.TestCase):
             REPO / ".github/workflows/preserve-obligation-retry-artifacts.yml"
         ).read_text()
         self.assertIn("actions: write", workflow)
+        self.assertIn("contents: write", workflow)
         self.assertIn(
             'paths: [".github/triggers/preserve-obligation-retry-artifacts.json"]',
             workflow,
         )
         preserve = workflow.index("Validate, download, and hash every source ZIP")
         upload = workflow.index("Retain the verified source ZIPs before remote deletion")
+        commit = workflow.index(
+            "Commit the exact preservation bundle to the operational branch"
+        )
         delete = workflow.index("Delete only the exact preserved conflicting artifacts")
         self.assertLess(preserve, upload)
-        self.assertLess(upload, delete)
+        self.assertLess(upload, commit)
+        self.assertLess(commit, delete)
 
 
 if __name__ == "__main__":

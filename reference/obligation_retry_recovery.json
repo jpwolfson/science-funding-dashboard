@@ -1,0 +1,998 @@
+{
+ "baselinePins": [],
+ "evidenceBranch": "agent/3-2d-retry-artifact-operation",
+ "evidenceCommit": "b2a5055aaec482cc10330ad7a57d09987e21c294",
+ "headBranch": "main",
+ "minimumRetryAttempt": 2,
+ "normalizedPartitions": [
+  {
+   "accountPath": "nsf/stem-education",
+   "artifactId": 10066473973,
+   "federalAccount": "049-0106",
+   "files": [
+    {
+     "memberName": "FY2026.csv.gz",
+     "sha256": "f9b23b96618db79e3ae9e6007b2b6240d60881216d54fc4d97af4da6d901b082",
+     "size": 1018914
+    },
+    {
+     "memberName": "FY2026.provenance.json",
+     "sha256": "71d1c517db0c0bccaa5b981b9b37589f5a764bdbc4808f070a4bb84e3fc5a9ae",
+     "size": 17583
+    },
+    {
+     "memberName": "partition.json",
+     "sha256": "66092422c0da82996a4144b8b0f8bf253278d9681b9bc87db5b1f95ea93c6835",
+     "size": 454
+    }
+   ],
+   "fiscalYear": 2026
+  }
+ ],
+ "preservationPath": "reference/obligation-retry-evidence/34141166514/preservation.json",
+ "preservedArtifacts": [
+  {
+   "artifactDigest": "sha256:2d207efdf93ac464bd51f2e42d912c6620a1b72ac168fa81b9b8aaa3d9c94b59",
+   "artifactId": 10029644128,
+   "artifactName": "obligation-raw-commerce--noaa-orf-FY2026-attempt1",
+   "artifactSize": 29581,
+   "deleteAfterPreserve": false
+  },
+  {
+   "artifactDigest": "sha256:16b2996a269344cb10105cb7e117a684c4709e14b5c3b28666e553b6576aed10",
+   "artifactId": 10031598346,
+   "artifactName": "obligation-raw-dhs--cwmd-rd-FY2026-attempt1",
+   "artifactSize": 13470,
+   "deleteAfterPreserve": false
+  },
+  {
+   "artifactDigest": "sha256:edee64a85517dd01a3ac2e2c9cee24eec0da9c03c8f528e9942de210f49284cc",
+   "artifactId": 10038920957,
+   "artifactName": "obligation-raw-doe--fossil-energy-FY2026-attempt1",
+   "artifactSize": 13969,
+   "deleteAfterPreserve": false
+  },
+  {
+   "artifactDigest": "sha256:885dc240effd182a2e14871ef7a811824196016b95145c5352a19771b74b66b0",
+   "artifactId": 10040778684,
+   "artifactName": "obligation-raw-doe--nuclear-energy-FY2026-attempt1",
+   "artifactSize": 11203,
+   "deleteAfterPreserve": false
+  },
+  {
+   "artifactDigest": "sha256:3a1f0c7d29f6b9fe086c3ab25cea01c88e708d7a29c63ea6587bbbd4bda01905",
+   "artifactId": 10041918460,
+   "artifactName": "obligation-raw-doe--sc-FY2026-attempt1",
+   "artifactSize": 10633,
+   "deleteAfterPreserve": false
+  },
+  {
+   "artifactDigest": "sha256:632f7c4657cb627f87bb0fe4230808b07728129a42f56f850203f8b590ad6d11",
+   "artifactId": 10042099343,
+   "artifactName": "obligation-raw-doi--usgs-sir-FY2018-attempt1",
+   "artifactSize": 12788,
+   "deleteAfterPreserve": false
+  },
+  {
+   "artifactDigest": "sha256:4c96d90133b2fc19c47afcb7b6c113151b8165794864ebe8fc6d0f7bd17a41a3",
+   "artifactId": 10044971992,
+   "artifactName": "obligation-raw-dot--ost-research-technology-FY2026-attempt1",
+   "artifactSize": 9079,
+   "deleteAfterPreserve": false
+  },
+  {
+   "artifactDigest": "sha256:ffd82ead70432a8f932c0302b875276b7d17b3124d55f566fc0e78a1a0059574",
+   "artifactId": 10049625795,
+   "artifactName": "obligation-raw-ed--ies-FY2018-attempt1",
+   "artifactSize": 11662,
+   "deleteAfterPreserve": false
+  },
+  {
+   "artifactDigest": "sha256:c50d1f559781ac06a165973697283db8e27dd26295cc18a7ee89d0f40b4b76df",
+   "artifactId": 10066473973,
+   "artifactName": "obligation-partition-nsf--stem-education-FY2026",
+   "artifactSize": 1021816,
+   "deleteAfterPreserve": true
+  }
+ ],
+ "rawEvidence": [
+  {
+   "accountPath": "commerce/noaa-orf",
+   "artifactId": 10029644128,
+   "federalAccount": "013-1450",
+   "fiscalYear": 2026,
+   "rawArchives": [
+    {
+     "memberName": "commerce--noaa-orf-FY2026P02-object_class_program_activity-821972de8c29.zip",
+     "memberRowCounts": {
+      "FY2026P01-P02_All_FA_AccountBreakdownByPA-OC_2026-09-07_H18M25S06_1.csv": 427
+     },
+     "parsedRowCount": 427,
+     "period": 2,
+     "sha256": "821972de8c29e3ffddf8f571547f1563ea352fb76e950b75baed89bd679f8dad",
+     "size": 2076,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "commerce--noaa-orf-FY2026P03-object_class_program_activity-0d01192ccd79.zip",
+     "memberRowCounts": {
+      "FY2026P01-P03_All_FA_AccountBreakdownByPA-OC_2026-09-07_H18M25S43_1.csv": 476
+     },
+     "parsedRowCount": 476,
+     "period": 3,
+     "sha256": "0d01192ccd79feea08b31e2cd44512445d1f6c25c70d79f689a18a855201a192",
+     "size": 2574,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "commerce--noaa-orf-FY2026P04-object_class_program_activity-a3c9f19ec4ee.zip",
+     "memberRowCounts": {
+      "FY2026P01-P04_All_FA_AccountBreakdownByPA-OC_2026-09-07_H18M26S20_1.csv": 492
+     },
+     "parsedRowCount": 492,
+     "period": 4,
+     "sha256": "a3c9f19ec4ee1ebcf0a5953cb7f4137cd5077136fa1f179e46a2cdde7a6b330b",
+     "size": 2834,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "commerce--noaa-orf-FY2026P05-object_class_program_activity-c5615b807bb4.zip",
+     "memberRowCounts": {
+      "FY2026P01-P05_All_FA_AccountBreakdownByPA-OC_2026-09-07_H18M26S58_1.csv": 500
+     },
+     "parsedRowCount": 500,
+     "period": 5,
+     "sha256": "c5615b807bb4358f0347d0aa931f68387647863dcc1dc7ed5a72f3d607669df0",
+     "size": 2964,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "commerce--noaa-orf-FY2026P06-object_class_program_activity-328860aa347c.zip",
+     "memberRowCounts": {
+      "FY2026P01-P06_All_FA_AccountBreakdownByPA-OC_2026-09-07_H18M27S35_1.csv": 507
+     },
+     "parsedRowCount": 507,
+     "period": 6,
+     "sha256": "328860aa347c72c615cd0568c9076d5414a1c8346a79b67adc404a04e7869a56",
+     "size": 3095,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "commerce--noaa-orf-FY2026P07-object_class_program_activity-897da99bfa68.zip",
+     "memberRowCounts": {
+      "FY2026P01-P07_All_FA_AccountBreakdownByPA-OC_2026-09-07_H18M28S13_1.csv": 531
+     },
+     "parsedRowCount": 531,
+     "period": 7,
+     "sha256": "897da99bfa68f1f49dc7db8c7725544ecef9ca2ab7830c99508d8cd55fe2db80",
+     "size": 3347,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "commerce--noaa-orf-FY2026P08-object_class_program_activity-7a28d93af60d.zip",
+     "memberRowCounts": {
+      "FY2026P01-P08_All_FA_AccountBreakdownByPA-OC_2026-09-07_H18M28S50_1.csv": 538
+     },
+     "parsedRowCount": 538,
+     "period": 8,
+     "sha256": "7a28d93af60d0c062257cb7bf92390c7acb431ca8ddc85e6f0573e0f638b1b98",
+     "size": 3590,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "commerce--noaa-orf-FY2026P09-object_class_program_activity-d599d4598182.zip",
+     "memberRowCounts": {
+      "FY2026P01-P09_All_FA_AccountBreakdownByPA-OC_2026-09-07_H18M29S27_1.csv": 551
+     },
+     "parsedRowCount": 551,
+     "period": 9,
+     "sha256": "d599d45981828a7065c244192ad1acc35abfbd355f9b71b5402f30ee6992aa59",
+     "size": 3536,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "commerce--noaa-orf-FY2026P10-object_class_program_activity-0b1e851977e7.zip",
+     "memberRowCounts": {
+      "FY2026P01-P10_All_FA_AccountBreakdownByPA-OC_2026-09-07_H18M30S21_1.csv": 576
+     },
+     "parsedRowCount": 576,
+     "period": 10,
+     "sha256": "0b1e851977e7b7161f7d424ea5177cf3f3af3534b584fc0392b4ba48116be5c5",
+     "size": 3791,
+     "submissionType": "object_class_program_activity"
+    }
+   ],
+   "resumeRequests": [],
+   "sourceAccountId": "3685"
+  },
+  {
+   "accountPath": "dhs/cwmd-rd",
+   "artifactId": 10031598346,
+   "federalAccount": "070-0860",
+   "fiscalYear": 2026,
+   "rawArchives": [
+    {
+     "memberName": "dhs--cwmd-rd-FY2026P02-object_class_program_activity-8d470d108f78.zip",
+     "memberRowCounts": {
+      "FY2026P01-P02_All_FA_AccountBreakdownByPA-OC_2026-09-07_H19M47S24_1.csv": 34
+     },
+     "parsedRowCount": 34,
+     "period": 2,
+     "sha256": "8d470d108f781e91352bb3cf463752f10ecad92319f135174fbc4b1e0563c363",
+     "size": 457,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "dhs--cwmd-rd-FY2026P03-object_class_program_activity-82d8867bc053.zip",
+     "memberRowCounts": {
+      "FY2026P01-P03_All_FA_AccountBreakdownByPA-OC_2026-09-07_H19M48S01_1.csv": 35
+     },
+     "parsedRowCount": 35,
+     "period": 3,
+     "sha256": "82d8867bc053aeea975fdefce30fc6b3fff042a423a0c892212ef7a6a28f41cf",
+     "size": 464,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "dhs--cwmd-rd-FY2026P04-object_class_program_activity-e051289bfd60.zip",
+     "memberRowCounts": {
+      "FY2026P01-P04_All_FA_AccountBreakdownByPA-OC_2026-09-07_H19M48S38_1.csv": 36
+     },
+     "parsedRowCount": 36,
+     "period": 4,
+     "sha256": "e051289bfd60ce64a3dd7ba223b8ce144bc908684392332715081cfc6434fc40",
+     "size": 474,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "dhs--cwmd-rd-FY2026P05-object_class_program_activity-05328f6b6ae7.zip",
+     "memberRowCounts": {
+      "FY2026P01-P05_All_FA_AccountBreakdownByPA-OC_2026-09-07_H19M49S16_1.csv": 36
+     },
+     "parsedRowCount": 36,
+     "period": 5,
+     "sha256": "05328f6b6ae7a4a99c0403c5803d587d191fc7ca5643a88f48d04d6b75158add",
+     "size": 490,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "dhs--cwmd-rd-FY2026P06-object_class_program_activity-a95d8776658b.zip",
+     "memberRowCounts": {
+      "FY2026P01-P06_All_FA_AccountBreakdownByPA-OC_2026-09-07_H19M49S53_1.csv": 36
+     },
+     "parsedRowCount": 36,
+     "period": 6,
+     "sha256": "a95d8776658b1c91bfdeaedea73aafe1704312ba40ceb8bb6a607f0ee4c7c353",
+     "size": 490,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "dhs--cwmd-rd-FY2026P07-object_class_program_activity-c359805d8239.zip",
+     "memberRowCounts": {
+      "FY2026P01-P07_All_FA_AccountBreakdownByPA-OC_2026-09-07_H19M50S31_1.csv": 36
+     },
+     "parsedRowCount": 36,
+     "period": 7,
+     "sha256": "c359805d8239086bc05c88963fdbb198ae8d10072972244d04b2ddbb1f790b9a",
+     "size": 490,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "dhs--cwmd-rd-FY2026P08-object_class_program_activity-3ad47d69742a.zip",
+     "memberRowCounts": {
+      "FY2026P01-P08_All_FA_AccountBreakdownByPA-OC_2026-09-07_H19M51S08_1.csv": 36
+     },
+     "parsedRowCount": 36,
+     "period": 8,
+     "sha256": "3ad47d69742a917694d470d3e4d7e195c58157bde4aa39facee23a0589143e9d",
+     "size": 494,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "dhs--cwmd-rd-FY2026P09-object_class_program_activity-e44ada28a277.zip",
+     "memberRowCounts": {
+      "FY2026P01-P09_All_FA_AccountBreakdownByPA-OC_2026-09-07_H19M51S46_1.csv": 36
+     },
+     "parsedRowCount": 36,
+     "period": 9,
+     "sha256": "e44ada28a2773886f6400a144bbca1f3aa4de10712b97f6536cd7a16c5d942ef",
+     "size": 504,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "dhs--cwmd-rd-FY2026P10-award_financial-4c28824e3076.zip",
+     "memberRowCounts": {
+      "FY2026P01-P10_All_FA_Assistance_AccountBreakdownByAward_2026-09-07_H20M02S16_01.csv": 36,
+      "FY2026P01-P10_All_FA_Contracts_AccountBreakdownByAward_2026-09-07_H20M02S16_01.csv": 205,
+      "FY2026P01-P10_All_FA_Unlinked_AccountBreakdownByAward_2026-09-07_H20M02S16_01.csv": 0
+     },
+     "parsedRowCount": 241,
+     "period": 10,
+     "sha256": "4c28824e3076d10a74bb49a53734db72c6c4fb83856bc76545377626500cf750",
+     "size": 8231,
+     "submissionType": "award_financial"
+    },
+    {
+     "memberName": "dhs--cwmd-rd-FY2026P10-object_class_program_activity-207e8ae9a347.zip",
+     "memberRowCounts": {
+      "FY2026P01-P10_All_FA_AccountBreakdownByPA-OC_2026-09-07_H19M52S24_1.csv": 36
+     },
+     "parsedRowCount": 36,
+     "period": 10,
+     "sha256": "207e8ae9a347f8c15d4dec0e3fdc97f8e243020eb73ab7cecd00cda034d5cfad",
+     "size": 515,
+     "submissionType": "object_class_program_activity"
+    }
+   ],
+   "resumeRequests": [],
+   "sourceAccountId": "5256"
+  },
+  {
+   "accountPath": "doe/fossil-energy",
+   "artifactId": 10038920957,
+   "federalAccount": "089-0213",
+   "fiscalYear": 2026,
+   "rawArchives": [
+    {
+     "memberName": "doe--fossil-energy-FY2026P02-object_class_program_activity-1d7b7898b887.zip",
+     "memberRowCounts": {
+      "FY2026P01-P02_All_FA_AccountBreakdownByPA-OC_2026-09-08_H02M36S37_1.csv": 197
+     },
+     "parsedRowCount": 197,
+     "period": 2,
+     "sha256": "1d7b7898b88770ded9813b299bcf54d5fb148e63747415bf878f462add9c7ffe",
+     "size": 959,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "doe--fossil-energy-FY2026P03-object_class_program_activity-eb4d85ad0304.zip",
+     "memberRowCounts": {
+      "FY2026P01-P03_All_FA_AccountBreakdownByPA-OC_2026-09-08_H02M37S48_1.csv": 207
+     },
+     "parsedRowCount": 207,
+     "period": 3,
+     "sha256": "eb4d85ad0304f71adcedd84d1a919440de38f6128f646cff8aa22ca2349c2dbb",
+     "size": 1214,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "doe--fossil-energy-FY2026P04-object_class_program_activity-bcdbc641e360.zip",
+     "memberRowCounts": {
+      "FY2026P01-P04_All_FA_AccountBreakdownByPA-OC_2026-09-08_H02M39S14_1.csv": 208
+     },
+     "parsedRowCount": 208,
+     "period": 4,
+     "sha256": "bcdbc641e360e44660f0ee8fc0a4b13eb1ec0f629906ec888d90207244cbaafd",
+     "size": 1327,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "doe--fossil-energy-FY2026P05-object_class_program_activity-2ae219737dc8.zip",
+     "memberRowCounts": {
+      "FY2026P01-P05_All_FA_AccountBreakdownByPA-OC_2026-09-08_H02M40S41_1.csv": 214
+     },
+     "parsedRowCount": 214,
+     "period": 5,
+     "sha256": "2ae219737dc89f6cb6e5d91bad91bd03bbef3ea5e8517a3a53f8ce54b2521f6d",
+     "size": 1394,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "doe--fossil-energy-FY2026P06-object_class_program_activity-1291261ee36c.zip",
+     "memberRowCounts": {
+      "FY2026P01-P06_All_FA_AccountBreakdownByPA-OC_2026-09-08_H02M41S17_1.csv": 218
+     },
+     "parsedRowCount": 218,
+     "period": 6,
+     "sha256": "1291261ee36cda4eeeba9cb44028730c8d68c745359181c95bcc95b536cafa04",
+     "size": 1476,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "doe--fossil-energy-FY2026P07-object_class_program_activity-ea19b2debee4.zip",
+     "memberRowCounts": {
+      "FY2026P01-P07_All_FA_AccountBreakdownByPA-OC_2026-09-08_H02M41S54_1.csv": 221
+     },
+     "parsedRowCount": 221,
+     "period": 7,
+     "sha256": "ea19b2debee468c61169fc1f59d6e1d5a735007b282d9c243b32066b762d5b84",
+     "size": 1576,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "doe--fossil-energy-FY2026P08-object_class_program_activity-f51db9f84406.zip",
+     "memberRowCounts": {
+      "FY2026P01-P08_All_FA_AccountBreakdownByPA-OC_2026-09-08_H02M42S31_1.csv": 215
+     },
+     "parsedRowCount": 215,
+     "period": 8,
+     "sha256": "f51db9f844065f7623618ad6638c983fa01bccb9e3ae10c7bcb30b32f13e14c0",
+     "size": 1615,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "doe--fossil-energy-FY2026P09-object_class_program_activity-97aefd3a42fa.zip",
+     "memberRowCounts": {
+      "FY2026P01-P09_All_FA_AccountBreakdownByPA-OC_2026-09-08_H02M43S07_1.csv": 219
+     },
+     "parsedRowCount": 219,
+     "period": 9,
+     "sha256": "97aefd3a42fa8698ad8fc38ed6b337016552560b0ecce36cfd804104c9719861",
+     "size": 1672,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "doe--fossil-energy-FY2026P10-object_class_program_activity-42f29cf55d81.zip",
+     "memberRowCounts": {
+      "FY2026P01-P10_All_FA_AccountBreakdownByPA-OC_2026-09-08_H02M43S48_1.csv": 92
+     },
+     "parsedRowCount": 92,
+     "period": 10,
+     "sha256": "42f29cf55d810f82de1466040508cf405a9789f28c1819b2f76ca2fe96ba7a45",
+     "size": 976,
+     "submissionType": "object_class_program_activity"
+    }
+   ],
+   "resumeRequests": [],
+   "sourceAccountId": "5771"
+  },
+  {
+   "accountPath": "doe/nuclear-energy",
+   "artifactId": 10040778684,
+   "federalAccount": "089-0319",
+   "fiscalYear": 2026,
+   "rawArchives": [
+    {
+     "memberName": "doe--nuclear-energy-FY2026P02-object_class_program_activity-892f1a0acfc7.zip",
+     "memberRowCounts": {
+      "FY2026P01-P02_All_FA_AccountBreakdownByPA-OC_2026-09-08_H04M12S19_1.csv": 109
+     },
+     "parsedRowCount": 109,
+     "period": 2,
+     "sha256": "892f1a0acfc7df36c4120c33c408be81dd573e73490dda8faa10df449324bce0",
+     "size": 822,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "doe--nuclear-energy-FY2026P03-object_class_program_activity-1446cd49565c.zip",
+     "memberRowCounts": {
+      "FY2026P01-P03_All_FA_AccountBreakdownByPA-OC_2026-09-08_H04M12S55_1.csv": 112
+     },
+     "parsedRowCount": 112,
+     "period": 3,
+     "sha256": "1446cd49565cc9e9d6ea6fe80d49c327125bed8148528a623adebc7afbe242ae",
+     "size": 887,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "doe--nuclear-energy-FY2026P04-object_class_program_activity-936f076002fb.zip",
+     "memberRowCounts": {
+      "FY2026P01-P04_All_FA_AccountBreakdownByPA-OC_2026-09-08_H04M13S30_1.csv": 112
+     },
+     "parsedRowCount": 112,
+     "period": 4,
+     "sha256": "936f076002fbc72f53bd87caf5140f33b5d1c821a10ee8d3af10e3b7075c452e",
+     "size": 959,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "doe--nuclear-energy-FY2026P05-object_class_program_activity-3115b8bc0821.zip",
+     "memberRowCounts": {
+      "FY2026P01-P05_All_FA_AccountBreakdownByPA-OC_2026-09-08_H04M14S07_1.csv": 119
+     },
+     "parsedRowCount": 119,
+     "period": 5,
+     "sha256": "3115b8bc08211b94af475c0fda3cd6552f7250ad7836f213bf4d4c0668acc5c7",
+     "size": 1103,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "doe--nuclear-energy-FY2026P06-object_class_program_activity-3a6ca86353e3.zip",
+     "memberRowCounts": {
+      "FY2026P01-P06_All_FA_AccountBreakdownByPA-OC_2026-09-08_H04M14S43_1.csv": 120
+     },
+     "parsedRowCount": 120,
+     "period": 6,
+     "sha256": "3a6ca86353e398a115bf850f5fc27fc6d80f9aef74a66f8b588683b8d66c430d",
+     "size": 1151,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "doe--nuclear-energy-FY2026P07-object_class_program_activity-200afe9798bd.zip",
+     "memberRowCounts": {
+      "FY2026P01-P07_All_FA_AccountBreakdownByPA-OC_2026-09-08_H04M15S19_1.csv": 122
+     },
+     "parsedRowCount": 122,
+     "period": 7,
+     "sha256": "200afe9798bd08896eebe46dfd71593be9a7f6f170af206cb32934ab9120e5ac",
+     "size": 1206,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "doe--nuclear-energy-FY2026P08-object_class_program_activity-9437fb3e6bd5.zip",
+     "memberRowCounts": {
+      "FY2026P01-P08_All_FA_AccountBreakdownByPA-OC_2026-09-08_H04M15S55_1.csv": 122
+     },
+     "parsedRowCount": 122,
+     "period": 8,
+     "sha256": "9437fb3e6bd50c3482727dd611ae3ca1ef67af4d329cb9678493338aad7f78ee",
+     "size": 1220,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "doe--nuclear-energy-FY2026P09-object_class_program_activity-79f1d33f92ce.zip",
+     "memberRowCounts": {
+      "FY2026P01-P09_All_FA_AccountBreakdownByPA-OC_2026-09-08_H04M16S32_1.csv": 123
+     },
+     "parsedRowCount": 123,
+     "period": 9,
+     "sha256": "79f1d33f92ceef6b409a270de31b2277df742f54e9031dceb244ce526bb42930",
+     "size": 1246,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "doe--nuclear-energy-FY2026P10-object_class_program_activity-6f90b850185e.zip",
+     "memberRowCounts": {
+      "FY2026P01-P10_All_FA_AccountBreakdownByPA-OC_2026-09-08_H04M23S12_1.csv": 75
+     },
+     "parsedRowCount": 75,
+     "period": 10,
+     "sha256": "6f90b850185e9e80d6e4890d76fe291dea4ea0a5f433f2f9c892e60ca659ba79",
+     "size": 927,
+     "submissionType": "object_class_program_activity"
+    }
+   ],
+   "resumeRequests": [],
+   "sourceAccountId": "5804"
+  },
+  {
+   "accountPath": "doe/sc",
+   "artifactId": 10041918460,
+   "federalAccount": "089-0222",
+   "fiscalYear": 2026,
+   "rawArchives": [
+    {
+     "memberName": "doe--sc-FY2026P02-object_class_program_activity-f7a3f6f0ded3.zip",
+     "memberRowCounts": {
+      "FY2026P01-P02_All_FA_AccountBreakdownByPA-OC_2026-09-08_H05M14S20_1.csv": 133
+     },
+     "parsedRowCount": 133,
+     "period": 2,
+     "sha256": "f7a3f6f0ded3464f432d7f598ae1aa3082b3e4e0ffb1702b4d09d1e7952e849f",
+     "size": 748,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "doe--sc-FY2026P03-object_class_program_activity-a63299b4eaff.zip",
+     "memberRowCounts": {
+      "FY2026P01-P03_All_FA_AccountBreakdownByPA-OC_2026-09-08_H05M14S57_1.csv": 136
+     },
+     "parsedRowCount": 136,
+     "period": 3,
+     "sha256": "a63299b4eaff2dee2b26746c64e111a30d37300d18b0347730686da1783645c9",
+     "size": 935,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "doe--sc-FY2026P04-object_class_program_activity-265a2bacd9e1.zip",
+     "memberRowCounts": {
+      "FY2026P01-P04_All_FA_AccountBreakdownByPA-OC_2026-09-08_H05M15S34_1.csv": 141
+     },
+     "parsedRowCount": 141,
+     "period": 4,
+     "sha256": "265a2bacd9e16c993b1fd935b242235ba5a200c41cbcdf7a99e830ca7de59d32",
+     "size": 992,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "doe--sc-FY2026P05-object_class_program_activity-0646a85f5618.zip",
+     "memberRowCounts": {
+      "FY2026P01-P05_All_FA_AccountBreakdownByPA-OC_2026-09-08_H05M16S10_1.csv": 141
+     },
+     "parsedRowCount": 141,
+     "period": 5,
+     "sha256": "0646a85f5618ced927733584b0cab110b2b5347487396ad6b1acf974129bb3b8",
+     "size": 1014,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "doe--sc-FY2026P06-object_class_program_activity-56d3483a2cde.zip",
+     "memberRowCounts": {
+      "FY2026P01-P06_All_FA_AccountBreakdownByPA-OC_2026-09-08_H05M16S47_1.csv": 143
+     },
+     "parsedRowCount": 143,
+     "period": 6,
+     "sha256": "56d3483a2cded1c3b8c83e0bf43b702e9d5616c29ce91895b1f23ce94067c6c3",
+     "size": 1099,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "doe--sc-FY2026P07-object_class_program_activity-dfcd83bc9f60.zip",
+     "memberRowCounts": {
+      "FY2026P01-P07_All_FA_AccountBreakdownByPA-OC_2026-09-08_H05M17S24_1.csv": 144
+     },
+     "parsedRowCount": 144,
+     "period": 7,
+     "sha256": "dfcd83bc9f603a941778a23c2db471a6d7dcbb893ea0e9762373787ea6becd1f",
+     "size": 1159,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "doe--sc-FY2026P08-object_class_program_activity-8621337f56c0.zip",
+     "memberRowCounts": {
+      "FY2026P01-P08_All_FA_AccountBreakdownByPA-OC_2026-09-08_H05M18S01_1.csv": 146
+     },
+     "parsedRowCount": 146,
+     "period": 8,
+     "sha256": "8621337f56c07ea9e0dd821b205e749427d8e597d0d4e76787f6f70a619b2388",
+     "size": 1271,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "doe--sc-FY2026P09-object_class_program_activity-f7d30e28f631.zip",
+     "memberRowCounts": {
+      "FY2026P01-P09_All_FA_AccountBreakdownByPA-OC_2026-09-08_H05M18S46_1.csv": 149
+     },
+     "parsedRowCount": 149,
+     "period": 9,
+     "sha256": "f7d30e28f631b794dc4f92973c9a11fd1e411149d277bac72cc18fa03463365c",
+     "size": 1333,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "doe--sc-FY2026P10-object_class_program_activity-517286d32024.zip",
+     "memberRowCounts": {
+      "FY2026P01-P10_All_FA_AccountBreakdownByPA-OC_2026-09-08_H05M19S24_1.csv": 39
+     },
+     "parsedRowCount": 39,
+     "period": 10,
+     "sha256": "517286d32024d7375a8906a0da1e75f9b48ef78f4eb85389608a552eba47d774",
+     "size": 634,
+     "submissionType": "object_class_program_activity"
+    }
+   ],
+   "resumeRequests": [],
+   "sourceAccountId": "5778"
+  },
+  {
+   "accountPath": "doi/usgs-sir",
+   "artifactId": 10042099343,
+   "federalAccount": "014-0804",
+   "fiscalYear": 2018,
+   "rawArchives": [
+    {
+     "memberName": "doi--usgs-sir-FY2018P02-object_class_program_activity-b7c5ee2f31d1.zip",
+     "memberRowCounts": {
+      "FY2018Q1-QNone_All_FA_AccountBreakdownByPA-OC_2026-09-08_H05M20S14_1.csv": 0
+     },
+     "parsedRowCount": 0,
+     "period": 2,
+     "sha256": "b7c5ee2f31d149c4e5832f5b1f27dce13a6fe6fcb2c93d272a3a582d2d247bf2",
+     "size": 331,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "doi--usgs-sir-FY2018P03-object_class_program_activity-0e237b42ef88.zip",
+     "memberRowCounts": {
+      "FY2018Q1_All_FA_AccountBreakdownByPA-OC_2026-09-08_H05M20S50_1.csv": 209
+     },
+     "parsedRowCount": 209,
+     "period": 3,
+     "sha256": "0e237b42ef88268266e7812ec60858a9954a5353bef9086a5202cc4b1b9dcc52",
+     "size": 2072,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "doi--usgs-sir-FY2018P04-object_class_program_activity-b622f22c9c37.zip",
+     "memberRowCounts": {
+      "FY2018Q1_All_FA_AccountBreakdownByPA-OC_2026-09-08_H05M21S27_1.csv": 209
+     },
+     "parsedRowCount": 209,
+     "period": 4,
+     "sha256": "b622f22c9c37a4dbb8b5cd7bc66164f4f21fb09a6c6c02d9d5f75bc15be4371f",
+     "size": 2072,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "doi--usgs-sir-FY2018P05-object_class_program_activity-b508fb1fb3a1.zip",
+     "memberRowCounts": {
+      "FY2018Q1_All_FA_AccountBreakdownByPA-OC_2026-09-08_H05M22S03_1.csv": 209
+     },
+     "parsedRowCount": 209,
+     "period": 5,
+     "sha256": "b508fb1fb3a13e20b2f7d08019b85396c984af996972b6f4237fb716a5ed1739",
+     "size": 2072,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "doi--usgs-sir-FY2018P06-object_class_program_activity-8e20cfd7530e.zip",
+     "memberRowCounts": {
+      "FY2018Q1-Q2_All_FA_AccountBreakdownByPA-OC_2026-09-08_H05M22S40_1.csv": 218
+     },
+     "parsedRowCount": 218,
+     "period": 6,
+     "sha256": "8e20cfd7530e2886c739493dad613b0f352eaa66d45622cfd5921c7fdcd703a5",
+     "size": 2195,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "doi--usgs-sir-FY2018P07-object_class_program_activity-097c81bd855c.zip",
+     "memberRowCounts": {
+      "FY2018Q1-Q2_All_FA_AccountBreakdownByPA-OC_2026-09-08_H05M23S16_1.csv": 218
+     },
+     "parsedRowCount": 218,
+     "period": 7,
+     "sha256": "097c81bd855c064cc6e7c7cc1e0d23082dd992baae5bec5cb53bdac7abb50f2b",
+     "size": 2195,
+     "submissionType": "object_class_program_activity"
+    }
+   ],
+   "resumeRequests": [
+    {
+     "fiscalYear": 2018,
+     "memberName": "obligation-download-resume-doi--usgs-sir-FY2018P08-object_class_program_activity.json",
+     "period": 8,
+     "sha256": "dfedc98cd1e91a3f701b263f280c05c2e499d01a06c52f073dbc646f8dd2838d",
+     "size": 1286,
+     "submissionType": "object_class_program_activity"
+    }
+   ],
+   "sourceAccountId": "3760"
+  },
+  {
+   "accountPath": "dot/ost-research-technology",
+   "artifactId": 10044971992,
+   "federalAccount": "069-1730",
+   "fiscalYear": 2026,
+   "rawArchives": [
+    {
+     "memberName": "dot--ost-research-technology-FY2026P02-object_class_program_activity-d6b2e585eeb3.zip",
+     "memberRowCounts": {
+      "FY2026P01-P02_All_FA_AccountBreakdownByPA-OC_2026-09-08_H07M10S25_1.csv": 65
+     },
+     "parsedRowCount": 65,
+     "period": 2,
+     "sha256": "d6b2e585eeb3fa06cca2180861e4cb669a794b67d573c742fb99dbf20f8486ed",
+     "size": 712,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "dot--ost-research-technology-FY2026P03-object_class_program_activity-133c54218adc.zip",
+     "memberRowCounts": {
+      "FY2026P01-P03_All_FA_AccountBreakdownByPA-OC_2026-09-08_H07M11S02_1.csv": 67
+     },
+     "parsedRowCount": 67,
+     "period": 3,
+     "sha256": "133c54218adc9fd249163a6ed48e0f656e6353dd4cad4086626dfface69542d3",
+     "size": 764,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "dot--ost-research-technology-FY2026P04-object_class_program_activity-2d6c95cfbe95.zip",
+     "memberRowCounts": {
+      "FY2026P01-P04_All_FA_AccountBreakdownByPA-OC_2026-09-08_H07M11S39_1.csv": 73
+     },
+     "parsedRowCount": 73,
+     "period": 4,
+     "sha256": "2d6c95cfbe9566e6406aaa8dc7ec1618f71a6ecaee64935c6c46890eff7812dc",
+     "size": 808,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "dot--ost-research-technology-FY2026P05-object_class_program_activity-e13d980d2e38.zip",
+     "memberRowCounts": {
+      "FY2026P01-P05_All_FA_AccountBreakdownByPA-OC_2026-09-08_H07M12S16_1.csv": 75
+     },
+     "parsedRowCount": 75,
+     "period": 5,
+     "sha256": "e13d980d2e3834c5975622b0ac8181d5dc95af1984d37c3d0433fc4a0cd67931",
+     "size": 831,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "dot--ost-research-technology-FY2026P06-object_class_program_activity-9815c76fb6c8.zip",
+     "memberRowCounts": {
+      "FY2026P01-P06_All_FA_AccountBreakdownByPA-OC_2026-09-08_H07M12S53_1.csv": 75
+     },
+     "parsedRowCount": 75,
+     "period": 6,
+     "sha256": "9815c76fb6c8fdc312d7342e57280ad348b57b637e31fb6cfb5d13174d2e3981",
+     "size": 836,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "dot--ost-research-technology-FY2026P07-object_class_program_activity-a9d55ae107a1.zip",
+     "memberRowCounts": {
+      "FY2026P01-P07_All_FA_AccountBreakdownByPA-OC_2026-09-08_H07M13S30_1.csv": 76
+     },
+     "parsedRowCount": 76,
+     "period": 7,
+     "sha256": "a9d55ae107a1de2c2827c5601376f563e2fc3415efb0c93000a4322772fcfd62",
+     "size": 839,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "dot--ost-research-technology-FY2026P08-object_class_program_activity-db62e505bc40.zip",
+     "memberRowCounts": {
+      "FY2026P01-P08_All_FA_AccountBreakdownByPA-OC_2026-09-08_H07M14S06_1.csv": 76
+     },
+     "parsedRowCount": 76,
+     "period": 8,
+     "sha256": "db62e505bc400c551ef5a75a43ae99b7a5e1f1cc82a5f057f9392e9349d58c71",
+     "size": 839,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "dot--ost-research-technology-FY2026P09-object_class_program_activity-b0990fbc61ca.zip",
+     "memberRowCounts": {
+      "FY2026P01-P09_All_FA_AccountBreakdownByPA-OC_2026-09-08_H07M14S44_1.csv": 76
+     },
+     "parsedRowCount": 76,
+     "period": 9,
+     "sha256": "b0990fbc61ca47cff7b55e5ac57aac31c08c25ff0dc58bd8b735ea2b4980fbf5",
+     "size": 850,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "dot--ost-research-technology-FY2026P10-object_class_program_activity-6af76cc134a4.zip",
+     "memberRowCounts": {
+      "FY2026P01-P10_All_FA_AccountBreakdownByPA-OC_2026-09-08_H07M20S36_1.csv": 78
+     },
+     "parsedRowCount": 78,
+     "period": 10,
+     "sha256": "6af76cc134a454d572cde458a423862b1a7bc7ba4a8754ef02fcc57d25a9f8d1",
+     "size": 880,
+     "submissionType": "object_class_program_activity"
+    }
+   ],
+   "resumeRequests": [],
+   "sourceAccountId": "5058"
+  },
+  {
+   "accountPath": "ed/ies",
+   "artifactId": 10049625795,
+   "federalAccount": "091-1100",
+   "fiscalYear": 2018,
+   "rawArchives": [
+    {
+     "memberName": "ed--ies-FY2018P02-object_class_program_activity-48bf669bfba7.zip",
+     "memberRowCounts": {
+      "FY2018Q1-QNone_All_FA_AccountBreakdownByPA-OC_2026-09-08_H07M21S30_1.csv": 0
+     },
+     "parsedRowCount": 0,
+     "period": 2,
+     "sha256": "48bf669bfba7562839d7b2e2d71c7caab2dfbe0f82de5f4410deca383764867f",
+     "size": 331,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "ed--ies-FY2018P03-object_class_program_activity-801272237a81.zip",
+     "memberRowCounts": {
+      "FY2018Q1_All_FA_AccountBreakdownByPA-OC_2026-09-08_H07M22S06_1.csv": 59
+     },
+     "parsedRowCount": 59,
+     "period": 3,
+     "sha256": "801272237a815aa01e39abc0139abd6d03bcb84cdbc9359c4138bbd277ed7d3b",
+     "size": 814,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "ed--ies-FY2018P04-object_class_program_activity-ebf636eefef8.zip",
+     "memberRowCounts": {
+      "FY2018Q1_All_FA_AccountBreakdownByPA-OC_2026-09-08_H07M22S43_1.csv": 59
+     },
+     "parsedRowCount": 59,
+     "period": 4,
+     "sha256": "ebf636eefef8f6552adad15a72a2835cdf46237a8d8e7b68c1fc8d439f0bcf18",
+     "size": 814,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "ed--ies-FY2018P05-object_class_program_activity-bb8a46d94565.zip",
+     "memberRowCounts": {
+      "FY2018Q1_All_FA_AccountBreakdownByPA-OC_2026-09-08_H07M23S19_1.csv": 59
+     },
+     "parsedRowCount": 59,
+     "period": 5,
+     "sha256": "bb8a46d945657e30af62699b55cda1b236b348f4dd86d95d1c4f399f48c47a32",
+     "size": 814,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "ed--ies-FY2018P06-object_class_program_activity-9ccf7210523b.zip",
+     "memberRowCounts": {
+      "FY2018Q1-Q2_All_FA_AccountBreakdownByPA-OC_2026-09-08_H07M23S55_1.csv": 62
+     },
+     "parsedRowCount": 62,
+     "period": 6,
+     "sha256": "9ccf7210523bd0ef9ecd4208f434f5d5cf68e853f9ffd5bb62bfb4722d061e25",
+     "size": 891,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "ed--ies-FY2018P07-object_class_program_activity-5cd051de85b8.zip",
+     "memberRowCounts": {
+      "FY2018Q1-Q2_All_FA_AccountBreakdownByPA-OC_2026-09-08_H07M24S32_1.csv": 62
+     },
+     "parsedRowCount": 62,
+     "period": 7,
+     "sha256": "5cd051de85b80efec067251cf1c7cf8ffc6e8bceb8cb1111e0c5dacc07fb7c2e",
+     "size": 891,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "ed--ies-FY2018P08-object_class_program_activity-3ce1ae66742e.zip",
+     "memberRowCounts": {
+      "FY2018Q1-Q2_All_FA_AccountBreakdownByPA-OC_2026-09-08_H07M25S08_1.csv": 62
+     },
+     "parsedRowCount": 62,
+     "period": 8,
+     "sha256": "3ce1ae66742ec33783f83ebdb4b3eb12f1a30a35ab3d5fafc595c7c60ea44fbc",
+     "size": 891,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "ed--ies-FY2018P09-object_class_program_activity-7dad49fe3e86.zip",
+     "memberRowCounts": {
+      "FY2018Q1-Q3_All_FA_AccountBreakdownByPA-OC_2026-09-08_H07M25S45_1.csv": 62
+     },
+     "parsedRowCount": 62,
+     "period": 9,
+     "sha256": "7dad49fe3e861b476b4b4b5d7da6a52803db27ee29968b5933e879d207e3e46f",
+     "size": 928,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "ed--ies-FY2018P10-object_class_program_activity-dfc8c44b953e.zip",
+     "memberRowCounts": {
+      "FY2018Q1-Q3_All_FA_AccountBreakdownByPA-OC_2026-09-08_H07M31S26_1.csv": 62
+     },
+     "parsedRowCount": 62,
+     "period": 10,
+     "sha256": "dfc8c44b953e1184b43c9dc7fb7880689f94dbae39638f93c9343c61fb4ec1ac",
+     "size": 928,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "ed--ies-FY2018P11-object_class_program_activity-f82eb604a4a9.zip",
+     "memberRowCounts": {
+      "FY2018Q1-Q3_All_FA_AccountBreakdownByPA-OC_2026-09-08_H07M32S04_1.csv": 62
+     },
+     "parsedRowCount": 62,
+     "period": 11,
+     "sha256": "f82eb604a4a95801794f4d1f7170151f2e72c90a7fe164f04fcb06746a81fe52",
+     "size": 928,
+     "submissionType": "object_class_program_activity"
+    },
+    {
+     "memberName": "ed--ies-FY2018P12-object_class_program_activity-62d27b40e4bc.zip",
+     "memberRowCounts": {
+      "FY2018Q1-Q4_All_FA_AccountBreakdownByPA-OC_2026-09-08_H07M32S41_1.csv": 62
+     },
+     "parsedRowCount": 62,
+     "period": 12,
+     "sha256": "62d27b40e4bc183ce465d292f1bf42d0c2826d5fae546999a2fb66737115ef88",
+     "size": 959,
+     "submissionType": "object_class_program_activity"
+    }
+   ],
+   "resumeRequests": [
+    {
+     "fiscalYear": 2018,
+     "memberName": "obligation-download-resume-ed--ies-FY2018P12-award_financial.json",
+     "period": 12,
+     "sha256": "1c1374c281c9a96fe2d89bb3fdfb4ed9ceac6e756c8ebc9aabea934d12c45458",
+     "size": 1500,
+     "submissionType": "award_financial"
+    }
+   ],
+   "sourceAccountId": "5905"
+  }
+ ],
+ "repository": "jpwolfson/science-funding-dashboard",
+ "schemaVersion": 1,
+ "sourceAttempt": 1,
+ "sourceEvent": "schedule",
+ "sourceHeadSha": "e8fa3b584fa1a66687667804ffa6d0f4f2d0a35d",
+ "workflowRunId": 34141166514
+}

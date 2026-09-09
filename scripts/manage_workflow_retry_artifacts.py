@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
-"""Preserve and remove exact raw artifacts that block a failed-job rerun.
+"""Preserve and remove exact artifacts that block a failed-job rerun.
 
 GitHub reruns execute the workflow definition from the original run. Older
-obligation runs therefore reuse their unsuffixed raw artifact names. This
+obligation runs therefore reuse their unsuffixed raw artifact names. A job
+that uploaded its normalized partition before failing during raw-evidence
+finalization can likewise leave the stable partition name occupied. This
 utility accepts an exact artifact manifest, downloads and hashes every ZIP,
 and only then permits a second invocation to delete those same artifacts.
-Normalized reconciliation artifacts are rejected by construction.
+Only obligation raw archives and normalized obligation partitions are
+accepted.
 """
 
 from __future__ import annotations
@@ -26,6 +29,9 @@ from pathlib import Path
 API_ROOT = "https://api.github.com"
 DIGEST = re.compile(r"sha256:[0-9a-f]{64}\Z")
 RAW_NAME = re.compile(r"obligation-raw-[A-Za-z0-9._-]+\Z")
+PARTITION_NAME = re.compile(
+    r"obligation-partition-[A-Za-z0-9._-]+-FY[0-9]{4}\Z"
+)
 
 
 class ManifestError(ValueError):
@@ -144,24 +150,42 @@ def validate_source_rows(rows: list[dict]) -> list[dict]:
     names: set[str] = set()
     result = []
     for row in rows:
-        if not isinstance(row, dict) or set(row) != {"id", "name", "digest"}:
-            raise ManifestError("each artifact must contain only id, name, digest")
+        if not isinstance(row, dict) or set(row) not in (
+            {"id", "name", "digest"},
+            {"id", "name", "digest", "deleteAfterPreserve"},
+        ):
+            raise ManifestError(
+                "each artifact must contain id, name, digest, and optionally "
+                "deleteAfterPreserve"
+            )
         artifact_id = row["id"]
         name = row["name"]
         digest = row["digest"]
+        delete_after_preserve = row.get("deleteAfterPreserve", True)
         if not isinstance(artifact_id, int) or artifact_id <= 0:
             raise ManifestError("artifact id must be a positive integer")
-        if not isinstance(name, str) or not RAW_NAME.fullmatch(name):
+        if not isinstance(name, str) or not (
+            RAW_NAME.fullmatch(name) or PARTITION_NAME.fullmatch(name)
+        ):
             raise ManifestError(
-                f"artifact {artifact_id} is not an obligation raw artifact"
+                f"artifact {artifact_id} is not an obligation retry artifact"
             )
         if not isinstance(digest, str) or not DIGEST.fullmatch(digest):
             raise ManifestError(f"artifact {artifact_id} has an invalid digest")
+        if not isinstance(delete_after_preserve, bool):
+            raise ManifestError(
+                f"artifact {artifact_id} deleteAfterPreserve must be boolean"
+            )
         if artifact_id in ids or name in names:
             raise ManifestError("artifact ids and names must be unique")
         ids.add(artifact_id)
         names.add(name)
-        result.append(row)
+        result.append({
+            "id": artifact_id,
+            "name": name,
+            "digest": digest,
+            "deleteAfterPreserve": delete_after_preserve,
+        })
     return result
 
 
@@ -237,13 +261,20 @@ def delete_preserved(record_path: Path, api) -> None:
         raise ManifestError(f"workflow run {run_id} is not terminal")
 
     for row in rows:
-        if not isinstance(row, dict) or set(row) != {
-            "id", "name", "digest", "file", "size"
-        }:
+        if not isinstance(row, dict) or set(row) not in (
+            {"id", "name", "digest", "file", "size"},
+            {
+                "id", "name", "digest", "deleteAfterPreserve",
+                "file", "size",
+            },
+        ):
             raise ManifestError("invalid preserved artifact record")
         validate_source_rows(
             [{key: row[key] for key in ("id", "name", "digest")}]
         )
+        delete_after_preserve = row.get("deleteAfterPreserve", True)
+        if not isinstance(delete_after_preserve, bool):
+            raise ManifestError("invalid preserved artifact deletion flag")
         artifact_file = (root / row["file"]).resolve()
         if root not in artifact_file.parents:
             raise ManifestError("preserved artifact path escapes its directory")
@@ -258,8 +289,9 @@ def delete_preserved(record_path: Path, api) -> None:
     # No remote mutation occurs until every local ZIP and every remote row has
     # passed the complete preflight above.
     for row in rows:
-        api.delete(row["id"])
-        print(f"Deleted exact preserved artifact {row['id']} {row['name']}")
+        if row.get("deleteAfterPreserve", True):
+            api.delete(row["id"])
+            print(f"Deleted exact preserved artifact {row['id']} {row['name']}")
 
 
 def parser() -> argparse.ArgumentParser:

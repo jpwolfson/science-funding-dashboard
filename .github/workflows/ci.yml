@@ -37,6 +37,7 @@ jobs:
           python -m json.tool config/funding_sentinel.json >/dev/null
           python -m json.tool reference/nih_databook_baseline.json >/dev/null
           python -m json.tool reference/usaspending_calibration.json >/dev/null
+          python -m json.tool reference/obligation_retry_recovery.json >/dev/null
           python -c "
           import json
           config = json.load(open('config/obligation_accounts.json'))

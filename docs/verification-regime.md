@@ -221,21 +221,40 @@ GitHub reruns use the workflow definition and `GITHUB_SHA`/`GITHUB_REF` from
 the original event. An obligation run started before raw audit archives gained
 their `-attempt${{ github.run_attempt }}` suffix will therefore try to reuse an
 attempt-1 raw artifact name when a failed matrix job is rerun. The normalized
-partition name intentionally stays stable and is not part of this recovery.
+partition name intentionally stays stable. It is included in recovery only
+when a job uploaded that accepted partition and then failed while finalizing
+its raw evidence.
 
 Use `preserve-obligation-retry-artifacts.yml` only after the source workflow
 run is terminal. Its input is a schema-v1 manifest pinning one run ID and each
-raw artifact's exact ID, name, and `sha256:` digest. The recovery job:
+conflicting obligation artifact's exact ID, name, and `sha256:` digest. The
+optional `deleteAfterPreserve` flag is `false` for reusable evidence that does
+not conflict on retry; omission defaults to `true` for the legacy raw-only
+operation. The recovery job:
 
-1. rejects normalized/non-obligation names and an active source run;
-2. re-fetches exact remote metadata, downloads every raw ZIP, and verifies its
+1. rejects non-obligation names and an active source run;
+2. re-fetches exact remote metadata, downloads every artifact ZIP, and verifies its
    digest;
-3. uploads the complete preservation bundle with fourteen-day retention; and
-4. revalidates every local ZIP and remote record before deleting only those
-   exact source artifacts.
+3. uploads the complete preservation bundle with fourteen-day retention and,
+   for the dedicated push trigger, commits the same bytes to that operational
+   branch before deletion; and
+4. revalidates every preserved ZIP and remote record before deleting only the
+   exact source artifacts explicitly marked for deletion.
 
 Only after that recovery job succeeds may the source run's failed jobs be
-rerun once. The empty trigger file is inert on `main`; a coordinator changes it
-only on the dedicated `agent/3-2d-retry-artifact-operation` operational branch.
-This path is solely for already-running legacy graphs. Newly dispatched runs
-use attempt-specific raw names and need no cleanup.
+rerun once. When accepted source responses also need reuse, the coordinator
+adds `reference/obligation_retry_recovery.json` to the repaired branch. That
+manifest pins the original run, attempt, event, head SHA, evidence branch and
+commit, outer artifact metadata, every reusable member's hash and row counts,
+accepted timeout handoffs, any already-accepted normalized partition, and any
+separately approved exact baseline pin. `pull_obligation_account.py` activates
+it only for the exact failed-job retry environment. It then requires the
+evidence branch tip to equal the pinned commit, revalidates the preservation
+record and every byte before reuse, and falls through to a new source request
+only for an unlisted partition. Any activation, scope, hash, row-count, or
+normalized-provenance mismatch stops the retry.
+
+The empty preservation trigger file is inert on `main`; a coordinator changes
+it only on the dedicated `agent/3-2d-retry-artifact-operation` operational
+branch. This path is solely for already-running legacy graphs. Newly dispatched
+runs use attempt-specific raw names and need no cleanup.

@@ -22,6 +22,7 @@ from adapters.usaspending_obligations import (
     resolve_account, resume_download,
 )
 from scripts.rollup_obligations import build
+from scripts.obligation_retry_recovery import load_retry_recovery
 
 
 FILE_B_COLUMNS = [
@@ -95,10 +96,23 @@ def _write_resume_handoff(path, account, fy, period, kind, request):
 
 
 def _download(repo, account, account_id, fy, period, kind, columns,
-              raw_archive_dir=None):
+              raw_archive_dir=None, recovery=None):
+    if recovery:
+        recovered = recovery.recover_raw(
+            account, account_id, fy, period, kind, columns, raw_archive_dir
+        )
+        if recovered is not None:
+            return recovered
     print(f"requesting FY{fy} P{period:02} {kind}", flush=True)
-    resumed = _resume_request(
-        repo, account, account_id, fy, period, kind, columns
+    recovery_result = recovery.resume_result(
+        account, account_id, fy, period, kind
+    ) if recovery else None
+    resumed = (
+        resume_download(
+            account_id, fy, period, kind, columns, recovery_result
+        ) if recovery_result else _resume_request(
+            repo, account, account_id, fy, period, kind, columns
+        )
     )
     if resumed:
         print(f"resuming accepted FY{fy} P{period:02} {kind}", flush=True)
@@ -155,7 +169,7 @@ def _download(repo, account, account_id, fy, period, kind, columns,
 
 
 def _baseline_pin(repo, account, fy, last_period, file_b_total,
-                  first_event_period=None):
+                  first_event_period=None, recovery=None):
     baseline = json.loads((repo / account["baseline"]).read_text())
     if baseline.get("schemaVersion") != 2:
         raise ValueError(f"{account['path']}: baseline schema must be v2")
@@ -164,6 +178,23 @@ def _baseline_pin(repo, account, fy, last_period, file_b_total,
     existing = baseline.get("fiscalYears", {}).get(str(fy))
     if existing and existing.get("status") == "unavailable":
         raise ValueError(f"FY{fy} is marked source-unavailable")
+    override = recovery.baseline_pin(account["path"], fy) if recovery else None
+    if override is not None:
+        problems = baseline_pin_problems(override)
+        if problems:
+            raise ValueError(
+                f"FY{fy}: invalid recovery baseline pin: {'; '.join(problems)}"
+            )
+        if (
+            override.get("status") != "partial"
+            or override.get("asOfPeriod") != last_period
+            or baseline_file_b_cents(override) != file_b_total
+        ):
+            raise ValueError(
+                f"FY{fy}: recovery baseline pin does not match accepted "
+                f"P{last_period:02} File B total {file_b_total}"
+            )
+        return dict(override)
     if existing and "fileBObligationsCents" in existing:
         problems = baseline_pin_problems(existing)
         if problems:
@@ -315,6 +346,11 @@ def pull(account, years, current_period=12, repo=REPO, rollup=True,
          raw_archive_dir=None, partition_output=None):
     repo = Path(repo)
     years = list(years)
+    recovery = load_retry_recovery(repo)
+    if recovery and recovery.restore_partition(
+        account, years, partition_output
+    ):
+        return
     baseline = json.loads((repo / account["baseline"]).read_text())
     for fy, pin in (baseline.get("fiscalYears") or {}).items():
         problems = baseline_pin_problems(pin)
@@ -366,7 +402,7 @@ def pull(account, years, current_period=12, repo=REPO, rollup=True,
             members, download = _download(
                 repo, account, account_id, fy, period,
                 "object_class_program_activity",
-                FILE_B_COLUMNS, raw_archive_dir,
+                FILE_B_COLUMNS, raw_archive_dir, recovery,
             )
             downloads.append(download)
             rows = [row for part in members.values() for row in part]
@@ -376,6 +412,7 @@ def pull(account, years, current_period=12, repo=REPO, rollup=True,
         c_members, download = _download(
             repo, account, account_id, fy, last_period, "award_financial",
             FILE_C_COLUMNS, raw_archive_dir,
+            recovery,
         )
         downloads.append(download)
         file_c = parse_file_c(c_members, account["federalAccount"], aliases)
@@ -388,7 +425,8 @@ def pull(account, years, current_period=12, repo=REPO, rollup=True,
             (event["fiscalPeriod"] for event in events), default=None
         )
         baseline_pin = _baseline_pin(
-            repo, account, fy, last_period, file_b_total, first_event_period
+            repo, account, fy, last_period, file_b_total, first_event_period,
+            recovery,
         )
         _validate_account_total(
             fy, last_period, detail_total, file_b_total, baseline_pin
