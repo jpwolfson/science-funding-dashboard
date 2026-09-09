@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-01",
+ "generated": "2026-09-09",
  "node": {
   "name": "Directorate for Biological Sciences",
   "abbrev": "BIO",
@@ -7,7 +7,10 @@
   "level": "directorate"
  },
  "source": "Aggregated from 6 leaf dataset(s) (6 configured); each source page documents its own API provenance.",
- "warnings": [],
+ "warnings": [
+  "EF: 4 stored awards not returned by this full re-pull; retained from the store",
+  "4 awards appear in more than one division; counted once in this rollup"
+ ],
  "totalAwards": 13735,
  "currentFY": 2026,
  "monthly": [
@@ -3070,6 +3073,16 @@
      "d": 335,
      "awards": 588,
      "dollars": 429573209
+    },
+    {
+     "d": 342,
+     "awards": 588,
+     "dollars": 429573209
+    },
+    {
+     "d": 343,
+     "awards": 588,
+     "dollars": 429573209
     }
    ]
   }
@@ -3138,12 +3151,12 @@
    "path": "nsf/bio/dbi",
    "active": true,
    "hasData": true,
-   "totalAwards": 3432,
+   "totalAwards": 3436,
    "currentFY": 2026,
    "octJulAwards": 139,
    "octJulDollars": 118370438,
-   "avgOctJulAwards": 231.9,
-   "avgOctJulDollars": 156966117.5
+   "avgOctJulAwards": 232.2,
+   "avgOctJulDollars": 161216063.5
   },
   {
    "slug": "ios",
