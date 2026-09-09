@@ -203,12 +203,35 @@ class NihReporterTests(unittest.TestCase):
              "nih_reporter_retractions.json").read_text()
         )
         records = ledger["records"]
-        self.assertEqual(21, len(records))
-        self.assertEqual(21, len({record["id"] for record in records}))
+        self.assertEqual(2, ledger["schemaVersion"])
+        self.assertEqual(31, len(records))
+        self.assertEqual(31, len({record["id"] for record in records}))
         self.assertTrue(all(record["id"].startswith("nih:") for record in records))
         self.assertTrue(all(record["reporterAgency"] for record in records))
         self.assertTrue(all(record["month"] == record["awardDate"][:7]
                             for record in records))
+        by_class = {}
+        for record in records:
+            classification = record["classification"]
+            by_class.setdefault(classification, []).append(record)
+        self.assertEqual({
+            "reporter-record-retraction-or-supersession": 29,
+            "confirmed-bilateral-termination": 2,
+        }, {key: len(value) for key, value in by_class.items()})
+        self.assertEqual(7904720,
+                         sum(record["amount"] for record in records))
+        self.assertEqual(120886, sum(
+            record["amount"]
+            for record in by_class["confirmed-bilateral-termination"]
+        ))
+        self.assertEqual({
+            ("nih:11241477", "F30HL178229", "2026-08-27"),
+            ("nih:11241491", "F32DK142455", "2026-08-29"),
+        }, {
+            (record["id"], record["awardNumber"], record["terminationDate"])
+            for record in by_class["confirmed-bilateral-termination"]
+            if record["terminationType"] == "Bilateral Termination"
+        })
 
     def test_approved_20260824_retractions_match_exact_evidence(self):
         root = Path(__file__).parents[1]
@@ -231,15 +254,113 @@ class NihReporterTests(unittest.TestCase):
         self.assertEqual(1288767,
                          sum(record["amount"] for record in evidence["records"]))
         ledger_by_id = {record["id"]: record for record in ledger["records"]}
-        self.assertEqual(evidence["records"],
-                         [ledger_by_id[record["id"]]
-                          for record in evidence["records"]])
+        returned_ids = {
+            "nih:11462449", "nih:11461896", "nih:11555862",
+            "nih:11437634",
+        }
+        active_ids = expected_ids - returned_ids
+        self.assertEqual(active_ids, expected_ids & set(ledger_by_id))
+        self.assertFalse(returned_ids & set(ledger_by_id))
         stores = {}
         for record in evidence["records"]:
             unit = record["unit"]
             if unit not in stores:
                 stores[unit] = load_store(root / "data" / unit)
-            self.assertNotIn(record["id"], stores[unit])
+            if record["id"] in active_ids:
+                self.assertNotIn(record["id"], stores[unit])
+            else:
+                self.assertIn(record["id"], stores[unit])
+
+    def test_approved_20260908_source_exclusions_match_exact_evidence(self):
+        root = Path(__file__).parents[1]
+        ledger = json.loads(
+            (root / "reference" / "nih_reporter_retractions.json").read_text()
+        )
+        evidence = json.loads(
+            (root / "reference" /
+             "nih_reporter_source_evidence_20260908.json").read_text()
+        )
+        missing_ids = {
+            "nih:11043767", "nih:11088961", "nih:11176793",
+            "nih:11234633", "nih:11241477", "nih:11241491",
+            "nih:11266582", "nih:11313204", "nih:11380040",
+            "nih:11384307", "nih:11398315", "nih:11415246",
+            "nih:11416109", "nih:11418121", "nih:11458848",
+        }
+        returned_ids = {
+            "nih:11294928", "nih:11437634", "nih:11461896",
+            "nih:11462449", "nih:11555862",
+        }
+        terminated_ids = {"nih:11241477", "nih:11241491"}
+        reporter_record_ids = missing_ids - terminated_ids
+        self.assertTrue(evidence["reporter"]["control"]["returned"])
+        self.assertEqual(
+            returned_ids | {"nih:11126249"},
+            set(evidence["reporter"]["exactQuery"]["returnedIds"]),
+        )
+        self.assertEqual(
+            reporter_record_ids,
+            set(evidence["classification"]
+                ["reporterRecordRetractionsOrSupersessions"]),
+        )
+        self.assertEqual(
+            terminated_ids,
+            set(evidence["classification"]
+                ["confirmedBilateralTerminations"]),
+        )
+        self.assertEqual({
+            "missingRecordCount": 15,
+            "missingRecordAmount": 5531355,
+            "reporterRecordRetractionOrSupersessionCount": 13,
+            "reporterRecordRetractionOrSupersessionAmount": 5410469,
+            "confirmedBilateralTerminationCount": 2,
+            "confirmedBilateralTerminationHistoricalRowAmount": 120886,
+            "returnedPriorExclusionCount": 5,
+            "returnedPriorExclusionCurrentReporterAmount": 517955,
+            "returnedPriorExclusionRecordedLedgerAmount": 751955,
+        }, evidence["totals"])
+
+        evidence_by_id = {
+            record["id"]: record
+            for record in evidence["missingStoredRecords"]
+        }
+        ledger_by_id = {record["id"]: record for record in ledger["records"]}
+        self.assertEqual(missing_ids, set(evidence_by_id))
+        self.assertEqual(missing_ids, missing_ids & set(ledger_by_id))
+        self.assertFalse(returned_ids & set(ledger_by_id))
+        for record_id, evidence_record in evidence_by_id.items():
+            ledger_record = ledger_by_id[record_id]
+            stored = evidence_record["stored"]
+            self.assertEqual(stored["date"], ledger_record["awardDate"])
+            self.assertEqual(int(stored["estimatedTotalAmt"]),
+                             ledger_record["amount"])
+            self.assertEqual(stored["title"], ledger_record["title"])
+            expected_class = (
+                "confirmed-bilateral-termination"
+                if record_id in terminated_ids
+                else "reporter-record-retraction-or-supersession"
+            )
+            self.assertEqual(expected_class, ledger_record["classification"])
+            store = load_store(root / "data" / evidence_record["unit"])
+            if record_id in store:
+                actual = store[record_id]
+                self.assertEqual(stored["date"], actual["date"])
+                self.assertEqual(int(stored["estimatedTotalAmt"]),
+                                 actual["amount"])
+                self.assertEqual(stored["transType"], actual["transType"])
+                self.assertEqual(stored["title"], actual["title"])
+                self.assertEqual(stored["awardeeName"], actual["awardee"])
+
+        returned_by_id = {
+            record["id"]: record
+            for record in evidence["returnedPriorExclusions"]
+        }
+        self.assertEqual(returned_ids, set(returned_by_id))
+        for record_id, returned in returned_by_id.items():
+            store = load_store(
+                root / "data" / returned["priorLedgerRecord"]["unit"]
+            )
+            self.assertIn(record_id, store)
 
     def test_config_has_all_current_reporter_nih_admin_components(self):
         cfg = json.loads((Path(__file__).parents[1] / "config" / "orgs.json").read_text())

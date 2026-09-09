@@ -31,6 +31,10 @@ FUNDING_MECHANISMS = [
     "SB", "RP", "RC", "OR", "TR", "TI", "CO", "IAA", "RDC", "SRDC",
     "OTHER",
 ]
+SOURCE_EXCLUSION_CLASSIFICATIONS = {
+    "reporter-record-retraction-or-supersession",
+    "confirmed-bilateral-termination",
+}
 
 
 def load_retraction_records(repo_root):
@@ -39,8 +43,14 @@ def load_retraction_records(repo_root):
         return []
     records = json.loads(ledger_path.read_text()).get("records") or []
     if len({record.get("id") for record in records}) != len(records):
-        raise RuntimeError(f"duplicate NIH retraction ID in {ledger_path}")
+        raise RuntimeError(f"duplicate NIH source-exclusion ID in {ledger_path}")
     for record in records:
+        classification = record.get("classification")
+        if classification not in SOURCE_EXCLUSION_CLASSIFICATIONS:
+            raise RuntimeError(
+                f"invalid NIH source-exclusion classification for "
+                f"{record.get('id')} in {ledger_path}"
+            )
         award_date = record.get("awardDate")
         month = record.get("month")
         if not isinstance(award_date, str) or not isinstance(month, str) \
@@ -49,6 +59,15 @@ def load_retraction_records(repo_root):
                 f"invalid month/date evidence for {record.get('id')} "
                 f"in {ledger_path}"
             )
+        if classification == "confirmed-bilateral-termination":
+            if record.get("terminationType") != "Bilateral Termination" \
+                    or not record.get("awardNumber") \
+                    or not re.fullmatch(r"\d{4}-\d{2}-\d{2}",
+                                        str(record.get("terminationDate") or "")):
+                raise RuntimeError(
+                    f"incomplete NIH bilateral-termination evidence for "
+                    f"{record.get('id')} in {ledger_path}"
+                )
     return records
 
 
@@ -332,36 +351,36 @@ class NihReporterPull:
         merged.update(collected)
         if mode == "full":
             missing_ids = set(stored) - set(collected)
-            reviewed_retractions = missing_ids & self.retracted_ids
-            for award_id in reviewed_retractions:
+            reviewed_exclusions = missing_ids & self.retracted_ids
+            for award_id in reviewed_exclusions:
                 month = stored[award_id]["month"]
                 ledger_month = self.retracted_months.get(award_id)
                 if ledger_month is not None and ledger_month != month:
                     raise RuntimeError(
-                        f"reviewed retraction {award_id} month changed from "
+                        f"reviewed source exclusion {award_id} month changed from "
                         f"ledger {ledger_month} to stored {month}"
                     )
                 self.allowed_monthly_shrink[month] = (
                     self.allowed_monthly_shrink.get(month, 0) + 1
                 )
                 merged.pop(award_id, None)
-            if reviewed_retractions:
+            if reviewed_exclusions:
                 print(
-                    f"NOTICE: removed {len(reviewed_retractions)} reviewed "
-                    "RePORTER retraction(s) from the store"
+                    f"NOTICE: removed {len(reviewed_exclusions)} reviewed "
+                    "RePORTER source exclusion(s) from the store"
                 )
-            unreviewed_missing = missing_ids - reviewed_retractions
+            unreviewed_missing = missing_ids - reviewed_exclusions
             if unreviewed_missing:
                 self.warn(
                     f"{len(unreviewed_missing)} stored awards not returned by "
                     "this full re-pull; "
                     "retained from the store"
                 )
-            returned_retractions = set(collected) & self.retracted_ids
-            if returned_retractions:
+            returned_exclusions = set(collected) & self.retracted_ids
+            if returned_exclusions:
                 self.warn(
-                    f"{len(returned_retractions)} reviewed RePORTER "
-                    "retraction(s) returned to the live source; ledger review "
+                    f"{len(returned_exclusions)} reviewed RePORTER source "
+                    "exclusion(s) returned to the live source; ledger review "
                     "required"
                 )
 

@@ -1,0 +1,1867 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-09-09T04:00:21+00:00",
+  "approval": "Owner approved the exact 13 RePORTER record retraction/supersession plus two confirmed bilateral termination split, retirement of five returned prior exclusions, and the targeted ten-unit refresh on 2026-09-08.",
+  "reporter": {
+    "source": "https://api.reporter.nih.gov/v2/projects/search",
+    "method": "Each affected fiscal-year snapshot was fetched in complete ascending and descending application-ID order; each pass was reconciled to meta.total and the ID sets were required to match. All active exclusions plus the 15 candidates were then queried in one exact appl_ids request with known-live control nih:11126249.",
+    "control": {
+      "id": "nih:11126249",
+      "returned": true
+    },
+    "fiscalYearSnapshots": [
+      {
+        "reporterAgency": "NHLBI",
+        "unit": "nih/nhlbi/nhlbi",
+        "fiscalYear": 2025,
+        "storeCount": 6059,
+        "liveCount": 6056,
+        "missingStoredIds": [
+          "nih:11241477",
+          "nih:11416109",
+          "nih:11418121"
+        ],
+        "liveOnlyIds": [],
+        "passes": [
+          {
+            "order": "asc",
+            "metaTotal": 6056,
+            "pageCount": 13,
+            "pages": [
+              {
+                "offset": 0,
+                "resultCount": 500,
+                "canonicalResponseSha256": "4219c142667180cd2f61a3a13dfc2bed9af47226d1df97288155a3fc7bae136c"
+              },
+              {
+                "offset": 500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "2d7a4e8d3f751f9f3ce2814acc92d3aadcbe66b2bb95ffa41d4ba81af72bdfba"
+              },
+              {
+                "offset": 1000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "b1a1ee671dc9d2fa1e19d1ab6a99a0dc1c6ec9adf0f1787f47cc4d5f82d769b5"
+              },
+              {
+                "offset": 1500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "963c23a72658771a9f1e712e65a1126b397c7120f4ce2ea5c36375c6bb7109c3"
+              },
+              {
+                "offset": 2000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "6ebd71f22b9f2f2801b7693d8ef3f8e54af50f6f66140b3d7335f8742a624d19"
+              },
+              {
+                "offset": 2500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "5227f4665c6c826e63dbeb4a4b7de2d5fdb7efb9ee52b4bbe66bbaf6c34fd260"
+              },
+              {
+                "offset": 3000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "8cde1244ed268bc1286f360b704d51f58a17fa26df73d87e08ec305b006881a5"
+              },
+              {
+                "offset": 3500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "3ecb80dccbc2c9062797c5165259e6403f5629e6bce426aeb3fabc208cbd4c9d"
+              },
+              {
+                "offset": 4000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "50dc0c62bd7c4f63e1ed3363855ba455dbd88d7fdec389e7dc770d6cf1b7a1ad"
+              },
+              {
+                "offset": 4500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "deec534967a658ea74fde45c8d5d886843177dbe14d5b554c143e5249265f98b"
+              },
+              {
+                "offset": 5000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "068db9b1753890c27dd064ebb9b85b2fc1d82abba9c5681eb4c9f257dc3ab547"
+              },
+              {
+                "offset": 5500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "2f68120b9b66f5d0b657ac3baf5c92e1daee468c8c015239a264959cb85a34f4"
+              },
+              {
+                "offset": 6000,
+                "resultCount": 56,
+                "canonicalResponseSha256": "45dcf80aab197ff3f0a78e2fec80a2720f73f50dd0dc20b6eaa7f2ad2bbdf2cb"
+              }
+            ],
+            "sortedIdsSha256": "cbcbf659279f804b0f5b97235a92f2baed4e354fe730e39fa09a0b2244f14a50"
+          },
+          {
+            "order": "desc",
+            "metaTotal": 6056,
+            "pageCount": 13,
+            "pages": [
+              {
+                "offset": 0,
+                "resultCount": 500,
+                "canonicalResponseSha256": "8c59dabed54c4a69c09b05196b66fa413bb93bbfa90193b12388f6123e2e4f62"
+              },
+              {
+                "offset": 500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "e7f0adf4a0ed7e82e90f246838ddabab8a00a988819a0ae0f0bd6c3c91271b26"
+              },
+              {
+                "offset": 1000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "8e673a74b1451f907856559dfec168a3cef2ae14370ef7a3f75f95d581323476"
+              },
+              {
+                "offset": 1500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "ec961e38b9a5a0e34ac721ca09b8bc2cd4a5aed1984eea1f804f6cc11ec4201e"
+              },
+              {
+                "offset": 2000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "c53206ba9fa5b4235a9e13a72a25020f4e8d1be28681c88b2687bc780dda5ed7"
+              },
+              {
+                "offset": 2500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "dd4a85707231236447b6091d6a1687b705c777485a27bc925188e5cba6e8d1ad"
+              },
+              {
+                "offset": 3000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "e6cef7fa489518ecb9adad5e5c35e5323297273ed0f6d968b205b8b4cc688a36"
+              },
+              {
+                "offset": 3500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "42a51ce7afd593912750ae362a873580febdc72422a20a99d7cc6107d26b96b5"
+              },
+              {
+                "offset": 4000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "8028f913fb960294a52fbd66dbf10071f3827f1c306d349644b3c972a8487d63"
+              },
+              {
+                "offset": 4500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "499dceda3deee886d86b4e5351dbffdd42a7454fbe949e8e4ef06f66eae1975c"
+              },
+              {
+                "offset": 5000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "ade97cf3ce9fa674124a283afe40ebfc60162efbe30701d06afcf82243976e47"
+              },
+              {
+                "offset": 5500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "20ac6e7b4ed32043e1c64da79d2ac032477efeeb0fd099cf535a85b1469f1cef"
+              },
+              {
+                "offset": 6000,
+                "resultCount": 56,
+                "canonicalResponseSha256": "f594aaa4de079ef3719595aa89fd5d869c54f6f99d7559a0dc361ee428704cc1"
+              }
+            ],
+            "sortedIdsSha256": "cbcbf659279f804b0f5b97235a92f2baed4e354fe730e39fa09a0b2244f14a50"
+          }
+        ]
+      },
+      {
+        "reporterAgency": "NIA",
+        "unit": "nih/nia/nia",
+        "fiscalYear": 2025,
+        "storeCount": 4532,
+        "liveCount": 4531,
+        "missingStoredIds": [
+          "nih:11234633"
+        ],
+        "liveOnlyIds": [],
+        "passes": [
+          {
+            "order": "asc",
+            "metaTotal": 4531,
+            "pageCount": 10,
+            "pages": [
+              {
+                "offset": 0,
+                "resultCount": 500,
+                "canonicalResponseSha256": "1f970196c8f171a4596243b9d32978dbcca9ddf3e76cfb98db4ac79970b00a84"
+              },
+              {
+                "offset": 500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "11b9f3e0e997412be65e6058d4e2ddd4f6b38b0773b1f8e06b6fab7b77218e2d"
+              },
+              {
+                "offset": 1000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "47b168f53bbf1ccb3ca4ea9e410603cc8377c134bac83431e66429047063ef63"
+              },
+              {
+                "offset": 1500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "d795f3b9d26291bb4dfc3b40bffe065e3a0e85aa55cea1e8bff314c6c88a6be4"
+              },
+              {
+                "offset": 2000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "060426e950c2d358adc1653813cee3773a3d7f460c106e167448f07e170af61f"
+              },
+              {
+                "offset": 2500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "43a3939a240b56fcac7f8c102e0d4367ea3fa1bbf20c5f0b4b8354047e319b8f"
+              },
+              {
+                "offset": 3000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "387993d7530f2029bd99133ee309a3db282d80793d95cced521f4e2f1775eaf2"
+              },
+              {
+                "offset": 3500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "ed63cd04ad522d65863769b353829504ce140d342f27cc4e2bdbc9bdbd556e98"
+              },
+              {
+                "offset": 4000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "fd3cf260dc1c6f59ce36d341159775f899a6341191189213f9652e593f354ec7"
+              },
+              {
+                "offset": 4500,
+                "resultCount": 31,
+                "canonicalResponseSha256": "ec8cff193d7fb77c497e84759e2a37d95a2c70b3598649647733a8ba1b71e5c7"
+              }
+            ],
+            "sortedIdsSha256": "e004a4578096fe981bd28b6cfc4fd213ae03f1d1e4a1a6dcd7be0a54e66139e7"
+          },
+          {
+            "order": "desc",
+            "metaTotal": 4531,
+            "pageCount": 10,
+            "pages": [
+              {
+                "offset": 0,
+                "resultCount": 500,
+                "canonicalResponseSha256": "c1ce69c9ef31fc587bb44d5534689278d592b801697148b6b5649f8de27f916f"
+              },
+              {
+                "offset": 500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "77ede725ecb2e631ba4d7d002009aaa845e665f027ca9412984dde427ebcaee9"
+              },
+              {
+                "offset": 1000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "4ef15b094f5e2b338cca8645e37ec0647f9778260dd79e141966a5b0d997367c"
+              },
+              {
+                "offset": 1500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "e581d4fe9311c59816635b5f39be3119b05a94fae4376afafa0c18f9c4e21917"
+              },
+              {
+                "offset": 2000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "cec40e5bd141c5ce8f5c7f9971444246a102e53886bbe8ac5e7aeb84a7aee878"
+              },
+              {
+                "offset": 2500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "0b5a5d822b0cf8e40263af34f72bb7d02c614456b3d55eb1918d4fd850bf6257"
+              },
+              {
+                "offset": 3000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "408bc5893ad0984aeb4ace990d8dc5e7762936a048a1e6be8c17f19baa70e844"
+              },
+              {
+                "offset": 3500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "4e8e1cdd333f603287dc38cec1347f031692b5ff4eb2b733e672f680e03fce33"
+              },
+              {
+                "offset": 4000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "b59c1e01b28abf7a3bd85515cede3a6bfe0b13c53ca85fe3cec5fb07b5fcc8e1"
+              },
+              {
+                "offset": 4500,
+                "resultCount": 31,
+                "canonicalResponseSha256": "e25d0a845d7daa8ee14f5051b3141da6326bb15556043bd4f3f7248a27d24015"
+              }
+            ],
+            "sortedIdsSha256": "e004a4578096fe981bd28b6cfc4fd213ae03f1d1e4a1a6dcd7be0a54e66139e7"
+          }
+        ]
+      },
+      {
+        "reporterAgency": "NIAID",
+        "unit": "nih/niaid/niaid",
+        "fiscalYear": 2026,
+        "storeCount": 6310,
+        "liveCount": 6309,
+        "missingStoredIds": [
+          "nih:11415246"
+        ],
+        "liveOnlyIds": [],
+        "passes": [
+          {
+            "order": "asc",
+            "metaTotal": 6309,
+            "pageCount": 13,
+            "pages": [
+              {
+                "offset": 0,
+                "resultCount": 500,
+                "canonicalResponseSha256": "83fa06b174c6bf05e84bfa087e5eb549f03a39ea6fab5ea946a784521916f9c8"
+              },
+              {
+                "offset": 500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "28a2bc5165dbf3b548b5437479fec7e220b18bc90f1f60444bcc3e4b7aff5a8c"
+              },
+              {
+                "offset": 1000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "1242ce235951986fb6c29287901ca28fe6eedbd0792221cc08b9d78c2e3b7d42"
+              },
+              {
+                "offset": 1500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "aa2f6204b58a52ff947e46303d98f23439a3c47bf3b691d2ce9c51f063901d65"
+              },
+              {
+                "offset": 2000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "9c267f0d0886e6e550f36cada0598e2ca38616b0af393a5dd4c46324db7aa988"
+              },
+              {
+                "offset": 2500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "d4b9407474d9028c2494a440127c788bd1c66478446022f468d4931806562d3d"
+              },
+              {
+                "offset": 3000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "bc4bbb95db7a3fc7c1a83ab0af605331b57790c41880c8043652c9f6655d2f2f"
+              },
+              {
+                "offset": 3500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "001f5b7ad80018688baa300e5da49d72ca3964a249917c551e1f4f7ce425383a"
+              },
+              {
+                "offset": 4000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "d226930eedb95ca8c92baccbab89bba0c5e3747b13838fcc4306d61e8b3e8228"
+              },
+              {
+                "offset": 4500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "eaac779c3ffaca1d84f577ab6748cae3b351a8a13bbe6c9a0225824fa4373e06"
+              },
+              {
+                "offset": 5000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "ce63df90df6765d9cde7ea1634b18c2979ba9db3dc715b15fed3b45837730711"
+              },
+              {
+                "offset": 5500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "86a34dcec7862959f308d2c7896bf69f9f04b311faf50821ad85cfb87489520e"
+              },
+              {
+                "offset": 6000,
+                "resultCount": 309,
+                "canonicalResponseSha256": "5077556b0f713ca799c4c3837cf898d87355f93d1e828bd45b4c45b22de09f34"
+              }
+            ],
+            "sortedIdsSha256": "336552c930fdfc5f8a1da5a19f509ab4a73b2a151fbf8400ba7debd079f398ee"
+          },
+          {
+            "order": "desc",
+            "metaTotal": 6309,
+            "pageCount": 13,
+            "pages": [
+              {
+                "offset": 0,
+                "resultCount": 500,
+                "canonicalResponseSha256": "5fdc52c852759bf36e232dbf7a613e1afe5c9b7ae039c368a0244520e8141327"
+              },
+              {
+                "offset": 500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "bd489cff657c7c2d0f0e7535be6a4e13b3fffbc4756acb2d507346c9787240ba"
+              },
+              {
+                "offset": 1000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "14b92a713b3edc8b428165251e06a3888ae5bec659675969887b5c06004f564e"
+              },
+              {
+                "offset": 1500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "ab6c110a70b994335a969cd091549ae7a06f959aec1a95c570ed6fdb60d8c360"
+              },
+              {
+                "offset": 2000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "589b3798924d9be92b26483322741f0495e3645ae4da3719f757d0ee9f3b435d"
+              },
+              {
+                "offset": 2500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "4b2aa2d6c433a7607a7947cbd58b1b27250fd715e17f0c46029038d5040a7021"
+              },
+              {
+                "offset": 3000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "cfb97a010856714bb1261f86c73ec1a91f33fcab4ef18cb41451bfccd8fb48a6"
+              },
+              {
+                "offset": 3500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "35b6a3c16fcae5a7a89dcd282bbbbce93b0bd26ace048a18c8b7499fef5bc2fe"
+              },
+              {
+                "offset": 4000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "eb1fa5ff23a1ee36533fb92afde9af570fb38ba30b43cde0c5a04e4c6cacec2e"
+              },
+              {
+                "offset": 4500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "7b34e6836597acaad4c6b898b6ec60db44611977c5b7977314d5c480bd81ca93"
+              },
+              {
+                "offset": 5000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "28b890d7f592dafc03f644d3c234e5efa06ce8f1d2e89ce45bcaded998a957ff"
+              },
+              {
+                "offset": 5500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "76c33afe1d09ba409851eaacf9da23f5906719a0b8b50d9736a879e2503a9ddf"
+              },
+              {
+                "offset": 6000,
+                "resultCount": 309,
+                "canonicalResponseSha256": "26eb6f4d233aec6d099506d0a3142122ef9507546d26a44337edb804e4dcae5c"
+              }
+            ],
+            "sortedIdsSha256": "336552c930fdfc5f8a1da5a19f509ab4a73b2a151fbf8400ba7debd079f398ee"
+          }
+        ]
+      },
+      {
+        "reporterAgency": "NICHD",
+        "unit": "nih/nichd/nichd",
+        "fiscalYear": 2026,
+        "storeCount": 2571,
+        "liveCount": 2570,
+        "missingStoredIds": [
+          "nih:11380040"
+        ],
+        "liveOnlyIds": [],
+        "passes": [
+          {
+            "order": "asc",
+            "metaTotal": 2570,
+            "pageCount": 6,
+            "pages": [
+              {
+                "offset": 0,
+                "resultCount": 500,
+                "canonicalResponseSha256": "a46746ddf4a610477327b7101fad5c805e33a08f691468ac726b4a5c86c3d835"
+              },
+              {
+                "offset": 500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "2b2ec65afe3b4813423e1365738a489ce31b6392d7b78379d7223f1cea129331"
+              },
+              {
+                "offset": 1000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "93b2ac82b6fd0c05941b3d66a453159af3a735ec60847a7c810c7b359ee7ef0d"
+              },
+              {
+                "offset": 1500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "489a455509d65740a7314aa720b858b026780d3e81c6e6bfeb8b9478e62ddd60"
+              },
+              {
+                "offset": 2000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "5bca0422714fb8b3422e9e40ea295c372e0cfc5a91a406c23a0c73b4aa7d8bcc"
+              },
+              {
+                "offset": 2500,
+                "resultCount": 70,
+                "canonicalResponseSha256": "38879f3b44edc5f56107cadac6265502f30d70a137e9914695e8ec6a78098cb9"
+              }
+            ],
+            "sortedIdsSha256": "206e73d09641a4992d56093fb7754ed6322487c505b75cc395904bf3afb82b99"
+          },
+          {
+            "order": "desc",
+            "metaTotal": 2570,
+            "pageCount": 6,
+            "pages": [
+              {
+                "offset": 0,
+                "resultCount": 500,
+                "canonicalResponseSha256": "0592d4b8edabe14f648055d00cf485d9d42e6c14b5c13e40c6ba7bfbf857b1a4"
+              },
+              {
+                "offset": 500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "5cf2ed3745a0c96851d87012082d1be25c57141ac9485ef62104da90ad703ebf"
+              },
+              {
+                "offset": 1000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "4cd1b59295891faf313b22405346bce7a308f34d7d362ada334dcb83a5a43ba2"
+              },
+              {
+                "offset": 1500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "75e7679a36189832ef6d1f2becf384a14cbe25eac534d67d3ae8f7d5912cd901"
+              },
+              {
+                "offset": 2000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "edaece64e16763bb5228bb8e2c33959a1079313568fb386206ace6d365097398"
+              },
+              {
+                "offset": 2500,
+                "resultCount": 70,
+                "canonicalResponseSha256": "e8554b1fc2a7ef74f99c4db01a5064ca7431e73d148b9a90ce30a157fcda7519"
+              }
+            ],
+            "sortedIdsSha256": "206e73d09641a4992d56093fb7754ed6322487c505b75cc395904bf3afb82b99"
+          }
+        ]
+      },
+      {
+        "reporterAgency": "NIDCR",
+        "unit": "nih/nidcr/nidcr",
+        "fiscalYear": 2025,
+        "storeCount": 899,
+        "liveCount": 898,
+        "missingStoredIds": [
+          "nih:11398315"
+        ],
+        "liveOnlyIds": [],
+        "passes": [
+          {
+            "order": "asc",
+            "metaTotal": 898,
+            "pageCount": 2,
+            "pages": [
+              {
+                "offset": 0,
+                "resultCount": 500,
+                "canonicalResponseSha256": "8a872aa0c99ad64261f400f309f9764d939d5453529084cfe618d6a04ed8cd6e"
+              },
+              {
+                "offset": 500,
+                "resultCount": 398,
+                "canonicalResponseSha256": "830404aafd9eb3e8f66f446c888820f302f6c294d79a490c075ab20fd87816a4"
+              }
+            ],
+            "sortedIdsSha256": "57be3c4de187f4fcaa25e151b35d76314b00967e4c3f7e79b700ccef7278b96e"
+          },
+          {
+            "order": "desc",
+            "metaTotal": 898,
+            "pageCount": 2,
+            "pages": [
+              {
+                "offset": 0,
+                "resultCount": 500,
+                "canonicalResponseSha256": "19c16ab40d5a72c535622ce90ad89dfd181483bdd218903d12e00aeb2a008294"
+              },
+              {
+                "offset": 500,
+                "resultCount": 398,
+                "canonicalResponseSha256": "c89447655aab0912f80d5789428b2c01a1911867e59dc8a72b343dfc3abfe108"
+              }
+            ],
+            "sortedIdsSha256": "57be3c4de187f4fcaa25e151b35d76314b00967e4c3f7e79b700ccef7278b96e"
+          }
+        ]
+      },
+      {
+        "reporterAgency": "NIDDK",
+        "unit": "nih/niddk/niddk",
+        "fiscalYear": 2025,
+        "storeCount": 3948,
+        "liveCount": 3946,
+        "missingStoredIds": [
+          "nih:11176793",
+          "nih:11241491"
+        ],
+        "liveOnlyIds": [],
+        "passes": [
+          {
+            "order": "asc",
+            "metaTotal": 3946,
+            "pageCount": 8,
+            "pages": [
+              {
+                "offset": 0,
+                "resultCount": 500,
+                "canonicalResponseSha256": "70b00e018392c36c8b5a69924a982e23ff108dae84b2b90b7988b6e62179eeea"
+              },
+              {
+                "offset": 500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "972c898f0d57c28a8d49d905fd4658d4bb0bc874ce4c5d210e5cf6ab33dba212"
+              },
+              {
+                "offset": 1000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "446e27290132787e4b24c32e1eb4dff3b2f754f86a75d64bf18a174ea3c7b4cc"
+              },
+              {
+                "offset": 1500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "bae06537db364c845754558c856d7a2edf616994dd9c026fc8c87b1933615d37"
+              },
+              {
+                "offset": 2000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "2b38d5e32a898a3acbab9875df18ad7340a281f04475dc232d8a5bad64e23bf7"
+              },
+              {
+                "offset": 2500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "ca424a6d3d9ded0b323eb7b014b2cd30aac534cc3b08b2166a5926524121e3c1"
+              },
+              {
+                "offset": 3000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "d5c11fa53f05652f552e046395ae645038f2090f01df851cbaa64bf94c885ba6"
+              },
+              {
+                "offset": 3500,
+                "resultCount": 446,
+                "canonicalResponseSha256": "4fccab1ef8b51cb4b3047af8d57669c6b10bb363f280874df084784c0d49d6c9"
+              }
+            ],
+            "sortedIdsSha256": "aa95cfa78325dd334e531c4af5bc1c1737ae32351e30f3faa97f0550a1ca8805"
+          },
+          {
+            "order": "desc",
+            "metaTotal": 3946,
+            "pageCount": 8,
+            "pages": [
+              {
+                "offset": 0,
+                "resultCount": 500,
+                "canonicalResponseSha256": "5c3df9c29e7479d6f88d5e343b8f4bd772628d71098363ff2b5db1ae67335dae"
+              },
+              {
+                "offset": 500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "e69e22e016f2b42ce8a297f9df2d30e210322749210093b58bcac24393041929"
+              },
+              {
+                "offset": 1000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "096f09a8c2ca68e34b86cea2ce7abf6ada36511b27c2661d29bcffcfecf48500"
+              },
+              {
+                "offset": 1500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "ca68fd7147f9e4514f170667344d3e08023191a0f3cdf9c5a760a5b7689c8590"
+              },
+              {
+                "offset": 2000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "dfafe47a6164d20976615d6d18872af9a16249e2ed1c7f50d65952ae8e2418f7"
+              },
+              {
+                "offset": 2500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "b9ea7ce82f686d19986a86cd3ec139a9510ff261b3a897550cf4c53cc984a216"
+              },
+              {
+                "offset": 3000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "dcb679260e9cfb79f5988e12abb7df808ee5918da5b881dcfedaeecedff6eff3"
+              },
+              {
+                "offset": 3500,
+                "resultCount": 446,
+                "canonicalResponseSha256": "2648638964fa8ba19e7fc89261321f15336d9d61a8a66d17f31889d46dc01be5"
+              }
+            ],
+            "sortedIdsSha256": "aa95cfa78325dd334e531c4af5bc1c1737ae32351e30f3faa97f0550a1ca8805"
+          }
+        ]
+      },
+      {
+        "reporterAgency": "NIGMS",
+        "unit": "nih/nigms/nigms",
+        "fiscalYear": 2025,
+        "storeCount": 6312,
+        "liveCount": 6310,
+        "missingStoredIds": [
+          "nih:11043767",
+          "nih:11088961"
+        ],
+        "liveOnlyIds": [],
+        "passes": [
+          {
+            "order": "asc",
+            "metaTotal": 6310,
+            "pageCount": 13,
+            "pages": [
+              {
+                "offset": 0,
+                "resultCount": 500,
+                "canonicalResponseSha256": "daef933145482d617f75916abb7211c53906666e7ce8ba0f01b76cef2a49351f"
+              },
+              {
+                "offset": 500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "af2215dbd23b08773b40524b47d71f18d9b4650c2508328426a9e41c48b94812"
+              },
+              {
+                "offset": 1000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "8740b464b57655b352cd0a63b6c9bce2e5dc53d480d0f0e29c683220cb65f28c"
+              },
+              {
+                "offset": 1500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "224e92ed70766b4987e860cd5cf78da844f2a6297e4edd7512dc7cb463d077a8"
+              },
+              {
+                "offset": 2000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "df2d89ed72016217f0968bd6d9da849d2fa089d12ad96d456f85fa3078790d39"
+              },
+              {
+                "offset": 2500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "0290b11318605a5c6cea34897b43c1fda20f06bcc28cb62245098c20b4276dd5"
+              },
+              {
+                "offset": 3000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "b6fd72c51ac64bc1483f4491e11df7824128440cde35b61a774a43857c5d78f7"
+              },
+              {
+                "offset": 3500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "4a7a1f9fe6267fb9bdd295210386897b1cdb935a5db1039440da6fecc92afeba"
+              },
+              {
+                "offset": 4000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "babac0172b22b30f1ab83cca73cda01a7989807a64ab661969c79189328e0f02"
+              },
+              {
+                "offset": 4500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "71358820d69c1092eccf53d62b2de5bb6070e8171dd1075235aba854c0193847"
+              },
+              {
+                "offset": 5000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "a4f3b18f47094642356ea81935738914aa877ccdfd1de5b032981073f76efdb3"
+              },
+              {
+                "offset": 5500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "192db608e888dac600316f7d019e4b5243b2fb69ea135b410f8057879e1d8227"
+              },
+              {
+                "offset": 6000,
+                "resultCount": 310,
+                "canonicalResponseSha256": "c3d8cc841a191ce031a4fe00980bd7aab4c6d28aee26b573144f4174a10b5c91"
+              }
+            ],
+            "sortedIdsSha256": "0787dfe26df558d3c59a797f57344535991726642612bdbe06ceaa796ec02e1a"
+          },
+          {
+            "order": "desc",
+            "metaTotal": 6310,
+            "pageCount": 13,
+            "pages": [
+              {
+                "offset": 0,
+                "resultCount": 500,
+                "canonicalResponseSha256": "458edc49b8e0781838247d8f720631366f225230ddb9a2bf1c8567ce43d8d877"
+              },
+              {
+                "offset": 500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "a89a2efb676e8c0acf2566216066ef82fc1a00ac767637aec6a335ea30251c9d"
+              },
+              {
+                "offset": 1000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "5e6aa5d54e0d382b5ef6824d32117abc5444301f58d86508572e62e79eeb2899"
+              },
+              {
+                "offset": 1500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "f2383a52d9376d2e68d430cbb66bda13cec595b8295f2d54f3232be55811d990"
+              },
+              {
+                "offset": 2000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "d95bb0b97a6b6b495a09ddc13eeca12e6cc669df396ca6776661781a235ee255"
+              },
+              {
+                "offset": 2500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "46427e700ed02dacabff473cd14b998c696be5da6de8adbc977e23926fe0ed35"
+              },
+              {
+                "offset": 3000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "d1d6b095002ce9505427dd060018fcf0246457c937fd7e6d69d43a3f31a171e3"
+              },
+              {
+                "offset": 3500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "1596ed0b6a18e10100009e0a68e81f4ddf88d27b97cc4a41b67c0f6eb6fa40e7"
+              },
+              {
+                "offset": 4000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "fcf9433974b1ba6adc0009f9d8bb433772c6c7f4b4cefd11a9b2a7fe412322c9"
+              },
+              {
+                "offset": 4500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "c028406a8f8096ec814d578276f9727941afd54dd92da1a94901d88f955927fa"
+              },
+              {
+                "offset": 5000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "88ec23d953cf3a26e6ac91e17170ac3986d867e31b03cbab9891edbc011ce35d"
+              },
+              {
+                "offset": 5500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "3e848dbe94868f62a2607528b9f555ad7e6c85ce1ec27dbbd3a4a156f334afbc"
+              },
+              {
+                "offset": 6000,
+                "resultCount": 310,
+                "canonicalResponseSha256": "3ab510bc1030a6e879624806cbd30c9177f207d9c3a89426c3506041593fbc27"
+              }
+            ],
+            "sortedIdsSha256": "0787dfe26df558d3c59a797f57344535991726642612bdbe06ceaa796ec02e1a"
+          }
+        ]
+      },
+      {
+        "reporterAgency": "NINDS",
+        "unit": "nih/ninds/ninds",
+        "fiscalYear": 2026,
+        "storeCount": 3915,
+        "liveCount": 3911,
+        "missingStoredIds": [
+          "nih:11266582",
+          "nih:11313204",
+          "nih:11384307",
+          "nih:11458848"
+        ],
+        "liveOnlyIds": [],
+        "passes": [
+          {
+            "order": "asc",
+            "metaTotal": 3911,
+            "pageCount": 8,
+            "pages": [
+              {
+                "offset": 0,
+                "resultCount": 500,
+                "canonicalResponseSha256": "ebf303da08c2c6c11758d1da9de05eeed6d8fc58518da58e82dbd76944632c37"
+              },
+              {
+                "offset": 500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "0ea45cc3542ae0163a5ee1db8e962497e4dd28bcd142d509217247e12a6a80dc"
+              },
+              {
+                "offset": 1000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "c2de2eccfd22b357a83d85406683a774d4236695a141dbe7c7cbf35b2e45faf4"
+              },
+              {
+                "offset": 1500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "32bb72f4bcf3354a6e984e9d53bc8f7ba8b818deffe90770264588c353f5f172"
+              },
+              {
+                "offset": 2000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "9b054c1d0bd069883dbed6b821d11b12de6cdd897128ba54deb0cda939571124"
+              },
+              {
+                "offset": 2500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "c96dc11c2c47a2c6907a8de6969c94a0bc362797db2c8127aed78aec57b5ce75"
+              },
+              {
+                "offset": 3000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "abec20570349317ca5bbb3aec84b248c5e9ab23c0d222fab6d9d362488b21858"
+              },
+              {
+                "offset": 3500,
+                "resultCount": 411,
+                "canonicalResponseSha256": "ab143d0b8674c13f06a430bce1446a3195495b4ced7203e91b3cd5204c7154b0"
+              }
+            ],
+            "sortedIdsSha256": "591f2365fc6d89574053d5a499c0b9fb7e52dbdf5ed878b302aa50ebe55d4821"
+          },
+          {
+            "order": "desc",
+            "metaTotal": 3911,
+            "pageCount": 8,
+            "pages": [
+              {
+                "offset": 0,
+                "resultCount": 500,
+                "canonicalResponseSha256": "c09e179f7549341b0592b09a5466d5a4fabdf6c17456aa33abebc2821a8f5632"
+              },
+              {
+                "offset": 500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "f797abae489451ca1cd310bbc37280a8c3e19d728da09e38e3b2447e12f74ace"
+              },
+              {
+                "offset": 1000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "30c35dce3acdd5b561c194d641c980f4cd0628fd468fc9c11729ea773d2e4415"
+              },
+              {
+                "offset": 1500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "a9a75ac6e4f6cd392354fa963e626f8850ad5ccea27b27524a2122bafad650ba"
+              },
+              {
+                "offset": 2000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "9ae35362643fea7fe01f6c364a3c48212a80bbdbb735a97f78c345519efe0c3e"
+              },
+              {
+                "offset": 2500,
+                "resultCount": 500,
+                "canonicalResponseSha256": "9cd187cc1a33affb1dfd85e989c6b6843aa695edecb7aa4f73f6836ff665229d"
+              },
+              {
+                "offset": 3000,
+                "resultCount": 500,
+                "canonicalResponseSha256": "e2defbf6a092d17e14b4870e016c2f29d368fdb183c43d86d0af5a5adef7b7d1"
+              },
+              {
+                "offset": 3500,
+                "resultCount": 411,
+                "canonicalResponseSha256": "59936a386abf8ccd9b1350bef22a22ab979ae277769f69036dd3bb97a85850a7"
+              }
+            ],
+            "sortedIdsSha256": "591f2365fc6d89574053d5a499c0b9fb7e52dbdf5ed878b302aa50ebe55d4821"
+          }
+        ]
+      }
+    ],
+    "exactQuery": {
+      "requestedIds": [
+        "nih:10825742",
+        "nih:10973969",
+        "nih:10996221",
+        "nih:11043767",
+        "nih:11088961",
+        "nih:11126249",
+        "nih:11161340",
+        "nih:11172607",
+        "nih:11176793",
+        "nih:11225088",
+        "nih:11234633",
+        "nih:11241477",
+        "nih:11241491",
+        "nih:11266582",
+        "nih:11286738",
+        "nih:11290350",
+        "nih:11294928",
+        "nih:11313204",
+        "nih:11314935",
+        "nih:11327923",
+        "nih:11377238",
+        "nih:11380040",
+        "nih:11380142",
+        "nih:11384307",
+        "nih:11388824",
+        "nih:11393581",
+        "nih:11398315",
+        "nih:11415246",
+        "nih:11416109",
+        "nih:11418121",
+        "nih:11437634",
+        "nih:11458848",
+        "nih:11459839",
+        "nih:11461896",
+        "nih:11462449",
+        "nih:11467202",
+        "nih:11555862"
+      ],
+      "returnedIds": [
+        "nih:11126249",
+        "nih:11294928",
+        "nih:11437634",
+        "nih:11461896",
+        "nih:11462449",
+        "nih:11555862"
+      ],
+      "metaTotal": 6,
+      "canonicalResponseSha256": "0633262846e2ba0616340feb481ae05d3db3edb1deb55e837a2a1d28c9fd0729",
+      "returnedRecords": [
+        {
+          "appl_id": 11126249,
+          "fiscal_year": 2024,
+          "project_num": "7R01EY034436-03",
+          "award_notice_date": "2025-04-11T00:00:00",
+          "budget_start": "2025-01-01T00:00:00",
+          "project_start_date": "2023-03-01T00:00:00",
+          "award_amount": 430676,
+          "award_type": "7",
+          "activity_code": "R01",
+          "project_title": "Hierarchies of spatiotemporal anticipation in the human brain",
+          "organization": {
+            "org_name": "UNIVERSITY OF CALIFORNIA BERKELEY",
+            "city": null,
+            "country": null,
+            "org_city": "BERKELEY",
+            "org_country": "UNITED STATES",
+            "org_state": "CA",
+            "org_state_name": null,
+            "dept_type": "PSYCHOLOGY",
+            "fips_country_code": null,
+            "org_duns": [
+              "124726725"
+            ],
+            "org_ueis": [
+              "GS3YEVSS12N6"
+            ],
+            "primary_duns": "124726725",
+            "primary_uei": "GS3YEVSS12N6",
+            "org_fips": "US",
+            "org_ipf_code": "577502",
+            "org_zipcode": "947201509",
+            "external_org_id": 577502
+          },
+          "agency_ic_admin": {
+            "code": "EY",
+            "abbreviation": "NEI",
+            "name": "National Eye Institute",
+            "admin_org_id": "12500073",
+            "admin_funding_url": ""
+          },
+          "funding_mechanism": "Non-SBIR/STTR",
+          "subproject_id": null
+        },
+        {
+          "appl_id": 11294928,
+          "fiscal_year": 2026,
+          "project_num": "1R03NS147206-01",
+          "award_notice_date": "2026-08-07T00:00:00",
+          "budget_start": "2026-09-01T00:00:00",
+          "project_start_date": "2026-09-01T00:00:00",
+          "award_amount": 76000,
+          "award_type": "1",
+          "activity_code": "R03",
+          "project_title": "Stimulating bulbospinal plasticity to improve baroreflex regulation of sympathetic cardiovascular activity after spinal cord injury.",
+          "organization": {
+            "org_name": "EAST TENNESSEE STATE UNIVERSITY",
+            "city": null,
+            "country": null,
+            "org_city": "JOHNSON CITY",
+            "org_country": "UNITED STATES",
+            "org_state": "TN",
+            "org_state_name": null,
+            "dept_type": "OTHER HEALTH PROFESSIONS",
+            "fips_country_code": null,
+            "org_duns": [
+              "051125037"
+            ],
+            "org_ueis": [
+              "V5LLVC627U34"
+            ],
+            "primary_duns": "051125037",
+            "primary_uei": "V5LLVC627U34",
+            "org_fips": "US",
+            "org_ipf_code": "1274603",
+            "org_zipcode": "37614",
+            "external_org_id": 1274603
+          },
+          "agency_ic_admin": {
+            "code": "NS",
+            "abbreviation": "NINDS",
+            "name": "National Institute of Neurological Disorders and Stroke",
+            "admin_org_id": "12500053",
+            "admin_funding_url": ""
+          },
+          "funding_mechanism": "Non-SBIR/STTR",
+          "subproject_id": null
+        },
+        {
+          "appl_id": 11437634,
+          "fiscal_year": 2026,
+          "project_num": "1R21OD042615-01",
+          "award_notice_date": "2026-08-05T00:00:00",
+          "budget_start": "2026-08-15T00:00:00",
+          "project_start_date": "2026-08-15T00:00:00",
+          "award_amount": 195000,
+          "award_type": "1",
+          "activity_code": "R21",
+          "project_title": "Enh13 mutant rats for investigation of XX vs. XY differences in phenotypes",
+          "organization": {
+            "org_name": "MEDICAL COLLEGE OF WISCONSIN",
+            "city": null,
+            "country": null,
+            "org_city": "MILWAUKEE",
+            "org_country": "UNITED STATES",
+            "org_state": "WI",
+            "org_state_name": null,
+            "dept_type": "PHYSIOLOGY",
+            "fips_country_code": null,
+            "org_duns": [
+              "937639060"
+            ],
+            "org_ueis": [
+              "E8VWJXMMUQ67"
+            ],
+            "primary_duns": "937639060",
+            "primary_uei": "E8VWJXMMUQ67",
+            "org_fips": "US",
+            "org_ipf_code": "46001",
+            "org_zipcode": "532263548",
+            "external_org_id": 46001
+          },
+          "agency_ic_admin": {
+            "code": "OD",
+            "abbreviation": "OD",
+            "name": "NIH Office of the Director",
+            "admin_org_id": "12500055",
+            "admin_funding_url": ""
+          },
+          "funding_mechanism": "Non-SBIR/STTR",
+          "subproject_id": null
+        },
+        {
+          "appl_id": 11461896,
+          "fiscal_year": 2026,
+          "project_num": "1F31AI203137-01",
+          "award_notice_date": "2026-08-13T00:00:00",
+          "budget_start": "2026-09-01T00:00:00",
+          "project_start_date": "2026-09-01T00:00:00",
+          "award_amount": 50114,
+          "award_type": "1",
+          "activity_code": "F31",
+          "project_title": "Mechanical licensing of cytotoxic degranulation",
+          "organization": {
+            "org_name": "WEILL MEDICAL COLL OF CORNELL UNIV",
+            "city": null,
+            "country": null,
+            "org_city": "NEW YORK",
+            "org_country": "UNITED STATES",
+            "org_state": "NY",
+            "org_state_name": null,
+            "dept_type": "NONE",
+            "fips_country_code": null,
+            "org_duns": [
+              "060217502"
+            ],
+            "org_ueis": [
+              "YNT8TCJH8FQ8"
+            ],
+            "primary_duns": "060217502",
+            "primary_uei": "YNT8TCJH8FQ8",
+            "org_fips": "US",
+            "org_ipf_code": "1514803",
+            "org_zipcode": "100654805",
+            "external_org_id": 1514803
+          },
+          "agency_ic_admin": {
+            "code": "AI",
+            "abbreviation": "NIAID",
+            "name": "National Institute of Allergy and Infectious Diseases",
+            "admin_org_id": "12500003",
+            "admin_funding_url": ""
+          },
+          "funding_mechanism": "Training, Individual",
+          "subproject_id": null
+        },
+        {
+          "appl_id": 11462449,
+          "fiscal_year": 2026,
+          "project_num": "1F30AG096996-01A1",
+          "award_notice_date": "2026-08-07T00:00:00",
+          "budget_start": "2026-08-19T00:00:00",
+          "project_start_date": "2026-08-19T00:00:00",
+          "award_amount": 55114,
+          "award_type": "1",
+          "activity_code": "F30",
+          "project_title": "A novel cellular model of entorhinal cortex layer II vulnerability in Alzheimer's disease",
+          "organization": {
+            "org_name": "BOSTON UNIVERSITY MEDICAL CAMPUS",
+            "city": null,
+            "country": null,
+            "org_city": "BOSTON",
+            "org_country": "UNITED STATES",
+            "org_state": "MA",
+            "org_state_name": null,
+            "dept_type": "ANATOMY/CELL BIOLOGY",
+            "fips_country_code": null,
+            "org_duns": [
+              "604483045"
+            ],
+            "org_ueis": [
+              "FBYMGMHW4X95"
+            ],
+            "primary_duns": "604483045",
+            "primary_uei": "FBYMGMHW4X95",
+            "org_fips": "US",
+            "org_ipf_code": "894901",
+            "org_zipcode": "021182340",
+            "external_org_id": 894901
+          },
+          "agency_ic_admin": {
+            "code": "AG",
+            "abbreviation": "NIA",
+            "name": "National Institute on Aging",
+            "admin_org_id": "12500002",
+            "admin_funding_url": ""
+          },
+          "funding_mechanism": "Training, Individual",
+          "subproject_id": null
+        },
+        {
+          "appl_id": 11555862,
+          "fiscal_year": 2026,
+          "project_num": "3R01ES030378-07S1",
+          "award_notice_date": "2026-06-29T00:00:00",
+          "budget_start": "2026-07-01T00:00:00",
+          "project_start_date": "2020-09-18T00:00:00",
+          "award_amount": 141727,
+          "award_type": "3",
+          "activity_code": "R01",
+          "project_title": "The ESPINA Study 19th Year Follow-Up: A Longitudinal Investigation of Pesticide Exposures in relation to Fertility and Hormonal Health",
+          "organization": {
+            "org_name": "UNIVERSITY OF CALIFORNIA, SAN DIEGO",
+            "city": null,
+            "country": null,
+            "org_city": "LA JOLLA",
+            "org_country": "UNITED STATES",
+            "org_state": "CA",
+            "org_state_name": null,
+            "dept_type": "NONE",
+            "fips_country_code": null,
+            "org_duns": [
+              "804355790"
+            ],
+            "org_ueis": [
+              "UYTTZT6G9DT1"
+            ],
+            "primary_duns": "804355790",
+            "primary_uei": "UYTTZT6G9DT1",
+            "org_fips": "US",
+            "org_ipf_code": "577507",
+            "org_zipcode": "920930621",
+            "external_org_id": 577507
+          },
+          "agency_ic_admin": {
+            "code": "ES",
+            "abbreviation": "NIEHS",
+            "name": "National Institute of Environmental Health Sciences",
+            "admin_org_id": "12500022",
+            "admin_funding_url": ""
+          },
+          "funding_mechanism": "Non-SBIR/STTR",
+          "subproject_id": null
+        }
+      ]
+    }
+  },
+  "terminatedGrantsRegister": {
+    "source": "https://taggs.hhs.gov/Content/Data/HHS_Grants_Terminated.pdf",
+    "downloadSha256": "9a2fa4a75b478d719e9c17765318f015e678456507051b97cc67e03f8bf9f581",
+    "pageCount": 94,
+    "method": "Downloaded the official HHS terminated-grants register and matched every candidate by normalized exact stored title; the two matches were also bound to exact award number and termination date.",
+    "matchedCandidates": [
+      {
+        "id": "nih:11241477",
+        "awardNumber": "F30HL178229",
+        "terminationDate": "2026-08-27",
+        "terminationType": "Bilateral Termination"
+      },
+      {
+        "id": "nih:11241491",
+        "awardNumber": "F32DK142455",
+        "terminationDate": "2026-08-29",
+        "terminationType": "Bilateral Termination"
+      }
+    ],
+    "notMatchedCandidateIds": [
+      "nih:11043767",
+      "nih:11088961",
+      "nih:11176793",
+      "nih:11234633",
+      "nih:11266582",
+      "nih:11313204",
+      "nih:11380040",
+      "nih:11384307",
+      "nih:11398315",
+      "nih:11415246",
+      "nih:11416109",
+      "nih:11418121",
+      "nih:11458848"
+    ]
+  },
+  "classification": {
+    "reporterRecordRetractionsOrSupersessions": [
+      "nih:11043767",
+      "nih:11088961",
+      "nih:11176793",
+      "nih:11234633",
+      "nih:11266582",
+      "nih:11313204",
+      "nih:11380040",
+      "nih:11384307",
+      "nih:11398315",
+      "nih:11415246",
+      "nih:11416109",
+      "nih:11418121",
+      "nih:11458848"
+    ],
+    "confirmedBilateralTerminations": [
+      "nih:11241477",
+      "nih:11241491"
+    ]
+  },
+  "missingStoredRecords": [
+    {
+      "id": "nih:11043767",
+      "reporterAgency": "NIGMS",
+      "unit": "nih/nigms/nigms",
+      "fiscalYear": 2025,
+      "stored": {
+        "id": "nih:11043767",
+        "date": "2025-09-05",
+        "estimatedTotalAmt": "403640",
+        "transType": "Standard/new award (award type=1; activity=R15; funding mechanism=Non-SBIR/STTR)",
+        "title": "Expression of High-Activity and High-SpecificityMicrobial L-Asparaginases from Naturally Occurring Microorganisms in the Alabama Black Belt",
+        "awardeeName": "AUBURN UNIVERSITY AT MONTGOMERY"
+      }
+    },
+    {
+      "id": "nih:11088961",
+      "reporterAgency": "NIGMS",
+      "unit": "nih/nigms/nigms",
+      "fiscalYear": 2025,
+      "stored": {
+        "id": "nih:11088961",
+        "date": "2025-08-14",
+        "estimatedTotalAmt": "619897",
+        "transType": "Standard/new award (award type=2; activity=R35; funding mechanism=Non-SBIR/STTR)",
+        "title": "Uncovering physiological and genomic mechanisms that enable dehydration tolerance in rodents",
+        "awardeeName": "UNIVERSITY OF NEW HAMPSHIRE"
+      }
+    },
+    {
+      "id": "nih:11176793",
+      "reporterAgency": "NIDDK",
+      "unit": "nih/niddk/niddk",
+      "fiscalYear": 2025,
+      "stored": {
+        "id": "nih:11176793",
+        "date": "2025-08-26",
+        "estimatedTotalAmt": "495952",
+        "transType": "Continuing award (award type=5; activity=R01; funding mechanism=Non-SBIR/STTR)",
+        "title": "Gut-brain axis in Parkinson's disease",
+        "awardeeName": "UNIVERSITY OF TOLEDO HEALTH SCI CAMPUS"
+      }
+    },
+    {
+      "id": "nih:11234633",
+      "reporterAgency": "NIA",
+      "unit": "nih/nia/nia",
+      "fiscalYear": 2025,
+      "stored": {
+        "id": "nih:11234633",
+        "date": "2025-07-14",
+        "estimatedTotalAmt": "36538",
+        "transType": "Fellowship (award type=7; activity=F30; funding mechanism=Training, Individual)",
+        "title": "Alleviating Mitochondrial Dysfunction in PERK-deficient Neurodegenerative Disease",
+        "awardeeName": "UNIVERSITY OF CALIFORNIA, SAN DIEGO"
+      }
+    },
+    {
+      "id": "nih:11241477",
+      "reporterAgency": "NHLBI",
+      "unit": "nih/nhlbi/nhlbi",
+      "fiscalYear": 2025,
+      "stored": {
+        "id": "nih:11241477",
+        "date": "2025-09-02",
+        "estimatedTotalAmt": "49866",
+        "transType": "Fellowship (award type=1; activity=F30; funding mechanism=Training, Individual)",
+        "title": "Elucidating the role of translational control in hematopoietic stem cell quiescence",
+        "awardeeName": "BAYLOR COLLEGE OF MEDICINE"
+      }
+    },
+    {
+      "id": "nih:11241491",
+      "reporterAgency": "NIDDK",
+      "unit": "nih/niddk/niddk",
+      "fiscalYear": 2025,
+      "stored": {
+        "id": "nih:11241491",
+        "date": "2025-08-28",
+        "estimatedTotalAmt": "71020",
+        "transType": "Fellowship (award type=1; activity=F32; funding mechanism=Training, Individual)",
+        "title": "HIF regulation of Ammonia Processing and Fibrosis in MASLD/MASH",
+        "awardeeName": "UNIVERSITY OF MICHIGAN AT ANN ARBOR"
+      }
+    },
+    {
+      "id": "nih:11266582",
+      "reporterAgency": "NINDS",
+      "unit": "nih/ninds/ninds",
+      "fiscalYear": 2026,
+      "stored": {
+        "id": "nih:11266582",
+        "date": "2026-06-01",
+        "estimatedTotalAmt": "1262557",
+        "transType": "Standard/new award (award type=1; activity=R61; funding mechanism=Non-SBIR/STTR)",
+        "title": "Non-Addictive Analgesic Discovery from Marine Microbial Natural Products",
+        "awardeeName": "UNIVERSITY OF MASSACHUSETTS LOWELL"
+      }
+    },
+    {
+      "id": "nih:11313204",
+      "reporterAgency": "NINDS",
+      "unit": "nih/ninds/ninds",
+      "fiscalYear": 2026,
+      "stored": {
+        "id": "nih:11313204",
+        "date": "2026-08-25",
+        "estimatedTotalAmt": "34818",
+        "transType": "Fellowship (award type=1; activity=F30; funding mechanism=Training, Individual)",
+        "title": "Discerning the mechanisms by which TRPM3 inhibition by Gβγ contributes to central- and peripheral-opioid-induced pruritus",
+        "awardeeName": "RUTGERS BIOMEDICAL AND HEALTH SCIENCES"
+      }
+    },
+    {
+      "id": "nih:11380040",
+      "reporterAgency": "NICHD",
+      "unit": "nih/nichd/nichd",
+      "fiscalYear": 2026,
+      "stored": {
+        "id": "nih:11380040",
+        "date": "2026-06-25",
+        "estimatedTotalAmt": "337191",
+        "transType": "Continuing award (award type=5; activity=K12; funding mechanism=Other Research-Related)",
+        "title": "University of Pittsburgh/Magee-Womens Research Institute Women's Reproductive Health Research Across the Lifespan (Pitt-MWRI WRHR)",
+        "awardeeName": "MAGEE-WOMEN'S RES INST AND FOUNDATION"
+      }
+    },
+    {
+      "id": "nih:11384307",
+      "reporterAgency": "NINDS",
+      "unit": "nih/ninds/ninds",
+      "fiscalYear": 2026,
+      "stored": {
+        "id": "nih:11384307",
+        "date": "2026-07-14",
+        "estimatedTotalAmt": "1",
+        "transType": "Continuing award (award type=5; activity=UE5; funding mechanism=Other Research-Related)",
+        "title": "Yale Clinical Neuroscientist Training Program",
+        "awardeeName": "YALE UNIVERSITY"
+      }
+    },
+    {
+      "id": "nih:11398315",
+      "reporterAgency": "NIDCR",
+      "unit": "nih/nidcr/nidcr",
+      "fiscalYear": 2025,
+      "stored": {
+        "id": "nih:11398315",
+        "date": "2024-10-01",
+        "estimatedTotalAmt": "582724",
+        "transType": "Continuing award (award type=7; activity=R01; funding mechanism=Non-SBIR/STTR)",
+        "title": "Angiogenic and Anti-microbial Supports for Pulp Regeneration",
+        "awardeeName": "UNIVERSITY OF HOUSTON"
+      }
+    },
+    {
+      "id": "nih:11415246",
+      "reporterAgency": "NIAID",
+      "unit": "nih/niaid/niaid",
+      "fiscalYear": 2026,
+      "stored": {
+        "id": "nih:11415246",
+        "date": "2026-08-05",
+        "estimatedTotalAmt": "1037835",
+        "transType": "Standard/new award (award type=3; activity=U01; funding mechanism=Non-SBIR/STTR)",
+        "title": "A Clinical Trial of Three Broadly Neutralizing Antibodies and Analytic Treatment Interruption in Early-Treated Children in Botswana",
+        "awardeeName": "HARVARD UNIVERSITY D/B/A HARVARD SCHOOL OF PUBLIC HEALTH"
+      }
+    },
+    {
+      "id": "nih:11416109",
+      "reporterAgency": "NHLBI",
+      "unit": "nih/nhlbi/nhlbi",
+      "fiscalYear": 2025,
+      "stored": {
+        "id": "nih:11416109",
+        "date": "2025-09-19",
+        "estimatedTotalAmt": "70526",
+        "transType": "Standard/new award (award type=3; activity=R01; funding mechanism=Non-SBIR/STTR)",
+        "title": "Mediterranean diet, Metabolites, and Cardiovascular Disease",
+        "awardeeName": "HARVARD UNIVERSITY D/B/A HARVARD SCHOOL OF PUBLIC HEALTH"
+      }
+    },
+    {
+      "id": "nih:11418121",
+      "reporterAgency": "NHLBI",
+      "unit": "nih/nhlbi/nhlbi",
+      "fiscalYear": 2025,
+      "stored": {
+        "id": "nih:11418121",
+        "date": "2025-09-23",
+        "estimatedTotalAmt": "335984",
+        "transType": "Continuing award (award type=5; activity=R33; funding mechanism=Non-SBIR/STTR)",
+        "title": "The Development of a Biatrial Catheter for a Cardiopulmonary Support System in Pulmonary Arterial Hypertension",
+        "awardeeName": "ICAHN SCHOOL OF MEDICINE AT MOUNT SINAI"
+      }
+    },
+    {
+      "id": "nih:11458848",
+      "reporterAgency": "NINDS",
+      "unit": "nih/ninds/ninds",
+      "fiscalYear": 2026,
+      "stored": {
+        "id": "nih:11458848",
+        "date": "2026-02-10",
+        "estimatedTotalAmt": "192806",
+        "transType": "Standard/new award (award type=3; activity=U01; funding mechanism=Non-SBIR/STTR)",
+        "title": "Multiplex Imaging of Brain Activity and Plasticity with Optimized FRET/FLIM-based Sensors",
+        "awardeeName": "NORTHWESTERN UNIVERSITY"
+      }
+    }
+  ],
+  "returnedPriorExclusions": [
+    {
+      "id": "nih:11294928",
+      "priorLedgerRecord": {
+        "id": "nih:11294928",
+        "reporterAgency": "NINDS",
+        "unit": "nih/ninds/ninds",
+        "fiscalYear": 2026,
+        "awardDate": "2026-08-07",
+        "month": "2026-08",
+        "amount": 76000,
+        "title": "Stimulating bulbospinal plasticity to improve baroreflex regulation of sympathetic cardiovascular activity after spinal cord injury."
+      },
+      "currentReporterRecord": {
+        "appl_id": 11294928,
+        "fiscal_year": 2026,
+        "project_num": "1R03NS147206-01",
+        "award_notice_date": "2026-08-07T00:00:00",
+        "budget_start": "2026-09-01T00:00:00",
+        "project_start_date": "2026-09-01T00:00:00",
+        "award_amount": 76000,
+        "award_type": "1",
+        "activity_code": "R03",
+        "project_title": "Stimulating bulbospinal plasticity to improve baroreflex regulation of sympathetic cardiovascular activity after spinal cord injury.",
+        "organization": {
+          "org_name": "EAST TENNESSEE STATE UNIVERSITY",
+          "city": null,
+          "country": null,
+          "org_city": "JOHNSON CITY",
+          "org_country": "UNITED STATES",
+          "org_state": "TN",
+          "org_state_name": null,
+          "dept_type": "OTHER HEALTH PROFESSIONS",
+          "fips_country_code": null,
+          "org_duns": [
+            "051125037"
+          ],
+          "org_ueis": [
+            "V5LLVC627U34"
+          ],
+          "primary_duns": "051125037",
+          "primary_uei": "V5LLVC627U34",
+          "org_fips": "US",
+          "org_ipf_code": "1274603",
+          "org_zipcode": "37614",
+          "external_org_id": 1274603
+        },
+        "agency_ic_admin": {
+          "code": "NS",
+          "abbreviation": "NINDS",
+          "name": "National Institute of Neurological Disorders and Stroke",
+          "admin_org_id": "12500053",
+          "admin_funding_url": ""
+        },
+        "funding_mechanism": "Non-SBIR/STTR",
+        "subproject_id": null
+      }
+    },
+    {
+      "id": "nih:11437634",
+      "priorLedgerRecord": {
+        "id": "nih:11437634",
+        "reporterAgency": "OD",
+        "unit": "nih/od/od",
+        "fiscalYear": 2026,
+        "awardDate": "2026-08-05",
+        "month": "2026-08",
+        "amount": 429000,
+        "title": "Enh13 mutant rats for investigation of XX vs. XY differences in phenotypes"
+      },
+      "currentReporterRecord": {
+        "appl_id": 11437634,
+        "fiscal_year": 2026,
+        "project_num": "1R21OD042615-01",
+        "award_notice_date": "2026-08-05T00:00:00",
+        "budget_start": "2026-08-15T00:00:00",
+        "project_start_date": "2026-08-15T00:00:00",
+        "award_amount": 195000,
+        "award_type": "1",
+        "activity_code": "R21",
+        "project_title": "Enh13 mutant rats for investigation of XX vs. XY differences in phenotypes",
+        "organization": {
+          "org_name": "MEDICAL COLLEGE OF WISCONSIN",
+          "city": null,
+          "country": null,
+          "org_city": "MILWAUKEE",
+          "org_country": "UNITED STATES",
+          "org_state": "WI",
+          "org_state_name": null,
+          "dept_type": "PHYSIOLOGY",
+          "fips_country_code": null,
+          "org_duns": [
+            "937639060"
+          ],
+          "org_ueis": [
+            "E8VWJXMMUQ67"
+          ],
+          "primary_duns": "937639060",
+          "primary_uei": "E8VWJXMMUQ67",
+          "org_fips": "US",
+          "org_ipf_code": "46001",
+          "org_zipcode": "532263548",
+          "external_org_id": 46001
+        },
+        "agency_ic_admin": {
+          "code": "OD",
+          "abbreviation": "OD",
+          "name": "NIH Office of the Director",
+          "admin_org_id": "12500055",
+          "admin_funding_url": ""
+        },
+        "funding_mechanism": "Non-SBIR/STTR",
+        "subproject_id": null
+      }
+    },
+    {
+      "id": "nih:11461896",
+      "priorLedgerRecord": {
+        "id": "nih:11461896",
+        "reporterAgency": "NIAID",
+        "unit": "nih/niaid/niaid",
+        "fiscalYear": 2026,
+        "awardDate": "2026-08-13",
+        "month": "2026-08",
+        "amount": 50114,
+        "title": "Mechanical licensing of cytotoxic degranulation"
+      },
+      "currentReporterRecord": {
+        "appl_id": 11461896,
+        "fiscal_year": 2026,
+        "project_num": "1F31AI203137-01",
+        "award_notice_date": "2026-08-13T00:00:00",
+        "budget_start": "2026-09-01T00:00:00",
+        "project_start_date": "2026-09-01T00:00:00",
+        "award_amount": 50114,
+        "award_type": "1",
+        "activity_code": "F31",
+        "project_title": "Mechanical licensing of cytotoxic degranulation",
+        "organization": {
+          "org_name": "WEILL MEDICAL COLL OF CORNELL UNIV",
+          "city": null,
+          "country": null,
+          "org_city": "NEW YORK",
+          "org_country": "UNITED STATES",
+          "org_state": "NY",
+          "org_state_name": null,
+          "dept_type": "NONE",
+          "fips_country_code": null,
+          "org_duns": [
+            "060217502"
+          ],
+          "org_ueis": [
+            "YNT8TCJH8FQ8"
+          ],
+          "primary_duns": "060217502",
+          "primary_uei": "YNT8TCJH8FQ8",
+          "org_fips": "US",
+          "org_ipf_code": "1514803",
+          "org_zipcode": "100654805",
+          "external_org_id": 1514803
+        },
+        "agency_ic_admin": {
+          "code": "AI",
+          "abbreviation": "NIAID",
+          "name": "National Institute of Allergy and Infectious Diseases",
+          "admin_org_id": "12500003",
+          "admin_funding_url": ""
+        },
+        "funding_mechanism": "Training, Individual",
+        "subproject_id": null
+      }
+    },
+    {
+      "id": "nih:11462449",
+      "priorLedgerRecord": {
+        "id": "nih:11462449",
+        "reporterAgency": "NIA",
+        "unit": "nih/nia/nia",
+        "fiscalYear": 2026,
+        "awardDate": "2026-08-07",
+        "month": "2026-08",
+        "amount": 55114,
+        "title": "A novel cellular model of entorhinal cortex layer II vulnerability in Alzheimer's disease"
+      },
+      "currentReporterRecord": {
+        "appl_id": 11462449,
+        "fiscal_year": 2026,
+        "project_num": "1F30AG096996-01A1",
+        "award_notice_date": "2026-08-07T00:00:00",
+        "budget_start": "2026-08-19T00:00:00",
+        "project_start_date": "2026-08-19T00:00:00",
+        "award_amount": 55114,
+        "award_type": "1",
+        "activity_code": "F30",
+        "project_title": "A novel cellular model of entorhinal cortex layer II vulnerability in Alzheimer's disease",
+        "organization": {
+          "org_name": "BOSTON UNIVERSITY MEDICAL CAMPUS",
+          "city": null,
+          "country": null,
+          "org_city": "BOSTON",
+          "org_country": "UNITED STATES",
+          "org_state": "MA",
+          "org_state_name": null,
+          "dept_type": "ANATOMY/CELL BIOLOGY",
+          "fips_country_code": null,
+          "org_duns": [
+            "604483045"
+          ],
+          "org_ueis": [
+            "FBYMGMHW4X95"
+          ],
+          "primary_duns": "604483045",
+          "primary_uei": "FBYMGMHW4X95",
+          "org_fips": "US",
+          "org_ipf_code": "894901",
+          "org_zipcode": "021182340",
+          "external_org_id": 894901
+        },
+        "agency_ic_admin": {
+          "code": "AG",
+          "abbreviation": "NIA",
+          "name": "National Institute on Aging",
+          "admin_org_id": "12500002",
+          "admin_funding_url": ""
+        },
+        "funding_mechanism": "Training, Individual",
+        "subproject_id": null
+      }
+    },
+    {
+      "id": "nih:11555862",
+      "priorLedgerRecord": {
+        "id": "nih:11555862",
+        "reporterAgency": "NIEHS",
+        "unit": "nih/niehs/niehs",
+        "fiscalYear": 2026,
+        "awardDate": "2026-06-29",
+        "month": "2026-06",
+        "amount": 141727,
+        "title": "The ESPINA Study 19th Year Follow-Up: A Longitudinal Investigation of Pesticide Exposures in relation to Fertility and Hormonal Health"
+      },
+      "currentReporterRecord": {
+        "appl_id": 11555862,
+        "fiscal_year": 2026,
+        "project_num": "3R01ES030378-07S1",
+        "award_notice_date": "2026-06-29T00:00:00",
+        "budget_start": "2026-07-01T00:00:00",
+        "project_start_date": "2020-09-18T00:00:00",
+        "award_amount": 141727,
+        "award_type": "3",
+        "activity_code": "R01",
+        "project_title": "The ESPINA Study 19th Year Follow-Up: A Longitudinal Investigation of Pesticide Exposures in relation to Fertility and Hormonal Health",
+        "organization": {
+          "org_name": "UNIVERSITY OF CALIFORNIA, SAN DIEGO",
+          "city": null,
+          "country": null,
+          "org_city": "LA JOLLA",
+          "org_country": "UNITED STATES",
+          "org_state": "CA",
+          "org_state_name": null,
+          "dept_type": "NONE",
+          "fips_country_code": null,
+          "org_duns": [
+            "804355790"
+          ],
+          "org_ueis": [
+            "UYTTZT6G9DT1"
+          ],
+          "primary_duns": "804355790",
+          "primary_uei": "UYTTZT6G9DT1",
+          "org_fips": "US",
+          "org_ipf_code": "577507",
+          "org_zipcode": "920930621",
+          "external_org_id": 577507
+        },
+        "agency_ic_admin": {
+          "code": "ES",
+          "abbreviation": "NIEHS",
+          "name": "National Institute of Environmental Health Sciences",
+          "admin_org_id": "12500022",
+          "admin_funding_url": ""
+        },
+        "funding_mechanism": "Non-SBIR/STTR",
+        "subproject_id": null
+      }
+    }
+  ],
+  "totals": {
+    "missingRecordCount": 15,
+    "missingRecordAmount": 5531355,
+    "reporterRecordRetractionOrSupersessionCount": 13,
+    "reporterRecordRetractionOrSupersessionAmount": 5410469,
+    "confirmedBilateralTerminationCount": 2,
+    "confirmedBilateralTerminationHistoricalRowAmount": 120886,
+    "returnedPriorExclusionCount": 5,
+    "returnedPriorExclusionCurrentReporterAmount": 517955,
+    "returnedPriorExclusionRecordedLedgerAmount": 751955
+  }
+}
