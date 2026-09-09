@@ -103,7 +103,7 @@ def fixture():
     }, sort_keys=True) + "\n").encode()
     normalized["partition.json"] = partition
 
-    outer = zipped({raw_name: raw_payload, resume_name: resume_payload, **normalized})
+    outer = zipped({raw_name: raw_payload, resume_name: resume_payload})
     artifact_id = 17
     artifact = {
         "artifactId": artifact_id,

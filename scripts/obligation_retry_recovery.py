@@ -111,6 +111,7 @@ class RetryRecovery:
         self._evidence_ready = False
         self._outer_cache: dict[int, bytes] = {}
         self._preserved: dict[int, dict] = {}
+        self._members: dict[int, set[str]] = {}
         self._raw: dict[tuple[str, int, int, str], tuple[dict, dict]] = {}
         self._resumes: dict[tuple[str, int, int, str], tuple[dict, dict]] = {}
         self._partitions: dict[tuple[str, int], dict] = {}
@@ -178,6 +179,7 @@ class RetryRecovery:
             if not isinstance(row.get("deleteAfterPreserve"), bool):
                 raise RecoveryError("deleteAfterPreserve must be boolean")
             self._preserved[artifact_id] = row
+            self._members[artifact_id] = set()
 
         for index, value in enumerate(
             _list(self.manifest.get("rawEvidence"), "rawEvidence")
@@ -259,6 +261,7 @@ class RetryRecovery:
                 if key in self._raw:
                     raise RecoveryError(f"duplicate raw recovery key {key}")
                 self._raw[key] = (row, archive)
+                self._members[artifact_id].add(name)
             for resume_index, resume_value in enumerate(
                 _list(row.get("resumeRequests"), "resumeRequests")
             ):
@@ -290,6 +293,7 @@ class RetryRecovery:
                 if key in self._resumes or key in self._raw:
                     raise RecoveryError(f"duplicate recovered request key {key}")
                 self._resumes[key] = (row, resume)
+                self._members[artifact_id].add(resume["memberName"])
 
         for index, value in enumerate(_list(
             self.manifest.get("normalizedPartitions"), "normalizedPartitions"
@@ -326,6 +330,7 @@ class RetryRecovery:
                 names.add(_safe_member(
                     file_row.get("memberName"), "normalized memberName"
                 ))
+                self._members[artifact_id].add(file_row["memberName"])
                 _digest(file_row.get("sha256"), "normalized sha256")
                 _positive_int(file_row.get("size"), "normalized size")
             if names != {f"FY{fy}.csv.gz", f"FY{fy}.provenance.json", "partition.json"}:
@@ -355,6 +360,8 @@ class RetryRecovery:
             if key in self._pins:
                 raise RecoveryError(f"duplicate recovery baseline pin {key}")
             self._pins[key] = copy.deepcopy(pin)
+        if any(not members for members in self._members.values()):
+            raise RecoveryError("every preserved artifact must have indexed members")
 
     def _git_blob(self, path: str) -> bytes:
         if self._blob_reader is not None:
@@ -441,6 +448,10 @@ class RetryRecovery:
                 raise RecoveryError(f"artifact {artifact_id} evidence failed CRC")
             if len(names) != len(set(names)):
                 raise RecoveryError(f"artifact {artifact_id} has duplicate members")
+            if set(names) != self._members[artifact_id]:
+                raise RecoveryError(
+                    f"artifact {artifact_id} members differ from recovery manifest"
+                )
         self._outer_cache[artifact_id] = payload
         return payload
 
