@@ -220,6 +220,104 @@ durable record; the roadmap carries only terse summaries and pointers.
         authorize automatic registry onboarding, production remapping, workflow
         changes, or automated drift enforcement.
 
+## Phase 3.2d — resolved-account obligation fan-out (completed 2026-09-14)
+
+Phase 3.2d completed the site-building and release work for 53 federal
+obligation accounts across 13 agencies. The registry, accepted account stores,
+baselines, rollups, site pages, fail-closed checks, rendered review, Pages
+footprint, deployment, and live QA are complete. File B remains canonical;
+File C supplies award-linked detail; the signed residual remains explicit; and
+File C plus residual equals File B exactly at every accepted grain.
+
+The exact resolved scope is 83 unique federal accounts from 185 resolved AAAS
+crosswalk rows. Its partition is complete and disjoint:
+
+- **53 registered Phase 3.2d accounts:** DOE 11 (`089-0222`, `089-0337`,
+  `089-0321`, `089-2297`, `089-0213`, `089-0318`, `089-2250`, `089-0319`,
+  `089-0240`, `089-0309`, `089-0216`); NSF 4 (`049-0100`, `049-0106`,
+  `049-0180`, `049-0551`); HHS 2 (`075-1000`, `075-1700`); NASA 6
+  (`080-0120`, `080-0126`, `080-0131`, `080-0128`, `080-0124`, `080-0115`);
+  DOI 1 (`014-0804`); EPA 1 (`068-0107`); Commerce 6 (`013-1450`,
+  `013-1460`, `013-0500`, `013-0525`, `013-0401`, `013-0450`); USDA 8
+  (`012-1400`, `012-1401`, `012-1104`, `012-0502`, `012-1500`, `012-1502`,
+  `012-1701`, `012-1801`); VA 1 (`036-0161`); DHS 3 (`070-0803`, `070-0805`,
+  `070-0860`); DOT 3 (`069-1730`, `069-8108`, `069-0745`); Education 1
+  (`091-1100`); and DoD 6 (`021-2040`, `017-1319`, `057-3600`, `057-3620`,
+  `097-0400`, `097-0130`).
+- **27 NIH obligation accounts intentionally out of Phase 3.2d:**
+  `075-0807`, `075-0819`, `075-0837`, `075-0838`, `075-0843`, `075-0844`,
+  `075-0846`, `075-0849`, `075-0851`, `075-0862`, `075-0872`, `075-0873`,
+  `075-0875`, `075-0884`, `075-0885`, `075-0886`, `075-0887`, `075-0888`,
+  `075-0889`, `075-0890`, `075-0891`, `075-0892`, `075-0893`, `075-0894`,
+  `075-0896`, `075-0897`, and `075-0898`.
+- **Three owner-approved quarantines:** BEA `013-1500`, BLS `016-0200`, and
+  OJP `015-0401`. BLS and OJP remain the quarantined Stats/OJP pair; their
+  graph is absent. These quarantines are unchanged.
+
+There are no registered codes outside the resolved set and no silent resolved
+omissions. The source crosswalk also retains its 10 provisional and 42
+unresolved rows. DARPA is included within Defense-Wide `097-0400`; it is not a
+standalone account or total.
+
+The accepted Phase 3.2d atomic snapshot is
+`640af0afd0ebb53508c2b34bf7769cf471c58c28`; the weekly/all trigger restore is
+`c33c1de0697fb6619acc866048d40e5d491a02d5`. At that accepted snapshot, all 53
+accounts report FY2026 through P09. Exact source-derived per-agency current-FY
+net obligations are:
+
+| Agency | Accounts | FY2026 through P09 |
+| --- | ---: | ---: |
+| Commerce | 6 | $6,785,783,895.39 |
+| DHS | 3 | $139,758,037.28 |
+| DoD | 6 | $184,724,968,208.97 |
+| DOE | 11 | $39,682,374,520.41 |
+| DOI | 1 | $1,352,224,602.47 |
+| DOT | 3 | $183,378,560.80 |
+| Education | 1 | $323,537,255.49 |
+| EPA | 1 | $456,962,937.04 |
+| HHS | 2 | $2,078,379,885.08 |
+| NASA | 6 | $13,874,791,867.29 |
+| NSF | 4 | $2,732,173,457.24 |
+| USDA | 8 | $2,591,207,599.40 |
+| VA | 1 | $621,486,212.92 |
+| **Total** | **53** | **$255,547,027,039.78** |
+
+Exact dual-source contracts are preserved without tolerance or synthetic
+residual: Navy FY2025 File A `2788535575911` / canonical File B
+`2788488646275` / variance `46929636` cents; DHP FY2025 File A
+`4692069313553` / canonical File B `4676524125773` / variance `15545187780`
+cents; Defense-Wide FY2025 File A `3813645882772` / canonical File B
+`3812362307540` / variance `1283575232` cents; and DHS FY2026 P10 File A
+`1990656262` / canonical File B `2660942811` / variance `-670286549` cents.
+Completed-year pins remain immutable; the current FY remains partial and
+source-refreshable.
+
+The DoD source graph closed with Stage 3 run `33472362131` attempt 18 and
+reconcile job `100038084744` green through all 16 steps. Final integration
+commit `74b667a56456a767e6ee34693f7eb2df520a2a22` has exact tree
+`ba3318f728b12b1f5b650b2f753ad4c2c53efa1b`. Main Test run `33573026004`
+and job `100070867854` passed; Main Deploy Pages run `33573025999` and job
+`100070868257` passed with deploy not skipped. Live QA passed at
+<https://jpwolfson.github.io/science-funding-dashboard/>, including the DoD
+parent and both Defense-Wide and DHP account pages. Full provenance and
+failure-recovery detail is retained in `docs/phase-3.2d-dod-handoff.md`.
+
+The exact ED/IES FY2018 export
+`FY2018Q1-Q4_All_FA_AccountBreakdownByAward_2026-09-08_H07M33S17838315.zip`
+is an owner-approved upstream-source quarantine after remaining `ready` with
+all completion fields null for more than six days. It does not remove ED/IES
+`091-1100`, change its accepted FY2018 pin/data, authorize another quarantine,
+or permit a replacement request. Failed wait job `102982598555` is retired;
+raw artifact `10170260290` is preserved with digest
+`sha256:517b46d4d7cf1d181c393380a791c5018e8e8be5d1529a9009fee50cb7f88c19`.
+
+The weekly obligation refresh remains automatic and independent of Phase 3.2d
+closeout. It may advance FY2026 when the source accepts a newer period and may
+rotate historical checks, but it neither redefines the completed build nor
+keeps an agent goal open. Scheduled run `34868893350` was left to continue
+normally; it was not cancelled, rerun, resubmitted, or used as release
+evidence.
+
 ## Post-completion notes (2026-08-12)
 
 - Phase 3.1b's named release gate — the fresh 28-IC NIH full pull with the

@@ -209,41 +209,14 @@ Full completed-phase history, evidence, and discovery narratives live in
       maintenance-cost estimates at launch. Replace estimates with measured
       figures after eight weeks as a non-blocking operational follow-up; do not
       keep an agent goal open or delay account fan-out while the clock runs.
-- [ ] Phase 3.2d+ — fan out in bounded agency batches (3.2a/3.2b/3.2c
-      are green; READY TO RUN). Execution: launch ONE coordinating agent
-      in goal mode ("complete phase 3.2d") — it follows
-      `docs/phase-3.2d-execution-protocol.md` (owner-approved parallel
-      worker/coordinator protocol: per-agency workers on branches under
-      strict file-ownership contracts, serial merges, cross-cutting
-      gates, owner escalations only for DOD disclosure language, measure
-      semantics, or new dependencies). Batch content:
-      `docs/phase-3.2d-agency-roadmap.md`, amended 2026-08-12 to include
-      NSF obligation accounts in wave 1 (closes the sentinel's NSF
-      coverage asymmetry); NIH obligation accounts stay out of scope.
-      Use one goal-mode task per batch, each adding registry entries, baselines,
-      backfill, exact reconciliation, Program Activity aliases, site pages,
-      tests, and rendered-browser QA:
-      1. DOE expansion, beginning with ARPA-E and applied/clean-energy accounts;
-      2. NSF and other grant-heavy civilian science OBLIGATION accounts
-         (the NSF/NIH award-ledger dashboards have been complete since
-         Phases 1-2; this batch adds their appropriations-account flows);
-      3. remaining resolved civilian R&D accounts (NASA Science, NOAA, NIST,
-         USGS, USDA, EPA, VA, and DHS as the crosswalk supports);
-      4. DOD and classified/intramural-heavy accounts last, with the standard
-         disclosure that canonical File B totals remain complete while public
-         File C award attribution may be limited.
-      - Retain all File C instrument classes (grants, cooperative agreements,
-        contracts, IAAs, and unlinked rows) while File B remains canonical.
-      - At account level, report the File C portion and residual. At PA level,
-        label File C/net as a signed ratio that may be negative or exceed 100%
-        when File C and residual activity offset; never call that a completeness
-        percentage without qualification.
-      - Low File C attribution for classified or intramural work is an award-
-        detail limitation, not under-reporting of canonical File B obligations.
-      - Gross positive/negative File C activity is retained as a financial fact
-        and feeds the separate sentinel without being labeled a cancellation on
-        amount or sign alone. Unresolved crosswalk rows and optional sentinel
-        review never block ready accounts or unrelated publication.
+- [x] Phase 3.2d — resolved federal-account obligation fan-out (completed
+      2026-09-14): 53 accounts across 13 agencies are live, with the exact
+      83-account resolved scope partition audited; NIH obligation accounts and
+      the three owner-approved quarantines remain out of registry. Build, test,
+      deploy, and live QA are accepted. The automatic weekly refresh is an
+      independent operating process, not a phase-completion gate. Detailed
+      evidence: `docs/phase-history.md`; DoD provenance:
+      `docs/phase-3.2d-dod-handoff.md`.
 - [ ] Display-improvements batch — AFTER 3.2d completes: execute
       `docs/display-improvements-ledger.md` as one reader-review-gated
       batch. Ledger is append-only while 3.2d workers are in flight

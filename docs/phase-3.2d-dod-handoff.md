@@ -15,10 +15,10 @@ DoD runs as three source graphs, exactly one graph at a time:
 2. Air Force RDT&E (`057-3600`) and Space Force RDT&E (`057-3620`); and
 3. Defense-Wide RDT&E (`097-0400`) and Defense Health Program (`097-0130`).
 
-Reader review and owner sign-off on the public disclosure remain mandatory
+Reader review and owner sign-off on the public disclosure were completed
 before merge. Source, reconciliation, rendered, screenshot, footprint,
-deployment, live-QA, and weekly-soak evidence will be appended as each gate
-becomes terminal.
+deployment, and live-QA evidence are recorded below. The automatic weekly
+refresh is independent site operation and is not a Phase 3.2d completion gate.
 
 ## Public interpretation contract
 
@@ -992,3 +992,46 @@ status is `ok` against the repository's 850 MB warning and 950 MB stop
 thresholds. The conservative 52-week trajectory remains flagged because the
 short sampled history is dominated by historical backfills, as documented by
 the existing footprint model; it is not a release-stop classification.
+
+## Final integration, deployment, and closeout
+
+Owner-approved integration commit
+`74b667a56456a767e6ee34693f7eb2df520a2a22` was published to `main` as a
+non-forced merge after revalidating parent
+`6f94a81e25451453445ace9f72c90e0f14742b17`. Its exact tree is
+`ba3318f728b12b1f5b650b2f753ad4c2c53efa1b`, with parents
+`c33c1de0697fb6619acc866048d40e5d491a02d5` and
+`6f94a81e25451453445ace9f72c90e0f14742b17`. Main Test run `33573026004`
+completed success; job `100070867854` passed registry, fast, rendered,
+assembly, footprint, and report checks. Main Deploy Pages run `33573025999`
+completed success; job `100070868257` passed validation, assembly, footprint,
+upload, and deploy. Their retained artifacts are Test `9825924874`
+(`verify-reports`) and Deploy `9825839573` (`github-pages`).
+
+Live QA at <https://jpwolfson.github.io/science-funding-dashboard/> passed.
+The landing page reports the accepted Phase 3.2d obligation snapshot through
+`FY2026P09`; the DoD parent presents Defense-Wide RDT&E and Defense Health
+Program as distinct accounts; Defense-Wide is not mislabeled as DARPA; both
+account pages render their source-derived current totals with partial-year
+marking; and DHP retains neutral PARK identity `5Q03E54NTZ6`. The sentinel
+rendered 172 episodes, 389 financial observations, and 53 registered
+obligation accounts with no browser errors. Completed-year pins remain
+immutable and FY2026 remains source-refreshable.
+
+The exact stalled ED/IES FY2018 upstream export
+`FY2018Q1-Q4_All_FA_AccountBreakdownByAward_2026-09-08_H07M33S17838315.zip`
+is narrowly quarantined by owner approval. Its status stayed `ready`, with a
+null message and null completion fields, for more than six days. Failed source
+wait job `102982598555` and all retired attempts remain non-retryable. This
+quarantine does not remove ED/IES `091-1100`, alter its accepted FY2018 data or
+pin, change any dollar, authorize another year/account quarantine, or permit a
+replacement POST. The preserved raw artifact is `10170260290`, digest
+`sha256:517b46d4d7cf1d181c393380a791c5018e8e8be5d1529a9009fee50cb7f88c19`.
+
+On 2026-09-14 the owner clarified the final phase boundary: Phase 3.2d is the
+site-building and release project; the scheduled weekly data pull is automatic
+site operation. The already-accepted build, tests, deployment, live QA,
+53-account registry, and exact scope audit therefore close the phase. Scheduled
+run `34868893350` continues independently and is neither cancelled nor treated
+as closeout evidence. No workflow was rerun or manually dispatched for this
+documentation closeout.
