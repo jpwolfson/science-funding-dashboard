@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-07",
+ "generated": "2026-09-14",
  "node": {
   "name": "Division of Astronomical Sciences",
   "abbrev": "AST",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.nsf.gov/services/v1/awards.json?org_code_div=03020000 (NSF Award Search API), month-by-month on Original Award Date",
  "warnings": [],
- "totalAwards": 2540,
+ "totalAwards": 2541,
  "currentFY": 2026,
  "monthly": [
   {
@@ -1300,12 +1300,12 @@
   },
   {
    "month": "2026-09",
-   "awards": 0,
-   "dollars": 0,
+   "awards": 1,
+   "dollars": 2953535,
    "std": 0,
    "cont": 0,
    "fell": 0,
-   "other": 0
+   "other": 1
   }
  ],
  "fiscalYears": [
@@ -1708,10 +1708,10 @@
   {
    "fy": 2026,
    "partial": true,
-   "awards": 100,
-   "dollars": 48340396,
-   "median": 443725,
-   "exTop3Dollars": 44706958,
+   "awards": 101,
+   "dollars": 51293931,
+   "median": 447036,
+   "exTop3Dollars": 45767638,
    "octJul": {
     "awards": 46,
     "dollars": 20687596,
@@ -1721,6 +1721,12 @@
     "other": 0
    },
    "top3": [
+    {
+     "id": "2628353",
+     "title": "NRAO Zone Regulatory Services (ZRS) Support",
+     "awardee": "Associated Universities, Inc.",
+     "amount": 2953535
+    },
     {
      "id": "2510185",
      "title": "MRI: Track 1 Development of a Novel Radio Telescope Designed to Search for Dark Matter",
@@ -1732,12 +1738,6 @@
      "title": "CASPER: Enabling Discovery Through Open Source Digital Instrumentation for the Radio Astronomy Community",
      "awardee": "University of California-Berkeley",
      "amount": 1190730
-    },
-    {
-     "id": "2542837",
-     "title": "CAREER: Lifting the Veil on the Cosmochemical Cycle of Organic Matter and the Diffuse Interstellar Bands Using Ion Trap Mass Spectrometry and Cryogenic Ion Electronic Spectroscopy",
-     "awardee": "University of Colorado at Boulder",
-     "amount": 1060680
     }
    ]
   }
@@ -3072,9 +3072,14 @@
      "dollars": 48340396
     },
     {
-     "d": 341,
+     "d": 342,
      "awards": 100,
      "dollars": 48340396
+    },
+    {
+     "d": 348,
+     "awards": 101,
+     "dollars": 51293931
     }
    ]
   }
