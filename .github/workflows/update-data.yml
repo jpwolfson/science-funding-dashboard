@@ -177,11 +177,18 @@ jobs:
           if [ "${{ needs.plan.outputs.full }}" = "true" ]; then FLAG="--full"; fi
           echo "mode flag: '$FLAG'"
           python scripts/pull_unit.py --unit "${{ matrix.unit }}" $FLAG
-      - name: Commit this unit's data subtree
+      - name: Commit this unit's data subtree and any exclusions-ledger returns
+        # A pull that sees a ledgered "excluded" id back on the live source
+        # flips it to "returned" in reference/nih_reporter_exclusions.json
+        # (docs/nih-data-validation.md). That flip must land with the unit's
+        # data, or the leaf dashboard (which counts the returned id) and the
+        # committed ledger (which still excludes it) disagree and
+        # validate_nih.py fails the rollup. NIH jobs run with max-parallel 1,
+        # so two units never race on the shared ledger file.
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add "data/${{ matrix.unit }}"
+          git add "data/${{ matrix.unit }}" reference/nih_reporter_exclusions.json
           if git diff --cached --quiet; then
             echo "No data changes."
             exit 0

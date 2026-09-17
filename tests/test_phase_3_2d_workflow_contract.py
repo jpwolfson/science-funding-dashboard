@@ -178,3 +178,18 @@ class PublicationGateDecouplingTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class NihExclusionLedgerCommitTests(unittest.TestCase):
+    """The pull-nih job must commit exclusions-ledger status flips with the
+    unit's data, or a returned id is counted by the leaf dashboard but still
+    excluded by the committed ledger (2026-09-17 run 35240994598 rollup
+    failure: nih/ninds/ninds totalAwards=53141 vs aggregated 53140)."""
+
+    def test_pull_nih_commit_step_stages_the_exclusions_ledger(self):
+        text = (REPO / ".github" / "workflows" / "update-data.yml").read_text()
+        nih_job = text[text.index("  pull-nih:"):text.index("  rollup:")]
+        self.assertIn(
+            'git add "data/${{ matrix.unit }}" reference/nih_reporter_exclusions.json',
+            nih_job,
+        )
