@@ -25,17 +25,26 @@ REPO = Path(__file__).resolve().parent.parent
 # (status "complete", or a frozen historical partial start-of-series row)
 # are not moving and keep exact literal pins.
 MINIMUM_CURRENT_FY_PERIOD = 9
+MINIMUM_CURRENT_FY = 2026  # a lower bound, not a pin -- see docstring below
 
 
 def current_partial_fiscal_year(fiscal_years):
     """Return the highest FY still 'partial' in a baseline -- the live
     current FY. A frozen historical partial pin is always older than the
     live current year, so max() finds it without a hard-coded year number.
+    The assertion below is a floor, not a pin: it keeps passing for 2027,
+    2028, ... once the real current year moves past it, and only fails
+    if a baseline's current year ever regresses.
     """
-    return max(
+    current_fy = max(
         int(fy) for fy, row in fiscal_years.items()
         if row.get("status") == "partial"
     )
+    assert current_fy >= MINIMUM_CURRENT_FY, (
+        f"current partial FY {current_fy} is below the floor "
+        f"{MINIMUM_CURRENT_FY} -- a baseline's current year must not regress"
+    )
+    return current_fy
 
 
 def assert_current_partial_row(test, row, minimum_period=MINIMUM_CURRENT_FY_PERIOD):
@@ -897,15 +906,16 @@ class DoeOnboardingTests(unittest.TestCase):
         }
         for path in EXPECTED:
             with self.subTest(path=path):
+                baseline = json.loads((REPO / self.accounts[path]["baseline"]).read_text())
+                current_fy = current_partial_fiscal_year(baseline["fiscalYears"])
                 jobs = plan(REPO, mode="full", selectors=path)["include"]
                 first_fy = expected_first_fy.get(path, 2017)
-                self.assertEqual(list(range(first_fy, 2027)), [
+                self.assertEqual(list(range(first_fy, current_fy + 1)), [
                     row["fiscalYear"] for row in jobs
                 ])
                 self.assertEqual(12, jobs[0]["period"])
                 assert_current_period_job(self, jobs[-1])
 
-                baseline = json.loads((REPO / self.accounts[path]["baseline"]).read_text())
                 self.assertEqual("unavailable", baseline["fiscalYears"]["2015"]["status"])
                 self.assertEqual("unavailable", baseline["fiscalYears"]["2016"]["status"])
                 for fiscal_year in range(2017, first_fy):
@@ -920,7 +930,9 @@ class DoeOnboardingTests(unittest.TestCase):
                 self.assertEqual(
                     12, baseline["fiscalYears"][str(first_fy)]["asOfPeriod"]
                 )
-                assert_current_partial_row(self, baseline["fiscalYears"]["2026"])
+                assert_current_partial_row(
+                    self, baseline["fiscalYears"][str(current_fy)]
+                )
 
                 store = REPO / "data" / "obligations" / path / "events"
                 if store.exists():
@@ -937,7 +949,7 @@ class DoeOnboardingTests(unittest.TestCase):
                         min(event["fiscalPeriod"] for event in first_events),
                         baseline["fiscalYears"][str(first_fy)]["firstPeriod"],
                     )
-                    for fiscal_year in range(first_fy, 2027):
+                    for fiscal_year in range(first_fy, current_fy + 1):
                         self.assertIn(
                             "obligationsCents",
                             baseline["fiscalYears"][str(fiscal_year)],

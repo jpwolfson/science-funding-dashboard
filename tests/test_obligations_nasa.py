@@ -18,18 +18,26 @@ REPO = Path(__file__).resolve().parent.parent
 # (status "complete", or FY2017's frozen partial start-of-series row) are
 # not moving and keep exact literal pins.
 MINIMUM_CURRENT_FY_PERIOD = 9
+MINIMUM_CURRENT_FY = 2026  # a lower bound, not a pin -- see docstring below
 
 
 def current_partial_fiscal_year(fiscal_years):
     """Return the highest FY still 'partial' in a baseline -- the live
     current FY. FY2017's frozen historical partial pin is always older
     than the live current year, so max() finds it without a hard-coded
-    year number.
+    year number. The assertion below is a floor, not a pin: it keeps
+    passing for 2027, 2028, ... once the real current year moves past
+    it, and only fails if a baseline's current year ever regresses.
     """
-    return max(
+    current_fy = max(
         int(fy) for fy, row in fiscal_years.items()
         if row.get("status") == "partial"
     )
+    assert current_fy >= MINIMUM_CURRENT_FY, (
+        f"current partial FY {current_fy} is below the floor "
+        f"{MINIMUM_CURRENT_FY} -- a baseline's current year must not regress"
+    )
+    return current_fy
 
 
 def assert_current_partial_row(test, row, minimum_period=MINIMUM_CURRENT_FY_PERIOD):
@@ -216,7 +224,10 @@ class NASAObligationScaffoldTests(unittest.TestCase):
             self.assertEqual(account["federalAccount"], baseline["federalAccount"])
             self.assertIn("api.usaspending.gov/api/v2/federal_accounts/", baseline["source"])
             years = baseline["fiscalYears"]
-            self.assertEqual({str(year) for year in range(2015, 2027)}, set(years))
+            current_fy = current_partial_fiscal_year(years)
+            self.assertEqual(
+                {str(year) for year in range(2015, current_fy + 1)}, set(years)
+            )
             for year in ("2015", "2016"):
                 self.assertEqual("unavailable", years[year]["status"])
                 self.assertTrue(years[year]["reason"])
@@ -225,12 +236,15 @@ class NASAObligationScaffoldTests(unittest.TestCase):
                  "firstPeriod": 6, "obligationsCents": EXPECTED_CENTS[path][0]},
                 years["2017"],
             )
-            for fiscal_year, cents in zip(range(2018, 2026), EXPECTED_CENTS[path][1:9]):
+            for fiscal_year, cents in zip(
+                range(2018, current_fy),
+                EXPECTED_CENTS[path][1:current_fy - 2017],
+            ):
                 self.assertEqual(
                     {"status": "complete", "obligationsCents": cents},
                     years[str(fiscal_year)],
                 )
-            assert_current_partial_row(self, years["2026"])
+            assert_current_partial_row(self, years[str(current_fy)])
 
     def test_program_activity_tokens_are_unique_and_resolve(self):
         for path, account in self.accounts.items():
@@ -395,11 +409,16 @@ class NASAObligationScaffoldTests(unittest.TestCase):
             self.assertEqual(set(selected), {job["account"] for job in jobs})
             for path in selected:
                 account_jobs = [job for job in jobs if job["account"] == path]
-                self.assertEqual(list(range(2017, 2027)), [
+                baseline = json.loads(
+                    (REPO / self.accounts[path]["baseline"]).read_text()
+                )
+                current_fy = current_partial_fiscal_year(baseline["fiscalYears"])
+                self.assertEqual(list(range(2017, current_fy + 1)), [
                     job["fiscalYear"] for job in account_jobs
                 ])
                 self.assertEqual(
-                    [12] * 9, [job["period"] for job in account_jobs[:-1]]
+                    [12] * (current_fy - 2017),
+                    [job["period"] for job in account_jobs[:-1]],
                 )
                 assert_current_period_job(self, account_jobs[-1])
 

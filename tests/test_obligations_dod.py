@@ -16,18 +16,26 @@ REPO = Path(__file__).resolve().parent.parent
 # (status "complete", or FY2017's frozen partial start-of-series row) are
 # not moving and keep exact literal pins.
 MINIMUM_CURRENT_FY_PERIOD = 9
+MINIMUM_CURRENT_FY = 2026  # a lower bound, not a pin -- see docstring below
 
 
 def current_partial_fiscal_year(fiscal_years):
     """Return the highest FY still 'partial' in a baseline -- the live
     current FY. FY2017's frozen historical partial pin is always older
     than the live current year, so max() finds it without a hard-coded
-    year number.
+    year number. The assertion below is a floor, not a pin: it keeps
+    passing for 2027, 2028, ... once the real current year moves past
+    it, and only fails if a baseline's current year ever regresses.
     """
-    return max(
+    current_fy = max(
         int(fy) for fy, row in fiscal_years.items()
         if row.get("status") == "partial"
     )
+    assert current_fy >= MINIMUM_CURRENT_FY, (
+        f"current partial FY {current_fy} is below the floor "
+        f"{MINIMUM_CURRENT_FY} -- a baseline's current year must not regress"
+    )
+    return current_fy
 
 
 def assert_current_partial_row(test, row, minimum_period=MINIMUM_CURRENT_FY_PERIOD):
@@ -344,14 +352,17 @@ class DoDObligationTests(unittest.TestCase):
                 self.assertIn("api.usaspending.gov/api/v2/federal_accounts/",
                               baseline["source"])
                 years = baseline["fiscalYears"]
-                self.assertEqual({str(fy) for fy in range(2015, 2027)}, set(years))
+                current_fy = current_partial_fiscal_year(years)
+                self.assertEqual(
+                    {str(fy) for fy in range(2015, current_fy + 1)}, set(years)
+                )
                 for fy in (2015, 2016):
                     self.assertEqual("unavailable", years[str(fy)]["status"])
                 self.assertEqual(6, years["2017"]["firstPeriod"])
                 self.assertEqual(12, years["2017"]["asOfPeriod"])
-                assert_current_partial_row(self, years["2026"])
+                assert_current_partial_row(self, years[str(current_fy)])
                 observed = [years[str(fy)]["obligationsCents"]
-                            for fy in range(2017, 2026)]
+                            for fy in range(2017, current_fy)]
                 self.assertEqual(expected["pins"][:-1], observed)
 
     def test_navy_fy2025_preserves_approved_exact_source_variance(self):
@@ -552,18 +563,25 @@ class DoDObligationTests(unittest.TestCase):
                 self.assertIn("api.usaspending.gov/api/v2/federal_accounts/",
                               baseline["source"])
                 years = baseline["fiscalYears"]
-                self.assertEqual({str(fy) for fy in range(2015, 2027)}, set(years))
+                current_fy = current_partial_fiscal_year(years)
+                self.assertEqual(
+                    {str(fy) for fy in range(2015, current_fy + 1)}, set(years)
+                )
                 first_fy = expected["availability"]["firstFiscalYear"]
                 for fy in range(2015, first_fy):
                     self.assertEqual("unavailable", years[str(fy)]["status"])
-                assert_current_partial_row(self, years["2026"])
+                assert_current_partial_row(self, years[str(current_fy)])
                 observed = [
                     years[str(fy)]["obligationsCents"]
-                    for fy in range(first_fy, 2026)
+                    for fy in range(first_fy, current_fy)
                 ]
                 self.assertEqual(expected["pins"][:-1], observed)
 
     def test_stage_two_full_plan_is_exactly_sixteen_serial_partitions(self):
+        air_force_baseline = json.loads(
+            (REPO / STAGE_TWO_META["dod/air-force-rdte"]["baseline"]).read_text()
+        )
+        current_fy = current_partial_fiscal_year(air_force_baseline["fiscalYears"])
         matrix = plan(
             repo=REPO,
             mode="full",
@@ -575,13 +593,17 @@ class DoDObligationTests(unittest.TestCase):
                      if row["account"] == "dod/air-force-rdte"]
         space_force = [row for row in matrix
                        if row["account"] == "dod/space-force-rdte"]
-        self.assertEqual(list(range(2017, 2027)),
+        self.assertEqual(list(range(2017, current_fy + 1)),
                          [row["fiscalYear"] for row in air_force])
-        self.assertEqual([12] * 9, [row["period"] for row in air_force[:-1]])
+        self.assertEqual([12] * (current_fy - 2017),
+                         [row["period"] for row in air_force[:-1]])
         assert_current_period_job(self, air_force[-1])
-        self.assertEqual(list(range(2021, 2027)),
+        space_force_first_fy = STAGE_TWO_META["dod/space-force-rdte"][
+            "availability"]["firstFiscalYear"]
+        self.assertEqual(list(range(space_force_first_fy, current_fy + 1)),
                          [row["fiscalYear"] for row in space_force])
-        self.assertEqual([12] * 5, [row["period"] for row in space_force[:-1]])
+        self.assertEqual([12] * (current_fy - space_force_first_fy),
+                         [row["period"] for row in space_force[:-1]])
         assert_current_period_job(self, space_force[-1])
 
     def test_stage_three_has_exact_account_contracts(self):
@@ -733,16 +755,19 @@ class DoDObligationTests(unittest.TestCase):
                 self.assertIn("api.usaspending.gov/api/v2/federal_accounts/",
                               baseline["source"])
                 years = baseline["fiscalYears"]
-                self.assertEqual({str(fy) for fy in range(2015, 2027)}, set(years))
+                current_fy = current_partial_fiscal_year(years)
+                self.assertEqual(
+                    {str(fy) for fy in range(2015, current_fy + 1)}, set(years)
+                )
                 for fy in (2015, 2016):
                     self.assertEqual("unavailable", years[str(fy)]["status"])
                 self.assertEqual("partial", years["2017"]["status"])
                 self.assertEqual(6, years["2017"]["firstPeriod"])
                 self.assertEqual(12, years["2017"]["asOfPeriod"])
-                for fy in range(2018, 2026):
+                for fy in range(2018, current_fy):
                     self.assertEqual("complete", years[str(fy)]["status"])
                 observed = [years[str(fy)]["obligationsCents"]
-                            for fy in range(2017, 2026)]
+                            for fy in range(2017, current_fy)]
                 self.assertEqual(expected["historicalPins"], observed)
 
                 # The current year is source-refreshable rather than frozen
@@ -750,10 +775,17 @@ class DoDObligationTests(unittest.TestCase):
                 # every week the scheduled refresh advances, so only
                 # structure is asserted here. Completed years above remain
                 # immutable and keep exact literal pins.
-                assert_current_partial_row(self, years["2026"])
-                self.assertGreaterEqual(years["2026"]["obligationsCents"], 0)
+                assert_current_partial_row(self, years[str(current_fy)])
+                self.assertGreaterEqual(years[str(current_fy)]["obligationsCents"], 0)
 
     def test_stage_three_full_plan_is_exactly_twenty_serial_partitions(self):
+        defense_wide_baseline = json.loads(
+            (REPO / STAGE_THREE_META["dod/defense-wide-rdte"]["baseline"])
+            .read_text()
+        )
+        current_fy = current_partial_fiscal_year(
+            defense_wide_baseline["fiscalYears"]
+        )
         matrix = plan(
             repo=REPO,
             mode="full",
@@ -763,9 +795,10 @@ class DoDObligationTests(unittest.TestCase):
         self.assertEqual(set(STAGE_THREE_META), {row["account"] for row in matrix})
         for path in STAGE_THREE_META:
             rows = [row for row in matrix if row["account"] == path]
-            self.assertEqual(list(range(2017, 2027)),
+            self.assertEqual(list(range(2017, current_fy + 1)),
                              [row["fiscalYear"] for row in rows])
-            self.assertEqual([12] * 9, [row["period"] for row in rows[:-1]])
+            self.assertEqual([12] * (current_fy - 2017),
+                             [row["period"] for row in rows[:-1]])
             assert_current_period_job(self, rows[-1])
 
     def test_darpa_is_included_without_relabeling_defense_wide(self):

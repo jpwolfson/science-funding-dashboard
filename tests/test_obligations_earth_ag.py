@@ -21,18 +21,26 @@ ROOT = Path(__file__).resolve().parent.parent
 # (status "complete", or FY2017's frozen partial start-of-series row) are
 # not moving and keep exact literal pins.
 MINIMUM_CURRENT_FY_PERIOD = 9
+MINIMUM_CURRENT_FY = 2026  # a lower bound, not a pin -- see docstring below
 
 
 def current_partial_fiscal_year(fiscal_years):
     """Return the highest FY still 'partial' in a baseline -- the live
     current FY. FY2017's frozen historical partial pin is always older
     than the live current year, so max() finds it without a hard-coded
-    year number.
+    year number. The assertion below is a floor, not a pin: it keeps
+    passing for 2027, 2028, ... once the real current year moves past
+    it, and only fails if a baseline's current year ever regresses.
     """
-    return max(
+    current_fy = max(
         int(fy) for fy, row in fiscal_years.items()
         if row.get("status") == "partial"
     )
+    assert current_fy >= MINIMUM_CURRENT_FY, (
+        f"current partial FY {current_fy} is below the floor "
+        f"{MINIMUM_CURRENT_FY} -- a baseline's current year must not regress"
+    )
+    return current_fy
 
 
 def assert_current_partial_row(test, row, minimum_period=MINIMUM_CURRENT_FY_PERIOD):
@@ -215,22 +223,25 @@ class EarthAgricultureObligationTests(unittest.TestCase):
                 self.assertEqual(code, baseline["federalAccount"])
                 self.assertIn("retrieved 2026-08-12", baseline["source"])
                 fiscal_years = baseline["fiscalYears"]
-                self.assertEqual(set(map(str, range(2015, 2027))), set(fiscal_years))
+                current_fy = current_partial_fiscal_year(fiscal_years)
+                self.assertEqual(
+                    set(map(str, range(2015, current_fy + 1))), set(fiscal_years)
+                )
                 for fiscal_year in (2015, 2016):
                     self.assertEqual("unavailable", fiscal_years[str(fiscal_year)]["status"])
                     self.assertTrue(fiscal_years[str(fiscal_year)]["reason"])
                 self.assertEqual("partial", fiscal_years["2017"]["status"])
                 self.assertEqual(6, fiscal_years["2017"]["firstPeriod"])
                 self.assertEqual(12, fiscal_years["2017"]["asOfPeriod"])
-                assert_current_partial_row(self, fiscal_years["2026"])
+                assert_current_partial_row(self, fiscal_years[str(current_fy)])
                 actual = [
                     fiscal_years[str(fy)]["obligationsCents"]
-                    for fy in range(2017, 2026)
+                    for fy in range(2017, current_fy)
                 ]
                 self.assertEqual(cents[:-1], actual)
                 self.assertTrue(all(
                     fiscal_years[str(fy)]["status"] == "complete"
-                    for fy in range(2018, 2026)
+                    for fy in range(2018, current_fy)
                 ))
 
     def test_every_declared_source_identity_resolves(self):
@@ -500,6 +511,7 @@ class EarthAgricultureObligationTests(unittest.TestCase):
         self.assertEqual(0, amount_cents)
 
     def test_stage_selectors_are_payload_ready(self):
+        baseline_by_path = {row[0]: row[-1] for row in EXPECTED.values()}
         for selector, expected_count in STAGE_SELECTORS.items():
             jobs = plan(ROOT, mode="full", selectors=selector)["include"]
             self.assertEqual(expected_count, len(jobs), selector)
@@ -507,11 +519,18 @@ class EarthAgricultureObligationTests(unittest.TestCase):
             self.assertEqual(set(selected), {job["account"] for job in jobs})
             for path in selected:
                 account_jobs = [job for job in jobs if job["account"] == path]
-                self.assertEqual(list(range(2017, 2027)), [
+                baseline = json.loads(
+                    (ROOT / baseline_by_path[path]).read_text()
+                )
+                current_fy = current_partial_fiscal_year(
+                    baseline["fiscalYears"]
+                )
+                self.assertEqual(list(range(2017, current_fy + 1)), [
                     job["fiscalYear"] for job in account_jobs
                 ])
                 self.assertEqual(
-                    [12] * 9, [job["period"] for job in account_jobs[:-1]]
+                    [12] * (current_fy - 2017),
+                    [job["period"] for job in account_jobs[:-1]],
                 )
                 assert_current_period_job(self, account_jobs[-1])
 

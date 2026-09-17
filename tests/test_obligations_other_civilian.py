@@ -119,6 +119,7 @@ UNKNOWN_DISPLAY_PATHS = {
 # below reflects that per-account state, not a hard-coded date.
 MINIMUM_CURRENT_FY_PERIOD = 9
 MINIMUM_CURRENT_FY_PERIOD_BY_PATH = {"dhs/cwmd-rd": 10}
+MINIMUM_CURRENT_FY = 2026  # a lower bound, not a pin -- see docstring below
 PATHS_WITH_CURRENT_FY_FILE_B = {"dhs/cwmd-rd"}
 DASHBOARD_AS_OF_PERIOD_RE = re.compile(r"^FY(\d{4})P(0[2-9]|1[0-2])$")
 
@@ -127,12 +128,19 @@ def current_partial_fiscal_year(fiscal_years):
     """Return the highest FY still 'partial' in a baseline -- the live
     current FY. FY2017's frozen historical partial pin is always older
     than the live current year, so max() finds it without a hard-coded
-    year number.
+    year number. The assertion below is a floor, not a pin: it keeps
+    passing for 2027, 2028, ... once the real current year moves past
+    it, and only fails if a baseline's current year ever regresses.
     """
-    return max(
+    current_fy = max(
         int(fy) for fy, row in fiscal_years.items()
         if row.get("status") == "partial"
     )
+    assert current_fy >= MINIMUM_CURRENT_FY, (
+        f"current partial FY {current_fy} is below the floor "
+        f"{MINIMUM_CURRENT_FY} -- a baseline's current year must not regress"
+    )
+    return current_fy
 
 
 def assert_current_partial_row(test, path, row):
@@ -291,7 +299,10 @@ class OtherCivilianObligationTests(unittest.TestCase):
                     baseline["source"],
                 )
                 years = baseline["fiscalYears"]
-                self.assertEqual({str(fy) for fy in range(2015, 2027)}, set(years))
+                current_fy = current_partial_fiscal_year(years)
+                self.assertEqual(
+                    {str(fy) for fy in range(2015, current_fy + 1)}, set(years)
+                )
                 for fy in (2015, 2016):
                     self.assertEqual(
                         {"status": "unavailable",
@@ -303,12 +314,12 @@ class OtherCivilianObligationTests(unittest.TestCase):
                      "obligationsCents": pins[0], "firstPeriod": 6},
                     years["2017"],
                 )
-                for offset, fy in enumerate(range(2018, 2026), start=1):
+                for offset, fy in enumerate(range(2018, current_fy), start=1):
                     self.assertEqual(
                         {"status": "complete", "obligationsCents": pins[offset]},
                         years[str(fy)],
                     )
-                assert_current_partial_row(self, path, years["2026"])
+                assert_current_partial_row(self, path, years[str(current_fy)])
                 self.assertEqual(2, len(baseline["notes"]))
 
     def _aspr_baseline(self):
@@ -347,30 +358,44 @@ class OtherCivilianObligationTests(unittest.TestCase):
             self.assertEqual(2024, filters.get("fy"))
             self.assertEqual(first_period, filters.get("period"))
 
+        # ASPR's fixed first two data years (2024, 2025) plus whichever FY
+        # is the live current partial year -- this dated evidence file's
+        # accountSnapshots was captured once at onboarding and covers
+        # exactly that window; the current FY is looked up, never a
+        # hard-coded "2026", since its own obligationsCents keeps moving.
+        current_fy = current_partial_fiscal_year(baseline["fiscalYears"])
+        expected_snapshot_years = {2024, 2025, current_fy}
         snapshots = evidence.get("accountSnapshots") or []
-        self.assertEqual({2024, 2025, 2026}, {
+        self.assertEqual(expected_snapshot_years, {
             row.get("fiscalYear") for row in snapshots
         })
         by_fy = {row["fiscalYear"]: row for row in snapshots}
         years = baseline["fiscalYears"]
-        for fiscal_year in (2024, 2025, 2026):
+        for fiscal_year in sorted(expected_snapshot_years):
             snapshot = by_fy[fiscal_year]
             self.assertTrue(snapshot.get("retrievedAt"))
             self.assertTrue(str(snapshot.get("url", "")).startswith(
                 "https://api.usaspending.gov/api/v2/federal_accounts/075-1000/"
             ))
-            self.assertEqual(
-                years[str(fiscal_year)]["obligationsCents"],
-                snapshot.get("obligationsCents"),
-            )
+            if fiscal_year == current_fy:
+                # The current FY's obligationsCents moves with every
+                # scheduled refresh; only the frozen historical years are
+                # compared exactly against this dated onboarding snapshot.
+                self.assertIsInstance(snapshot.get("obligationsCents"), int)
+            else:
+                self.assertEqual(
+                    years[str(fiscal_year)]["obligationsCents"],
+                    snapshot.get("obligationsCents"),
+                )
         return evidence
 
     def _aspr_result_ready(self):
         account, baseline = self._aspr_baseline()
         years = baseline["fiscalYears"]
+        current_fy = current_partial_fiscal_year(years)
         if not all(
                 isinstance(years[str(fy)].get("obligationsCents"), int)
-                for fy in (2024, 2025, 2026)):
+                for fy in (2024, 2025, current_fy)):
             return False
         self._aspr_result_evidence(account, baseline)
         first_period = account["availability"]["firstFiscalYearPeriod"]
@@ -378,7 +403,7 @@ class OtherCivilianObligationTests(unittest.TestCase):
         self.assertEqual("complete" if first_period == 2 else "partial",
                          years["2024"]["status"])
         self.assertEqual("complete", years["2025"]["status"])
-        assert_current_partial_row(self, ASPR_PATH, years["2026"])
+        assert_current_partial_row(self, ASPR_PATH, years[str(current_fy)])
         self.assertNotIn("pending", baseline["source"].lower())
         self.assertIn(ASPR_EVIDENCE.name, baseline["source"])
         return True
@@ -389,7 +414,16 @@ class OtherCivilianObligationTests(unittest.TestCase):
         self.assertEqual(2, baseline["schemaVersion"])
         self.assertEqual("075-1000", baseline["federalAccount"])
         years = baseline["fiscalYears"]
-        self.assertEqual({str(fy) for fy in range(2015, 2027)}, set(years))
+        # The registry keeps this account's year-key window through the
+        # real current FY even before ASPR itself has onboarded that
+        # year's data, so the upper bound is the highest year key present
+        # -- not a status lookup (still FY2024 mid-probe) or a hard-coded
+        # year.
+        registry_current_fy = max(int(fy) for fy in years)
+        self.assertEqual(
+            {str(fy) for fy in range(2015, registry_current_fy + 1)},
+            set(years),
+        )
         for fy in range(2017, 2024):
             self.assertEqual(
                 {"status": "unavailable",
@@ -408,7 +442,7 @@ class OtherCivilianObligationTests(unittest.TestCase):
                 {"status": "partial", "asOfPeriod": 2, "firstPeriod": 2},
                 years["2024"],
             )
-            for fy in (2025, 2026):
+            for fy in range(2025, registry_current_fy + 1):
                 self.assertEqual("unavailable", years[str(fy)]["status"])
                 self.assertIn(
                     "multi-year release is blocked", years[str(fy)]["reason"]
@@ -461,18 +495,24 @@ class OtherCivilianObligationTests(unittest.TestCase):
                 (job["fiscalYear"], job["period"])
             )
         for path, rows in by_account.items():
+            account_baseline = json.loads(
+                (REPO / self.accounts[path]["baseline"]).read_text()
+            )
+            current_fy = current_partial_fiscal_year(
+                account_baseline["fiscalYears"]
+            )
             if path == ASPR_PATH:
                 if aspr_job_count == 3:
                     self.assertEqual([(2024, 12), (2025, 12)], rows[:-1])
-                    self.assertEqual(2026, rows[-1][0])
+                    self.assertEqual(current_fy, rows[-1][0])
                     assert_current_period_job(self, {"period": rows[-1][1]})
                 else:
                     self.assertEqual([(2024, 2)], rows)
             else:
                 self.assertEqual(
-                    [(fy, 12) for fy in range(2017, 2026)], rows[:-1],
+                    [(fy, 12) for fy in range(2017, current_fy)], rows[:-1],
                 )
-                self.assertEqual(2026, rows[-1][0])
+                self.assertEqual(current_fy, rows[-1][0])
                 minimum_period = MINIMUM_CURRENT_FY_PERIOD_BY_PATH.get(
                     path, MINIMUM_CURRENT_FY_PERIOD
                 )
@@ -835,19 +875,21 @@ class OtherCivilianObligationTests(unittest.TestCase):
         )
         account, baseline = self._aspr_baseline()
         years = baseline["fiscalYears"]
+        current_fy = current_partial_fiscal_year(years)
+        expected_fiscal_years = [2024, 2025, current_fy]
         store = REPO / "data" / "obligations" / ASPR_PATH
         manifest_path = store / "events" / "manifest.json"
         self.assertTrue(
             manifest_path.exists(),
-            "the atomic FY2024-FY2026 ASPR data commit must precede later scaffolds",
+            "the atomic FY2024-current ASPR data commit must precede later scaffolds",
         )
         manifest = json.loads(manifest_path.read_text())
         self.assertEqual("075-1000", manifest.get("federalAccount"))
-        self.assertEqual([2024, 2025, 2026], manifest.get("fiscalYears"))
+        self.assertEqual(expected_fiscal_years, manifest.get("fiscalYears"))
         partitions = {
             row.get("fiscalYear"): row for row in manifest.get("partitions") or []
         }
-        self.assertEqual({2024, 2025, 2026}, set(partitions))
+        self.assertEqual(set(expected_fiscal_years), set(partitions))
         for fiscal_year, partition in partitions.items():
             self.assertEqual("accepted", partition.get("collectionStatus"))
             self.assertRegex(partition.get("sha256", ""), r"^[0-9a-f]{64}$")
@@ -889,7 +931,6 @@ class OtherCivilianObligationTests(unittest.TestCase):
         # currentFY and asOfPeriod track the baseline's current partial FY,
         # a value that advances every week the scheduled refresh runs; only
         # structure and cross-consistency with the baseline are asserted.
-        current_fy = current_partial_fiscal_year(years)
         self.assertEqual(current_fy, dashboard.get("currentFY"))
         as_of_period = dashboard.get("asOfPeriod")
         match = DASHBOARD_AS_OF_PERIOD_RE.match(as_of_period or "")

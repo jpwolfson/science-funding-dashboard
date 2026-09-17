@@ -20,18 +20,26 @@ REPO = Path(__file__).resolve().parent.parent
 # (status "complete", or FY2017's frozen partial start-of-series row) are
 # not moving and keep exact literal pins.
 MINIMUM_CURRENT_FY_PERIOD = 9
+MINIMUM_CURRENT_FY = 2026  # a lower bound, not a pin -- see docstring below
 
 
 def current_partial_fiscal_year(fiscal_years):
     """Return the highest FY still 'partial' in a baseline -- the live
     current FY. FY2017's frozen historical partial pin is always older
     than the live current year, so max() finds it without a hard-coded
-    year number.
+    year number. The assertion below is a floor, not a pin: it keeps
+    passing for 2027, 2028, ... once the real current year moves past
+    it, and only fails if a baseline's current year ever regresses.
     """
-    return max(
+    current_fy = max(
         int(fy) for fy, row in fiscal_years.items()
         if row.get("status") == "partial"
     )
+    assert current_fy >= MINIMUM_CURRENT_FY, (
+        f"current partial FY {current_fy} is below the floor "
+        f"{MINIMUM_CURRENT_FY} -- a baseline's current year must not regress"
+    )
+    return current_fy
 
 
 def assert_current_partial_row(test, row, minimum_period=MINIMUM_CURRENT_FY_PERIOD):
@@ -432,7 +440,10 @@ class CommerceObligationTests(unittest.TestCase):
                 )
                 self.assertIn(retrieved, baseline["source"])
                 years = baseline["fiscalYears"]
-                self.assertEqual({str(fy) for fy in range(2015, 2027)}, set(years))
+                current_fy = current_partial_fiscal_year(years)
+                self.assertEqual(
+                    {str(fy) for fy in range(2015, current_fy + 1)}, set(years)
+                )
                 self.assertEqual("unavailable", years["2015"]["status"])
                 self.assertEqual("unavailable", years["2016"]["status"])
                 self.assertEqual(
@@ -440,12 +451,12 @@ class CommerceObligationTests(unittest.TestCase):
                      "obligationsCents": pins[0]},
                     years["2017"],
                 )
-                for offset, fy in enumerate(range(2018, 2026), start=1):
+                for offset, fy in enumerate(range(2018, current_fy), start=1):
                     if path == "commerce/bea" and fy == 2020:
                         continue
                     self.assertEqual("complete", years[str(fy)]["status"])
                     self.assertEqual(pins[offset], years[str(fy)]["obligationsCents"])
-                assert_current_partial_row(self, years["2026"])
+                assert_current_partial_row(self, years[str(current_fy)])
 
     def test_noaa_pac_fy2025_preserves_exact_file_a_file_b_variance(self):
         account = self.accounts["commerce/noaa-pac"]
@@ -570,11 +581,17 @@ class CommerceObligationTests(unittest.TestCase):
                 (job["fiscalYear"], job["period"])
             )
         for path, rows in by_account.items():
-            expected = [(fy, 12) for fy in range(2017, 2026)]
+            account_baseline = json.loads(
+                (REPO / self.accounts[path]["baseline"]).read_text()
+            )
+            current_fy = current_partial_fiscal_year(
+                account_baseline["fiscalYears"]
+            )
+            expected = [(fy, 12) for fy in range(2017, current_fy)]
             if path == "commerce/bea" and not probe_state:
                 expected.remove((2020, 12))
             self.assertEqual(expected, rows[:-1])
-            self.assertEqual(2026, rows[-1][0])
+            self.assertEqual(current_fy, rows[-1][0])
             assert_current_period_job(self, {"period": rows[-1][1]})
         if probe_state:
             with self.assertRaisesRegex(AssertionError, "preflight-required"):
@@ -606,16 +623,17 @@ class CommerceObligationTests(unittest.TestCase):
         )
         if baseline["fiscalYears"]["2020"]["status"] == "partial":
             return
+        current_fy = current_partial_fiscal_year(baseline["fiscalYears"])
         jobs = plan(
             REPO, mode="full", selectors="commerce/bea"
         )["include"]
         self.assertEqual(9, len(jobs))
         pairs = [(job["fiscalYear"], job["period"]) for job in jobs]
         self.assertEqual(
-            [(fy, 12) for fy in range(2017, 2026) if fy != 2020],
+            [(fy, 12) for fy in range(2017, current_fy) if fy != 2020],
             pairs[:-1],
         )
-        self.assertEqual(2026, pairs[-1][0])
+        self.assertEqual(current_fy, pairs[-1][0])
         assert_current_period_job(self, {"period": pairs[-1][1]})
         self._require_all_planned_pins(jobs)
 
@@ -1019,8 +1037,12 @@ class CommerceObligationTests(unittest.TestCase):
         self.assertIn(sum(active_present), {0, len(NIST_PATHS)})
         if not any(active_present):
             return
+        nist_baseline = json.loads(
+            (REPO / self.accounts[NIST_PATHS[0]]["baseline"]).read_text()
+        )
+        current_fy = current_partial_fiscal_year(nist_baseline["fiscalYears"])
         expected = {"manifest.json"}
-        for fy in range(2017, 2027):
+        for fy in range(2017, current_fy + 1):
             expected.add(f"FY{fy}.csv.gz")
             expected.add(f"FY{fy}.provenance.json")
         for path in NIST_PATHS:
