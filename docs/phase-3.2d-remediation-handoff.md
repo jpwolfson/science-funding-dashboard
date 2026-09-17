@@ -177,6 +177,7 @@ parallel.
 | 2026-09-17 17:16 UTC | sentinel run 35251254148 | Built, validated, rendered green under the decoupled gate; failed only at `git push` (non-fast-forward: NIH leaf commits landed on main meanwhile). Single-push commit steps in the sentinel and obligation reconcile had no rebase retry. | failure, diagnosed |
 | 2026-09-17 17:32 UTC | weekly run 35251206571 cancelled; PR #71 merged (`f5a9106`); weekly obligation run and sentinel run re-dispatched on `main` | W9: both commit steps replay on the branch tip up to five times (`pull --rebase -X theirs`), as the award workflow already did | running |
 | 2026-09-17 17:32–17:37 UTC | sentinel run 35253304028 | **SUCCESS** — first accepted sentinel snapshot since 2026-08-25, under the decoupled gate (W2) and the retry push (W9); committed to `main` | green |
+| 2026-09-17 17:05–18:30 UTC | run 35250546983 (third NIH full pull) | **SUCCESS**: 28/28 ICs pulled under the ledger-initializing exemption, 28 `changes.csv.gz` ledgers created, 4 exclusions flipped to `returned` and committed (W8), rollup rebuilt, `validate_nih.py --live` green, Pages deployed. Root `totalAwards` 860,636 = `storeIdCount`; NIH 721,062 = leaf union; zero NIH warnings, empty `dataQualityNotes`. | green |
 
 ## Finding closure evidence (filled at closeout)
 
