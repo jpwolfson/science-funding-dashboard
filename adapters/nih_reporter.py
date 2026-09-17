@@ -191,8 +191,16 @@ def append_changes_ledger(store_path, new_rows):
     """Append field-change rows, never rewriting or removing an existing
     row. Rewrites the whole gzip file (mtime=0) with the full row set,
     sorted deterministically by (pullDate, id, field), so the output bytes
-    are reproducible and the file stays small and append-only in content."""
-    if not new_rows:
+    are reproducible and the file stays small and append-only in content.
+
+    An empty ``new_rows`` is a no-op if the ledger already exists (nothing
+    to add, nothing to rewrite). If the ledger does not exist yet, an empty
+    list still creates the header-only file -- this is the marker a caller
+    uses (``changes_ledger_path(store_path).exists()``) to tell an
+    already-initialized unit from one whose first source-current pull is
+    still in progress."""
+    path = changes_ledger_path(store_path)
+    if not new_rows and path.exists():
         return
     combined = load_changes_ledger(store_path) + [
         {"pullDate": row["pullDate"], "id": row["id"], "field": row["field"],
@@ -200,7 +208,6 @@ def append_changes_ledger(store_path, new_rows):
         for row in new_rows
     ]
     combined.sort(key=lambda row: (row["pullDate"], row["id"], row["field"]))
-    path = changes_ledger_path(store_path)
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "wb") as raw:
         with gzip.GzipFile(filename="", mode="wb", fileobj=raw, mtime=0) as zipped:
@@ -209,6 +216,30 @@ def append_changes_ledger(store_path, new_rows):
                 writer.writeheader()
                 for row in combined:
                     writer.writerow(row)
+
+
+MOVE_SAMPLE_LIMIT = 10
+
+
+def _move_field_breakdown(moves):
+    """Per-tracked-field move counts, e.g. {'date': 5, 'amount': 2}."""
+    counts = {}
+    for move in moves:
+        counts[move["field"]] = counts.get(move["field"], 0) + 1
+    return counts
+
+
+def _move_breakdown_str(counts):
+    if not counts:
+        return "none"
+    return ", ".join(f"{field}: {n}" for field, n in sorted(counts.items()))
+
+
+def _move_sample_lines(moves, limit=MOVE_SAMPLE_LIMIT):
+    """Up to `limit` sample moves as 'id field: old -> new', for diagnosing
+    a threshold trip (or an initializing pull) from the CI log."""
+    return [f"  {move['id']} {move['field']}: {move['old']} -> {move['new']}"
+            for move in moves[:limit]]
 
 
 INCLUDE_FIELDS = [
@@ -564,20 +595,55 @@ class NihReporterPull:
                         "new": str(new_award.get(field)),
                     })
 
+        # The committed ledger file is the marker of whether this unit has
+        # ever completed a source-current pull. It must be read BEFORE this
+        # pull appends to it, and before the threshold decision below, so
+        # the exemption below can only ever see a unit's true first pull.
+        ledger_initialized = changes_ledger_path(self.store_path).exists()
+
         move_return_count = len(moves) + len(returned_ids)
         limit = max(MOVE_RETURN_ABS_MIN, MOVE_RETURN_REL_FRACTION * len(stored))
-        if move_return_count > limit:
-            raise SystemExit(
-                f"FATAL: {self.agency} pull has {len(moves)} field move(s) + "
-                f"{len(returned_ids)} return(s) = {move_return_count}, above "
-                f"the max(20, 0.1% of store) = {limit:.1f} threshold for a "
-                f"{len(stored)}-award store; this is the pagination/"
-                "duplicate-displacement bug signature (CLAUDE.md data "
-                "integrity rule 4) -- refusing to publish"
-            )
+        field_counts = _move_field_breakdown(moves)
+        field_breakdown = _move_breakdown_str(field_counts)
+        sample_lines = _move_sample_lines(moves)
 
-        if moves:
-            append_changes_ledger(self.store_path, moves)
+        if ledger_initialized:
+            if move_return_count > limit:
+                diagnostics = f"  field breakdown: {field_breakdown}"
+                if sample_lines:
+                    diagnostics += "\n  sample moves (up to " \
+                        f"{MOVE_SAMPLE_LIMIT}):\n" + "\n".join(sample_lines)
+                raise SystemExit(
+                    f"FATAL: {self.agency} pull has {len(moves)} field "
+                    f"move(s) + {len(returned_ids)} return(s) = "
+                    f"{move_return_count}, above the max(20, 0.1% of "
+                    f"store) = {limit:.1f} threshold for a {len(stored)}-"
+                    "award store; this is the pagination/duplicate-"
+                    "displacement bug signature (CLAUDE.md data integrity "
+                    "rule 4) -- refusing to publish\n" + diagnostics
+                )
+        else:
+            # First source-current pull for this unit: the old adapter
+            # never overwrote fields, so this pull is measuring the drift
+            # accumulated since the store was built, not one pull's worth
+            # of churn. The threshold would misfire on that backlog every
+            # time, so it is not enforced here -- every move is appended,
+            # initializing the ledger. This is deliberately NOT a general
+            # bypass: the ledger file this pull creates is itself the
+            # marker `ledger_initialized` checks, so no unit can hit this
+            # branch more than once, ever. From the next pull for this
+            # unit onward the threshold applies exactly as it does today.
+            print(
+                f"NOTICE: first source-current pull for {self.agency}: "
+                f"initialized the change ledger with {len(moves)} field "
+                f"move(s) ({field_breakdown}); the churn threshold applies "
+                "from the next pull"
+            )
+            if sample_lines:
+                print(f"  sample moves (up to {MOVE_SAMPLE_LIMIT}):\n"
+                      + "\n".join(sample_lines))
+
+        append_changes_ledger(self.store_path, moves)
 
         if fy_anomaly_ids:
             print(f"NOTICE: {len(fy_anomaly_ids)} RePORTER record(s) carry an "

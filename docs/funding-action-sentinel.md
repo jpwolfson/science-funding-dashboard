@@ -101,12 +101,21 @@ not overwrite the last accepted snapshot.
 An unreviewed signal should show only mechanically supportable facts:
 
 - the threshold or cluster rule that fired;
-- affected award IDs, accounts, programs, and recipients where available;
-- gross negative activity, net activity, and reporting period;
+- award IDs with negative entries, accounts, programs, and recipients where
+  available;
+- gross negative activity and net activity side by side (so a strongly
+  positive net is never displayed only under a negative-only heading), a
+  plain statement when net activity in a period was positive, and the
+  reporting period;
 - any exactly matched official source;
 - source and data freshness;
 - an explicit statement that the signal has not been classified as a
   cancellation.
+
+An episode's age as an unreviewed signal is shown as a plain day count. The
+page does not characterize that age as overdue or not overdue: the working
+regime already states that an unreviewed signal is a durable, valid state
+with no deadline, so no rendered text should imply a clock is running.
 
 A source-confirmed event may additionally show the agency's event type and
 reason as stated, effective date, announced affected value, and affected-award
@@ -117,6 +126,16 @@ financial observations, sourced events, litigation events, and restorations.
 This prevents hundreds of related terminations from becoming hundreds of
 independent alarms and prevents later reinstatements from erasing the original
 history.
+
+Source-confirmed episodes render in their own always-visible section, anchored
+at `#confirmed`, ahead of the unreviewed episodes, so the handful of episodes
+with an accepted authoritative-source event are not lost among a much larger
+number of unreviewed ones. The bulk of unreviewed episodes beyond a fixed
+inline count render behind a native disclosure control rather than all at
+once; this keeps the default page height bounded so it renders and captures
+completely (Phase 3.2d remediation: an earlier build's default view produced
+a full-page screenshot tall enough to clip the final card and leave a large
+blank tail below it).
 
 ### Attributed-language rendering rule (owner-approved 2026-08-12)
 

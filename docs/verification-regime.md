@@ -202,6 +202,7 @@ a verifier needs is a new column here, added once, not a per-agency branch.
 | `availability.firstFiscalYear` / `firstFiscalYearPeriod` / `regularFirstPeriod` | Source-availability boundary: the first FY File B/C exist for this account, that FY's first reporting period, and the first period of every regular FY. |
 | `programActivities[]` | `{slug, code, name, park?, parkAliases?, codeNameAliases?, abbrev?}` — canonical Program Activity identities. `slug` and canonical `(code, name)` must be unique; a source code may repeat when the agency reused it for distinct named activities. `park` is the preferred reporting key and `parkAliases` lists other PARK keys for the same identity. `codeNameAliases` lists exact historical `{code, name}` pairs for that identity. Every PARK and exact code/name token must map to exactly one identity. A nonblank PARK is authoritative and must resolve as a declared `park`/`parkAliases` token; it never falls through to PAC/PAN or the implicit unknown bucket. An ambiguous or unknown identity fails closed. |
 | `freshnessMaxDays` (optional, else `refreshDefaults.freshnessMaxDays`) | Days a current-FY source snapshot may age before `--check-freshness` fails. |
+| `interpretationNote` (optional) | Free-text account-level interpretive disclosure, owner-approved editorial content (e.g. the DoD low-File-C-attribution note, Phase 3.2d remediation decision 3). When present it must be a non-empty string; the registry tier lints only that. `scripts/rollup_obligations.py` copies it verbatim into that account's `dashboard.json` and every Program Activity `dashboard.json` beneath it, and the site renders it wherever the field is present plus as a row note on the obligations landing table for any row whose account carries it. The field is the entire specialization surface for this disclosure — no verifier or site code may key off an account or agency name to decide whether to show it. |
 
 ### `reference/*_obligation_baseline.json` — per-account baseline file
 
@@ -247,6 +248,27 @@ Full contract: `docs/nih-data-validation.md`; constants live in
 | `LIVE_GAP_ABS_MIN` | 3 | Absolute floor for the `--live` reconciliation gap tolerance. |
 | `LIVE_GAP_REL_FRACTION` | 0.0001 (0.01%) | Relative component of the same tolerance, applied to the unit's stored id count. |
 | (live tolerance) | `max(LIVE_GAP_ABS_MIN, LIVE_GAP_REL_FRACTION * store_size)` | `--live` bound on `\|meta.total − (store − excluded − retainedMissing)\|` per institute. Equality is not required; the decomposition is always printed. |
+
+**Initializing-pull exemption on the move+return threshold.** The
+threshold row above is not enforced on a unit's first source-current pull
+-- the one for which `data/nih/<ic>/<ic>/changes.csv.gz` does not yet
+exist (`adapters.nih_reporter.changes_ledger_path(...).exists()`, checked
+before that pull appends to it). Every NIH store predates this contract
+and was built by an adapter that never overwrote fields, so a unit's first
+pull under source-current semantics is measuring weeks of accumulated
+drift, not one pull's steady-state churn; enforcing the threshold there
+would fail closed on every unit, not just a real pagination/duplicate-
+displacement defect. On that one pull every move is appended
+unconditionally, which is what creates (initializes) the ledger, and a
+`NOTICE` reports the move count and its per-field (`date`/`amount`/
+`title`/`type`) breakdown instead of a `FATAL`. This is deliberately not a
+general bypass: the ledger file the exempted pull creates is the same
+marker the check reads, so it can fire at most once per unit, ever --
+every subsequent pull for that unit sees the ledger present and the
+threshold applies exactly as tabulated above. Both the initializing
+`NOTICE` and a threshold `FATAL` print the per-field move counts and up to
+ten sample moves (`id field: old -> new`) so a trip is diagnosable from
+the CI log alone.
 
 Two more invariants have no numeric constant:
 

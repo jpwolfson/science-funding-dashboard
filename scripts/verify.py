@@ -188,6 +188,20 @@ def _lint_account(repo, account, crosswalk_rows):
     )
     checks.append(_check(f"{path}: per-account checks present", fields_ok, evidence))
 
+    # interpretationNote (docs/verification-regime.md specialization schema):
+    # optional per-account free-text disclosure. The only requirement is a
+    # non-empty string when present -- this is the sole agency-neutral
+    # specialization surface for an account-level interpretive note; no
+    # verifier may key off which account carries one.
+    if "interpretationNote" in account:
+        note = account.get("interpretationNote")
+        note_ok = isinstance(note, str) and bool(note.strip())
+        checks.append(_check(
+            f"{path}: interpretationNote is a non-empty string", note_ok,
+            f"interpretationNote={note!r}" if not note_ok
+            else f"{len(note)} character(s)",
+        ))
+
     baseline_rel = account.get("baseline")
     baseline_path = (repo / baseline_rel) if baseline_rel else None
     if not baseline_path or not baseline_path.exists():
