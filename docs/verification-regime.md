@@ -248,6 +248,27 @@ Full contract: `docs/nih-data-validation.md`; constants live in
 | `LIVE_GAP_REL_FRACTION` | 0.0001 (0.01%) | Relative component of the same tolerance, applied to the unit's stored id count. |
 | (live tolerance) | `max(LIVE_GAP_ABS_MIN, LIVE_GAP_REL_FRACTION * store_size)` | `--live` bound on `\|meta.total − (store − excluded − retainedMissing)\|` per institute. Equality is not required; the decomposition is always printed. |
 
+**Initializing-pull exemption on the move+return threshold.** The
+threshold row above is not enforced on a unit's first source-current pull
+-- the one for which `data/nih/<ic>/<ic>/changes.csv.gz` does not yet
+exist (`adapters.nih_reporter.changes_ledger_path(...).exists()`, checked
+before that pull appends to it). Every NIH store predates this contract
+and was built by an adapter that never overwrote fields, so a unit's first
+pull under source-current semantics is measuring weeks of accumulated
+drift, not one pull's steady-state churn; enforcing the threshold there
+would fail closed on every unit, not just a real pagination/duplicate-
+displacement defect. On that one pull every move is appended
+unconditionally, which is what creates (initializes) the ledger, and a
+`NOTICE` reports the move count and its per-field (`date`/`amount`/
+`title`/`type`) breakdown instead of a `FATAL`. This is deliberately not a
+general bypass: the ledger file the exempted pull creates is the same
+marker the check reads, so it can fire at most once per unit, ever --
+every subsequent pull for that unit sees the ledger present and the
+threshold applies exactly as tabulated above. Both the initializing
+`NOTICE` and a threshold `FATAL` print the per-field move counts and up to
+ten sample moves (`id field: old -> new`) so a trip is diagnosable from
+the CI log alone.
+
 Two more invariants have no numeric constant:
 
 - **Id-count invariant** (`adapters.common.write_dashboard`, shared with

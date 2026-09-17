@@ -11,6 +11,7 @@ from adapters.common import load_store, write_store
 from adapters.nih_reporter import (METHODOLOGY_NOTE, MOVE_RETURN_ABS_MIN,
                                    MOVE_RETURN_REL_FRACTION,
                                    NihReporterPull, _award_kind,
+                                   append_changes_ledger,
                                    changes_ledger_path, excluded_ids,
                                    load_changes_ledger, load_exclusion_ledger,
                                    parse_trans_type, pull_unit,
@@ -383,7 +384,6 @@ class MoveLedgerTests(unittest.TestCase):
             bytes_first = path.read_bytes()
             # Re-appending the same content produces byte-identical output
             # (fixed gzip mtime + deterministic sort).
-            from adapters.nih_reporter import append_changes_ledger
             append_changes_ledger(store_path, [])
             self.assertEqual(bytes_first, path.read_bytes())
 
@@ -421,11 +421,21 @@ class MoveLedgerTests(unittest.TestCase):
 
 
 class ChurnThresholdTests(unittest.TestCase):
+    """The move+return churn threshold, once the per-unit change ledger is
+    already initialized (i.e. NOT this unit's first source-current pull --
+    see FirstPullLedgerInitializationTests for that case)."""
+
     def _store_of_size(self, store_path, n):
         write_store(store_path, [
             NihReporterPull("NIGMS", {}, store_path).normalize(row(i))[0]
             for i in range(1, n + 1)
         ])
+        # Pre-initialize the ledger so this store behaves as one that has
+        # already completed its first source-current pull: the threshold
+        # below is exercised in its steady-state form, not the one-time
+        # initializing-pull exemption.
+        append_changes_ledger(store_path, [])
+        self.assertTrue(changes_ledger_path(store_path).exists())
 
     def test_threshold_passes_at_exactly_the_limit(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -473,6 +483,142 @@ class ChurnThresholdTests(unittest.TestCase):
                               side_effect=lambda fy: all_rows if fy == 2025 else {}):
                 with self.assertRaisesRegex(SystemExit, "pagination"):
                     puller.pull(full=True, today=date(2026, 8, 17), repo_root=root)
+
+    def test_threshold_failure_message_includes_per_field_breakdown(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            store_path = root / "data" / "nih" / "nigms" / "nigms" / "awards"
+            n = 1000
+            self._store_of_size(store_path, n)
+            limit = int(max(MOVE_RETURN_ABS_MIN, MOVE_RETURN_REL_FRACTION * n))
+            over_limit = limit + 1
+            changed_rows = {
+                i: row(i, award_notice_date="2025-03-01T00:00:00")
+                for i in range(1, over_limit + 1)
+            }
+            puller = NihReporterPull(
+                "NIGMS", {"min_total": 0, "max_total": 10000, "max_monthly": 10000},
+                store_path,
+            )
+            all_rows = {i: row(i) for i in range(1, n + 1)}
+            all_rows.update(changed_rows)
+            with patch.object(puller, "fetch_year",
+                              side_effect=lambda fy: all_rows if fy == 2025 else {}):
+                with self.assertRaises(SystemExit) as cm:
+                    puller.pull(full=True, today=date(2026, 8, 17), repo_root=root)
+            message = str(cm.exception)
+            self.assertIn("field breakdown", message)
+            self.assertIn(f"date: {over_limit}", message)
+            self.assertIn("sample moves", message)
+
+
+class FirstPullLedgerInitializationTests(unittest.TestCase):
+    """The move+return churn threshold is not enforced on a unit's very
+    first source-current pull (no committed changes.csv.gz yet): that
+    pull is measuring drift accumulated under the old, never-overwriting
+    adapter, not one pull's worth of steady-state churn."""
+
+    def _store_of_size(self, store_path, n):
+        write_store(store_path, [
+            NihReporterPull("NIGMS", {}, store_path).normalize(row(i))[0]
+            for i in range(1, n + 1)
+        ])
+
+    def test_first_pull_above_threshold_does_not_fail_and_initializes_ledger(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            store_path = root / "data" / "nih" / "nigms" / "nigms" / "awards"
+            n = 1000
+            self._store_of_size(store_path, n)
+            self.assertFalse(changes_ledger_path(store_path).exists())
+            limit = int(max(MOVE_RETURN_ABS_MIN, MOVE_RETURN_REL_FRACTION * n))
+            over_limit = limit + 20  # comfortably above the threshold
+            changed_rows = {
+                i: row(i, award_notice_date="2025-03-01T00:00:00")
+                for i in range(1, over_limit + 1)
+            }
+            puller = NihReporterPull(
+                "NIGMS", {"min_total": 0, "max_total": 10000, "max_monthly": 10000},
+                store_path,
+            )
+            all_rows = {i: row(i) for i in range(1, n + 1)}
+            all_rows.update(changed_rows)
+            with patch.object(puller, "fetch_year",
+                              side_effect=lambda fy: all_rows if fy == 2025 else {}):
+                with patch("builtins.print") as mock_print:
+                    awards, warnings, notes = puller.pull(
+                        full=True, today=date(2026, 8, 17), repo_root=root)
+            self.assertEqual([], warnings)
+            self.assertEqual(n, len(awards))
+            printed = "\n".join(str(call.args[0]) if call.args else ""
+                                 for call in mock_print.call_args_list)
+            self.assertIn("NOTICE: first source-current pull for NIGMS", printed)
+            self.assertIn(f"{over_limit} field move(s)", printed)
+            self.assertIn("date:", printed)
+            self.assertIn("applies from the next pull", printed)
+            rows = load_changes_ledger(store_path)
+            self.assertEqual(over_limit, len(rows))
+
+    def test_second_pull_after_initialization_enforces_threshold(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            store_path = root / "data" / "nih" / "nigms" / "nigms" / "awards"
+            n = 1000
+            self._store_of_size(store_path, n)
+            limit = int(max(MOVE_RETURN_ABS_MIN, MOVE_RETURN_REL_FRACTION * n))
+            over_limit = limit + 5
+
+            # First pull: a burst of drift above the threshold, exempted.
+            changed_rows = {
+                i: row(i, award_notice_date="2025-03-01T00:00:00")
+                for i in range(1, over_limit + 1)
+            }
+            puller = NihReporterPull(
+                "NIGMS", {"min_total": 0, "max_total": 10000, "max_monthly": 10000},
+                store_path,
+            )
+            all_rows = {i: row(i) for i in range(1, n + 1)}
+            all_rows.update(changed_rows)
+            with patch.object(puller, "fetch_year",
+                              side_effect=lambda fy: all_rows if fy == 2025 else {}):
+                first_awards, _, _ = puller.pull(
+                    full=True, today=date(2026, 8, 17), repo_root=root)
+            write_store(store_path, first_awards)
+            self.assertTrue(changes_ledger_path(store_path).exists())
+
+            # Second pull: same-shaped churn now fails closed, because the
+            # ledger from the first pull marks this unit as initialized.
+            second_changed = {
+                i: row(i, award_notice_date="2025-05-01T00:00:00")
+                for i in range(1, over_limit + 1)
+            }
+            all_rows_2 = {i: row(i) for i in range(1, n + 1)}
+            all_rows_2.update(second_changed)
+            with patch.object(puller, "fetch_year",
+                              side_effect=lambda fy: all_rows_2 if fy == 2025 else {}):
+                with self.assertRaisesRegex(SystemExit, "pagination") as cm:
+                    puller.pull(full=True, today=date(2026, 8, 24), repo_root=root)
+            self.assertIn("field breakdown", str(cm.exception))
+
+    def test_first_pull_with_zero_moves_creates_header_only_ledger(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            store_path = root / "data" / "nih" / "nigms" / "nigms" / "awards"
+            self._store_of_size(store_path, 5)
+            self.assertFalse(changes_ledger_path(store_path).exists())
+            puller = NihReporterPull(
+                "NIGMS", {"min_total": 0, "max_total": 1000, "max_monthly": 1000},
+                store_path,
+            )
+            unchanged_rows = {i: row(i) for i in range(1, 6)}
+            with patch.object(puller, "fetch_year",
+                              side_effect=lambda fy: unchanged_rows if fy == 2025 else {}):
+                awards, warnings, notes = puller.pull(
+                    full=True, today=date(2026, 8, 17), repo_root=root)
+            self.assertEqual([], warnings)
+            path = changes_ledger_path(store_path)
+            self.assertTrue(path.exists())
+            self.assertEqual([], load_changes_ledger(store_path))
 
 
 class MethodologyAndDataQualityTests(unittest.TestCase):
