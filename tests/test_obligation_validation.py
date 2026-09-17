@@ -346,5 +346,96 @@ class ObligationValidationTests(unittest.TestCase):
                 )
 
 
+class InterpretationNoteRollupTests(unittest.TestCase):
+    """Phase 3.2d remediation decision 3: `interpretationNote` is an
+    optional registry field (docs/verification-regime.md specialization
+    schema). scripts/rollup_obligations.py is what actually carries it from
+    the registry into every dashboard.json the site reads, and no existing
+    validator schema-checks a dashboard.json's own shape -- this is the one
+    place in the obligation-validation suite where that flow is covered
+    end to end, on a minimal two-account fixture (append-only per the W4
+    worker contract)."""
+
+    def build_fixture(self, note="Note text."):
+        temp = tempfile.TemporaryDirectory()
+        root = Path(temp.name)
+        (root / "config").mkdir()
+        (root / "reference").mkdir()
+        accounts = [
+            {"path": "dod/army-rdte", "name": "Army RDT&E", "abbrev": "Army",
+             "agency": "Department of Defense", "federalAccount": "021-2040",
+             "baseline": "reference/army_baseline.json",
+             "interpretationNote": note,
+             "programActivities": [{"slug": "basic-research", "code": "0001",
+                                    "name": "Basic Research"}]},
+            {"path": "doe/sc", "name": "Office of Science", "abbrev": "DOE SC",
+             "agency": "Department of Energy", "federalAccount": "089-0222",
+             "baseline": "reference/doe_sc_baseline.json",
+             "programActivities": [{"slug": "bes", "code": "0001", "name": "BES"}]},
+        ]
+        (root / "config" / "obligation_accounts.json").write_text(json.dumps({
+            "schemaVersion": 2, "refreshDefaults": {"freshnessMaxDays": 10},
+            "accounts": accounts}))
+        for name, federal_account in (
+            ("army_baseline.json", "021-2040"), ("doe_sc_baseline.json", "089-0222"),
+        ):
+            (root / "reference" / name).write_text(json.dumps({
+                "schemaVersion": 2, "federalAccount": federal_account,
+                "fiscalYears": {"2024": {"status": "complete", "obligationsCents": 100}}}))
+        for account in accounts:
+            row = normalize_event({
+                "id": f"{account['path']}-one", "source": "file_c",
+                "submissionPeriod": "FY2024P12",
+                "federalAccount": account["federalAccount"],
+                "programActivityCode": "0001",
+                "programActivityName": account["programActivities"][0]["name"],
+                "amountCents": 100, "awardId": "", "linked": False,
+            })
+            write_store(root / "data" / "obligations" / account["path"] / "events", [row])
+        return temp, root
+
+    def test_note_flows_to_account_and_program_activity_dashboards_only_for_the_noted_account(self):
+        import scripts.rollup_obligations as rollup_obligations
+        temp, root = self.build_fixture()
+        try:
+            rollup_obligations.build(root)
+            noted = json.loads(
+                (root / "data" / "obligations" / "dod" / "army-rdte" / "dashboard.json").read_text()
+            )
+            self.assertEqual("Note text.", noted["interpretationNote"])
+            noted_pa = json.loads((root / "data" / "obligations" / "dod" / "army-rdte" /
+                                   "basic-research" / "dashboard.json").read_text())
+            self.assertEqual("Note text.", noted_pa["interpretationNote"])
+            # The account page's own "Program activities" table children must
+            # NOT each carry the note: the account page already shows it once
+            # near the top, so repeating it as a per-PA-row footnote (one per
+            # activity) would be exact-text repetition, not a useful note.
+            for child in noted["children"]:
+                self.assertNotIn("interpretationNote", child)
+
+            unnoted = json.loads(
+                (root / "data" / "obligations" / "doe" / "sc" / "dashboard.json").read_text()
+            )
+            self.assertNotIn("interpretationNote", unnoted)
+            unnoted_pa = json.loads((root / "data" / "obligations" / "doe" / "sc" /
+                                     "bes" / "dashboard.json").read_text())
+            self.assertNotIn("interpretationNote", unnoted_pa)
+
+            # The obligations root dashboard's children list is what the
+            # site's landing-table row-note rendering reads.
+            root_dashboard = json.loads(
+                (root / "data" / "obligations" / "dashboard.json").read_text()
+            )
+            self.assertEqual(2, root_dashboard["accountCount"])
+            dod_child = next(c for c in root_dashboard["children"]
+                              if c["path"] == "obligations/dod")
+            doe_child = next(c for c in root_dashboard["children"]
+                              if c["path"] == "obligations/doe")
+            self.assertEqual("Note text.", dod_child["interpretationNote"])
+            self.assertNotIn("interpretationNote", doe_child)
+        finally:
+            temp.cleanup()
+
+
 if __name__ == "__main__":
     unittest.main()

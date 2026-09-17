@@ -63,6 +63,15 @@
     border-left: 3px solid var(--s2); border-radius: 6px; background: var(--surface);
     color: var(--ink-2); font-size: 13.5px;
   }
+  /* A registry-declared interpretation note (e.g. the DoD low-File-C
+     disclosure): a note, not a warning, so it uses a neutral border rather
+     than the --s2 warning color the .banner class uses. */
+  .interpretation-note {
+    margin-top: 16px; padding: 10px 14px; border: 1px solid var(--border);
+    border-left: 3px solid var(--muted); border-radius: 6px; background: var(--surface);
+    color: var(--ink-2); font-size: 13.5px;
+  }
+  .interpretation-note strong { color: var(--ink); }
   .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-top: 24px; }
   .summary-group { margin-top: 24px; }
   .summary-group + .summary-group { margin-top: 20px; }
@@ -122,6 +131,11 @@
   .state.confirmed, .state.reviewed { border-color: var(--s1); }
   .state.restored { border-color: var(--good); color: var(--good); }
   .state.superseded { color: var(--muted); }
+  .sentinel-header-figures {
+    display: inline-flex; align-items: baseline; gap: 4px; margin-left: 10px;
+    font-size: 13px; font-weight: 500; color: var(--ink-2); vertical-align: 2px;
+  }
+  .sentinel-header-figures strong { color: var(--ink); font-variant-numeric: tabular-nums; }
   .sentinel-facts { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 10px; font-size: 13px; }
   .sentinel-facts strong { font-variant-numeric: tabular-nums; }
   .sentinel-event { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--grid); font-size: 13px; }
@@ -387,6 +401,15 @@ function findInIndex(indexData, path) {
 
 function levelForDepth(d) { return LEVELS[Math.min(d, LEVELS.length - 1)]; }
 
+// Leaf-unit count for the award-root coverage line (Phase 3.2d remediation
+// decision 4): every nav-index node with no children is a division/institute
+// leaf, whichever agency it belongs to -- no per-agency count is hardcoded.
+function countLeaves(node) {
+  const kids = node?.children || [];
+  if (!kids.length) return node ? 1 : 0;
+  return kids.reduce((sum, kid) => sum + countLeaves(kid), 0);
+}
+
 function renderViewNav(obligationRoot, sentinelRoot = false) {
   const nav = document.getElementById("viewNav");
   const views = [
@@ -514,10 +537,18 @@ function obligationChildrenCard(data, title = null, note = null) {
     .forEach((h, i) => trh.append(el("th", { class: i > 0 ? "num" : "", text: h })));
   trh.append(el("th", { class: "chev" }));
   t.append(trh);
+  // Rows whose registry entry carries an interpretationNote (Phase 3.2d
+  // remediation decision 3, e.g. the DoD low-File-C disclosure) get a
+  // footnote marker here and the full text listed once below the table --
+  // purely field-driven, so any future account with the field is covered
+  // the same way with no code change.
+  const annotated = [];
   for (const c of sorted) {
     const tr = el("tr"), tdUnit = el("td");
     const path = String(c.path || "").startsWith("obligations") ? c.path : `obligations/${c.path}`;
-    tdUnit.append(el("a", { href: `index.html?org=${path}`, text: unitLabel(c) }));
+    const hasNote = Boolean(c.interpretationNote);
+    if (hasNote) annotated.push(c);
+    tdUnit.append(el("a", { href: `index.html?org=${path}`, text: unitLabel(c) + (hasNote ? " *" : "") }));
     tr.append(tdUnit);
     if (!c.hasData) {
       tr.append(el("td", { class: "num", text: "no data yet" }),
@@ -533,6 +564,24 @@ function obligationChildrenCard(data, title = null, note = null) {
     t.append(tr);
   }
   card.append(t);
+  if (annotated.length) {
+    // Rows that carry the identical note text (e.g. every DoD account row
+    // shares the same disclosure) group into one line rather than repeating
+    // the same paragraph once per row.
+    const groups = new Map();
+    for (const c of annotated) {
+      if (!groups.has(c.interpretationNote)) groups.set(c.interpretationNote, []);
+      groups.get(c.interpretationNote).push(unitLabel(c));
+    }
+    const p = el("p", { class: "note", id: "interpretationNoteFootnotes" });
+    let firstGroup = true;
+    for (const [note, names] of groups) {
+      if (!firstGroup) p.append(document.createTextNode(" "));
+      firstGroup = false;
+      p.append(el("strong", { text: `* ${names.join(", ")}: ` }), document.createTextNode(note));
+    }
+    card.append(p);
+  }
   $app.append(card);
 }
 
@@ -1331,6 +1380,38 @@ function obligationFlowTables(data) {
   $app.append(card);
 }
 
+// A registry-declared, agency-neutral account-level disclosure (e.g. the
+// DoD low-File-C-attribution note, Phase 3.2d remediation decision 3).
+// Rendered wherever `interpretationNote` is present on the dashboard --
+// never behind an agency check -- as a note, not a warning.
+function renderInterpretationNote(text, container = $app) {
+  if (!text) return;
+  const box = el("div", { class: "interpretation-note", id: "interpretationNote" });
+  box.append(el("strong", { text: "Interpretation note: " }), document.createTextNode(text));
+  container.append(box);
+}
+
+// W1's dashboard-level data-quality notes (plain, non-blocking observations
+// such as a stored id not returned by the latest full re-pull) render in a
+// dedicated notes block, deliberately separate from the red `.banner`
+// warnings block used for validator warnings.
+function renderDataQualityNotes(notes) {
+  if (!notes || !notes.length) return;
+  const box = el("div", { class: "interpretation-note", id: "dataQualityNotes" });
+  box.append(el("strong", { text: "Data quality notes: " }));
+  const list = el("ul");
+  notes.forEach(note => list.append(el("li", { text: note })));
+  box.append(list);
+  $app.append(box);
+}
+
+// W1's award-ledger methodology line ("counts as of the pull date; NIH
+// revises award notice dates."), rendered verbatim near the page header.
+function renderMethodologyNote(text) {
+  if (!text) return;
+  $app.append(el("p", { class: "sub", id: "methodologyNote", text }));
+}
+
 function renderObligationNotes(data) {
   const notes = document.getElementById("notes");
   notes.replaceChildren(el("h2", { text: "How to read this obligation ledger" }));
@@ -1559,22 +1640,39 @@ function renderSentinelSourcedEvents(episode, card, data) {
   events.forEach(event => renderSentinelSourcedEvent(event, card, data));
 }
 
-function sentinelEpisodeCard(episode, data) {
+// Phase 3.2d remediation decision 5 (sentinel-facing language, owner-
+// approved): the header shows gross negative and net side by side (so a
+// strongly positive net is never hidden below a negative-only headline),
+// the award-count fact label now names negative entries specifically
+// rather than the whole episode, a state line states plainly when net
+// activity was positive, and the unreviewed age is shown without any
+// overdue/not-overdue characterization -- age alone.
+function sentinelEpisodeCard(episode, data, container = $app) {
   const card = el("article", { class: "card" });
   const heading = el("h2", { text: episodeHeadingText(episode) });
+  const grossNegative = Number(episode.grossNegativeCents || 0);
+  const netActivity = Number(episode.netActivityCents || 0);
+  heading.append(el("span", { class: "sentinel-header-figures" },
+    el("strong", { text: fmtCents(grossNegative) }), document.createTextNode(" gross negative"),
+    document.createTextNode(" · "),
+    el("strong", { text: fmtCents(netActivity) }), document.createTextNode(" net")));
   heading.append(el("span", { class: `state ${sentinelStateClass(episode.state)}`,
     text: SENTINEL_STATE_LABELS[episode.state] || episode.state }));
   card.append(heading);
   const observed = episode.firstObserved === episode.lastObserved
     ? episode.firstObserved : `${episode.firstObserved} through ${episode.lastObserved}`;
   const age = episode.state === "unreviewed-signal"
-    ? ` · unreviewed for ${fmtN(episode.unreviewedAgeDays || 0)} days (not overdue)` : "";
+    ? ` · unreviewed for ${fmtN(episode.unreviewedAgeDays || 0)} days` : "";
   card.append(el("p", { class: "note", text: `Observed ${observed || "date unavailable"}${age}` }));
+  if (netActivity > 0) {
+    card.append(el("p", { class: "note",
+      text: "State: net activity in this period was positive." }));
+  }
   const facts = el("div", { class: "sentinel-facts" });
   facts.append(
-    el("span", {}, el("strong", { text: fmtCents(episode.grossNegativeCents) }), document.createTextNode(" gross negative activity")),
-    el("span", {}, el("strong", { text: fmtCents(episode.netActivityCents) }), document.createTextNode(" net activity")),
-    el("span", {}, el("strong", { text: fmtN((episode.awardIds || []).length) }), document.createTextNode(" affected award IDs")),
+    el("span", {}, el("strong", { text: fmtCents(grossNegative) }), document.createTextNode(" gross negative activity")),
+    el("span", {}, el("strong", { text: fmtCents(netActivity) }), document.createTextNode(" net activity")),
+    el("span", {}, el("strong", { text: fmtN((episode.awardIds || []).length) }), document.createTextNode(" award IDs with negative entries")),
   );
   card.append(facts);
   (episode.financialObservations || []).forEach(observation => {
@@ -1598,7 +1696,7 @@ function sentinelEpisodeCard(episode, data) {
       el("p", { class: "note", text: finding.summary || "No additional reviewer summary." }));
     card.append(section);
   });
-  $app.append(card);
+  container.append(card);
 }
 
 function renderSentinelNotes(data) {
@@ -1620,6 +1718,61 @@ function renderSentinelNotes(data) {
   notes.append(table, el("p", { class: "stamp", text: "These are planning ranges. Replace them with measured figures after eight weeks without delaying publication, account fan-out, or closing this implementation phase." }));
 }
 
+// The sentinel dashboard can list well over a hundred unreviewed episodes.
+// Rendering every one inline produced a page tens of thousands of pixels
+// tall. Reproduced directly (Phase 3.2d remediation, `verify.py --tier
+// screens` at 1100px wide against origin/main before this fix): a
+// 65,219px-tall document whose full-page screenshot capture rendered
+// content only through ~y=39,370 and was blank for the remaining
+// ~25,850px, with the final visible card ("Weapons Activities (Direct)",
+// -$826M gross negative) clipped mid-word -- an exact match to the
+// independent review's report -- and no notes footer, since it sits past
+// the blank region. The same capture of the same unmodified page
+// succeeded completely in an earlier, less loaded run, so the underlying
+// raster/tile limit for very tall composited screenshots appears to be
+// system-load-dependent rather than a fixed byte-for-byte threshold;
+// headless Chrome's full-page capture is documented to clip near 16,384px
+// in a number of builds, which is the working hypothesis, not a proven
+// single mechanism. Also buried the handful of source-confirmed episodes
+// among the unreviewed ones (finding #16). Splitting confirmed episodes
+// into their own always-visible, anchored section, and collapsing the
+// bulk of the unreviewed episodes behind a native <details> (unopened
+// <details> content is not laid out or painted, so it does not add to
+// document height until a reader opens it) fixes both: the default page
+// stays a bounded height with headroom below the working hypothesis's
+// limit, and #confirmed is a direct anchor to the episodes that already
+// have an accepted authoritative source.
+const SENTINEL_INLINE_EPISODE_LIMIT = 20;
+
+function renderSentinelEpisodes(data) {
+  const episodes = data.episodes || [];
+  const confirmed = episodes.filter(episode => episode.state === "source-confirmed-event");
+  const other = episodes.filter(episode => episode.state !== "source-confirmed-event");
+  if (confirmed.length) {
+    const section = el("section", { class: "summary-group", "aria-labelledby": "confirmed" });
+    section.append(el("h2", { id: "confirmed",
+      text: `Source-confirmed episodes (${fmtN(confirmed.length)})` }));
+    section.append(el("p", { class: "note", text:
+      "These episodes have at least one accepted authoritative-source event, separated here so they are not lost among the unreviewed signals below." }));
+    $app.append(section);
+    confirmed.forEach(episode => sentinelEpisodeCard(episode, data));
+  }
+  const otherHeading = el("h2", { id: "other-episodes",
+    text: `Unreviewed and other episodes (${fmtN(other.length)})` });
+  const otherNote = el("p", { class: "note", text:
+    "An unreviewed state is durable and carries no deadline; see the coverage banner above for what is and is not automatically detected." });
+  $app.append(otherHeading, otherNote);
+  const primary = other.slice(0, SENTINEL_INLINE_EPISODE_LIMIT);
+  const overflow = other.slice(SENTINEL_INLINE_EPISODE_LIMIT);
+  primary.forEach(episode => sentinelEpisodeCard(episode, data));
+  if (overflow.length) {
+    const details = el("details", { class: "detail-table" });
+    details.append(el("summary", { text: `Show ${fmtN(overflow.length)} more unreviewed episodes` }));
+    overflow.forEach(episode => sentinelEpisodeCard(episode, data, details));
+    $app.append(details);
+  }
+}
+
 function renderSentinel(data) {
   const banner = el("div", { class: "banner" });
   banner.append(el("strong", { text: "A signal is not a cancellation. " }),
@@ -1628,7 +1781,7 @@ function renderSentinel(data) {
   sentinelCoverageBanner(data);
   sentinelTiles(data);
   sentinelSourceCard(data);
-  (data.episodes || []).forEach(episode => sentinelEpisodeCard(episode, data));
+  renderSentinelEpisodes(data);
   renderSentinelNotes(data);
 }
 
@@ -1722,6 +1875,15 @@ async function boot() {
     const totalNet = data.totalNetObligations ?? data.netObligations ?? 0;
     document.getElementById("stamp").textContent =
       `${fmtSignedMoney(totalNet)} net obligations across ${fmtN(data.distinctLinkedAwards || 0)} distinct linked awards · through ${submissionPeriodDisplay(asOf)} · last updated ${gen.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}`;
+    if (node.level === "root") {
+      // Phase 3.2d remediation decision 4 (fixed wording; count derived).
+      $app.append(el("p", { class: "sub", id: "obligationsSubtitle",
+        text: `Obligations from ${fmtN(data.accountCount ?? 0)} registered science-related federal accounts, including defense RDT&E.` }));
+    }
+    // Phase 3.2d remediation decision 3: an agency-neutral registry field is
+    // the only switch -- present on every DoD account/PA dashboard, absent
+    // everywhere else, no agency check here.
+    renderInterpretationNote(data.interpretationNote);
     if (data.warnings?.length) {
       const b = el("div", { class: "banner" });
       b.append(el("strong", { text: "Data quality warnings from the last pull: " }),
@@ -1764,6 +1926,10 @@ async function boot() {
   const gen = new Date(data.generated + "T12:00:00");
   document.getElementById("stamp").textContent =
     `${fmtN(data.totalAwards)} award${data.totalAwards === 1 ? "" : "s"} since Oct 2014 · last updated ${gen.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })} · refreshes weekly`;
+  // W1's award-ledger methodology line and data-quality notes render near
+  // the header, whenever present, unchanged from the dashboard's own text.
+  renderMethodologyNote(data.methodologyNote);
+  renderDataQualityNotes(data.dataQualityNotes);
   if (data.warnings?.length) {
     const b = el("div", { class: "banner" });
     b.append(el("strong", { text: "Data quality warnings from the last pull: " }), document.createTextNode(data.warnings.join(" · ")));
@@ -1782,6 +1948,17 @@ async function boot() {
     try { obligationSummary = await fetchJSON("data/obligations/dashboard.json"); }
     catch (e) { obligationSummary = null; }
   }
+  if (node.level === "root" && obligationSummary?.kind === "obligations" && indexData) {
+    // Phase 3.2d remediation decision 4 (fixed wording; every count derived
+    // in the browser -- unit count from the nav index.json leaves, account
+    // and agency counts from the obligations root dashboard the site
+    // already loads).
+    const unitCount = countLeaves(indexData.root);
+    const accountCount = obligationSummary.accountCount ?? 0;
+    const agencyCount = obligationSummary.children?.length ?? 0;
+    $app.append(el("p", { class: "sub", id: "coverageLine",
+      text: `Award ledger: NIH and NSF, ${fmtN(unitCount)} units. Obligation ledger: ${fmtN(accountCount)} registered federal accounts across ${fmtN(agencyCount)} agencies.` }));
+  }
   tiles(data, node.level === "root" ? {
     id: "award-summary-heading",
     heading: "Award activity",
@@ -1794,7 +1971,9 @@ async function boot() {
     obligationTiles(obligationSummary, {
       id: "obligation-summary-heading",
       heading: `${obligationScope} obligations`,
-      note: `Signed account-ledger measures through ${submissionPeriodDisplay(obligationAsOf)}; updated ${obligationGenerated.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}. They are separate from, and not additive to, the award totals above. Negative entries can include routine corrections or reductions; sign alone does not establish a cancellation.`,
+      // Phase 3.2d remediation decision 4: the fixed subtitle sentence
+      // (count derived) leads the root obligation tile's note.
+      note: `Obligations from ${fmtN(obligationSummary.accountCount ?? 0)} registered science-related federal accounts, including defense RDT&E. Signed account-ledger measures through ${submissionPeriodDisplay(obligationAsOf)}; updated ${obligationGenerated.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}. They are separate from, and not additive to, the award totals above. Negative entries can include routine corrections or reductions; sign alone does not establish a cancellation.`,
       compact: true,
     });
   }
