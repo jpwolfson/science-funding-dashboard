@@ -103,6 +103,40 @@ class ShardedStoreTests(unittest.TestCase):
             dashboard = json.loads((data_dir / "dashboard.json").read_text())
             self.assertEqual(1, dashboard["totalAwards"])
 
+    def test_id_count_warning_fires_when_store_shrinks_by_exactly_the_excluded_count(self):
+        """Regression: comparing the new physical count against the
+        previous *aggregated* totalAwards (instead of the previous
+        published storeIdCount) let a store that lost exactly as many rows
+        as it has excluded ids pass silently. storeIdCount is now published
+        and compared against directly, so this case must warn."""
+        with tempfile.TemporaryDirectory() as tmp:
+            data_dir = Path(tmp) / "nih" / "nigms" / "nigms"
+            node = {"name": "NIGMS", "abbrev": "NIGMS",
+                    "path": "nih/nigms/nigms", "level": "division"}
+            today = date(2026, 8, 17)
+            awards = [award("nih:1", "2025-01-15"),
+                      award("nih:2", "2025-01-16")]
+            # Store has 2 physical rows; nih:2 is a soft-deleted exclusion,
+            # so the published totalAwards (1) is already smaller than the
+            # physical store (2).
+            write_dashboard(data_dir, node, "test", awards[:1], [], today,
+                            store_id_count=2)
+            dashboard = json.loads((data_dir / "dashboard.json").read_text())
+            self.assertEqual(1, dashboard["totalAwards"])
+            self.assertEqual(2, dashboard["storeIdCount"])
+
+            # The store itself now loses nih:2's row (a genuine bug) -- the
+            # physical count drops to 1, exactly matching the previously
+            # published totalAwards, so a totalAwards-based comparison
+            # would wrongly see no shrink. storeIdCount catches it.
+            warnings = write_dashboard(
+                data_dir, node, "test", awards[:1], [], today,
+                store_id_count=1)
+            self.assertEqual(
+                ["invariant violated: award id count shrank from 2 to 1"],
+                warnings,
+            )
+
     def test_store_id_count_defaults_to_len_awards(self):
         with tempfile.TemporaryDirectory() as tmp:
             data_dir = Path(tmp) / "nsf" / "mps" / "dms"

@@ -260,12 +260,18 @@ def write_dashboard(data_dir, node, source, awards, warnings, today,
     ever removing its row) -- that can legitimately make ``totalAwards``
     smaller than the physical store, and must not be confused with real
     data loss. ``store_id_count`` lets a caller pass the true physical
-    store id count when it differs from ``len(awards)``; the warning fires
-    only when that count itself drops below the previously published
-    ``totalAwards`` -- a signal that the store itself lost a row, which
-    should never happen (retain and warn, per CLAUDE.md data-integrity
-    rule 4). This check is source-agnostic and shared by every adapter
-    (NSF and NIH alike).
+    store id count when it differs from ``len(awards)``; it is published
+    verbatim as ``storeIdCount`` so the check has a physical-count field to
+    compare against on the *next* run, rather than the aggregated
+    ``totalAwards`` (comparing against ``totalAwards`` would let a store
+    that lost exactly as many rows as it has excluded ids pass silently).
+    The warning fires only when the new physical count drops below the
+    previously published ``storeIdCount`` -- a signal that the store
+    itself lost a row, which should never happen (retain and warn, per
+    CLAUDE.md data-integrity rule 4). The first run after this check was
+    introduced falls back to the previous ``totalAwards`` (no
+    ``storeIdCount`` published yet). This check is source-agnostic and
+    shared by every adapter (NSF and NIH alike).
     """
     data_dir = Path(data_dir)
     warnings = list(warnings)
@@ -276,11 +282,11 @@ def write_dashboard(data_dir, node, source, awards, warnings, today,
     prev_path = data_dir / "dashboard.json"
     if prev_path.exists():
         prev = json.loads(prev_path.read_text())
-        prev_total = prev.get("totalAwards")
-        if isinstance(prev_total, int) and new_store_count < prev_total:
+        prev_store_count = prev.get("storeIdCount", prev.get("totalAwards"))
+        if isinstance(prev_store_count, int) and new_store_count < prev_store_count:
             warnings.append(
                 f"invariant violated: award id count shrank from "
-                f"{prev_total} to {new_store_count}")
+                f"{prev_store_count} to {new_store_count}")
 
     out = {
         "generated": today.isoformat(),
@@ -288,6 +294,7 @@ def write_dashboard(data_dir, node, source, awards, warnings, today,
         "source": source,
         "warnings": warnings,
         **agg,
+        "storeIdCount": new_store_count,
         "children": children if children is not None else [],
     }
     if metadata:

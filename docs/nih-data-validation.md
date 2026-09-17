@@ -107,9 +107,14 @@ corrected date from leaving one ID in two fiscal-year files -- verified by
 
 `adapters.common.write_dashboard`'s id-count invariant is source-agnostic
 and shared with NSF: a caller may pass the true physical `store_id_count`
-separately from the aggregated `awards` it publishes, so a legitimate
-aggregation-level exclusion (NIH's soft delete) never trips the warning --
-only an actual drop in the physical store does.
+separately from the aggregated `awards` it publishes. That physical count
+is itself published on every dashboard as `storeIdCount`, and the next
+run's check compares against the *previous* `storeIdCount` (falling back
+to the previous `totalAwards` only on the first run after this field was
+introduced) -- never against the previous aggregated `totalAwards` -- so a
+legitimate aggregation-level exclusion (NIH's soft delete) never trips the
+warning, while a store that lost exactly as many rows as it has excluded
+ids still does.
 
 ## Orthogonal and external reconciliation
 
