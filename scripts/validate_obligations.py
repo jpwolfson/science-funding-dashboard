@@ -491,10 +491,11 @@ def validate(repo=REPO, require_data=True, check_freshness=False,
             if endpoint and endpoint["netObligationsCents"] != row["netObligationsCents"]:
                 errors.append(f"FY{row['fy']}: cumulative endpoint mismatch")
         # Undocumented large drop: only above a $1M previous cumulative
-        # (usda/nifa-integrated-activities FY2022 P03 fired on a $24k base
-        # otherwise). The curated explanation lives in the baseline file's
-        # periodNotes, not in generated provenance -- provenance is
-        # byte-regenerated from the source and never hand-edited.
+        # (a small account's cumulative can otherwise swing >50% on noise
+        # worth only tens of thousands of dollars). The curated explanation
+        # lives in the baseline file's periodNotes, not in generated
+        # provenance -- provenance is byte-regenerated from the source and
+        # never hand-edited.
         LARGE_DROP_FLOOR_CENTS = 100_000_000
         for series in stats["fyCumulative"]:
             reported_points = [p for p in series["points"]
