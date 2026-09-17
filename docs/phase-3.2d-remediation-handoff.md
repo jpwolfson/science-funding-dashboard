@@ -173,6 +173,7 @@ parallel.
 | 2026-09-17 15:33 UTC | `Update data` dispatched (run 35240994598) on `main` (units=nih, full_refresh=true) | First full NIH pull under the new contract: source-current fields, changes ledgers, exclusions ledger returns, `validate_nih.py --live` bounded gap | running |
 | 2026-09-17 17:14 UTC | PR #68 merged to `main` (`167841c`) | W3 File B acceptance (165 account-years classified; 24 material), span reconciliation, pin-advancement guard, periodNotes; fast 6/7 on the merge commit (the one red check is main's own transient NIH state being fixed by the running pull), rendered 4/4, 343 unit tests | merged |
 | 2026-09-17 17:16 UTC | `Update obligation ledger` dispatched on `main` (mode=weekly, all 53 accounts, ~28 h) | Sequencing decision: the reconcile freshness gate checks every account's current FY (last accepted snapshot 2026-08-24, 24 days > 10-day SLA), so a historical-only custom re-pull cannot commit until the weekly run restores freshness. This run also lands FY2026 P10 for all accounts (retires the P10 hatches) under the W3 rule and guards. Custom FY2025/2024/2023/2022 re-pulls are chained after it. | running |
+| 2026-09-17 17:20 UTC | `Update funding-action sentinel` dispatched on `main` | First sentinel run under the decoupled gate (W2); sources were 23 days stale against the 10-day SLA | running |
 
 ## Finding closure evidence (filled at closeout)
 
