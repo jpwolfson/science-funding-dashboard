@@ -258,3 +258,31 @@ The empty preservation trigger file is inert on `main`; a coordinator changes
 it only on the dedicated `agent/3-2d-retry-artifact-operation` operational
 branch. This path is solely for already-running legacy graphs. Newly dispatched
 runs use attempt-specific raw names and need no cleanup.
+
+## Workflow-to-gate mapping (Phase 3.2d remediation, W2)
+
+Each ledger's committing workflow runs only the checks that ledger owns.
+Before this change, `update-obligations.yml`'s `reconcile` job and
+`update-sentinel.yml`'s test step both ran the repo-wide default: the full
+`unittest discover` (which includes the NIH award-ledger's own unit
+modules) and, for obligations, `scripts/verify.py`'s default tier (which
+also runs the NIH award-ledger's offline validator). That coupled
+obligation- and sentinel-ledger publication to the unrelated NIH
+award-ledger's source-current churn (HIGH-2,
+`docs/reviews/2026-09-15-phase-3.2d-independent-review.md`). The gates are
+now:
+
+| Workflow / job | Runs | Never runs |
+|---|---|---|
+| `update-data.yml` (`rollup` job) | `scripts/rollup.py`; the NIH award-ledger's offline validator (`--live`) | — (this is the NIH ledger's own gate) |
+| `update-sentinel.yml` (`build` job) | `scripts/validate_funding_sentinel.py`; the sentinel and site-contract unit modules only (`tests.test_funding_sentinel`, `tests.test_funding_sentinel_validation`, `tests.test_funding_source_adapters`, `tests.test_site_contract`); `scripts/smoke_sentinel_page.py` | the full `unittest discover`; the NIH award-ledger's unit modules or offline validator |
+| `update-obligations.yml` (`reconcile` job) | `scripts/validate_obligations.py --check-freshness --require-current-provenance`; the obligation-ledger unit modules (every `tests.test_obligation*`/`tests.test_obligations_*` module, plus `tests.test_usaspending_obligations`, `tests.test_verification_regime`, `tests.test_pages_footprint`); `scripts/validate_award_invariants.py` (shared award-ledger schema invariant, agency-neutral); `scripts/verify.py --tier rendered` | `scripts/verify.py`'s default tier as a single call; the NIH award-ledger's unit modules or offline validator |
+| `verify-main.yml` (new) | `scripts/verify.py --tier fast` against the committed `main` tree, on a schedule (Mon/Tue 14:00 UTC, a few hours after the three data workflows) and after each of `Update data` / `Update obligation ledger` / `Update funding-action sentinel` completes on `main`; files or updates a `verify-main-failure`-labeled issue on failure | — it is independent and non-blocking: nothing depends on it, and it never gates a deploy |
+| `ci.yml` (`Test` job) | `scripts/verify.py`'s registry/fast/rendered tiers on `push`/`pull_request`, scoped by its existing path filters (which exclude `data/**`, so a committed data change alone does not retrigger it) | unchanged by this work |
+
+`verify-main.yml` is the release-bar backstop the regime's "zero-warning
+run" rule (`CLAUDE.md` working regime item 4) needs now that the three
+publication workflows no longer each run the full fast tier: it is the one
+place that still checks the *whole* committed tree on `main`, on its own
+schedule, without being able to hold up any of the three ledgers' own
+publication.

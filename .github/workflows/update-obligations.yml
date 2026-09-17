@@ -150,18 +150,44 @@ jobs:
         # are not a universal-across-agencies invariant, so they stay a
         # direct scripts/validate_obligations.py call rather than a
         # scripts/verify.py tier. See docs/verification-regime.md.
+        #
+        # Independent publication gate (Phase 3.2d remediation, W2): this
+        # call (require_data=True by construction -- no --allow-empty) is
+        # this job's entire offline-validator gate; it replaces the full
+        # `scripts/verify.py` default-tier step that used to run here. That
+        # tier also ran the NIH award-ledger's offline validator and its own
+        # unit modules, which gated obligation-ledger publication on the
+        # award ledger's unrelated NIH source-current churn -- a different
+        # ledger with its own release process (update-data.yml's rollup
+        # job). See docs/verification-regime.md, "Workflow-to-gate mapping",
+        # and the HIGH-2 finding in
+        # docs/reviews/2026-09-15-phase-3.2d-independent-review.md.
         run: >-
           python scripts/validate_obligations.py
           --check-freshness --require-current-provenance
-      # The remaining two steps ARE verify.py tiers -- unit/site-contract
-      # tests plus the full offline validator suite, then the full rendered
-      # matrix (including --all-accounts, so a newly onboarded agency is
-      # covered the first week it reconciles) -- the same commands a worker
-      # or the coordinator runs locally. Actions minutes are not the scarce
-      # resource here (CLAUDE.md working regime #1), so re-running the full
-      # fast tier atop the freshness gate above is deliberate, not waste.
-      - name: Verify — fast tier (unit tests + full offline validator suite)
-        run: python scripts/verify.py --tier fast --json _verify-fast.json
+      - name: Run obligation ledger unit tests
+        run: >-
+          python -m unittest
+          tests.test_obligation_aggregation
+          tests.test_obligation_planner
+          tests.test_obligation_reconcile
+          tests.test_obligation_retry_approved_semantics
+          tests.test_obligation_retry_recovery
+          tests.test_obligation_store
+          tests.test_obligation_validation
+          tests.test_obligations_commerce
+          tests.test_obligations_dod
+          tests.test_obligations_doe
+          tests.test_obligations_earth_ag
+          tests.test_obligations_nasa
+          tests.test_obligations_nsf
+          tests.test_obligations_other_civilian
+          tests.test_usaspending_obligations
+          tests.test_verification_regime
+          tests.test_pages_footprint
+          -v
+      - name: Validate award-ledger invariants shared with the obligation dashboards
+        run: python scripts/validate_award_invariants.py
       - name: Verify — rendered tier (obligation, all-accounts, and sentinel browser matrices)
         run: python scripts/verify.py --tier rendered --json _verify-rendered.json
       - name: Commit the validated atomic snapshot

@@ -1,0 +1,141 @@
+name: Verify main (independent, non-blocking)
+
+# Phase 3.2d remediation, W2: a separate, independent check of the
+# committed state of `main`. It never gates or blocks a deploy -- nothing
+# depends on this workflow's outcome -- and it does not replace any
+# publication gate in update-data.yml, update-obligations.yml, or
+# update-sentinel.yml (those each run their own narrower gate; see
+# docs/verification-regime.md, "Workflow-to-gate mapping"). Its only job is
+# to notice, on a schedule and after each data/obligation/sentinel refresh,
+# when `main`'s committed tree fails `verify.py --tier fast`, and to file
+# (or update) a GitHub issue naming the failing checks -- the auto-filed-
+# issue behavior CLAUDE.md's validation contract already calls for.
+
+on:
+  schedule:
+    # A few hours after the three data workflows land on main:
+    # Update data (Mon 09:13 UTC), Update obligation ledger (Mon 10:37 UTC),
+    # Update funding-action sentinel (Tue 12:17 UTC).
+    - cron: "0 14 * * 1" # Monday 14:00 UTC
+    - cron: "0 14 * * 2" # Tuesday 14:00 UTC
+  workflow_run:
+    workflows:
+      - "Update data"
+      - "Update obligation ledger"
+      - "Update funding-action sentinel"
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-main
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    # Only act on a `workflow_run` for the run that actually happened on
+    # `main`; the same three workflows also run on worker branches via
+    # trigger-file pushes, and this workflow only ever verifies `main`.
+    if: >-
+      github.event_name != 'workflow_run' ||
+      github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      issues: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify — fast tier against the committed main tree
+        id: verify
+        continue-on-error: true
+        run: python scripts/verify.py --tier fast --json _verify-fast.json
+      - name: Upload verify --tier fast JSON
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verify-main-fast
+          path: _verify-fast.json
+          if-no-files-found: warn
+          retention-days: 30
+      - name: File or update an issue naming the failing checks
+        if: steps.verify.outcome == 'failure'
+        uses: actions/github-script@v7
+        env:
+          RESULT_PATH: _verify-fast.json
+        with:
+          script: |
+            const fs = require("fs");
+            const path = process.env.RESULT_PATH;
+            const title = "verify --tier fast failed on main";
+            const label = "verify-main-failure";
+
+            let result = null;
+            try {
+              result = JSON.parse(fs.readFileSync(path, "utf8"));
+            } catch (err) {
+              core.warning(`Could not read/parse ${path}: ${err}`);
+            }
+
+            const checks = (result && result.checks) || [];
+            const failing = checks.filter((check) => !check.passed);
+            const lines = failing.length
+              ? failing.map(
+                  (check) => `- \`${check.name}\`: ${check.evidence}`
+                )
+              : ["- (verify.py exited non-zero but produced no per-check JSON; see the run log and the uploaded artifact.)"];
+
+            const runUrl =
+              `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}` +
+              `/actions/runs/${context.runId}`;
+            const body = [
+              `\`scripts/verify.py --tier fast\` failed on \`main\` at ` +
+                `${new Date().toISOString()}.`,
+              "",
+              "Failing checks:",
+              ...lines,
+              "",
+              `Run: ${runUrl}`,
+              "",
+              "This is filed by the independent `verify-main.yml` workflow " +
+                "(Phase 3.2d remediation, W2). It does not gate or block any " +
+                "deploy; it is a notification only.",
+            ].join("\n");
+
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: "open",
+              labels: label,
+            });
+            const match = existing.data.find((issue) => issue.title === title);
+
+            if (match) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: match.number,
+                body,
+              });
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: match.number,
+                body: `Still failing as of ${runUrl}.`,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: [label],
+              });
+            }

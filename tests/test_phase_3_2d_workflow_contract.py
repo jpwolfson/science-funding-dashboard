@@ -83,5 +83,98 @@ class Phase32dWorkflowContractTests(unittest.TestCase):
         self.assertLess(commit, delete)
 
 
+class PublicationGateDecouplingTests(unittest.TestCase):
+    """Phase 3.2d remediation, W2 (HIGH-2): the sentinel and obligation
+    publication gates must not run the NIH award-ledger's own suite, and
+    must not run scripts/verify.py's full "fast" tier (which does). See
+    docs/verification-regime.md, "Workflow-to-gate mapping", and
+    docs/phase-3.2d-remediation-brief.md, "W2 -- Decouple publication
+    gates"."""
+
+    def test_sentinel_workflow_does_not_discover_the_full_test_tree(self):
+        workflow = (
+            REPO / ".github/workflows/update-sentinel.yml"
+        ).read_text()
+        self.assertNotIn("unittest discover -s tests", workflow)
+
+    def test_sentinel_workflow_never_runs_nih_validation_or_nih_tests(self):
+        workflow = (
+            REPO / ".github/workflows/update-sentinel.yml"
+        ).read_text()
+        self.assertNotIn("validate_nih.py", workflow)
+        self.assertNotIn("test_nih_reporter", workflow)
+        self.assertNotIn("test_nih_validation", workflow)
+
+    def test_sentinel_workflow_runs_its_own_unit_and_contract_suites(self):
+        workflow = (
+            REPO / ".github/workflows/update-sentinel.yml"
+        ).read_text()
+        for module in (
+            "tests.test_funding_sentinel",
+            "tests.test_funding_sentinel_validation",
+            "tests.test_funding_source_adapters",
+            "tests.test_site_contract",
+        ):
+            self.assertIn(module, workflow)
+        self.assertIn("validate_funding_sentinel.py", workflow)
+
+    def test_obligation_reconcile_never_runs_verify_fast_tier(self):
+        workflow = (
+            REPO / ".github/workflows/update-obligations.yml"
+        ).read_text()
+        self.assertNotIn("--tier fast", workflow)
+
+    def test_obligation_reconcile_never_runs_nih_validation_or_nih_tests(self):
+        workflow = (
+            REPO / ".github/workflows/update-obligations.yml"
+        ).read_text()
+        self.assertNotIn("validate_nih.py", workflow)
+        self.assertNotIn("test_nih_reporter", workflow)
+        self.assertNotIn("test_nih_validation", workflow)
+
+    def test_obligation_reconcile_keeps_its_own_offline_gates(self):
+        workflow = (
+            REPO / ".github/workflows/update-obligations.yml"
+        ).read_text()
+        self.assertIn("validate_obligations.py", workflow)
+        self.assertIn("--check-freshness --require-current-provenance", workflow)
+        self.assertIn("validate_award_invariants.py", workflow)
+        self.assertIn("--tier rendered", workflow)
+        for module in (
+            "tests.test_obligation_aggregation",
+            "tests.test_obligation_validation",
+            "tests.test_obligations_dod",
+            "tests.test_usaspending_obligations",
+            "tests.test_verification_regime",
+            "tests.test_pages_footprint",
+        ):
+            self.assertIn(module, workflow)
+
+    def test_update_data_rollup_still_runs_validate_nih(self):
+        # update-data.yml is W1's file, not W2's; W2 only asserts it is left
+        # alone -- the NIH ledger keeps validating itself on its own
+        # workflow.
+        workflow = (REPO / ".github/workflows/update-data.yml").read_text()
+        self.assertIn("validate_nih.py --live", workflow)
+
+    def test_verify_main_workflow_exists_with_schedule_fast_tier_and_issue_filing(self):
+        path = REPO / ".github/workflows/verify-main.yml"
+        self.assertTrue(path.exists(), "expected .github/workflows/verify-main.yml")
+        workflow = path.read_text()
+        self.assertIn("schedule:", workflow)
+        self.assertIn("workflow_run:", workflow)
+        self.assertIn("workflow_dispatch:", workflow)
+        self.assertIn("--tier fast", workflow)
+        self.assertIn("actions/github-script", workflow)
+        self.assertIn("issues: write", workflow)
+        self.assertIn("verify --tier fast failed on main", workflow)
+        self.assertIn("concurrency:", workflow)
+
+    def test_verify_main_workflow_never_gates_a_deploy(self):
+        workflow = (REPO / ".github/workflows/verify-main.yml").read_text()
+        self.assertNotIn("needs:", workflow)
+        self.assertNotIn("deploy-pages", workflow)
+
+
 if __name__ == "__main__":
     unittest.main()
