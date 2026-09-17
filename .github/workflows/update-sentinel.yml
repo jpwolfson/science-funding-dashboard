@@ -63,4 +63,14 @@ jobs:
               subprocess.run(["git", "commit", "-m",
                               "Refresh funding-action sentinel snapshot"], check=True)
               branch = os.environ["BRANCH"]
-              subprocess.run(["git", "push", "origin", f"HEAD:{branch}"], check=True)
+              # Data commits land on main continuously (award leaf jobs, the
+              # coordinator); replay this commit on top of the branch tip
+              # instead of failing the whole run on a non-fast-forward push.
+              # -X theirs keeps this job's freshly generated files on conflict.
+              for attempt in range(5):
+                  if subprocess.run(["git", "push", "origin", f"HEAD:{branch}"]).returncode == 0:
+                      break
+                  subprocess.run(["git", "pull", "--rebase", "-X", "theirs", "origin", branch],
+                                 check=True)
+              else:
+                  raise SystemExit("push failed after 5 rebase attempts")
