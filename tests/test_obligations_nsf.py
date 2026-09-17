@@ -8,6 +8,54 @@ from scripts.plan_obligation_refresh import plan
 
 REPO = Path(__file__).resolve().parent.parent
 
+# The current fiscal year's partial baseline pin (status "partial",
+# asOfPeriod, obligationsCents) advances every week the scheduled
+# obligation refresh runs. Unit tests may not pin its literal value --
+# doing so guarantees the suite goes red on the first advance after any
+# release (docs/phase-3.2d-remediation-brief.md, W6). Historical rows
+# (status "complete", or FY2017's frozen partial start-of-series row) are
+# not moving and keep exact literal pins.
+MINIMUM_CURRENT_FY_PERIOD = 9
+MINIMUM_CURRENT_FY = 2026  # a lower bound, not a pin -- see docstring below
+
+
+def current_partial_fiscal_year(fiscal_years):
+    """Return the highest FY still 'partial' in a baseline -- the live
+    current FY. FY2017's frozen historical partial pin is always older
+    than the live current year, so max() finds it without a hard-coded
+    year number. The assertion below is a floor, not a pin: it keeps
+    passing for 2027, 2028, ... once the real current year moves past
+    it, and only fails if a baseline's current year ever regresses.
+    """
+    current_fy = max(
+        int(fy) for fy, row in fiscal_years.items()
+        if row.get("status") == "partial"
+    )
+    assert current_fy >= MINIMUM_CURRENT_FY, (
+        f"current partial FY {current_fy} is below the floor "
+        f"{MINIMUM_CURRENT_FY} -- a baseline's current year must not regress"
+    )
+    return current_fy
+
+
+def assert_current_partial_row(test, row, minimum_period=MINIMUM_CURRENT_FY_PERIOD):
+    """Structural-only assertion for the current (moving) partial FY row.
+    Exact-cent equality against the source is already enforced by
+    scripts/validate_obligations.py.
+    """
+    test.assertEqual("partial", row["status"])
+    test.assertIsInstance(row["asOfPeriod"], int)
+    test.assertGreaterEqual(row["asOfPeriod"], minimum_period)
+    test.assertLessEqual(row["asOfPeriod"], 12)
+    test.assertIsInstance(row["obligationsCents"], int)
+
+
+def assert_current_period_job(test, job, minimum_period=MINIMUM_CURRENT_FY_PERIOD):
+    """Structural-only assertion for a planner job covering the current FY."""
+    test.assertIsInstance(job["period"], int)
+    test.assertGreaterEqual(job["period"], minimum_period)
+    test.assertLessEqual(job["period"], 12)
+
 
 class NSFObligationOnboardingTests(unittest.TestCase):
     @classmethod
@@ -65,26 +113,28 @@ class NSFObligationOnboardingTests(unittest.TestCase):
             self.assertEqual(2, baseline["schemaVersion"])
             self.assertEqual(account["federalAccount"], baseline["federalAccount"])
             years = baseline["fiscalYears"]
-            self.assertEqual(set(map(str, range(2015, 2027))), set(years))
+            current_fy = current_partial_fiscal_year(years)
+            self.assertEqual(
+                set(map(str, range(2015, current_fy + 1))), set(years)
+            )
             self.assertEqual("unavailable", years["2015"]["status"])
             self.assertEqual("unavailable", years["2016"]["status"])
             self.assertEqual("partial", years["2017"]["status"])
             self.assertEqual(12, years["2017"]["asOfPeriod"])
             self.assertEqual(6, years["2017"]["firstPeriod"])
-            self.assertEqual("partial", years["2026"]["status"])
-            self.assertEqual(9, years["2026"]["asOfPeriod"])
+            assert_current_partial_row(self, years[str(current_fy)])
             store = REPO / "data" / "obligations" / path / "events"
             if store.exists():
-                for fiscal_year in range(2017, 2027):
+                for fiscal_year in range(2017, current_fy + 1):
                     self.assertIn(
                         "obligationsCents",
                         years[str(fiscal_year)],
                         f"{path} FY{fiscal_year} retained an unfilled scaffold",
                     )
-                for fiscal_year in range(2018, 2026):
+                for fiscal_year in range(2018, current_fy):
                     self.assertEqual("complete", years[str(fiscal_year)]["status"])
             else:
-                for fiscal_year in range(2018, 2026):
+                for fiscal_year in range(2018, current_fy):
                     self.assertEqual(
                         {"status": "partial", "asOfPeriod": 12},
                         years[str(fiscal_year)],
@@ -103,9 +153,17 @@ class NSFObligationOnboardingTests(unittest.TestCase):
                 (job["fiscalYear"], job["period"])
             )
         self.assertEqual(set(self.accounts), set(by_account))
-        expected = [(fy, 9 if fy == 2026 else 12) for fy in range(2017, 2027)]
-        for rows in by_account.values():
-            self.assertEqual(expected, rows)
+        for path, rows in by_account.items():
+            baseline = json.loads(
+                (REPO / self.accounts[path]["baseline"]).read_text()
+            )
+            current_fy = current_partial_fiscal_year(baseline["fiscalYears"])
+            expected_historical = [(fy, 12) for fy in range(2017, current_fy)]
+            self.assertEqual(expected_historical, rows[:-1])
+            self.assertEqual(current_fy, rows[-1][0])
+            assert_current_period_job(
+                self, {"period": rows[-1][1]}
+            )
 
     def test_reviewed_program_activity_aliases_are_unique(self):
         expected_codes = {

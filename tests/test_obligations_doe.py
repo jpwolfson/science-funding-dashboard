@@ -17,6 +17,55 @@ from scripts.pull_obligation_account import pull
 
 REPO = Path(__file__).resolve().parent.parent
 
+# The current fiscal year's partial baseline pin (status "partial",
+# asOfPeriod, obligationsCents) advances every week the scheduled
+# obligation refresh runs. Unit tests may not pin its literal value --
+# doing so guarantees the suite goes red on the first advance after any
+# release (docs/phase-3.2d-remediation-brief.md, W6). Historical rows
+# (status "complete", or a frozen historical partial start-of-series row)
+# are not moving and keep exact literal pins.
+MINIMUM_CURRENT_FY_PERIOD = 9
+MINIMUM_CURRENT_FY = 2026  # a lower bound, not a pin -- see docstring below
+
+
+def current_partial_fiscal_year(fiscal_years):
+    """Return the highest FY still 'partial' in a baseline -- the live
+    current FY. A frozen historical partial pin is always older than the
+    live current year, so max() finds it without a hard-coded year number.
+    The assertion below is a floor, not a pin: it keeps passing for 2027,
+    2028, ... once the real current year moves past it, and only fails
+    if a baseline's current year ever regresses.
+    """
+    current_fy = max(
+        int(fy) for fy, row in fiscal_years.items()
+        if row.get("status") == "partial"
+    )
+    assert current_fy >= MINIMUM_CURRENT_FY, (
+        f"current partial FY {current_fy} is below the floor "
+        f"{MINIMUM_CURRENT_FY} -- a baseline's current year must not regress"
+    )
+    return current_fy
+
+
+def assert_current_partial_row(test, row, minimum_period=MINIMUM_CURRENT_FY_PERIOD):
+    """Structural-only assertion for the current (moving) partial FY row.
+    Exact-cent equality against the source is already enforced by
+    scripts/validate_obligations.py.
+    """
+    test.assertEqual("partial", row["status"])
+    test.assertIsInstance(row["asOfPeriod"], int)
+    test.assertGreaterEqual(row["asOfPeriod"], minimum_period)
+    test.assertLessEqual(row["asOfPeriod"], 12)
+    test.assertIsInstance(row["obligationsCents"], int)
+
+
+def assert_current_period_job(test, job, minimum_period=MINIMUM_CURRENT_FY_PERIOD):
+    """Structural-only assertion for a planner job covering the current FY."""
+    test.assertIsInstance(job["period"], int)
+    test.assertGreaterEqual(job["period"], minimum_period)
+    test.assertLessEqual(job["period"], 12)
+
+
 EXPECTED = {
     "doe/arpa-e": ("089-0337", "Advanced Research Projects Agency-Energy", 4),
     "doe/eere": ("089-0321", "Energy Efficiency and Renewable Energy", 25),
@@ -857,15 +906,16 @@ class DoeOnboardingTests(unittest.TestCase):
         }
         for path in EXPECTED:
             with self.subTest(path=path):
+                baseline = json.loads((REPO / self.accounts[path]["baseline"]).read_text())
+                current_fy = current_partial_fiscal_year(baseline["fiscalYears"])
                 jobs = plan(REPO, mode="full", selectors=path)["include"]
                 first_fy = expected_first_fy.get(path, 2017)
-                self.assertEqual(list(range(first_fy, 2027)), [
+                self.assertEqual(list(range(first_fy, current_fy + 1)), [
                     row["fiscalYear"] for row in jobs
                 ])
                 self.assertEqual(12, jobs[0]["period"])
-                self.assertEqual(9, jobs[-1]["period"])
+                assert_current_period_job(self, jobs[-1])
 
-                baseline = json.loads((REPO / self.accounts[path]["baseline"]).read_text())
                 self.assertEqual("unavailable", baseline["fiscalYears"]["2015"]["status"])
                 self.assertEqual("unavailable", baseline["fiscalYears"]["2016"]["status"])
                 for fiscal_year in range(2017, first_fy):
@@ -880,8 +930,9 @@ class DoeOnboardingTests(unittest.TestCase):
                 self.assertEqual(
                     12, baseline["fiscalYears"][str(first_fy)]["asOfPeriod"]
                 )
-                self.assertEqual("partial", baseline["fiscalYears"]["2026"]["status"])
-                self.assertEqual(9, baseline["fiscalYears"]["2026"]["asOfPeriod"])
+                assert_current_partial_row(
+                    self, baseline["fiscalYears"][str(current_fy)]
+                )
 
                 store = REPO / "data" / "obligations" / path / "events"
                 if store.exists():
@@ -898,7 +949,7 @@ class DoeOnboardingTests(unittest.TestCase):
                         min(event["fiscalPeriod"] for event in first_events),
                         baseline["fiscalYears"][str(first_fy)]["firstPeriod"],
                     )
-                    for fiscal_year in range(first_fy, 2027):
+                    for fiscal_year in range(first_fy, current_fy + 1):
                         self.assertIn(
                             "obligationsCents",
                             baseline["fiscalYears"][str(fiscal_year)],

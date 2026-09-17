@@ -45,6 +45,33 @@ verifier is agency-uniform; see the module docstring of
 | `rendered` | ~9 s | Existing headless-Chrome smoke matrices (`smoke_obligation_pages.py`, `smoke_sentinel_page.py`) **plus** `smoke_obligation_pages.py --all-accounts`, which renders every registered account page and one Program Activity sub-page per account, both themes, discovered from the registry — never a hardcoded path list. Zero console errors is part of every case. | 0 pass / 1 fail / 2 usage |
 | `screens` | ~6 s (1 account today) | Reader-review screenshot pack: obligations landing, every account page, one Program Activity page per agency, the sentinel page, and the award root, light mode, 1100 px wide, full page, to `--out` (default OS temp dir). Prints the manifest. **Never pass/fails** — it is a release-bar input for a human/fresh-agent reader review (working regime item 5), not a mechanical gate. | always 0 (usage errors still exit 2) |
 
+**Unit tests may not pin a moving current-FY value (Phase 3.2d remediation,
+W6).** Every registered account's baseline carries exactly one open
+(`status: "partial"`) fiscal year that is the live current FY — its
+`asOfPeriod` and `obligationsCents` (and, for the one account still
+reconciling a File A/File B gap on the current year, its
+`fileBObligationsCents`/`fileAFileBVarianceCents`/`fileAFileBVarianceReason`)
+advance every week the scheduled obligation refresh runs. A unit test that
+pins one of these values as a literal breaks on the first advance after the
+test is written, which turned a routine weekly refresh into 53 failing
+tests (`tests/test_obligations_other_civilian.py::test_normal_baselines_preserve_all_exact_cent_pins`,
+CI run 34868893350). Tests may pin literal values only for fiscal years
+whose baseline status is `complete`, or whose partial pin is historical and
+frozen (the FY2017 start-of-series partial row, and `unavailable` rows).
+For the current partial FY — found dynamically as the highest FY whose
+baseline status is `partial`, never a hard-coded year — tests assert
+structure only: `status == "partial"`; `asOfPeriod` is an int in `2..12`
+and at least as large as the value previously observed (a per-file
+`MINIMUM_CURRENT_FY_PERIOD` regression floor, so a backwards move still
+fails); `obligationsCents` is an int; when `fileBObligationsCents` is
+present, `fileAFileBVarianceCents` equals `obligationsCents -
+fileBObligationsCents` exactly and `fileAFileBVarianceReason` is
+non-empty; and any dashboard `asOfPeriod` string matches
+`^FY\d{4}P(0[2-9]|1[0-2])$` with its FY/period agreeing with the
+baseline's current partial row. Exact-cent equality between the store and
+the baseline pin is already enforced by `scripts/validate_obligations.py`,
+so this loses no coverage.
+
 Any change that can move chart geometry — series endpoints or extents, axis
 ranges, point density, or period boundaries — requires `rendered` plus a
 before/after look at the affected chart's screenshot before merge. The
