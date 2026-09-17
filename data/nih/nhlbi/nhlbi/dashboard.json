@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-14",
+ "generated": "2026-09-17",
  "node": {
   "name": "National Heart, Lung, and Blood Institute",
   "abbrev": "NHLBI",
@@ -7,9 +7,7 @@
   "level": "division"
  },
  "source": "https://api.reporter.nih.gov/v2/projects/search (NIH RePORTER v2), administering IC NHLBI; one application record per fiscal year; intramural projects excluded; dated by award notice, then budget/project start when unavailable",
- "warnings": [
-  "invariant violated: 2024-09 shrank from 507 to 506 awards"
- ],
+ "warnings": [],
  "totalAwards": 70461,
  "currentFY": 2026,
  "monthly": [
@@ -3079,7 +3077,12 @@
      "dollars": 3060214456
     },
     {
-     "d": 348,
+     "d": 349,
+     "awards": 5217,
+     "dollars": 3145915028
+    },
+    {
+     "d": 351,
      "awards": 5217,
      "dollars": 3145915028
     }
@@ -3096,5 +3099,7 @@
   "cont": "Noncompeting continuations",
   "fell": "Fellowships",
   "other": "Other awards"
- }
+ },
+ "methodologyNote": "counts as of the pull date; NIH revises award notice dates.",
+ "dataQualityNotes": []
 }
