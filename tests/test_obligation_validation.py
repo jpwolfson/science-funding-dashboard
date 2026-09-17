@@ -145,6 +145,66 @@ class ObligationValidationTests(unittest.TestCase):
             account, pa, [], stats, set()
         ))
 
+    def test_not_reported_p12_is_a_validation_error_not_a_crash(self):
+        # scripts/validate_obligations.py must report the P12/complete-year
+        # hard error as an ordinary validation error (fail closed) without
+        # raising out of validate() and aborting every other account.
+        temp, root = self.fixture(100)
+        try:
+            provenance = (root / "data" / "obligations" / "doe" / "sc" /
+                         "events" / "FY2024.provenance.json")
+            value = json.loads(provenance.read_text())
+            value["collectionStatus"] = "accepted"
+            value["acceptedAt"] = "2026-08-11T12:00:00+00:00"
+            value["downloads"] = [
+                {"submissionType": "object_class_program_activity",
+                 "requestScope": {"filters": {"fy": 2024, "period": 6,
+                                              "submission_types":
+                                                  ["object_class_program_activity"],
+                                              "federal_account": "5787"},
+                                  "columns": ["submission_period"]},
+                 "acceptedRequestScope": {"filters": {"fy": 2024, "period": 6,
+                                                      "federal_account": "5787"},
+                                          "download_types":
+                                              ["object_class_program_activity"]},
+                 "status": "finished", "statusRowCount": 100,
+                 "parsedRowCount": 100, "memberRowCounts": {"a.csv": 100},
+                 "archiveSha256": "0" * 64, "rawArtifactFile": "a.zip"},
+                {"submissionType": "object_class_program_activity",
+                 "requestScope": {"filters": {"fy": 2024, "period": 12,
+                                              "submission_types":
+                                                  ["object_class_program_activity"],
+                                              "federal_account": "5787"},
+                                  "columns": ["submission_period"]},
+                 "acceptedRequestScope": {"filters": {"fy": 2024, "period": 12,
+                                                      "federal_account": "5787"},
+                                          "download_types":
+                                              ["object_class_program_activity"]},
+                 "status": "finished", "statusRowCount": 40,
+                 "parsedRowCount": 40, "memberRowCounts": {"a.csv": 40},
+                 "archiveSha256": "0" * 64, "rawArtifactFile": "b.zip"},
+                {"submissionType": "award_financial",
+                 "requestScope": {"filters": {"fy": 2024, "period": 12,
+                                              "submission_types":
+                                                  ["award_financial"],
+                                              "federal_account": "5787"},
+                                  "columns": ["submission_period"]},
+                 "acceptedRequestScope": {"filters": {"fy": 2024, "period": 12,
+                                                      "federal_account": "5787"},
+                                          "download_types": ["award_financial"]},
+                 "status": "finished", "statusRowCount": 0,
+                 "parsedRowCount": 0, "memberRowCounts": {},
+                 "archiveSha256": "0" * 64, "rawArtifactFile": "c.zip"},
+            ]
+            provenance.write_text(json.dumps(value))
+            errors = validate(root, require_data=False)
+            self.assertTrue(
+                any("FY2024P12 is notReported" in error for error in errors),
+                errors,
+            )
+        finally:
+            temp.cleanup()
+
     def test_one_cent_difference_fails(self):
         temp, root = self.fixture(101)
         try:

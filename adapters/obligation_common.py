@@ -199,10 +199,16 @@ def account_period_status(store, events, partial_fys=()):
     ``FY####.provenance.json`` and reapplies ``classify_file_b_periods``, so
     dashboard rebuilds (``scripts/rollup_obligations.py``) and validation
     (``scripts/validate_obligations.py``) derive the identical status from
-    the same source of truth without any network pull. Raises
-    ``ValueError`` (via ``check_final_period_reported``) if a fiscal year
-    that is complete, or whose highest recorded period is P12, ends on a
-    ``notReported`` period.
+    the same source of truth without any network pull. This never raises:
+    the P12/complete-year hard error
+    (``check_final_period_reported``) is a validation-time concern (an
+    already-committed historical fiscal year that turns out to end on a
+    notReported period must be reported as a validation failure -- and,
+    independently, will already fail the exact-cents GTAS gate since its
+    File B cumulative total is now frozen short -- not crash the dashboard
+    rebuild for every other account in the same process). Callers that want
+    the hard error call ``check_final_period_reported`` themselves per
+    fiscal year.
     """
     partial_fys = set(partial_fys)
     merged = {}
@@ -213,9 +219,7 @@ def account_period_status(store, events, partial_fys=()):
         row_counts = file_b_row_counts_from_provenance(provenance)
         if not row_counts:
             continue
-        classification = classify_file_b_periods(row_counts)
-        check_final_period_reported(classification, fy_complete=fy not in partial_fys)
-        merged.update(classification)
+        merged.update(classify_file_b_periods(row_counts))
     return merged
 
 

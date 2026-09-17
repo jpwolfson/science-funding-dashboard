@@ -13,8 +13,8 @@ sys.path.insert(0, str(REPO))
 
 from adapters.obligation_common import (
     account_period_status, aggregate, baseline_file_b_cents,
-    baseline_pin_problems, event_fingerprint, file_sha256,
-    load_partition_provenance, load_store, period_info,
+    baseline_pin_problems, check_final_period_reported, event_fingerprint,
+    file_sha256, load_partition_provenance, load_store, period_info,
 )
 from scripts.obligation_retry_recovery import RecoveryError, RetryRecovery
 
@@ -466,14 +466,21 @@ def validate(repo=REPO, require_data=True, check_freshness=False,
         # Snapshot acceptance rule (docs/obligation-ledger.md "Snapshot
         # acceptance and not-reported periods"): recompute the notReported
         # classification straight from committed provenance -- independent
-        # of, and compared against, the persisted dashboard below -- and
-        # fail closed on the same P12/fiscal-year-complete hard error the
-        # pull path enforces.
-        try:
-            recomputed_status = account_period_status(store, events, partial_fys)
-        except ValueError as error:
-            errors.append(f"{account['path']}: {error}")
-            recomputed_status = {}
+        # of, and compared against, the persisted dashboard below. Fail
+        # closed, per fiscal year, on the same P12/fiscal-year-complete
+        # hard error the pull path enforces -- appended as an ordinary
+        # validation error rather than raised, so one historical fiscal
+        # year's defect does not abort validating every other account.
+        recomputed_status = account_period_status(store, events, partial_fys)
+        for fy in sorted(by_fy):
+            fy_status = {period: status for period, status in recomputed_status.items()
+                        if period_info(period)[0] == fy}
+            if not fy_status:
+                continue
+            try:
+                check_final_period_reported(fy_status, fy_complete=fy not in partial_fys)
+            except ValueError as error:
+                errors.append(f"{account['path']}: {error}")
         stats = aggregate(events, max(by_fy), covered_periods, partial_fys,
                           recomputed_status)
         if stats["netObligationsCents"] != sum(e["amountCents"] for e in events):

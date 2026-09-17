@@ -158,6 +158,36 @@ class ObligationStoreTests(unittest.TestCase):
                 "FY2025P12": "reported",
             }, status)
 
+    def test_account_period_status_never_raises_even_on_p12_not_reported(self):
+        # A hard P12/complete-year error is a validation-time concern
+        # (scripts/validate_obligations.py calls check_final_period_reported
+        # itself, per fiscal year, and appends an error) -- not something
+        # account_period_status raises, which would abort rebuilding every
+        # other account's dashboard in the same process over one already-
+        # committed historical fiscal year's row-count anomaly.
+        with tempfile.TemporaryDirectory() as tmp:
+            store = Path(tmp) / "events"
+            store.mkdir()
+            rows = [event(event_id="p12", period="FY2020P12")]
+            write_store(store, rows)
+            write_partition_provenance(store, 2020, {
+                "collectionStatus": "accepted",
+                "downloads": [
+                    {"acceptedRequestScope": {
+                        "download_types": ["object_class_program_activity"],
+                        "filters": {"fy": 2020, "period": 6}},
+                     "statusRowCount": 100},
+                    {"acceptedRequestScope": {
+                        "download_types": ["object_class_program_activity"],
+                        "filters": {"fy": 2020, "period": 12}},
+                     "statusRowCount": 40},
+                ],
+            })
+            status = account_period_status(store, load_store(store), partial_fys=set())
+            self.assertEqual("notReported", status["FY2020P12"])
+            with self.assertRaisesRegex(ValueError, "FY2020P12 is notReported"):
+                check_final_period_reported(status, fy_complete=True)
+
     def test_merge_period_status_requires_unanimous_not_reported(self):
         merged = merge_period_status([
             {"FY2025P11": "notReported"},
