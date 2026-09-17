@@ -204,6 +204,37 @@ agency-specific parameter at all — `totalAwards`, `fiscalYears`, `monthly`,
 award-ledger `dashboard.json` shares by construction, whichever source
 produced it.
 
+## NIH award-ledger invariants
+
+Phase 3.2d remediation (W1, 2026-09-17) replaced the per-month "allowed
+shrink" exception with source-current semantics and id-level invariants.
+Full contract: `docs/nih-data-validation.md`; constants live in
+`adapters/nih_reporter.py` and are exercised by `scripts/validate_nih.py`.
+
+| Constant | Value | Meaning |
+|---|---|---|
+| `MOVE_RETURN_ABS_MIN` | 20 | Absolute floor for the per-unit, per-pull churn threshold. |
+| `MOVE_RETURN_REL_FRACTION` | 0.001 (0.1%) | Relative component of the same threshold, applied to the unit's stored id count. |
+| (threshold) | `max(MOVE_RETURN_ABS_MIN, MOVE_RETURN_REL_FRACTION * store_size)` | Moves (tracked-field overwrites: date/amount/title/type) plus ledger returns, summed over one pull for one institute. Above this, the pull fails closed — CLAUDE.md data integrity rule 4 names this volume of churn the pagination/duplicate-displacement bug signature, not ordinary source revision. |
+| `LIVE_GAP_ABS_MIN` | 3 | Absolute floor for the `--live` reconciliation gap tolerance. |
+| `LIVE_GAP_REL_FRACTION` | 0.0001 (0.01%) | Relative component of the same tolerance, applied to the unit's stored id count. |
+| (live tolerance) | `max(LIVE_GAP_ABS_MIN, LIVE_GAP_REL_FRACTION * store_size)` | `--live` bound on `\|meta.total − (store − excluded − retainedMissing)\|` per institute. Equality is not required; the decomposition is always printed. |
+
+Two more invariants have no numeric constant:
+
+- **Id-count invariant** (`adapters.common.write_dashboard`, shared with
+  NSF): the physical store id count may only grow. A caller that applies a
+  source-level aggregation exclusion (NIH's soft-delete ledger) passes the
+  true physical count separately (`store_id_count`) so a legitimate
+  exclusion never trips this warning — only an actual drop in the store
+  itself does.
+- **Missing-uncovered / FY-anomaly reporting**: an id stored but not
+  returned by a full pull (and not already excluded), and a re-dated
+  record whose source-current date falls outside its own declared
+  `fiscal_year`, are both retained, counted (the latter under its new
+  date), and published as plain-language `dataQualityNotes` entries —
+  never a warning, never a failure.
+
 ## Schema-extension rule
 
 If a future account needs a fact none of the tables above can express, that
