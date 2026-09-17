@@ -56,14 +56,44 @@ def baseline_file_b_cents(pin):
     return pin["obligationsCents"]
 
 
+def baseline_period_notes_problems(pin):
+    """Validate the curated ``periodNotes`` list on one baseline FY pin.
+
+    ``periodNotes`` (optional) is a list of ``{"period": int 2-12, "note":
+    non-empty str}`` -- the hand-curated explanation for an accepted period
+    whose cumulative File B drop the large-drop validator check would
+    otherwise flag (see docs/obligation-ledger.md "Snapshot acceptance and
+    not-reported periods"). It lives in the curated baseline file, never in
+    generated provenance.
+    """
+    notes = pin.get("periodNotes")
+    if notes is None:
+        return []
+    if not isinstance(notes, list) or not notes:
+        return ["periodNotes must be a non-empty list when present"]
+    problems = []
+    for entry in notes:
+        if not isinstance(entry, dict):
+            problems.append(f"periodNotes entry must be an object: {entry!r}")
+            continue
+        period = entry.get("period")
+        if type(period) is not int or not 2 <= period <= 12:
+            problems.append(f"periodNotes period must be an integer 2-12: {period!r}")
+        note = entry.get("note")
+        if not isinstance(note, str) or not note.strip():
+            problems.append("periodNotes note must be a non-empty string")
+    return problems
+
+
 def baseline_pin_problems(pin):
     """Validate the universal File A/File B baseline specialization schema."""
     status = pin.get("status")
+    problems = baseline_period_notes_problems(pin)
     present = [field in pin for field in BASELINE_VARIANCE_FIELDS]
     if status == "unavailable":
-        return (["source-unavailable row cannot declare a File A/File B variance"]
-                if any(present) else [])
-    problems = []
+        problems += (["source-unavailable row cannot declare a File A/File B variance"]
+                     if any(present) else [])
+        return problems
     if type(pin.get("obligationsCents")) is not int:
         problems.append("available row must declare integer obligationsCents")
     if any(present) and not all(present):
@@ -86,6 +116,220 @@ def baseline_pin_problems(pin):
         if not isinstance(reason, str) or not reason.strip():
             problems.append("File A/File B variance requires a non-empty reason")
     return problems
+
+
+def classify_file_b_periods(row_counts):
+    """Classify one fiscal year's File B period snapshots as accepted.
+
+    ``row_counts`` maps canonical submission-period labels, all within one
+    fiscal year, to the raw row count returned by that period's File B
+    download. This is the universal, registry-free snapshot-acceptance rule
+    (see docs/obligation-ledger.md "Snapshot acceptance and not-reported
+    periods"), refined from data on 2026-09-17 after the first offline
+    rebuild tripped its own validator on five account-years:
+
+    - A row count of zero is always ``notReported``.
+    - A period whose rows fall below half the last *reported* period's rows
+      is a candidate dip against that frozen baseline. Looking only at
+      periods that already exist in ``row_counts`` (never ones not yet
+      pulled):
+      - if some later period recovers to at least half the baseline, the
+        whole dip run is ``notReported`` (transient -- e.g. Navy FY2025
+        P11: 1 row against a 239-row baseline, P12 recovers to 243) and the
+        recovering period becomes the new baseline;
+      - if no later period exists at all, the dip is ``notReported``
+        (provisional -- the fiscal year may still recover on a future
+        pull);
+      - if later periods exist but none of them recovers, the dip is a real
+        restructuring: it is ``reported`` and becomes the new baseline
+        itself (sustained -- e.g. commerce/census-current-surveys FY2020
+        settles from 101 rows at P06 to 44 at P07 and stays there, and the
+        fiscal-year total still reconciles to GTAS).
+    - Independently, any non-final period whose rows fall below a quarter
+      of the fiscal year's final accepted period's rows is also
+      ``notReported`` (the final period itself exempt from this backward
+      check) -- catches a run of periods that each look individually
+      stable next to their neighbors but are collectively tiny next to the
+      real year-end total (e.g. commerce/noaa-orf FY2024: 5-10 rows for
+      P04-P08 against 551 at P12). A small account whose early periods are
+      merely proportionately smaller, not stub-sized, is unaffected (3
+      rows at P02 against 8 at P12 is 0.375 of the final count and passes).
+
+    Its bytes and provenance are still kept upstream; this function only
+    returns the classification.
+
+    Returns ``{period: "reported" | "notReported"}``.
+    """
+    ordered = sorted(row_counts, key=lambda label: period_info(label)[1])
+    rows = [int(row_counts[label]) for label in ordered]
+    n = len(rows)
+    status = [None] * n
+    baseline = None
+    index = 0
+    while index < n:
+        current_rows = rows[index]
+        if current_rows == 0:
+            status[index] = "notReported"
+            index += 1
+            continue
+        if baseline is not None and current_rows < 0.5 * baseline:
+            recovery = next(
+                (later for later in range(index + 1, n)
+                 if rows[later] >= 0.5 * baseline),
+                None,
+            )
+            if recovery is None:
+                if index == n - 1:
+                    status[index] = "notReported"  # provisional
+                else:
+                    status[index] = "reported"  # sustained: new regime
+                    baseline = current_rows
+                index += 1
+                continue
+            for dip in range(index, recovery):
+                status[dip] = "notReported"  # transient
+            status[recovery] = "reported"
+            baseline = rows[recovery]
+            index = recovery + 1
+            continue
+        status[index] = "reported"
+        baseline = current_rows
+        index += 1
+
+    if n and rows[-1] > 0:
+        floor = 0.25 * rows[-1]
+        for idx in range(n - 1):  # the final period is exempt
+            if rows[idx] < floor:
+                status[idx] = "notReported"
+
+    return {ordered[idx]: status[idx] for idx in range(n)}
+
+
+def check_final_period_reported(period_status, fy_complete):
+    """Fail closed when a fiscal year cannot reconcile without its last period.
+
+    ``period_status`` is one fiscal year's ``classify_file_b_periods``
+    result. Raises ``ValueError`` when the highest-numbered period recorded
+    is ``notReported`` and either it is P12 or the fiscal year's baseline
+    pin says the year is complete -- a File B snapshot the GTAS total
+    depends on is missing, and pinning through it would be exactly the
+    empty-snapshot defect the acceptance rule exists to prevent.
+    """
+    if not period_status:
+        return
+    last_label = max(period_status, key=lambda label: period_info(label)[1])
+    if period_status[last_label] != "notReported":
+        return
+    last_period = period_info(last_label)[1]
+    if last_period == 12 or fy_complete:
+        raise ValueError(
+            f"{last_label} is notReported and the fiscal year cannot "
+            "reconcile without it"
+        )
+
+
+def covers_and_effective(period_status):
+    """Derive reporting-span relationships from a period-status map.
+
+    ``period_status`` may span several fiscal years; periods are ordered by
+    (fiscal year, period number) so spans never cross a fiscal-year
+    boundary (each fiscal year's own P12/P02 reset is independent).
+
+    Returns ``(covers, effective)``:
+
+    - ``covers[reportedPeriod]`` is the ordered list of periods that
+      reported period absorbs (itself last), present only when it follows
+      one or more ``notReported`` periods -- i.e. length > 1. The site uses
+      this to label a row "P12 (covers P11-P12)".
+    - ``effective[period]`` is the reported period whose span covers it
+      (itself, for a reported period). A ``notReported`` period with no
+      later reported period yet in ``period_status`` -- a dangling tail on
+      an in-progress pull -- is omitted: its File C events remain
+      unmatched until a future pull supplies the covering reported period.
+    """
+    ordered = sorted(period_status, key=lambda label: period_info(label)[:2])
+    covers, effective = {}, {}
+    pending = []
+    for label in ordered:
+        if period_status[label] == "notReported":
+            pending.append(label)
+            continue
+        span = pending + [label]
+        if len(span) > 1:
+            covers[label] = span
+        for member in span:
+            effective[member] = label
+        pending = []
+    return covers, effective
+
+
+def file_b_row_counts_from_provenance(provenance):
+    """Extract ``{period: rows}`` for File B downloads in one FY's provenance."""
+    counts = {}
+    fallback_fy = provenance.get("fiscalYear")
+    for download in provenance.get("downloads") or []:
+        scope = download.get("acceptedRequestScope") or {}
+        if "object_class_program_activity" not in (scope.get("download_types") or []):
+            continue
+        filters = scope.get("filters") or {}
+        period = filters.get("period")
+        fy = filters.get("fy", fallback_fy)
+        if period is None or fy is None:
+            continue
+        label = canonical_period(f"FY{int(fy)}P{int(period):02}")
+        counts[label] = int(download.get("statusRowCount") or 0)
+    return counts
+
+
+def account_period_status(store, events, partial_fys=()):
+    """Recompute an account's File B period classification from provenance.
+
+    Reads each event-bearing fiscal year's committed
+    ``FY####.provenance.json`` and reapplies ``classify_file_b_periods``, so
+    dashboard rebuilds (``scripts/rollup_obligations.py``) and validation
+    (``scripts/validate_obligations.py``) derive the identical status from
+    the same source of truth without any network pull. This never raises:
+    the P12/complete-year hard error
+    (``check_final_period_reported``) is a validation-time concern (an
+    already-committed historical fiscal year that turns out to end on a
+    notReported period must be reported as a validation failure -- and,
+    independently, will already fail the exact-cents GTAS gate since its
+    File B cumulative total is now frozen short -- not crash the dashboard
+    rebuild for every other account in the same process). Callers that want
+    the hard error call ``check_final_period_reported`` themselves per
+    fiscal year.
+    """
+    partial_fys = set(partial_fys)
+    merged = {}
+    for fy in sorted({event["fiscalYear"] for event in events}):
+        provenance = load_partition_provenance(store, fy)
+        if not provenance:
+            continue
+        row_counts = file_b_row_counts_from_provenance(provenance)
+        if not row_counts:
+            continue
+        merged.update(classify_file_b_periods(row_counts))
+    return merged
+
+
+def merge_period_status(status_dicts):
+    """Combine several accounts' per-period status for an agency/root rollup.
+
+    A period is ``notReported`` at the combined grain only when every
+    account that has an opinion on it agrees; a mix (or accounts silent on
+    it, e.g. before this feature or with no File B download recorded) is a
+    legitimate, if partly incomplete, reported total and must not be
+    hidden from the combined chart.
+    """
+    votes = defaultdict(list)
+    for status in status_dicts:
+        for period, value in status.items():
+            votes[period].append(value)
+    return {
+        period: ("notReported" if values and all(v == "notReported" for v in values)
+                 else "reported")
+        for period, values in votes.items()
+    }
 
 
 def period_info(label):
@@ -377,11 +621,13 @@ def _top_flows(events, positive):
              "awardUrl": e["awardUrl"]} for e in rows[:20]]
 
 
-def aggregate(events, current_fy=None, covered_periods=None, partial_fys=None):
+def aggregate(events, current_fy=None, covered_periods=None, partial_fys=None,
+              period_status=None):
     events = [normalize_event(e) for e in events]
+    period_status = dict(period_status or {})
     covered_periods = {
         canonical_period(label) for label in (covered_periods or [])
-    }
+    } | set(period_status)
     covered_fys = {period_info(label)[0] for label in covered_periods}
     if current_fy is None:
         current_fy = max(
@@ -403,12 +649,28 @@ def aggregate(events, current_fy=None, covered_periods=None, partial_fys=None):
         by_period[label]
         by_fy[period_info(label)[0]]
 
+    covers, _ = covers_and_effective(period_status) if period_status else ({}, {})
+
     periods = []
     for label in sorted(by_period, key=lambda p: (period_info(p)[0], period_info(p)[1])):
         period_events = by_period[label]
-        periods.append({"submissionPeriod": label,
-                        "month": period_info(label)[2].isoformat()[:7],
-                        **_metrics(period_events)})
+        status = period_status.get(label, "reported")
+        row = {"submissionPeriod": label,
+               "month": period_info(label)[2].isoformat()[:7],
+               "status": status}
+        if status == "notReported":
+            # No derived File B activity or residual exists for a
+            # not-reported period (see "Snapshot acceptance and
+            # not-reported periods" in docs/obligation-ledger.md); publish
+            # no numeric period activity at all rather than the partial,
+            # potentially misleading File-C-only total that would otherwise
+            # land in this bucket.
+            row.update({key: None for key in _metrics(period_events)})
+        else:
+            row.update(_metrics(period_events))
+            if label in covers:
+                row["coversPeriods"] = covers[label]
+        periods.append(row)
 
     fiscal_years, cumulative = [], []
     for fy in sorted(by_fy):
@@ -418,12 +680,31 @@ def aggregate(events, current_fy=None, covered_periods=None, partial_fys=None):
                              "topRecipients": _top_recipients(fy_events),
                              "positiveFlows": _top_flows(fy_events, True),
                              "negativeFlows": _top_flows(fy_events, False)})
-        running = []
-        for row in [r for r in periods if period_info(r["submissionPeriod"])[0] == fy]:
-            through = [e for e in fy_events if e["fiscalPeriod"] <= period_info(row["submissionPeriod"])[1]]
-            end = period_info(row["submissionPeriod"])[2]
+        fy_rows = [r for r in periods if period_info(r["submissionPeriod"])[0] == fy]
+        running, last_reported_point = [], None
+        for index, row in enumerate(fy_rows):
+            label = row["submissionPeriod"]
+            status = period_status.get(label, "reported")
+            end = period_info(label)[2]
             day = (end - date(fy - 1, 10, 1)).days
-            running.append({"d": day, "submissionPeriod": row["submissionPeriod"], **_metrics(through)})
+            is_last = index == len(fy_rows) - 1
+            if status == "notReported" and last_reported_point is not None and not is_last:
+                # Hold the cumulative line at the last reported value
+                # instead of dipping to the partial File-C-only total that
+                # a not-reported period's own events would otherwise imply.
+                # A dangling final period (no later reported point yet to
+                # anchor a hold) is shown at its real, if incomplete, value
+                # so the cumulative-endpoint invariant still holds exactly.
+                point = {**last_reported_point, "d": day,
+                         "submissionPeriod": label, "status": "notReported",
+                         "held": True}
+            else:
+                through = [e for e in fy_events if e["fiscalPeriod"] <= period_info(label)[1]]
+                point = {"d": day, "submissionPeriod": label, "status": status,
+                         **_metrics(through)}
+                if status == "reported":
+                    last_reported_point = point
+            running.append(point)
         cumulative.append({"fy": fy, "partial": fy in partial_fys, "points": running})
     totals = _metrics(events)
     return {**totals,
@@ -441,12 +722,13 @@ def aggregate(events, current_fy=None, covered_periods=None, partial_fys=None):
 
 def write_dashboard(data_dir, node, source, events, warnings=None, children=None,
                     current_fy=None, metadata=None, covered_periods=None,
-                    partial_fys=None):
+                    partial_fys=None, period_status=None):
     out = {"schemaVersion": 2, "kind": "obligations",
            "generated": date.today().isoformat(),
            "node": node, "source": source, "warnings": list(warnings or []),
            "dataComplete": not warnings,
-           **aggregate(events, current_fy, covered_periods, partial_fys),
+           **aggregate(events, current_fy, covered_periods, partial_fys,
+                      period_status),
            "children": children or []}
     if metadata:
         out.update(metadata)

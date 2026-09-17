@@ -13,8 +13,9 @@ REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
 from adapters.obligation_common import (
-    baseline_file_b_cents, baseline_pin_problems, event_fingerprint,
-    file_sha256, load_store, partition_diff, write_store,
+    baseline_file_b_cents, baseline_pin_problems, check_final_period_reported,
+    classify_file_b_periods, event_fingerprint, file_sha256, load_store,
+    partition_diff, period_info, write_store,
 )
 from adapters.usaspending_obligations import (
     alias_map, archive_rows, combine_file_b_file_c, file_b_period_events,
@@ -178,6 +179,21 @@ def _baseline_pin(repo, account, fy, last_period, file_b_total,
     existing = baseline.get("fiscalYears", {}).get(str(fy))
     if existing and existing.get("status") == "unavailable":
         raise ValueError(f"FY{fy} is marked source-unavailable")
+    if existing and file_b_total == 0:
+        try:
+            previous_amount = baseline_file_b_cents(existing)
+        except (KeyError, TypeError):
+            previous_amount = existing.get("obligationsCents")
+        if previous_amount:
+            # A File A/GTAS-level collapse to exactly zero cents after a
+            # previously positive pin in the same fiscal year is the same
+            # empty-snapshot defect class as a row-count-based notReported
+            # period (HIGH-5): never pin a zero over a positive one. Keep
+            # the last accepted pin unchanged; the row-count acceptance
+            # rule (classify_file_b_periods / check_final_period_reported)
+            # is the primary defense, and this is the backstop for a
+            # collapse it did not already classify notReported.
+            return dict(existing)
     override = recovery.baseline_pin(account["path"], fy) if recovery else None
     if override is not None:
         problems = baseline_pin_problems(override)
@@ -398,6 +414,7 @@ def pull(account, years, current_period=12, repo=REPO, rollup=True,
             availability.get("firstFiscalYearPeriod", 6)
             if fy == first_fy else availability.get("regularFirstPeriod", 2)
         )
+        file_b_row_counts = {}
         for period in range(first_period, last_period + 1):
             members, download = _download(
                 repo, account, account_id, fy, period,
@@ -406,9 +423,26 @@ def pull(account, years, current_period=12, repo=REPO, rollup=True,
             )
             downloads.append(download)
             rows = [row for part in members.values() for row in part]
-            snapshots[f"FY{fy}P{period:02}"] = parse_file_b_snapshot(
+            label = f"FY{fy}P{period:02}"
+            snapshots[label] = parse_file_b_snapshot(
                 rows, account["federalAccount"], aliases)
-        file_b = file_b_period_events(snapshots, account["federalAccount"])
+            file_b_row_counts[label] = download["statusRowCount"]
+        # Snapshot acceptance rule (see docs/obligation-ledger.md
+        # "Snapshot acceptance and not-reported periods"): a period whose
+        # File B download returned zero rows, or fewer than half the
+        # previous reported period's rows, is notReported. A notReported
+        # P12 -- or the fiscal year's final available period once the
+        # baseline already marks the year complete -- cannot reconcile and
+        # fails the pull closed.
+        classification = classify_file_b_periods(file_b_row_counts)
+        existing_fy_pin = baseline.get("fiscalYears", {}).get(str(fy), {})
+        fy_marked_complete = existing_fy_pin.get("status") in {"complete", "available"}
+        check_final_period_reported(
+            classification, fy_complete=(last_period == 12 or fy_marked_complete)
+        )
+        file_b = file_b_period_events(
+            snapshots, account["federalAccount"], classification
+        )
         c_members, download = _download(
             repo, account, account_id, fy, last_period, "award_financial",
             FILE_C_COLUMNS, raw_archive_dir,
@@ -416,8 +450,24 @@ def pull(account, years, current_period=12, repo=REPO, rollup=True,
         )
         downloads.append(download)
         file_c = parse_file_c(c_members, account["federalAccount"], aliases)
-        events = combine_file_b_file_c(file_b, file_c, account["federalAccount"])
+        events = combine_file_b_file_c(
+            file_b, file_c, account["federalAccount"], classification
+        )
+        # file_b already telescopes only across reported periods, so its
+        # sum is the cumulative value as of the last *reported* period even
+        # when the raw requested last_period came back notReported.
         file_b_total = sum(e["amountCents"] for e in file_b)
+        reported_period_numbers = [
+            period_info(label)[1] for label, status in classification.items()
+            if status == "reported"
+        ]
+        # The baseline pin may only advance to a period whose File B
+        # snapshot is classified reported; a notReported period never
+        # becomes the asOfPeriod (coordinator addition to the W3 brief,
+        # 2026-09-17 -- the ed/ies FY2026 P10 empty-pin regression).
+        effective_last_period = (
+            max(reported_period_numbers) if reported_period_numbers else last_period
+        )
         from adapters.obligation_common import cents
         detail_total = cents(detail.get("total_obligated_amount") or 0)
         all_events.extend(events)
@@ -425,11 +475,11 @@ def pull(account, years, current_period=12, repo=REPO, rollup=True,
             (event["fiscalPeriod"] for event in events), default=None
         )
         baseline_pin = _baseline_pin(
-            repo, account, fy, last_period, file_b_total, first_event_period,
-            recovery,
+            repo, account, fy, effective_last_period, file_b_total,
+            first_event_period, recovery,
         )
         _validate_account_total(
-            fy, last_period, detail_total, file_b_total, baseline_pin
+            fy, effective_last_period, detail_total, file_b_total, baseline_pin
         )
         previous = [e for e in existing if e["fiscalYear"] == fy]
         previous_provenance = store / f"FY{fy}.provenance.json"

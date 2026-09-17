@@ -7,6 +7,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+from adapters.obligation_common import classify_file_b_periods
 from adapters.usaspending_obligations import (
     DOWNLOAD_STATUS_TIMEOUT_SECONDS,
     _bytes, _json, alias_map, combine_file_b_file_c, file_b_period_events,
@@ -71,6 +72,28 @@ class USAspendingObligationTests(unittest.TestCase):
             )
             with self.assertRaisesRegex(ValueError, "as-of P09"):
                 _baseline_pin(Path(temp), account, 2024, 10, 100)
+
+    def test_baseline_pin_refuses_to_advance_onto_a_zero_collapse(self):
+        # The ed/ies FY2026 P10 regression: a prior partial pin was
+        # positive, and the newly computed File B total collapsed to
+        # exactly zero cents. The pin must not advance; the last accepted
+        # pin is kept unchanged.
+        account = {
+            "path": "ed/ies", "federalAccount": "091-0300",
+            "baseline": "reference/account.json",
+            "availability": {"firstFiscalYear": 2017, "firstFiscalYearPeriod": 6},
+        }
+        old_pin = {"status": "partial", "asOfPeriod": 9, "obligationsCents": 500}
+        with tempfile.TemporaryDirectory() as temp:
+            reference = Path(temp) / "reference"
+            reference.mkdir()
+            (reference / "account.json").write_text(json.dumps({
+                "schemaVersion": 2, "federalAccount": "091-0300",
+                "fiscalYears": {"2026": old_pin},
+            }))
+            self.assertEqual(
+                old_pin, _baseline_pin(Path(temp), account, 2026, 10, 0)
+            )
 
     def test_multiple_historical_parks_normalize_to_one_canonical_activity(self):
         aliases = alias_map({"programActivities": [{
@@ -472,6 +495,90 @@ class USAspendingObligationTests(unittest.TestCase):
             "transaction_obligated_amount": "1.00"}], "Contracts.csv": [], "Unlinked.csv": []}
         c = parse_file_c(parts, "089-0222", ALIASES)
         self.assertEqual("FY2017P06", c[0]["submissionPeriod"])
+
+    def test_not_reported_period_is_skipped_as_a_diff_boundary(self):
+        # Navy RDT&E FY2025 shape: P02..P10 build normally, P11 returns an
+        # anomalous single row (notReported), P12 recovers. The P12 delta
+        # must be measured against the last *reported* snapshot (P10), not
+        # against the near-empty P11 snapshot -- otherwise P11 shows a
+        # fabricated multi-billion-dollar collapse and P12 an equal spike.
+        key = ("0001", "0001", "BES", "PARK1", "", "", "", "")
+        snapshots = {
+            "FY2025P10": {key: 23_000_000_00},
+            "FY2025P11": {key: 100},  # anomalous near-empty snapshot
+            "FY2025P12": {key: 24_300_000_00},
+        }
+        row_counts = {"FY2025P10": 228, "FY2025P11": 1, "FY2025P12": 243}
+        status = classify_file_b_periods(row_counts)
+        self.assertEqual(
+            {"FY2025P10": "reported", "FY2025P11": "notReported",
+             "FY2025P12": "reported"}, status)
+        flows = file_b_period_events(snapshots, "017-1319", status)
+        # No flow at all for the notReported P11; the P12 span delta is
+        # measured against the last reported snapshot, P10.
+        self.assertEqual(["FY2025P10", "FY2025P12"],
+                         [f["submissionPeriod"] for f in flows])
+        by_period = {f["submissionPeriod"]: f["amountCents"] for f in flows}
+        self.assertEqual(1_300_000_00, by_period["FY2025P12"])
+
+    def test_file_c_in_a_not_reported_period_reconciles_at_the_covering_period(self):
+        status = {"FY2024P02": "reported", "FY2024P03": "notReported",
+                  "FY2024P04": "reported"}
+        c_parts = {"Assistance.csv": [
+            {"submission_period": "FY2024P02", "federal_account_symbol": "089-0222",
+             "program_activity_code": "0001", "program_activity_name": "BES",
+             "award_unique_key": "A", "transaction_obligated_amount": "5.00"},
+            # File C activity dated inside the notReported period: it keeps
+            # its own period label but is not reconciled until P04.
+            {"submission_period": "FY2024P03", "federal_account_symbol": "089-0222",
+             "program_activity_code": "0001", "program_activity_name": "BES",
+             "award_unique_key": "B", "transaction_obligated_amount": "2.00"},
+            {"submission_period": "FY2024P04", "federal_account_symbol": "089-0222",
+             "program_activity_code": "0001", "program_activity_name": "BES",
+             "award_unique_key": "C", "transaction_obligated_amount": "1.00"},
+        ], "Contracts.csv": [], "Unlinked.csv": []}
+        c = parse_file_c(c_parts, "089-0222", ALIASES)
+        b = [
+            {"submissionPeriod": "FY2024P02", "federalAccount": "089-0222",
+             "programActivityCode": "0001", "programActivityName": "BES",
+             "programActivityReportingKey": "PARK1", "amountCents": 500},
+            # P03 (notReported) has no File B flow at all.
+            {"submissionPeriod": "FY2024P04", "federalAccount": "089-0222",
+             "programActivityCode": "0001", "programActivityName": "BES",
+             "programActivityReportingKey": "PARK1", "amountCents": 400},
+        ]
+        combined = combine_file_b_file_c(b, c, "089-0222", status)
+        # File C events keep their own submission period unchanged.
+        self.assertEqual(
+            {"FY2024P02", "FY2024P03", "FY2024P04"},
+            {e["submissionPeriod"] for e in combined if e["source"] == "file_c"})
+        # No residual is booked for the notReported period itself.
+        residuals = {e["submissionPeriod"]: e["amountCents"]
+                     for e in combined if e["source"] == "file_b_residual"}
+        self.assertNotIn("FY2024P03", residuals)
+        # The P04 residual absorbs the whole span: 400 (P04 File B) minus
+        # (200 P03 File C + 100 P04 File C) = 100.
+        self.assertEqual(100, residuals["FY2024P04"])
+        self.assertEqual(500 + 400, sum(e["amountCents"] for e in combined))
+
+    def test_dangling_not_reported_tail_leaves_file_c_unmatched(self):
+        # The most recently pulled period is itself notReported with no
+        # later period fetched yet: its File C dollars stay unreconciled
+        # until a future pull supplies the covering reported period.
+        status = {"FY2024P02": "reported", "FY2024P03": "notReported"}
+        c_parts = {"Assistance.csv": [
+            {"submission_period": "FY2024P03", "federal_account_symbol": "089-0222",
+             "program_activity_code": "0001", "program_activity_name": "BES",
+             "award_unique_key": "A", "transaction_obligated_amount": "9.00"},
+        ], "Contracts.csv": [], "Unlinked.csv": []}
+        c = parse_file_c(c_parts, "089-0222", ALIASES)
+        b = [{"submissionPeriod": "FY2024P02", "federalAccount": "089-0222",
+              "programActivityCode": "0001", "programActivityName": "BES",
+              "programActivityReportingKey": "PARK1", "amountCents": 500}]
+        combined = combine_file_b_file_c(b, c, "089-0222", status)
+        self.assertNotIn(
+            "FY2024P03",
+            {e["submissionPeriod"] for e in combined if e["source"] == "file_b_residual"})
 
 
 if __name__ == "__main__":

@@ -281,6 +281,30 @@ class SiteContractTests(unittest.TestCase):
         # heading must not reappear.
         self.assertNotIn('el("h2", { text: episode.title', self.html)
 
+    def test_not_reported_period_renders_a_hollow_marker_and_table_text(self):
+        # Owner decision 2 (2026-09-17, Phase 3.2d remediation): the period
+        # activity chart omits a notReported period; the cumulative step
+        # holds the last reported value and draws a hollow marker there;
+        # the table row reads exactly "not reported at pull".
+        self.assertIn('const NOT_REPORTED_AT_PULL = "not reported at pull";', self.html)
+        cumulative = self.html.split("function obligationCumulativeChart(data) {", 1)[1]
+        cumulative = cumulative.split("function obligationPeriodsChart(data) {", 1)[0]
+        self.assertIn("p.held", cumulative)
+        self.assertIn('fill: css("--surface"), stroke: css(s.v)', cumulative)
+        self.assertIn("marker.append(svgTitle(NOT_REPORTED_AT_PULL))", cumulative)
+        self.assertIn('"aria-label": NOT_REPORTED_AT_PULL', cumulative)
+        self.assertIn("NOT_REPORTED_AT_PULL", cumulative)
+        periods = self.html.split("function obligationPeriodsChart(data) {", 1)[1]
+        periods = periods.split("function obligationFYChart(data) {", 1)[0]
+        self.assertIn('r.status === "notReported"', periods)
+        self.assertIn("NOT_REPORTED_AT_PULL", periods)
+        self.assertIn("covers", periods)
+        self.assertIn("coversPeriods", periods)
+        # The period activity chart itself omits notReported rows.
+        self.assertIn(
+            'const rows = allRows.filter(r => (r.status || "reported") !== "notReported");',
+            periods)
+
     def test_sentinel_publishes_limits_costs_and_source_staleness(self):
         for text in ("Coverage and interpretation limits",
                      "Current automated financial coverage",

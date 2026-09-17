@@ -218,6 +218,7 @@ a verifier needs is a new column here, added once, not a per-agency branch.
 | `fiscalYears.<FY>.fileAFileBVarianceReason` | Required non-empty source disclosure when the dual-pin fields are present. |
 | `fiscalYears.<FY>.firstPeriod` / `asOfPeriod` | For `partial` years: the first reporting period covered and the period the pin is as-of. |
 | `fiscalYears.<FY>.reason` | Required for `unavailable` years — why no pin exists (e.g. "Files A/B/C begin in FY2017 Q2"). |
+| `fiscalYears.<FY>.periodNotes` | Optional list of `{"period": <int 2-12>, "note": "<non-empty string>"}`. The curated explanation `validate_obligations.py`'s undocumented-large-drop check requires for an accepted period whose cumulative File B fell more than 50% from a previous cumulative of at least $1,000,000. Lives only here, never in generated provenance (`docs/obligation-ledger.md` "Snapshot acceptance and not-reported periods"). |
 
 ### `reference/aaas_federal_account_crosswalk.json` — reference-only, consulted by the registry tier
 
@@ -366,3 +367,37 @@ publication workflows no longer each run the full fast tier: it is the one
 place that still checks the *whole* committed tree on `main`, on its own
 schedule, without being able to hold up any of the three ledgers' own
 publication.
+
+## Fast-tier addition: File B snapshot acceptance (Phase 3.2d remediation, 2026-09-17)
+
+`validate_obligations.py`, part of the `fast` tier, gained three checks for
+the not-reported acceptance rule (HIGH-3/HIGH-5; full rule, including the
+2026-09-17 forward transient/sustained/provisional and backward-floor
+refinements, in `docs/obligation-ledger.md` "Snapshot acceptance and
+not-reported periods"). All three are universal and registry-free, reading
+only `config/obligation_accounts.json`/committed provenance and each
+account's own curated baseline file, per the governing principle at the
+top of this document:
+
+- **Classification cross-check.** Every account's `notReported` period
+  classification is recomputed straight from committed provenance
+  (`account_period_status`, independent of the persisted dashboard) and
+  compared against `dashboard.json`'s `reportingPeriods[].status`; a
+  mismatch is a staleness error, folded into the existing "dashboard
+  reporting periods are stale" check.
+- **Undocumented large drop.** A reported-to-reported cumulative File B
+  drop of more than 50%, where the previous cumulative is at least
+  $1,000,000 (a lower floor fires on immaterial noise), fails unless that
+  fiscal year's **baseline** file (see the specialization schema below)
+  carries a matching `periodNotes` entry; the note is curated, never
+  generated provenance.
+- **P12/complete-year hard error.** A fiscal year whose highest recorded
+  period is `notReported`, when that period is P12 or the baseline already
+  marks the year complete, fails validation (`check_final_period_reported`)
+  — the same hard error the pull path enforces, so a broken endpoint can
+  never reach `main` through either path.
+
+Chart geometry changed for this feature (the period chart omits
+`notReported` rows; the cumulative step chart holds the last reported value
+with a hollow marker), so its release additionally required `rendered` plus
+a before/after screenshot pack per the rule above.

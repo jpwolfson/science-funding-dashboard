@@ -18,6 +18,36 @@ from adapters.funding_sentinel import build as build_sentinel
 from scripts.rollup_obligations import build as build_obligations
 
 
+def _reject_zero_collapse_pin(account_path, fy, current_pin, pin):
+    """Defense in depth for the not-reported acceptance rule at the pin grain.
+
+    ``scripts/pull_obligation_account.py`` already refuses to advance a
+    partial pin's ``asOfPeriod``/``obligationsCents`` onto a notReported
+    period (see docs/obligation-ledger.md "Snapshot acceptance and
+    not-reported periods"; the ed/ies FY2026 P10 empty-pin regression is
+    the motivating case). This is the reconcile-stage backstop: even a
+    provenance file produced by an older pull binary, or a hand-assembled
+    artifact, may never publish a File A/File B pin of exactly zero cents
+    over a previously accepted positive pin in the same fiscal year.
+    """
+    if not current_pin:
+        return
+    try:
+        previous_amount = baseline_file_b_cents(current_pin)
+    except (KeyError, TypeError):
+        previous_amount = current_pin.get("obligationsCents")
+    try:
+        new_amount = baseline_file_b_cents(pin)
+    except (KeyError, TypeError):
+        new_amount = pin.get("obligationsCents")
+    if previous_amount and new_amount == 0:
+        raise ValueError(
+            f"{account_path} FY{fy}: refusing to advance the baseline pin "
+            f"to a zero-cent snapshot after a previously accepted "
+            f"{previous_amount} cents (not-reported acceptance rule)"
+        )
+
+
 def _preserve_current_dual_pin(account_path, fy, current, artifact, normalized_total):
     """Keep a newer approved dual pin when the accepted shard matches exactly."""
     if not current or "fileBObligationsCents" not in current:
@@ -125,6 +155,7 @@ def reconcile(staging, repo=REPO):
                 raise ValueError(f"{key}: invalid accepted provenance")
             pin = dict(provenance.get("baselinePin") or {})
             current_pin = baselines[account["path"]]["fiscalYears"].get(str(fy))
+            _reject_zero_collapse_pin(account["path"], int(fy), current_pin, pin)
             pin = _preserve_current_complete_pin(
                 account["path"], int(fy), current_pin, pin,
                 provenance.get("normalized", {}).get("netObligationsCents"),

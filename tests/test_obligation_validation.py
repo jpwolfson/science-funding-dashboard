@@ -145,6 +145,156 @@ class ObligationValidationTests(unittest.TestCase):
             account, pa, [], stats, set()
         ))
 
+    def test_not_reported_p12_is_a_validation_error_not_a_crash(self):
+        # scripts/validate_obligations.py must report the P12/complete-year
+        # hard error as an ordinary validation error (fail closed) without
+        # raising out of validate() and aborting every other account.
+        temp, root = self.fixture(100)
+        try:
+            provenance = (root / "data" / "obligations" / "doe" / "sc" /
+                         "events" / "FY2024.provenance.json")
+            value = json.loads(provenance.read_text())
+            value["collectionStatus"] = "accepted"
+            value["acceptedAt"] = "2026-08-11T12:00:00+00:00"
+            value["downloads"] = [
+                {"submissionType": "object_class_program_activity",
+                 "requestScope": {"filters": {"fy": 2024, "period": 6,
+                                              "submission_types":
+                                                  ["object_class_program_activity"],
+                                              "federal_account": "5787"},
+                                  "columns": ["submission_period"]},
+                 "acceptedRequestScope": {"filters": {"fy": 2024, "period": 6,
+                                                      "federal_account": "5787"},
+                                          "download_types":
+                                              ["object_class_program_activity"]},
+                 "status": "finished", "statusRowCount": 100,
+                 "parsedRowCount": 100, "memberRowCounts": {"a.csv": 100},
+                 "archiveSha256": "0" * 64, "rawArtifactFile": "a.zip"},
+                {"submissionType": "object_class_program_activity",
+                 "requestScope": {"filters": {"fy": 2024, "period": 12,
+                                              "submission_types":
+                                                  ["object_class_program_activity"],
+                                              "federal_account": "5787"},
+                                  "columns": ["submission_period"]},
+                 "acceptedRequestScope": {"filters": {"fy": 2024, "period": 12,
+                                                      "federal_account": "5787"},
+                                          "download_types":
+                                              ["object_class_program_activity"]},
+                 "status": "finished", "statusRowCount": 40,
+                 "parsedRowCount": 40, "memberRowCounts": {"a.csv": 40},
+                 "archiveSha256": "0" * 64, "rawArtifactFile": "b.zip"},
+                {"submissionType": "award_financial",
+                 "requestScope": {"filters": {"fy": 2024, "period": 12,
+                                              "submission_types":
+                                                  ["award_financial"],
+                                              "federal_account": "5787"},
+                                  "columns": ["submission_period"]},
+                 "acceptedRequestScope": {"filters": {"fy": 2024, "period": 12,
+                                                      "federal_account": "5787"},
+                                          "download_types": ["award_financial"]},
+                 "status": "finished", "statusRowCount": 0,
+                 "parsedRowCount": 0, "memberRowCounts": {},
+                 "archiveSha256": "0" * 64, "rawArtifactFile": "c.zip"},
+            ]
+            provenance.write_text(json.dumps(value))
+            errors = validate(root, require_data=False)
+            self.assertTrue(
+                any("FY2024P12 is notReported" in error for error in errors),
+                errors,
+            )
+        finally:
+            temp.cleanup()
+
+    def test_large_drop_requires_a_baseline_period_note_above_the_dollar_floor(self):
+        temp = tempfile.TemporaryDirectory()
+        try:
+            root = Path(temp.name)
+            (root / "config").mkdir()
+            (root / "reference").mkdir()
+            (root / "config" / "obligation_accounts.json").write_text(json.dumps({
+                "schemaVersion": 2,
+                "accounts": [{"path": "dhs/cisa-rd", "federalAccount": "070-0805",
+                              "baseline": "reference/dhs_cisa_rd_obligation_baseline.json",
+                              "programActivities": [{"slug": "rd", "code": "0001",
+                                                     "name": "R&D"}]}]}))
+            baseline_path = root / "reference" / "dhs_cisa_rd_obligation_baseline.json"
+            baseline_path.write_text(json.dumps({
+                "schemaVersion": 2, "federalAccount": "070-0805",
+                "fiscalYears": {"2023": {"status": "complete",
+                                         "obligationsCents": 100_000_000}}}))
+            rows = [
+                # Cumulative through P03: $12.9M. Through P04: $1M (a real
+                # >50% drop, above the $1M floor).
+                normalize_event({
+                    "id": "p03", "source": "file_b_residual",
+                    "submissionPeriod": "FY2023P03", "federalAccount": "070-0805",
+                    "programActivityCode": "0001", "programActivityName": "R&D",
+                    "amountCents": 1_290_038_168, "awardId": "", "linked": False,
+                }),
+                normalize_event({
+                    "id": "p04", "source": "file_b_residual",
+                    "submissionPeriod": "FY2023P04", "federalAccount": "070-0805",
+                    "programActivityCode": "0001", "programActivityName": "R&D",
+                    "amountCents": -1_190_038_168, "awardId": "", "linked": False,
+                }),
+            ]
+            store = root / "data" / "obligations" / "dhs" / "cisa-rd" / "events"
+            write_store(store, rows, {"federalAccount": "070-0805"})
+            errors = validate(root, require_data=False)
+            self.assertTrue(
+                any("cumulative File B fell" in e and "periodNotes" in e
+                    for e in errors), errors,
+            )
+            # Add the curated note and confirm the same drop no longer fails.
+            value = json.loads(baseline_path.read_text())
+            value["fiscalYears"]["2023"]["periodNotes"] = [
+                {"period": 4, "note": "Provisional note pending re-pull."}]
+            baseline_path.write_text(json.dumps(value))
+            errors = validate(root, require_data=False)
+            self.assertFalse(
+                any("cumulative File B fell" in e for e in errors), errors)
+        finally:
+            temp.cleanup()
+
+    def test_large_drop_below_the_dollar_floor_is_not_flagged(self):
+        temp = tempfile.TemporaryDirectory()
+        try:
+            root = Path(temp.name)
+            (root / "config").mkdir()
+            (root / "reference").mkdir()
+            (root / "config" / "obligation_accounts.json").write_text(json.dumps({
+                "schemaVersion": 2,
+                "accounts": [{"path": "usda/nifa-integrated-activities",
+                              "federalAccount": "012-1502",
+                              "baseline": "reference/nifa_obligation_baseline.json",
+                              "programActivities": [{"slug": "ia", "code": "0001",
+                                                     "name": "Integrated"}]}]}))
+            (root / "reference" / "nifa_obligation_baseline.json").write_text(json.dumps({
+                "schemaVersion": 2, "federalAccount": "012-1502",
+                "fiscalYears": {"2022": {"status": "complete", "obligationsCents": -1000}}}))
+            rows = [
+                normalize_event({
+                    "id": "p02", "source": "file_b_residual",
+                    "submissionPeriod": "FY2022P02", "federalAccount": "012-1502",
+                    "programActivityCode": "0001", "programActivityName": "Integrated",
+                    "amountCents": 24258, "awardId": "", "linked": False,
+                }),
+                normalize_event({
+                    "id": "p03", "source": "file_b_residual",
+                    "submissionPeriod": "FY2022P03", "federalAccount": "012-1502",
+                    "programActivityCode": "0001", "programActivityName": "Integrated",
+                    "amountCents": -25258, "awardId": "", "linked": False,
+                }),
+            ]
+            store = (root / "data" / "obligations" / "usda" /
+                    "nifa-integrated-activities" / "events")
+            write_store(store, rows, {"federalAccount": "012-1502"})
+            errors = validate(root, require_data=False)
+            self.assertFalse(
+                any("cumulative File B fell" in e for e in errors), errors)
+        finally:
+            temp.cleanup()
+
     def test_one_cent_difference_fails(self):
         temp, root = self.fixture(101)
         try:

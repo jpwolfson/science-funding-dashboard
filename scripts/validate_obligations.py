@@ -12,9 +12,9 @@ REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
 from adapters.obligation_common import (
-    aggregate, baseline_file_b_cents, baseline_pin_problems,
-    event_fingerprint, file_sha256, load_partition_provenance, load_store,
-    period_info,
+    account_period_status, aggregate, baseline_file_b_cents,
+    baseline_pin_problems, check_final_period_reported, event_fingerprint,
+    file_sha256, load_partition_provenance, load_store, period_info,
 )
 from scripts.obligation_retry_recovery import RecoveryError, RetryRecovery
 
@@ -463,7 +463,26 @@ def validate(repo=REPO, require_data=True, check_freshness=False,
                         f"is outside the 0–{max_days}-day SLA"
                     )
         covered_periods = {event["submissionPeriod"] for event in events}
-        stats = aggregate(events, max(by_fy), covered_periods, partial_fys)
+        # Snapshot acceptance rule (docs/obligation-ledger.md "Snapshot
+        # acceptance and not-reported periods"): recompute the notReported
+        # classification straight from committed provenance -- independent
+        # of, and compared against, the persisted dashboard below. Fail
+        # closed, per fiscal year, on the same P12/fiscal-year-complete
+        # hard error the pull path enforces -- appended as an ordinary
+        # validation error rather than raised, so one historical fiscal
+        # year's defect does not abort validating every other account.
+        recomputed_status = account_period_status(store, events, partial_fys)
+        for fy in sorted(by_fy):
+            fy_status = {period: status for period, status in recomputed_status.items()
+                        if period_info(period)[0] == fy}
+            if not fy_status:
+                continue
+            try:
+                check_final_period_reported(fy_status, fy_complete=fy not in partial_fys)
+            except ValueError as error:
+                errors.append(f"{account['path']}: {error}")
+        stats = aggregate(events, max(by_fy), covered_periods, partial_fys,
+                          recomputed_status)
         if stats["netObligationsCents"] != sum(e["amountCents"] for e in events):
             errors.append(f"{account['path']}: aggregate total mismatch")
         for row in stats["fiscalYears"]:
@@ -471,6 +490,35 @@ def validate(repo=REPO, require_data=True, check_freshness=False,
                              if s["fy"] == row["fy"] and s["points"]), None)
             if endpoint and endpoint["netObligationsCents"] != row["netObligationsCents"]:
                 errors.append(f"FY{row['fy']}: cumulative endpoint mismatch")
+        # Undocumented large drop: only above a $1M previous cumulative
+        # (a small account's cumulative can otherwise swing >50% on noise
+        # worth only tens of thousands of dollars). The curated explanation
+        # lives in the baseline file's periodNotes, not in generated
+        # provenance -- provenance is byte-regenerated from the source and
+        # never hand-edited.
+        LARGE_DROP_FLOOR_CENTS = 100_000_000
+        for series in stats["fyCumulative"]:
+            reported_points = [p for p in series["points"]
+                               if p.get("status", "reported") == "reported"]
+            period_notes = {
+                note.get("period")
+                for note in (baseline["fiscalYears"].get(str(series["fy"]), {})
+                             .get("periodNotes") or [])
+            }
+            for previous, current in zip(reported_points, reported_points[1:]):
+                previous_cents = previous.get("netObligationsCents") or 0
+                current_cents = current.get("netObligationsCents") or 0
+                if (previous_cents >= LARGE_DROP_FLOOR_CENTS
+                        and current_cents < previous_cents * 0.5):
+                    current_period_number = period_info(current["submissionPeriod"])[1]
+                    if current_period_number not in period_notes:
+                        errors.append(
+                            f"{account['path']} FY{series['fy']} "
+                            f"{current['submissionPeriod']}: cumulative File B "
+                            f"fell from {previous_cents} to {current_cents} "
+                            "cents (>50%) with no periodNotes entry in the "
+                            "baseline"
+                        )
         dashboard = repo / "data" / "obligations" / account["path"] / "dashboard.json"
         if dashboard.exists():
             page = json.loads(dashboard.read_text())
@@ -496,8 +544,11 @@ def validate(repo=REPO, require_data=True, check_freshness=False,
                 if not actual or (actual.get("netObligationsCents"), actual.get("partial")) != (
                         row["netObligationsCents"], row["partial"]):
                     errors.append(f"FY{row['fy']}: dashboard fiscal-year status is stale")
-            if [row.get("submissionPeriod") for row in page.get("reportingPeriods", [])] != [
-                    row["submissionPeriod"] for row in stats["reportingPeriods"]]:
+            page_periods = page.get("reportingPeriods", [])
+            if ([row.get("submissionPeriod") for row in page_periods] !=
+                    [row["submissionPeriod"] for row in stats["reportingPeriods"]]
+                    or [row.get("status", "reported") for row in page_periods] !=
+                    [row.get("status", "reported") for row in stats["reportingPeriods"]]):
                 errors.append(f"{account['path']}: dashboard reporting periods are stale")
             children = page.get("children", [])
             if round(sum(c.get("currentFYNetObligations", 0) for c in children) * 100) != next(
@@ -520,7 +571,8 @@ def validate(repo=REPO, require_data=True, check_freshness=False,
                     == (pa["code"], pa["name"])
                 ]
                 child_stats = aggregate(
-                    child_events, stats["currentFY"], covered_periods, partial_fys
+                    child_events, stats["currentFY"], covered_periods, partial_fys,
+                    recomputed_status,
                 )
                 if child_page.get("totalNetObligationsCents") != child_stats["totalNetObligationsCents"]:
                     errors.append(f"{account['path']}/{pa['slug']}: dashboard total is stale")

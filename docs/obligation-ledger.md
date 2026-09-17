@@ -127,6 +127,125 @@ to mean `awards`. Obligation dashboards publish:
 Distinct linked-award counts are not additive. Dollar rollups are additive.
 Negative events and residuals remain visible throughout the UI.
 
+## Snapshot acceptance and not-reported periods
+
+Added in the Phase 3.2d remediation (2026-09-17) after HIGH-5: an empty or
+near-empty File B period download was previously accepted at face value, so
+the cumulative-through-period value collapsed toward zero and the next
+period's delta spiked to recover it — a fabricated multi-billion-dollar
+swing that no validator caught because `File C + residual = File B` still
+held exactly at that broken grain.
+
+**Acceptance rule (universal, registry-free).** A row count of zero is
+always `notReported`. Otherwise, a period whose rows fall below half the
+last *reported* period's rows is a candidate dip against that frozen
+baseline; looking only at periods that already exist for the fiscal year
+(never ones not yet pulled), the dip is `notReported` if a later period
+recovers to at least half the baseline (**transient** — `dod/navy-rdte`
+FY2025 P11: 1 row against 239, P12 recovers to 243) or if no later period
+exists at all yet (**provisional** — the fiscal year may still recover on
+a future pull); if later periods exist but none recovers, the dip is a
+real restructuring (**sustained**): it is `reported` and becomes the new
+baseline itself — `commerce/census-current-surveys` FY2020 settles from
+101 rows at P06 to 44 at P07 and stays there, and the fiscal-year total
+still reconciles to GTAS exactly. Independently, any non-final period
+whose rows fall below a quarter of the fiscal year's final accepted
+period's rows is also `notReported` (the final period exempt) — this
+backward rule catches a run of periods that each look individually stable
+next to their immediate neighbors but are collectively tiny next to the
+real year-end total (`commerce/noaa-orf` FY2024: 5–10 rows at P04–P08
+against 551 at P12); it does not misfire on a genuinely small account
+whose early periods are proportionately smaller, not stub-sized (3 rows
+against 8 is 0.375 of the final count and passes). There is no per-agency
+parameter anywhere in this rule — see the verification regime's governing
+principle. A `notReported` snapshot's bytes and provenance are still kept;
+it contributes no derived File B activity and no residual event.
+`adapters.obligation_common` implements the whole rule once
+(`classify_file_b_periods`) and both the pull adapter and the offline
+rebuild/validation path (`account_period_status`, reading
+`downloads[].statusRowCount` straight from committed provenance) apply the
+identical rule, so an existing store is reclassified without a re-pull.
+
+A `notReported` P12 — or, for a fiscal year the baseline already marks
+complete, its final recorded period — is a hard error
+(`check_final_period_reported`): the year cannot reconcile to GTAS without
+a real endpoint, so the pull and the rebuild both fail closed rather than
+publish a broken pin.
+
+**Reporting-span reconciliation.** File C is downloaded once per fiscal
+year at the latest requested period, with each row carrying its own
+`submission_period`; a `notReported` File B period therefore still has real
+File C events under its own period label. Reconciliation runs over the
+*reporting span* a reported period closes, not the single period:
+
+- File B activity for a reported period = its cumulative snapshot minus the
+  last *reported* snapshot before it (skipping any `notReported` periods in
+  between).
+- The residual booked at that reported period = that delta minus the sum of
+  File C events across the whole span it absorbs (the skipped periods plus
+  itself).
+- A `notReported` period itself keeps its File C events, but gets no File B
+  activity and no residual event.
+- `File C + residual = File B` holds exactly per span; the FY-total GTAS
+  gate is unchanged (it was always a whole-year identity).
+
+A `notReported` period with no later reported period yet fetched (a
+dangling tail on an in-progress pull) is left unreconciled — its File C
+dollars are real and retained, but unmatched — until a future pull supplies
+the covering reported period. This never produces a fabricated swing: no
+residual is invented for it either way.
+
+**Dashboard shape.** Every `reportingPeriods` row carries `status:
+"reported" | "notReported"`. A `notReported` row publishes no numeric
+activity at all (every metric field is `null`); the next `reported` row
+that absorbs one or more `notReported` periods carries `coversPeriods`, the
+ordered list of periods (itself last) its delta actually spans. Cumulative
+(`fyCumulative`) points at a `notReported` period hold the last reported
+value and add `held: true`, except when it is also the fiscal year's final
+recorded point (nothing later to hold against yet) — that endpoint is
+always its real, if incomplete, computed value, so the cumulative-endpoint
+invariant (`fyCumulative` last point == that FY's total) still holds
+exactly.
+
+**Display.** The obligations-by-period chart omits `notReported` rows
+entirely — there is no derived activity to plot, so it is neither a zero
+nor a gap-worthy point. The cumulative step chart draws a hollow marker
+(with a "not reported at pull" title/aria hint) at a held point instead of
+the usual filled one. Both charts' tables render the literal text "not
+reported at pull" for that row, and the covering row's period label notes
+its span, e.g. "P12 (covers P11-P12)".
+
+**`periodNotes`.** A reported-to-reported cumulative File B drop of more
+than 50%, where the previous cumulative is at least $1,000,000 (a lower
+floor fires on noise — `usda/nifa-integrated-activities` FY2022 P03 fell
+from a $24k base), is exactly the shape of the HIGH-5 defect, but real
+large deobligations do happen, and a collapsed-dollar/stable-row-count
+snapshot (`commerce/nist-its` FY2025 P11, `dhs/cisa-rd` FY2023 P04 — full
+row counts, no row rule can classify either one) can be exactly as real or
+exactly as broken. `scripts/validate_obligations.py` fails on such a drop
+unless that fiscal year's **baseline** file carries a matching entry in
+`fiscalYears.<FY>.periodNotes`: a list of `{"period": <int 2-12>, "note":
+"<non-empty string>"}`. This is a curated field in the hand-maintained
+baseline, never in generated provenance — provenance is byte-regenerated
+from the source on every pull and a note living there would vanish (or
+silently stay stale) on the next re-pull. A `periodNotes` entry that only
+says a CI re-pull is pending, until it lands, is still a legitimate note —
+it documents the account's status, not a final explanation.
+
+**Baseline-pin advancement.** A partial fiscal year's baseline pin
+(`asOfPeriod`, `obligationsCents`) may only advance onto a period File B
+classifies `reported` — a `notReported` period never becomes the pin's
+`asOfPeriod`, and the pin keeps its last accepted values instead
+(`scripts/pull_obligation_account.py`'s `_baseline_pin`). This closes a
+variant of the same defect found in production on 2026-09-17: a scheduled
+reconcile run advanced ed/ies's FY2026 pin to `{"asOfPeriod": 10,
+"obligationsCents": 0}` from an empty P10 File B snapshot. As a backstop
+for a collapse the row-count rule did not already catch, both
+`_baseline_pin` and the reconcile-stage `_reject_zero_collapse_pin` refuse
+to publish a File A/File B pin of exactly zero cents over a previously
+positive pin in the same fiscal year; the last accepted pin is kept
+unchanged rather than advanced.
+
 ## Reconciliation gate
 
 For every covered account-year:

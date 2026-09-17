@@ -9,13 +9,34 @@ from adapters.obligation_common import (
     event_fingerprint, file_sha256, normalize_event, partition_diff, write_store,
 )
 from scripts.reconcile_obligation_artifacts import (
-    _preserve_current_complete_pin, _preserve_current_dual_pin, reconcile,
+    _preserve_current_complete_pin, _preserve_current_dual_pin,
+    _reject_zero_collapse_pin, reconcile,
 )
 from scripts.validate_funding_sentinel import validate as validate_sentinel
 from scripts.validate_obligations import validate
 
 
 class ObligationReconcileTests(unittest.TestCase):
+    def test_reject_zero_collapse_pin_defense_in_depth(self):
+        # Defense in depth for the same ed/ies FY2026 P10 regression that
+        # scripts/pull_obligation_account.py's _baseline_pin now refuses at
+        # the source: even if a provenance artifact somehow still carries a
+        # zero-cent pin after a previously positive one, reconcile must
+        # refuse to publish it.
+        current_pin = {"status": "partial", "asOfPeriod": 9,
+                       "obligationsCents": 500}
+        zero_pin = {"status": "partial", "asOfPeriod": 10,
+                   "obligationsCents": 0}
+        with self.assertRaisesRegex(ValueError, "refusing to advance"):
+            _reject_zero_collapse_pin("ed/ies", 2026, current_pin, zero_pin)
+        # A genuinely fresh account (no current pin yet) is unaffected.
+        _reject_zero_collapse_pin("ed/ies", 2026, None, zero_pin)
+        # A non-zero advance is unaffected.
+        _reject_zero_collapse_pin(
+            "ed/ies", 2026, current_pin,
+            {"status": "partial", "asOfPeriod": 10, "obligationsCents": 600},
+        )
+
     def test_established_complete_pin_fails_closed_on_artifact_mismatch(self):
         current = {"status": "complete", "obligationsCents": 100}
         for artifact, normalized_total, as_of_period in (

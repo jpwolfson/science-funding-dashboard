@@ -315,9 +315,16 @@ class OtherCivilianObligationTests(unittest.TestCase):
                     years["2017"],
                 )
                 for offset, fy in enumerate(range(2018, current_fy), start=1):
+                    # periodNotes (Phase 3.2d remediation, 2026-09-17) is an
+                    # optional, curated explanation for the large-drop
+                    # validator check; tolerate it here the same way the
+                    # commerce accounts' equivalent test already does
+                    # field-by-field, rather than exact dict equality.
+                    row = dict(years[str(fy)])
+                    row.pop("periodNotes", None)
                     self.assertEqual(
                         {"status": "complete", "obligationsCents": pins[offset]},
-                        years[str(fy)],
+                        row,
                     )
                 assert_current_partial_row(self, path, years[str(current_fy)])
                 self.assertEqual(2, len(baseline["notes"]))

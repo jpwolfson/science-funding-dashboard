@@ -13,7 +13,10 @@ import zipfile
 from collections import defaultdict
 from decimal import Decimal
 
-from adapters.obligation_common import canonical_period, cents, normalize_event, stable_id
+from adapters.obligation_common import (
+    canonical_period, cents, covers_and_effective, normalize_event,
+    period_info, stable_id,
+)
 
 
 API = "https://api.usaspending.gov/api/v2"
@@ -329,11 +332,25 @@ def parse_file_b_snapshot(rows, account, aliases):
     return values
 
 
-def file_b_period_events(snapshots, account):
-    """Delta cumulative File B snapshots without losing disappearing dimensions."""
+def file_b_period_events(snapshots, account, period_status=None):
+    """Delta cumulative File B snapshots without losing disappearing dimensions.
+
+    ``period_status`` is one FY's (or several FYs') ``notReported``
+    classification from ``obligation_common.classify_file_b_periods``. A
+    ``notReported`` period is skipped as both a diff boundary and an
+    output row: no File B activity or residual is derived for it. The next
+    *reported* period differences against the last reported snapshot
+    before it, so its activity is the delta across the whole reporting
+    span (see docs/obligation-ledger.md). Omitting ``period_status``
+    reproduces the historical behavior of differencing every period.
+    """
+    period_status = period_status or {}
     prior = {}
     output = []
-    for submission_period, current in sorted(snapshots.items()):
+    for submission_period in sorted(snapshots, key=lambda label: period_info(label)[:2]):
+        current = snapshots[submission_period]
+        if period_status.get(submission_period) == "notReported":
+            continue
         pa_deltas = defaultdict(int)
         for key in set(prior) | set(current):
             pa_deltas[key[:4]] += current.get(key, 0) - prior.get(key, 0)
@@ -348,13 +365,34 @@ def file_b_period_events(snapshots, account):
     return output
 
 
-def combine_file_b_file_c(file_b_events, file_c_events, account):
+def combine_file_b_file_c(file_b_events, file_c_events, account, period_status=None):
     def activity_key(event):
         return event.get("_programActivityKey", event["programActivityCode"])
 
+    # A notReported period's File C events keep their own submissionPeriod
+    # (they are still real, dated award-financial activity) but their
+    # dollars are matched against File B at the next *reported* period that
+    # absorbs the span -- see "Snapshot acceptance and not-reported
+    # periods" in docs/obligation-ledger.md. A dangling notReported tail
+    # with no later reported period yet is left unmatched here; it is
+    # reconciled on the pull that supplies the covering period.
+    period_status = period_status or {}
+    _, effective_period = covers_and_effective(period_status)
+
     c_by_bucket = defaultdict(int)
+    dangling_cents = 0
     for event in file_c_events:
-        c_by_bucket[(event["submissionPeriod"], activity_key(event))] += event["amountCents"]
+        label = event["submissionPeriod"]
+        if label in period_status and label not in effective_period:
+            # A notReported period with no later reported period yet (a
+            # dangling tail on an in-progress pull): leave its File C
+            # dollars unmatched until a future pull supplies the covering
+            # reported period. Its dollars stay outside the File B/File C
+            # identity below until that span closes.
+            dangling_cents += event["amountCents"]
+            continue
+        effective = effective_period.get(label, label)
+        c_by_bucket[(effective, activity_key(event))] += event["amountCents"]
     residuals = []
     seen = set()
     for flow in file_b_events:
@@ -401,7 +439,13 @@ def combine_file_b_file_c(file_b_events, file_c_events, account):
             "file_b_residual", account, identity_key, submission_period)
         residuals.append(normalize_event(event))
     combined = list(file_c_events) + residuals
-    if sum(e["amountCents"] for e in combined) != sum(e["amountCents"] for e in file_b_events):
+    # The identity holds per reporting span, not necessarily globally: a
+    # dangling notReported tail's File C dollars are real events (kept in
+    # ``combined``) but are deliberately excluded here because no residual
+    # exists for them yet -- they are reconciled once a later pull supplies
+    # the covering reported period.
+    if (sum(e["amountCents"] for e in combined) - dangling_cents
+            != sum(e["amountCents"] for e in file_b_events)):
         raise AssertionError("File B/File C residual identity failed")
     return combined
 
