@@ -100,6 +100,24 @@ published, never silently absorbed:
   the pull fails closed, because that volume of churn is the
   pagination/duplicate-displacement bug signature (CLAUDE.md data
   integrity rule 4), not ordinary source revision.
+- **Initializing-pull exemption.** The threshold above is not enforced on
+  a unit's very first source-current pull, i.e. one for which
+  `data/nih/<ic>/<ic>/changes.csv.gz` does not yet exist. Every store
+  built under the pre-2026-09-17 adapter accumulated weeks of unrecorded
+  field revisions, because that adapter never overwrote fields; measuring
+  that backlog against a threshold sized for one week's steady-state churn
+  would misfire on every unit's first pull under this contract, not just
+  the ones with an actual pagination defect. On that first pull, every
+  move is appended to the ledger unconditionally -- which is what
+  initializes it -- and a `NOTICE` reports the move count and its
+  per-field breakdown. The exemption is self-limiting, not a bypass flag:
+  the committed ledger file this pull creates is itself the marker the
+  adapter checks, so a given unit can take this path at most once, ever.
+  From that unit's next pull onward, with the ledger already present, the
+  threshold applies exactly as described above. A pull that trips the
+  threshold (initializing or not) prints the per-field move counts and up
+  to ten sample moves (`id field: old -> new`) so the drift is diagnosable
+  from the CI log without a live reproduction.
 
 Deterministic shard rewrites (`adapters.common.write_store`) also prevent a
 corrected date from leaving one ID in two fiscal-year files -- verified by
