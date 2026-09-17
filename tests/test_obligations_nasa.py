@@ -9,6 +9,48 @@ from scripts.plan_obligation_refresh import plan
 
 
 REPO = Path(__file__).resolve().parent.parent
+
+# The current fiscal year's partial baseline pin (status "partial",
+# asOfPeriod, obligationsCents) advances every week the scheduled
+# obligation refresh runs. Unit tests may not pin its literal value --
+# doing so guarantees the suite goes red on the first advance after any
+# release (docs/phase-3.2d-remediation-brief.md, W6). Historical rows
+# (status "complete", or FY2017's frozen partial start-of-series row) are
+# not moving and keep exact literal pins.
+MINIMUM_CURRENT_FY_PERIOD = 9
+
+
+def current_partial_fiscal_year(fiscal_years):
+    """Return the highest FY still 'partial' in a baseline -- the live
+    current FY. FY2017's frozen historical partial pin is always older
+    than the live current year, so max() finds it without a hard-coded
+    year number.
+    """
+    return max(
+        int(fy) for fy, row in fiscal_years.items()
+        if row.get("status") == "partial"
+    )
+
+
+def assert_current_partial_row(test, row, minimum_period=MINIMUM_CURRENT_FY_PERIOD):
+    """Structural-only assertion for the current (moving) partial FY row.
+    Exact-cent equality against the source is already enforced by
+    scripts/validate_obligations.py.
+    """
+    test.assertEqual("partial", row["status"])
+    test.assertIsInstance(row["asOfPeriod"], int)
+    test.assertGreaterEqual(row["asOfPeriod"], minimum_period)
+    test.assertLessEqual(row["asOfPeriod"], 12)
+    test.assertIsInstance(row["obligationsCents"], int)
+
+
+def assert_current_period_job(test, job, minimum_period=MINIMUM_CURRENT_FY_PERIOD):
+    """Structural-only assertion for a planner job covering the current FY."""
+    test.assertIsInstance(job["period"], int)
+    test.assertGreaterEqual(job["period"], minimum_period)
+    test.assertLessEqual(job["period"], 12)
+
+
 EXPECTED_ACCOUNTS = {
     "nasa/science": ("080-0120", "Science"),
     "nasa/aeronautics": ("080-0126", "Aeronautics"),
@@ -188,11 +230,7 @@ class NASAObligationScaffoldTests(unittest.TestCase):
                     {"status": "complete", "obligationsCents": cents},
                     years[str(fiscal_year)],
                 )
-            self.assertEqual(
-                {"status": "partial", "asOfPeriod": 9,
-                 "obligationsCents": EXPECTED_CENTS[path][9]},
-                years["2026"],
-            )
+            assert_current_partial_row(self, years["2026"])
 
     def test_program_activity_tokens_are_unique_and_resolve(self):
         for path, account in self.accounts.items():
@@ -361,8 +399,9 @@ class NASAObligationScaffoldTests(unittest.TestCase):
                     job["fiscalYear"] for job in account_jobs
                 ])
                 self.assertEqual(
-                    [12] * 9 + [9], [job["period"] for job in account_jobs]
+                    [12] * 9, [job["period"] for job in account_jobs[:-1]]
                 )
+                assert_current_period_job(self, account_jobs[-1])
 
 
 if __name__ == "__main__":

@@ -13,6 +13,47 @@ from scripts.plan_obligation_refresh import plan
 
 ROOT = Path(__file__).resolve().parent.parent
 
+# The current fiscal year's partial baseline pin (status "partial",
+# asOfPeriod, obligationsCents) advances every week the scheduled
+# obligation refresh runs. Unit tests may not pin its literal value --
+# doing so guarantees the suite goes red on the first advance after any
+# release (docs/phase-3.2d-remediation-brief.md, W6). Historical rows
+# (status "complete", or FY2017's frozen partial start-of-series row) are
+# not moving and keep exact literal pins.
+MINIMUM_CURRENT_FY_PERIOD = 9
+
+
+def current_partial_fiscal_year(fiscal_years):
+    """Return the highest FY still 'partial' in a baseline -- the live
+    current FY. FY2017's frozen historical partial pin is always older
+    than the live current year, so max() finds it without a hard-coded
+    year number.
+    """
+    return max(
+        int(fy) for fy, row in fiscal_years.items()
+        if row.get("status") == "partial"
+    )
+
+
+def assert_current_partial_row(test, row, minimum_period=MINIMUM_CURRENT_FY_PERIOD):
+    """Structural-only assertion for the current (moving) partial FY row.
+    Exact-cent equality against the source is already enforced by
+    scripts/validate_obligations.py.
+    """
+    test.assertEqual("partial", row["status"])
+    test.assertIsInstance(row["asOfPeriod"], int)
+    test.assertGreaterEqual(row["asOfPeriod"], minimum_period)
+    test.assertLessEqual(row["asOfPeriod"], 12)
+    test.assertIsInstance(row["obligationsCents"], int)
+
+
+def assert_current_period_job(test, job, minimum_period=MINIMUM_CURRENT_FY_PERIOD):
+    """Structural-only assertion for a planner job covering the current FY."""
+    test.assertIsInstance(job["period"], int)
+    test.assertGreaterEqual(job["period"], minimum_period)
+    test.assertLessEqual(job["period"], 12)
+
+
 EXPECTED = {
     "014-0804": (
         "doi/usgs-sir", "Surveys, Investigations and Research", "USGS SIR",
@@ -181,13 +222,12 @@ class EarthAgricultureObligationTests(unittest.TestCase):
                 self.assertEqual("partial", fiscal_years["2017"]["status"])
                 self.assertEqual(6, fiscal_years["2017"]["firstPeriod"])
                 self.assertEqual(12, fiscal_years["2017"]["asOfPeriod"])
-                self.assertEqual("partial", fiscal_years["2026"]["status"])
-                self.assertEqual(9, fiscal_years["2026"]["asOfPeriod"])
+                assert_current_partial_row(self, fiscal_years["2026"])
                 actual = [
                     fiscal_years[str(fy)]["obligationsCents"]
-                    for fy in range(2017, 2027)
+                    for fy in range(2017, 2026)
                 ]
-                self.assertEqual(cents, actual)
+                self.assertEqual(cents[:-1], actual)
                 self.assertTrue(all(
                     fiscal_years[str(fy)]["status"] == "complete"
                     for fy in range(2018, 2026)
@@ -471,8 +511,9 @@ class EarthAgricultureObligationTests(unittest.TestCase):
                     job["fiscalYear"] for job in account_jobs
                 ])
                 self.assertEqual(
-                    [12] * 9 + [9], [job["period"] for job in account_jobs]
+                    [12] * 9, [job["period"] for job in account_jobs[:-1]]
                 )
+                assert_current_period_job(self, account_jobs[-1])
 
     def test_no_synthetic_ars_or_nifa_total_account(self):
         paths = {account["path"] for account in self.accounts.values()}

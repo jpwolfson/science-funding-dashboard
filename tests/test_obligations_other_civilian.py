@@ -1,4 +1,5 @@
 import json
+import re
 import unittest
 from pathlib import Path
 
@@ -106,14 +107,73 @@ UNKNOWN_DISPLAY_PATHS = {
     }
 }
 
-CWMD_FY2026_FILE_B_CENTS = 2_660_942_811
-CWMD_FY2026_VARIANCE_CENTS = -670_286_549
-CWMD_FY2026_VARIANCE_REASON = (
-    "Official FY2026 P10 GTAS/File A is 1990656262 cents while the accepted "
-    "P10 File B Program Activity total is 2660942811 cents; preserve the exact "
-    "-670286549-cent official source variance with File B canonical and no "
-    "synthetic residual or tolerance."
-)
+# The current fiscal year's partial baseline pin (status "partial",
+# asOfPeriod, obligationsCents, and for dhs/cwmd-rd the File A/File B
+# variance fields) advances every week the scheduled obligation refresh
+# runs. Unit tests may not pin its literal value -- doing so guarantees the
+# suite goes red on the first advance after any release
+# (docs/phase-3.2d-remediation-brief.md, W6). Historical rows (status
+# "complete", or FY2017's frozen partial start-of-series row) are not
+# moving and keep exact literal pins. dhs/cwmd-rd's current-FY period
+# happens to already be one ahead of the others (P10 vs. P9); the floor
+# below reflects that per-account state, not a hard-coded date.
+MINIMUM_CURRENT_FY_PERIOD = 9
+MINIMUM_CURRENT_FY_PERIOD_BY_PATH = {"dhs/cwmd-rd": 10}
+PATHS_WITH_CURRENT_FY_FILE_B = {"dhs/cwmd-rd"}
+DASHBOARD_AS_OF_PERIOD_RE = re.compile(r"^FY(\d{4})P(0[2-9]|1[0-2])$")
+
+
+def current_partial_fiscal_year(fiscal_years):
+    """Return the highest FY still 'partial' in a baseline -- the live
+    current FY. FY2017's frozen historical partial pin is always older
+    than the live current year, so max() finds it without a hard-coded
+    year number.
+    """
+    return max(
+        int(fy) for fy, row in fiscal_years.items()
+        if row.get("status") == "partial"
+    )
+
+
+def assert_current_partial_row(test, path, row):
+    """Structural-only assertion for the current (moving) partial FY row.
+    Exact-cent equality against the source is already enforced by
+    scripts/validate_obligations.py.
+    """
+    minimum_period = MINIMUM_CURRENT_FY_PERIOD_BY_PATH.get(
+        path, MINIMUM_CURRENT_FY_PERIOD
+    )
+    test.assertEqual("partial", row["status"])
+    test.assertIsInstance(row["asOfPeriod"], int)
+    test.assertGreaterEqual(row["asOfPeriod"], minimum_period)
+    test.assertLessEqual(row["asOfPeriod"], 12)
+    test.assertIsInstance(row["obligationsCents"], int)
+    has_file_b = "fileBObligationsCents" in row
+    test.assertEqual(path in PATHS_WITH_CURRENT_FY_FILE_B, has_file_b)
+    if has_file_b:
+        test.assertIsInstance(row["fileBObligationsCents"], int)
+        test.assertIn("fileAFileBVarianceCents", row)
+        test.assertEqual(
+            row["obligationsCents"] - row["fileBObligationsCents"],
+            row["fileAFileBVarianceCents"],
+        )
+        test.assertTrue(row.get("fileAFileBVarianceReason"))
+        test.assertEqual(
+            {"status", "asOfPeriod", "obligationsCents",
+             "fileBObligationsCents", "fileAFileBVarianceCents",
+             "fileAFileBVarianceReason"},
+            set(row),
+        )
+    else:
+        test.assertEqual({"status", "asOfPeriod", "obligationsCents"}, set(row))
+
+
+def assert_current_period_job(test, job, minimum_period=MINIMUM_CURRENT_FY_PERIOD):
+    """Structural-only assertion for a planner job covering the current FY."""
+    test.assertIsInstance(job["period"], int)
+    test.assertGreaterEqual(job["period"], minimum_period)
+    test.assertLessEqual(job["period"], 12)
+
 
 STAGES = [
     {"hhs/aspr-rd-procurement"},
@@ -248,20 +308,7 @@ class OtherCivilianObligationTests(unittest.TestCase):
                         {"status": "complete", "obligationsCents": pins[offset]},
                         years[str(fy)],
                     )
-                expected_2026 = {
-                    "status": "partial",
-                    "asOfPeriod": 10 if path == "dhs/cwmd-rd" else 9,
-                    "obligationsCents": pins[-1],
-                }
-                if path == "dhs/cwmd-rd":
-                    expected_2026.update({
-                        "fileBObligationsCents": CWMD_FY2026_FILE_B_CENTS,
-                        "fileAFileBVarianceCents":
-                            CWMD_FY2026_VARIANCE_CENTS,
-                        "fileAFileBVarianceReason":
-                            CWMD_FY2026_VARIANCE_REASON,
-                    })
-                self.assertEqual(expected_2026, years["2026"])
+                assert_current_partial_row(self, path, years["2026"])
                 self.assertEqual(2, len(baseline["notes"]))
 
     def _aspr_baseline(self):
@@ -331,8 +378,7 @@ class OtherCivilianObligationTests(unittest.TestCase):
         self.assertEqual("complete" if first_period == 2 else "partial",
                          years["2024"]["status"])
         self.assertEqual("complete", years["2025"]["status"])
-        self.assertEqual("partial", years["2026"]["status"])
-        self.assertEqual(9, years["2026"]["asOfPeriod"])
+        assert_current_partial_row(self, ASPR_PATH, years["2026"])
         self.assertNotIn("pending", baseline["source"].lower())
         self.assertIn(ASPR_EVIDENCE.name, baseline["source"])
         return True
@@ -416,17 +462,22 @@ class OtherCivilianObligationTests(unittest.TestCase):
             )
         for path, rows in by_account.items():
             if path == ASPR_PATH:
-                expected = (
-                    [(2024, 12), (2025, 12), (2026, 9)]
-                    if aspr_job_count == 3 else [(2024, 2)]
-                )
-                self.assertEqual(expected, rows)
+                if aspr_job_count == 3:
+                    self.assertEqual([(2024, 12), (2025, 12)], rows[:-1])
+                    self.assertEqual(2026, rows[-1][0])
+                    assert_current_period_job(self, {"period": rows[-1][1]})
+                else:
+                    self.assertEqual([(2024, 2)], rows)
             else:
-                current_period = 10 if path == "dhs/cwmd-rd" else 9
                 self.assertEqual(
-                    [(fy, 12) for fy in range(2017, 2026)]
-                    + [(2026, current_period)],
-                    rows,
+                    [(fy, 12) for fy in range(2017, 2026)], rows[:-1],
+                )
+                self.assertEqual(2026, rows[-1][0])
+                minimum_period = MINIMUM_CURRENT_FY_PERIOD_BY_PATH.get(
+                    path, MINIMUM_CURRENT_FY_PERIOD
+                )
+                assert_current_period_job(
+                    self, {"period": rows[-1][1]}, minimum_period
                 )
                 self._require_all_planned_pins(
                     [job for job in jobs if job["account"] == path]
@@ -835,8 +886,16 @@ class OtherCivilianObligationTests(unittest.TestCase):
         dashboard = json.loads((store / "dashboard.json").read_text())
         self.assertEqual([], dashboard.get("warnings"))
         self.assertTrue(dashboard.get("dataComplete"))
-        self.assertEqual(2026, dashboard.get("currentFY"))
-        self.assertEqual("FY2026P09", dashboard.get("asOfPeriod"))
+        # currentFY and asOfPeriod track the baseline's current partial FY,
+        # a value that advances every week the scheduled refresh runs; only
+        # structure and cross-consistency with the baseline are asserted.
+        current_fy = current_partial_fiscal_year(years)
+        self.assertEqual(current_fy, dashboard.get("currentFY"))
+        as_of_period = dashboard.get("asOfPeriod")
+        match = DASHBOARD_AS_OF_PERIOD_RE.match(as_of_period or "")
+        self.assertTrue(match, f"unexpected asOfPeriod shape: {as_of_period!r}")
+        self.assertEqual(current_fy, int(match.group(1)))
+        self.assertEqual(years[str(current_fy)]["asOfPeriod"], int(match.group(2)))
 
     def test_scaffold_does_not_claim_unmaterialized_later_stores(self):
         for path in set(ACCOUNT_META) - set(self.accounts):

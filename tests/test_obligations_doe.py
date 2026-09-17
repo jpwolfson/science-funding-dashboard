@@ -17,6 +17,46 @@ from scripts.pull_obligation_account import pull
 
 REPO = Path(__file__).resolve().parent.parent
 
+# The current fiscal year's partial baseline pin (status "partial",
+# asOfPeriod, obligationsCents) advances every week the scheduled
+# obligation refresh runs. Unit tests may not pin its literal value --
+# doing so guarantees the suite goes red on the first advance after any
+# release (docs/phase-3.2d-remediation-brief.md, W6). Historical rows
+# (status "complete", or a frozen historical partial start-of-series row)
+# are not moving and keep exact literal pins.
+MINIMUM_CURRENT_FY_PERIOD = 9
+
+
+def current_partial_fiscal_year(fiscal_years):
+    """Return the highest FY still 'partial' in a baseline -- the live
+    current FY. A frozen historical partial pin is always older than the
+    live current year, so max() finds it without a hard-coded year number.
+    """
+    return max(
+        int(fy) for fy, row in fiscal_years.items()
+        if row.get("status") == "partial"
+    )
+
+
+def assert_current_partial_row(test, row, minimum_period=MINIMUM_CURRENT_FY_PERIOD):
+    """Structural-only assertion for the current (moving) partial FY row.
+    Exact-cent equality against the source is already enforced by
+    scripts/validate_obligations.py.
+    """
+    test.assertEqual("partial", row["status"])
+    test.assertIsInstance(row["asOfPeriod"], int)
+    test.assertGreaterEqual(row["asOfPeriod"], minimum_period)
+    test.assertLessEqual(row["asOfPeriod"], 12)
+    test.assertIsInstance(row["obligationsCents"], int)
+
+
+def assert_current_period_job(test, job, minimum_period=MINIMUM_CURRENT_FY_PERIOD):
+    """Structural-only assertion for a planner job covering the current FY."""
+    test.assertIsInstance(job["period"], int)
+    test.assertGreaterEqual(job["period"], minimum_period)
+    test.assertLessEqual(job["period"], 12)
+
+
 EXPECTED = {
     "doe/arpa-e": ("089-0337", "Advanced Research Projects Agency-Energy", 4),
     "doe/eere": ("089-0321", "Energy Efficiency and Renewable Energy", 25),
@@ -863,7 +903,7 @@ class DoeOnboardingTests(unittest.TestCase):
                     row["fiscalYear"] for row in jobs
                 ])
                 self.assertEqual(12, jobs[0]["period"])
-                self.assertEqual(9, jobs[-1]["period"])
+                assert_current_period_job(self, jobs[-1])
 
                 baseline = json.loads((REPO / self.accounts[path]["baseline"]).read_text())
                 self.assertEqual("unavailable", baseline["fiscalYears"]["2015"]["status"])
@@ -880,8 +920,7 @@ class DoeOnboardingTests(unittest.TestCase):
                 self.assertEqual(
                     12, baseline["fiscalYears"][str(first_fy)]["asOfPeriod"]
                 )
-                self.assertEqual("partial", baseline["fiscalYears"]["2026"]["status"])
-                self.assertEqual(9, baseline["fiscalYears"]["2026"]["asOfPeriod"])
+                assert_current_partial_row(self, baseline["fiscalYears"]["2026"])
 
                 store = REPO / "data" / "obligations" / path / "events"
                 if store.exists():
