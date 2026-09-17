@@ -193,3 +193,20 @@ class NihExclusionLedgerCommitTests(unittest.TestCase):
             'git add "data/${{ matrix.unit }}" reference/nih_reporter_exclusions.json',
             nih_job,
         )
+
+
+class PushRetryTests(unittest.TestCase):
+    """Every workflow that commits to the branch must replay its commit on a
+    non-fast-forward push instead of failing the run (2026-09-17 sentinel run
+    35251254148 failed only at `git push`, after a green build, because NIH
+    leaf commits had landed on main meanwhile)."""
+
+    def test_sentinel_and_obligation_commits_retry_with_rebase(self):
+        for name in ("update-sentinel.yml", "update-obligations.yml"):
+            text = (REPO / ".github" / "workflows" / name).read_text()
+            with self.subTest(workflow=name):
+                self.assertIn('"pull", "--rebase", "-X", "theirs"', text)
+                self.assertNotIn(
+                    'subprocess.run(["git", "push", "origin", f"HEAD:{branch}"], check=True)',
+                    text,
+                )
