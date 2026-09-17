@@ -4,6 +4,8 @@ from pathlib import Path
 
 from adapters.obligation_common import (
     account_period_status,
+    baseline_period_notes_problems,
+    baseline_pin_problems,
     canonical_period,
     check_final_period_reported,
     classify_file_b_periods,
@@ -93,6 +95,60 @@ class ObligationStoreTests(unittest.TestCase):
     def test_final_period_not_reported_mid_year_is_not_an_error(self):
         status = classify_file_b_periods({"FY2026P09": 40, "FY2026P10": 1})
         check_final_period_reported(status, fy_complete=False)  # no raise
+
+    def test_sustained_drop_is_a_restructuring_not_a_gap(self):
+        # commerce/census-current-surveys FY2020: rows settle from ~100 at
+        # P06 to ~45 from P07 on and never recover -- a real regime change,
+        # not a stub. Every later period stays below half of P06's rows,
+        # so the whole run is `reported`, each becoming the next baseline.
+        status = classify_file_b_periods({
+            "FY2020P03": 96, "FY2020P04": 96, "FY2020P05": 96,
+            "FY2020P06": 101, "FY2020P07": 44, "FY2020P08": 44,
+            "FY2020P09": 46, "FY2020P10": 49, "FY2020P11": 50,
+            "FY2020P12": 50,
+        })
+        self.assertTrue(all(value == "reported" for value in status.values()),
+                        status)
+
+    def test_transient_dip_that_recovers_stays_not_reported(self):
+        # dod/navy-rdte FY2025: P11 (1 row) is a stub against a 239-row
+        # baseline, but P12 recovers to 243 -- the dip stays notReported
+        # and P12 becomes the new baseline.
+        status = classify_file_b_periods({
+            "FY2025P10": 239, "FY2025P11": 1, "FY2025P12": 243,
+        })
+        self.assertEqual({
+            "FY2025P10": "reported", "FY2025P11": "notReported",
+            "FY2025P12": "reported",
+        }, status)
+
+    def test_backward_floor_catches_a_run_of_stub_periods(self):
+        # commerce/noaa-orf FY2024: P04-P08 (5-10 rows) are each individually
+        # "reported" against their immediate neighbors (no >50% drop
+        # between consecutive stub periods), but are all far below a
+        # quarter of P12's 551 rows -- the backward rule catches them even
+        # though the forward rule alone would not.
+        status = classify_file_b_periods({
+            "FY2024P02": 0, "FY2024P03": 0, "FY2024P04": 6, "FY2024P05": 6,
+            "FY2024P06": 5, "FY2024P07": 10, "FY2024P08": 9,
+            "FY2024P09": 0, "FY2024P10": 0, "FY2024P11": 0, "FY2024P12": 551,
+        })
+        for period in ("FY2024P02", "FY2024P03", "FY2024P04", "FY2024P05",
+                      "FY2024P06", "FY2024P07", "FY2024P08", "FY2024P09",
+                      "FY2024P10", "FY2024P11"):
+            self.assertEqual("notReported", status[period], period)
+        self.assertEqual("reported", status["FY2024P12"])
+
+    def test_backward_floor_does_not_misfire_on_a_small_account(self):
+        # A genuinely small account whose early periods are proportionately
+        # smaller, not stub-sized, must not be flagged: 3/8 = 0.375 is
+        # above the 0.25 floor.
+        status = classify_file_b_periods({
+            "FY2024P02": 3, "FY2024P03": 4, "FY2024P04": 5, "FY2024P05": 6,
+            "FY2024P06": 6, "FY2024P07": 7, "FY2024P08": 7, "FY2024P12": 8,
+        })
+        self.assertTrue(all(value == "reported" for value in status.values()),
+                        status)
 
     def test_covers_and_effective_span_a_single_gap(self):
         status = {"FY2025P10": "reported", "FY2025P11": "notReported",
@@ -187,6 +243,27 @@ class ObligationStoreTests(unittest.TestCase):
             self.assertEqual("notReported", status["FY2020P12"])
             with self.assertRaisesRegex(ValueError, "FY2020P12 is notReported"):
                 check_final_period_reported(status, fy_complete=True)
+
+    def test_period_notes_schema_is_a_list_of_period_and_note(self):
+        self.assertEqual([], baseline_period_notes_problems({"status": "complete"}))
+        self.assertEqual([], baseline_period_notes_problems({
+            "status": "complete", "obligationsCents": 100,
+            "periodNotes": [{"period": 11, "note": "Provisional note."}],
+        }))
+        self.assertTrue(baseline_period_notes_problems({"periodNotes": []}))
+        self.assertTrue(baseline_period_notes_problems({
+            "periodNotes": [{"period": 1, "note": "x"}]}))  # out of range
+        self.assertTrue(baseline_period_notes_problems({
+            "periodNotes": [{"period": 11, "note": "  "}]}))  # blank note
+        self.assertTrue(baseline_period_notes_problems({
+            "periodNotes": "not a list"}))
+        # Reaches the shared registry-tier lint through baseline_pin_problems.
+        self.assertTrue(any(
+            "periodNotes" in problem for problem in baseline_pin_problems({
+                "status": "complete", "obligationsCents": 100,
+                "periodNotes": [{"period": 99, "note": "x"}],
+            })
+        ))
 
     def test_merge_period_status_requires_unanimous_not_reported(self):
         merged = merge_period_status([

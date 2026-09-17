@@ -205,6 +205,96 @@ class ObligationValidationTests(unittest.TestCase):
         finally:
             temp.cleanup()
 
+    def test_large_drop_requires_a_baseline_period_note_above_the_dollar_floor(self):
+        temp = tempfile.TemporaryDirectory()
+        try:
+            root = Path(temp.name)
+            (root / "config").mkdir()
+            (root / "reference").mkdir()
+            (root / "config" / "obligation_accounts.json").write_text(json.dumps({
+                "schemaVersion": 2,
+                "accounts": [{"path": "dhs/cisa-rd", "federalAccount": "070-0805",
+                              "baseline": "reference/dhs_cisa_rd_obligation_baseline.json",
+                              "programActivities": [{"slug": "rd", "code": "0001",
+                                                     "name": "R&D"}]}]}))
+            baseline_path = root / "reference" / "dhs_cisa_rd_obligation_baseline.json"
+            baseline_path.write_text(json.dumps({
+                "schemaVersion": 2, "federalAccount": "070-0805",
+                "fiscalYears": {"2023": {"status": "complete",
+                                         "obligationsCents": 100_000_000}}}))
+            rows = [
+                # Cumulative through P03: $12.9M. Through P04: $1M (a real
+                # >50% drop, above the $1M floor).
+                normalize_event({
+                    "id": "p03", "source": "file_b_residual",
+                    "submissionPeriod": "FY2023P03", "federalAccount": "070-0805",
+                    "programActivityCode": "0001", "programActivityName": "R&D",
+                    "amountCents": 1_290_038_168, "awardId": "", "linked": False,
+                }),
+                normalize_event({
+                    "id": "p04", "source": "file_b_residual",
+                    "submissionPeriod": "FY2023P04", "federalAccount": "070-0805",
+                    "programActivityCode": "0001", "programActivityName": "R&D",
+                    "amountCents": -1_190_038_168, "awardId": "", "linked": False,
+                }),
+            ]
+            store = root / "data" / "obligations" / "dhs" / "cisa-rd" / "events"
+            write_store(store, rows, {"federalAccount": "070-0805"})
+            errors = validate(root, require_data=False)
+            self.assertTrue(
+                any("cumulative File B fell" in e and "periodNotes" in e
+                    for e in errors), errors,
+            )
+            # Add the curated note and confirm the same drop no longer fails.
+            value = json.loads(baseline_path.read_text())
+            value["fiscalYears"]["2023"]["periodNotes"] = [
+                {"period": 4, "note": "Provisional note pending re-pull."}]
+            baseline_path.write_text(json.dumps(value))
+            errors = validate(root, require_data=False)
+            self.assertFalse(
+                any("cumulative File B fell" in e for e in errors), errors)
+        finally:
+            temp.cleanup()
+
+    def test_large_drop_below_the_dollar_floor_is_not_flagged(self):
+        temp = tempfile.TemporaryDirectory()
+        try:
+            root = Path(temp.name)
+            (root / "config").mkdir()
+            (root / "reference").mkdir()
+            (root / "config" / "obligation_accounts.json").write_text(json.dumps({
+                "schemaVersion": 2,
+                "accounts": [{"path": "usda/nifa-integrated-activities",
+                              "federalAccount": "012-1502",
+                              "baseline": "reference/nifa_obligation_baseline.json",
+                              "programActivities": [{"slug": "ia", "code": "0001",
+                                                     "name": "Integrated"}]}]}))
+            (root / "reference" / "nifa_obligation_baseline.json").write_text(json.dumps({
+                "schemaVersion": 2, "federalAccount": "012-1502",
+                "fiscalYears": {"2022": {"status": "complete", "obligationsCents": -1000}}}))
+            rows = [
+                normalize_event({
+                    "id": "p02", "source": "file_b_residual",
+                    "submissionPeriod": "FY2022P02", "federalAccount": "012-1502",
+                    "programActivityCode": "0001", "programActivityName": "Integrated",
+                    "amountCents": 24258, "awardId": "", "linked": False,
+                }),
+                normalize_event({
+                    "id": "p03", "source": "file_b_residual",
+                    "submissionPeriod": "FY2022P03", "federalAccount": "012-1502",
+                    "programActivityCode": "0001", "programActivityName": "Integrated",
+                    "amountCents": -25258, "awardId": "", "linked": False,
+                }),
+            ]
+            store = (root / "data" / "obligations" / "usda" /
+                    "nifa-integrated-activities" / "events")
+            write_store(store, rows, {"federalAccount": "012-1502"})
+            errors = validate(root, require_data=False)
+            self.assertFalse(
+                any("cumulative File B fell" in e for e in errors), errors)
+        finally:
+            temp.cleanup()
+
     def test_one_cent_difference_fails(self):
         temp, root = self.fixture(101)
         try:

@@ -56,14 +56,44 @@ def baseline_file_b_cents(pin):
     return pin["obligationsCents"]
 
 
+def baseline_period_notes_problems(pin):
+    """Validate the curated ``periodNotes`` list on one baseline FY pin.
+
+    ``periodNotes`` (optional) is a list of ``{"period": int 2-12, "note":
+    non-empty str}`` -- the hand-curated explanation for an accepted period
+    whose cumulative File B drop the large-drop validator check would
+    otherwise flag (see docs/obligation-ledger.md "Snapshot acceptance and
+    not-reported periods"). It lives in the curated baseline file, never in
+    generated provenance.
+    """
+    notes = pin.get("periodNotes")
+    if notes is None:
+        return []
+    if not isinstance(notes, list) or not notes:
+        return ["periodNotes must be a non-empty list when present"]
+    problems = []
+    for entry in notes:
+        if not isinstance(entry, dict):
+            problems.append(f"periodNotes entry must be an object: {entry!r}")
+            continue
+        period = entry.get("period")
+        if type(period) is not int or not 2 <= period <= 12:
+            problems.append(f"periodNotes period must be an integer 2-12: {period!r}")
+        note = entry.get("note")
+        if not isinstance(note, str) or not note.strip():
+            problems.append("periodNotes note must be a non-empty string")
+    return problems
+
+
 def baseline_pin_problems(pin):
     """Validate the universal File A/File B baseline specialization schema."""
     status = pin.get("status")
+    problems = baseline_period_notes_problems(pin)
     present = [field in pin for field in BASELINE_VARIANCE_FIELDS]
     if status == "unavailable":
-        return (["source-unavailable row cannot declare a File A/File B variance"]
-                if any(present) else [])
-    problems = []
+        problems += (["source-unavailable row cannot declare a File A/File B variance"]
+                     if any(present) else [])
+        return problems
     if type(pin.get("obligationsCents")) is not int:
         problems.append("available row must declare integer obligationsCents")
     if any(present) and not all(present):
@@ -95,25 +125,84 @@ def classify_file_b_periods(row_counts):
     fiscal year, to the raw row count returned by that period's File B
     download. This is the universal, registry-free snapshot-acceptance rule
     (see docs/obligation-ledger.md "Snapshot acceptance and not-reported
-    periods"): a period whose own download returned zero rows, or fewer
-    than half the previous *reported* period's rows in the same fiscal
-    year, is ``notReported``. Its bytes and provenance are still kept
-    upstream; this function only returns the classification.
+    periods"), refined from data on 2026-09-17 after the first offline
+    rebuild tripped its own validator on five account-years:
+
+    - A row count of zero is always ``notReported``.
+    - A period whose rows fall below half the last *reported* period's rows
+      is a candidate dip against that frozen baseline. Looking only at
+      periods that already exist in ``row_counts`` (never ones not yet
+      pulled):
+      - if some later period recovers to at least half the baseline, the
+        whole dip run is ``notReported`` (transient -- e.g. Navy FY2025
+        P11: 1 row against a 239-row baseline, P12 recovers to 243) and the
+        recovering period becomes the new baseline;
+      - if no later period exists at all, the dip is ``notReported``
+        (provisional -- the fiscal year may still recover on a future
+        pull);
+      - if later periods exist but none of them recovers, the dip is a real
+        restructuring: it is ``reported`` and becomes the new baseline
+        itself (sustained -- e.g. commerce/census-current-surveys FY2020
+        settles from 101 rows at P06 to 44 at P07 and stays there, and the
+        fiscal-year total still reconciles to GTAS).
+    - Independently, any non-final period whose rows fall below a quarter
+      of the fiscal year's final accepted period's rows is also
+      ``notReported`` (the final period itself exempt from this backward
+      check) -- catches a run of periods that each look individually
+      stable next to their neighbors but are collectively tiny next to the
+      real year-end total (e.g. commerce/noaa-orf FY2024: 5-10 rows for
+      P04-P08 against 551 at P12). A small account whose early periods are
+      merely proportionately smaller, not stub-sized, is unaffected (3
+      rows at P02 against 8 at P12 is 0.375 of the final count and passes).
+
+    Its bytes and provenance are still kept upstream; this function only
+    returns the classification.
 
     Returns ``{period: "reported" | "notReported"}``.
     """
     ordered = sorted(row_counts, key=lambda label: period_info(label)[1])
-    status = {}
-    last_reported_rows = None
-    for label in ordered:
-        rows = int(row_counts[label])
-        if rows == 0 or (
-                last_reported_rows is not None and rows < 0.5 * last_reported_rows):
-            status[label] = "notReported"
-        else:
-            status[label] = "reported"
-            last_reported_rows = rows
-    return status
+    rows = [int(row_counts[label]) for label in ordered]
+    n = len(rows)
+    status = [None] * n
+    baseline = None
+    index = 0
+    while index < n:
+        current_rows = rows[index]
+        if current_rows == 0:
+            status[index] = "notReported"
+            index += 1
+            continue
+        if baseline is not None and current_rows < 0.5 * baseline:
+            recovery = next(
+                (later for later in range(index + 1, n)
+                 if rows[later] >= 0.5 * baseline),
+                None,
+            )
+            if recovery is None:
+                if index == n - 1:
+                    status[index] = "notReported"  # provisional
+                else:
+                    status[index] = "reported"  # sustained: new regime
+                    baseline = current_rows
+                index += 1
+                continue
+            for dip in range(index, recovery):
+                status[dip] = "notReported"  # transient
+            status[recovery] = "reported"
+            baseline = rows[recovery]
+            index = recovery + 1
+            continue
+        status[index] = "reported"
+        baseline = current_rows
+        index += 1
+
+    if n and rows[-1] > 0:
+        floor = 0.25 * rows[-1]
+        for idx in range(n - 1):  # the final period is exempt
+            if rows[idx] < floor:
+                status[idx] = "notReported"
+
+    return {ordered[idx]: status[idx] for idx in range(n)}
 
 
 def check_final_period_reported(period_status, fy_complete):

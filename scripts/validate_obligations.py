@@ -490,20 +490,33 @@ def validate(repo=REPO, require_data=True, check_freshness=False,
                              if s["fy"] == row["fy"] and s["points"]), None)
             if endpoint and endpoint["netObligationsCents"] != row["netObligationsCents"]:
                 errors.append(f"FY{row['fy']}: cumulative endpoint mismatch")
+        # Undocumented large drop: only above a $1M previous cumulative
+        # (usda/nifa-integrated-activities FY2022 P03 fired on a $24k base
+        # otherwise). The curated explanation lives in the baseline file's
+        # periodNotes, not in generated provenance -- provenance is
+        # byte-regenerated from the source and never hand-edited.
+        LARGE_DROP_FLOOR_CENTS = 100_000_000
         for series in stats["fyCumulative"]:
             reported_points = [p for p in series["points"]
                                if p.get("status", "reported") == "reported"]
+            period_notes = {
+                note.get("period")
+                for note in (baseline["fiscalYears"].get(str(series["fy"]), {})
+                             .get("periodNotes") or [])
+            }
             for previous, current in zip(reported_points, reported_points[1:]):
                 previous_cents = previous.get("netObligationsCents") or 0
                 current_cents = current.get("netObligationsCents") or 0
-                if previous_cents > 0 and current_cents < previous_cents * 0.5:
-                    fy_provenance = load_partition_provenance(store, series["fy"]) or {}
-                    if not str(fy_provenance.get("largeChangeNote") or "").strip():
+                if (previous_cents >= LARGE_DROP_FLOOR_CENTS
+                        and current_cents < previous_cents * 0.5):
+                    current_period_number = period_info(current["submissionPeriod"])[1]
+                    if current_period_number not in period_notes:
                         errors.append(
                             f"{account['path']} FY{series['fy']} "
                             f"{current['submissionPeriod']}: cumulative File B "
                             f"fell from {previous_cents} to {current_cents} "
-                            "cents (>50%) with no largeChangeNote in provenance"
+                            "cents (>50%) with no periodNotes entry in the "
+                            "baseline"
                         )
         dashboard = repo / "data" / "obligations" / account["path"] / "dashboard.json"
         if dashboard.exists():

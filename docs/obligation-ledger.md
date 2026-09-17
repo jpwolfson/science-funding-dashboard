@@ -136,14 +136,33 @@ period's delta spiked to recover it — a fabricated multi-billion-dollar
 swing that no validator caught because `File C + residual = File B` still
 held exactly at that broken grain.
 
-**Acceptance rule (universal, registry-free).** A File B period snapshot is
-`notReported` when its download returned zero rows, or fewer than half the
-previous *reported* period's rows, within the same fiscal year (there is no
-per-agency parameter here — see the verification regime's governing
-principle). Its bytes and provenance are still kept; it contributes no
-derived File B activity and no residual event. `adapters.obligation_common`
-implements this once (`classify_file_b_periods`) and both the pull adapter
-and the offline rebuild/validation path (`account_period_status`, reading
+**Acceptance rule (universal, registry-free).** A row count of zero is
+always `notReported`. Otherwise, a period whose rows fall below half the
+last *reported* period's rows is a candidate dip against that frozen
+baseline; looking only at periods that already exist for the fiscal year
+(never ones not yet pulled), the dip is `notReported` if a later period
+recovers to at least half the baseline (**transient** — `dod/navy-rdte`
+FY2025 P11: 1 row against 239, P12 recovers to 243) or if no later period
+exists at all yet (**provisional** — the fiscal year may still recover on
+a future pull); if later periods exist but none recovers, the dip is a
+real restructuring (**sustained**): it is `reported` and becomes the new
+baseline itself — `commerce/census-current-surveys` FY2020 settles from
+101 rows at P06 to 44 at P07 and stays there, and the fiscal-year total
+still reconciles to GTAS exactly. Independently, any non-final period
+whose rows fall below a quarter of the fiscal year's final accepted
+period's rows is also `notReported` (the final period exempt) — this
+backward rule catches a run of periods that each look individually stable
+next to their immediate neighbors but are collectively tiny next to the
+real year-end total (`commerce/noaa-orf` FY2024: 5–10 rows at P04–P08
+against 551 at P12); it does not misfire on a genuinely small account
+whose early periods are proportionately smaller, not stub-sized (3 rows
+against 8 is 0.375 of the final count and passes). There is no per-agency
+parameter anywhere in this rule — see the verification regime's governing
+principle. A `notReported` snapshot's bytes and provenance are still kept;
+it contributes no derived File B activity and no residual event.
+`adapters.obligation_common` implements the whole rule once
+(`classify_file_b_periods`) and both the pull adapter and the offline
+rebuild/validation path (`account_period_status`, reading
 `downloads[].statusRowCount` straight from committed provenance) apply the
 identical rule, so an existing store is reclassified without a re-pull.
 
@@ -196,12 +215,22 @@ the usual filled one. Both charts' tables render the literal text "not
 reported at pull" for that row, and the covering row's period label notes
 its span, e.g. "P12 (covers P11-P12)".
 
-**`largeChangeNote`.** A reported-to-reported cumulative File B drop of
-more than 50% is exactly the shape of the HIGH-5 defect, but real large
-deobligations do happen. `scripts/validate_obligations.py` fails on such a
-drop unless that fiscal year's provenance carries a non-empty
-`largeChangeNote` string documenting the source-confirmed reason; this is
-a hand-added provenance field, not a value the adapter derives.
+**`periodNotes`.** A reported-to-reported cumulative File B drop of more
+than 50%, where the previous cumulative is at least $1,000,000 (a lower
+floor fires on noise — `usda/nifa-integrated-activities` FY2022 P03 fell
+from a $24k base), is exactly the shape of the HIGH-5 defect, but real
+large deobligations do happen, and a collapsed-dollar/stable-row-count
+snapshot (`commerce/nist-its` FY2025 P11, `dhs/cisa-rd` FY2023 P04 — full
+row counts, no row rule can classify either one) can be exactly as real or
+exactly as broken. `scripts/validate_obligations.py` fails on such a drop
+unless that fiscal year's **baseline** file carries a matching entry in
+`fiscalYears.<FY>.periodNotes`: a list of `{"period": <int 2-12>, "note":
+"<non-empty string>"}`. This is a curated field in the hand-maintained
+baseline, never in generated provenance — provenance is byte-regenerated
+from the source on every pull and a note living there would vanish (or
+silently stay stale) on the next re-pull. A `periodNotes` entry that only
+says a CI re-pull is pending, until it lands, is still a legitimate note —
+it documents the account's status, not a final explanation.
 
 **Baseline-pin advancement.** A partial fiscal year's baseline pin
 (`asOfPeriod`, `obligationsCents`) may only advance onto a period File B
