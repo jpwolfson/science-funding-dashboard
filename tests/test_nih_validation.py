@@ -1,3 +1,4 @@
+import gzip
 import json
 import tempfile
 import unittest
@@ -5,9 +6,11 @@ from pathlib import Path
 from unittest.mock import patch
 
 from adapters.common import write_store
-from adapters.nih_reporter import encode_trans_type
-from scripts.validate_nih import (in_data_book_scope,
-                                  live_mechanism_partition, read_store,
+from adapters.nih_reporter import (CHANGES_HEADER, append_changes_ledger,
+                                   changes_ledger_path, encode_trans_type)
+from scripts.validate_nih import (_check_changes_ledger, in_data_book_scope,
+                                  live_mechanism_partition,
+                                  reconcile_live_total, read_store,
                                   within_relative)
 
 
@@ -87,6 +90,72 @@ class NihValidationTests(unittest.TestCase):
         row["transType"] = "Standard/new award (1, R01)"
         with self.assertRaisesRegex(ValueError, "full re-pull required"):
             in_data_book_scope(row)
+
+    def test_live_gap_within_tolerance_math(self):
+        # store=10000, excluded=3, retainedMissing=2 -> expected=9995.
+        # tolerance = max(3, 0.01% of 10000) = max(3, 1) = 3.
+        result = reconcile_live_total(10000, 3, 2, 9995)
+        self.assertEqual(result["expected"], 9995)
+        self.assertEqual(result["tolerance"], 3)
+        self.assertEqual(result["gap"], 0)
+        self.assertTrue(result["withinTolerance"])
+
+        result = reconcile_live_total(10000, 3, 2, 9998)
+        self.assertEqual(result["gap"], 3)
+        self.assertTrue(result["withinTolerance"])  # exactly at tolerance
+
+        result = reconcile_live_total(10000, 3, 2, 9999)
+        self.assertEqual(result["gap"], 4)
+        self.assertFalse(result["withinTolerance"])
+
+    def test_live_gap_tolerance_uses_absolute_floor_for_small_stores(self):
+        # 0.01% of 100 is 0.01, so the floor of 3 applies.
+        result = reconcile_live_total(100, 0, 0, 97)
+        self.assertEqual(result["tolerance"], 3)
+        self.assertTrue(result["withinTolerance"])
+
+    def test_changes_ledger_check_accepts_absence(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            leaf = Path(tmp) / "nih" / "nci" / "nci"
+            self.assertEqual([], _check_changes_ledger(leaf))
+
+    def test_changes_ledger_check_validates_columns_and_order(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            leaf = Path(tmp) / "nih" / "nci" / "nci"
+            store_path = leaf / "awards"
+            append_changes_ledger(store_path, [
+                {"pullDate": "2026-09-14", "id": "nih:1", "field": "date",
+                 "old": "2025-01-01", "new": "2025-02-01"},
+            ])
+            self.assertEqual([], _check_changes_ledger(leaf))
+
+    def test_changes_ledger_check_rejects_unsorted_rows(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            leaf = Path(tmp) / "nih" / "nci" / "nci"
+            path = changes_ledger_path(leaf / "awards")
+            path.parent.mkdir(parents=True, exist_ok=True)
+            with gzip.open(path, "wt", newline="") as fh:
+                import csv
+                writer = csv.DictWriter(fh, fieldnames=CHANGES_HEADER)
+                writer.writeheader()
+                writer.writerow({"pullDate": "2026-09-14", "id": "nih:2",
+                                 "field": "date", "old": "a", "new": "b"})
+                writer.writerow({"pullDate": "2026-09-14", "id": "nih:1",
+                                 "field": "date", "old": "a", "new": "b"})
+            errors = _check_changes_ledger(leaf)
+            self.assertEqual(1, len(errors))
+            self.assertIn("not sorted", errors[0])
+
+    def test_changes_ledger_check_rejects_wrong_columns(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            leaf = Path(tmp) / "nih" / "nci" / "nci"
+            path = changes_ledger_path(leaf / "awards")
+            path.parent.mkdir(parents=True, exist_ok=True)
+            with gzip.open(path, "wt", newline="") as fh:
+                fh.write("pullDate,id,field,old\n2026-09-14,nih:1,date,a\n")
+            errors = _check_changes_ledger(leaf)
+            self.assertEqual(1, len(errors))
+            self.assertIn("unexpected columns", errors[0])
 
 
 if __name__ == "__main__":

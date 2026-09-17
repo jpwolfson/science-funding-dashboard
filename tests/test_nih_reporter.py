@@ -1,3 +1,5 @@
+import gzip
+import io
 import json
 import tempfile
 import unittest
@@ -6,16 +8,23 @@ from pathlib import Path
 from unittest.mock import patch
 
 from adapters.common import load_store, write_store
-from adapters.nih_reporter import (NihReporterPull, _award_kind,
-                                   parse_trans_type)
+from adapters.nih_reporter import (METHODOLOGY_NOTE, MOVE_RETURN_ABS_MIN,
+                                   MOVE_RETURN_REL_FRACTION,
+                                   NihReporterPull, _award_kind,
+                                   changes_ledger_path, excluded_ids,
+                                   load_changes_ledger, load_exclusion_ledger,
+                                   parse_trans_type, pull_unit,
+                                   retained_missing_count,
+                                   save_exclusion_ledger)
 
 
-def row(appl_id, agency="NIGMS"):
+def row(appl_id, agency="NIGMS", award_notice_date="2025-01-15T00:00:00",
+        fiscal_year_value=2025):
     return {
         "appl_id": appl_id,
-        "fiscal_year": 2025,
+        "fiscal_year": fiscal_year_value,
         "project_num": f"5R01GM{appl_id:06d}-01",
-        "award_notice_date": "2025-01-15T00:00:00",
+        "award_notice_date": award_notice_date,
         "budget_start": "2025-02-01T00:00:00",
         "project_start_date": "2025-02-01T00:00:00",
         "award_amount": 123456,
@@ -26,6 +35,20 @@ def row(appl_id, agency="NIGMS"):
         "agency_ic_admin": {"abbreviation": agency},
         "funding_mechanism": "Non-SBIR/STTR",
     }
+
+
+def write_exclusion_ledger(repo_root, records):
+    (repo_root / "reference").mkdir(parents=True, exist_ok=True)
+    (repo_root / "reference" / "nih_reporter_exclusions.json").write_text(
+        json.dumps({"schemaVersion": 1, "records": records}))
+
+
+def exclusion_record(award_id, unit="nih/nigms/nigms",
+                     classification="reporter-record-retraction-or-supersession",
+                     reason="RePORTER retracted or superseded this application record from its search results.",
+                     decided_on="2026-09-09", status="excluded"):
+    return {"id": award_id, "unit": unit, "classification": classification,
+            "reason": reason, "decidedOn": decided_on, "status": status}
 
 
 class NihReporterTests(unittest.TestCase):
@@ -141,8 +164,9 @@ class NihReporterTests(unittest.TestCase):
             "NIGMS", {"min_total": 0, "max_total": 1, "max_monthly": 1},
             Path("unused"),
         )
-        normalized, fallback = puller.normalize(row(123))
+        normalized, fallback, fy_anomaly = puller.normalize(row(123))
         self.assertFalse(fallback)
+        self.assertFalse(fy_anomaly)
         self.assertEqual(normalized["id"], "nih:123")
         self.assertEqual(normalized["date"], "2025-01-15")
         self.assertEqual(normalized["amount"], 123456)
@@ -154,214 +178,340 @@ class NihReporterTests(unittest.TestCase):
             "mechanism": "Non-SBIR/STTR",
         })
 
-    def test_full_pull_removes_only_reviewed_reporter_retractions(self):
+    def test_normalize_uses_source_current_date_outside_own_fiscal_year(self):
+        # FY2025 runs 2024-10-01..2025-09-30; this notice date is in FY2026.
+        puller = NihReporterPull(
+            "NIGMS", {"min_total": 0, "max_total": 1, "max_monthly": 1},
+            Path("unused"),
+        )
+        anomalous = row(123, award_notice_date="2025-11-04T00:00:00")
+        normalized, fallback, fy_anomaly = puller.normalize(anomalous)
+        self.assertFalse(fallback)
+        self.assertTrue(fy_anomaly)
+        # Source-current: the raw notice date is retained, not clamped to
+        # the fiscal-year start or substituted with budget_start.
+        self.assertEqual(normalized["date"], "2025-11-04")
+
+    def test_normalize_falls_back_only_when_notice_date_is_absent(self):
+        puller = NihReporterPull(
+            "NIGMS", {"min_total": 0, "max_total": 1, "max_monthly": 1},
+            Path("unused"),
+        )
+        missing_notice = row(123, award_notice_date=None)
+        normalized, fallback, fy_anomaly = puller.normalize(missing_notice)
+        self.assertTrue(fallback)
+        self.assertFalse(fy_anomaly)
+        self.assertEqual(normalized["date"], "2025-02-01")  # budget_start
+
+
+class ExclusionLedgerTests(unittest.TestCase):
+    def test_missing_ledger_file_is_treated_as_empty(self):
         with tempfile.TemporaryDirectory() as tmp:
-            store_path = Path(tmp) / "awards"
+            self.assertEqual(excluded_ids(Path(tmp)), set())
+            self.assertEqual(load_exclusion_ledger(Path(tmp)),
+                             {"schemaVersion": 1, "records": []})
+
+    def test_duplicate_id_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_exclusion_ledger(root, [exclusion_record("nih:1"),
+                                          exclusion_record("nih:1")])
+            with self.assertRaisesRegex(RuntimeError, "duplicate"):
+                load_exclusion_ledger(root)
+
+    def test_invalid_status_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            bad = exclusion_record("nih:1")
+            bad["status"] = "deleted"
+            write_exclusion_ledger(root, [bad])
+            with self.assertRaisesRegex(RuntimeError, "status"):
+                load_exclusion_ledger(root)
+
+    def test_invalid_classification_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            bad = exclusion_record("nih:1")
+            bad["classification"] = "vibes"
+            write_exclusion_ledger(root, [bad])
+            with self.assertRaisesRegex(RuntimeError, "classification"):
+                load_exclusion_ledger(root)
+
+    def test_excluded_ids_returns_only_excluded_status(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_exclusion_ledger(root, [
+                exclusion_record("nih:1", status="excluded"),
+                exclusion_record("nih:2", status="returned"),
+            ])
+            self.assertEqual(excluded_ids(root), {"nih:1"})
+
+    def test_save_sorts_records_deterministically(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            save_exclusion_ledger(root, {"schemaVersion": 1, "records": [
+                exclusion_record("nih:2"), exclusion_record("nih:1"),
+            ]})
+            ledger = load_exclusion_ledger(root)
+            self.assertEqual([r["id"] for r in ledger["records"]],
+                             ["nih:1", "nih:2"])
+
+
+class SoftDeleteAndReturnTests(unittest.TestCase):
+    def test_excluded_id_is_never_popped_from_the_store(self):
+        """Soft delete: the store retains an id even while its ledger
+        status is 'excluded' and a full pull no longer returns it."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            store_path = root / "data" / "nih" / "nigms" / "nigms" / "awards"
+            write_exclusion_ledger(root, [exclusion_record("nih:2")])
+            write_store(store_path, [
+                NihReporterPull("NIGMS", {}, store_path).normalize(row(1))[0],
+                NihReporterPull("NIGMS", {}, store_path).normalize(row(2))[0],
+            ])
             puller = NihReporterPull(
-                "NIGMS",
-                {"min_total": 0, "max_total": 1000, "max_monthly": 1000},
+                "NIGMS", {"min_total": 0, "max_total": 1000, "max_monthly": 1000},
                 store_path,
-                retracted_ids={"nih:2"},
-                retracted_months={"nih:2": "2025-01"},
             )
-            write_store(
+            with patch.object(puller, "fetch_year",
+                              side_effect=lambda fy: {1: row(1)} if fy == 2025 else {}):
+                awards, warnings, notes = puller.pull(
+                    full=True, today=date(2026, 8, 17), repo_root=root)
+            self.assertEqual({"nih:1", "nih:2"}, {a["id"] for a in awards})
+            self.assertEqual([], warnings)
+            # nih:2 is still "excluded" (not returned), so it is a
+            # data-quality note, not a warning, and it is not popped.
+            self.assertEqual(excluded_ids(root), {"nih:2"})
+
+    def test_missing_uncovered_id_is_a_data_quality_note_not_a_warning(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            store_path = root / "data" / "nih" / "nigms" / "nigms" / "awards"
+            write_store(store_path, [
+                NihReporterPull("NIGMS", {}, store_path).normalize(row(2))[0],
+            ])
+            puller = NihReporterPull(
+                "NIGMS", {"min_total": 0, "max_total": 1000, "max_monthly": 1000},
                 store_path,
-                [puller.normalize(row(1))[0], puller.normalize(row(2))[0]],
+            )
+            with patch.object(puller, "fetch_year", return_value={}):
+                awards, warnings, notes = puller.pull(
+                    full=True, today=date(2026, 8, 17), repo_root=root)
+            self.assertEqual(["nih:2"], [a["id"] for a in awards])
+            self.assertEqual([], warnings)
+            self.assertEqual(1, len(notes))
+            self.assertIn("1 stored award record(s) were not returned", notes[0])
+            self.assertIn("retained", notes[0])
+
+    def test_return_flips_ledger_status_and_prints_notice(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            store_path = root / "data" / "nih" / "nigms" / "nigms" / "awards"
+            write_exclusion_ledger(root, [exclusion_record("nih:2")])
+            write_store(store_path, [
+                NihReporterPull("NIGMS", {}, store_path).normalize(row(1))[0],
+                NihReporterPull("NIGMS", {}, store_path).normalize(row(2))[0],
+            ])
+            puller = NihReporterPull(
+                "NIGMS", {"min_total": 0, "max_total": 1000, "max_monthly": 1000},
+                store_path,
             )
             with patch.object(
-                puller,
-                "fetch_year",
-                side_effect=lambda fy: {1: row(1)} if fy == 2025 else {},
+                puller, "fetch_year",
+                side_effect=lambda fy: {1: row(1), 2: row(2)} if fy == 2025 else {},
             ):
-                awards, warnings = puller.pull(
-                    full=True, today=date(2026, 8, 17)
-                )
-        self.assertEqual(["nih:1"], [award["id"] for award in awards])
-        self.assertEqual([], warnings)
-        self.assertEqual({"2025-01": 1}, puller.allowed_monthly_shrink)
+                buf = io.StringIO()
+                with patch("sys.stdout", buf):
+                    awards, warnings, notes = puller.pull(
+                        full=True, today=date(2026, 8, 17), repo_root=root)
+            self.assertEqual([], warnings)
+            self.assertIn("NOTICE", buf.getvalue())
+            self.assertIn("returned to the live source", buf.getvalue())
+            ledger = load_exclusion_ledger(root)
+            by_id = {r["id"]: r for r in ledger["records"]}
+            self.assertEqual("returned", by_id["nih:2"]["status"])
+            self.assertEqual(excluded_ids(root), set())
 
-    def test_unreviewed_missing_award_is_still_retained_and_warned(self):
+    def test_returning_a_second_time_is_idempotent(self):
         with tempfile.TemporaryDirectory() as tmp:
-            store_path = Path(tmp) / "awards"
+            root = Path(tmp)
+            store_path = root / "data" / "nih" / "nigms" / "nigms" / "awards"
+            write_exclusion_ledger(root, [
+                exclusion_record("nih:2", status="returned"),
+            ])
+            write_store(store_path, [
+                NihReporterPull("NIGMS", {}, store_path).normalize(row(2))[0],
+            ])
             puller = NihReporterPull(
-                "NIGMS",
-                {"min_total": 0, "max_total": 1000, "max_monthly": 1000},
+                "NIGMS", {"min_total": 0, "max_total": 1000, "max_monthly": 1000},
                 store_path,
             )
-            write_store(store_path, [puller.normalize(row(2))[0]])
-            with patch.object(puller, "fetch_year", return_value={}):
-                awards, warnings = puller.pull(
-                    full=True, today=date(2026, 8, 17)
-                )
-        self.assertEqual(["nih:2"], [award["id"] for award in awards])
-        self.assertEqual(1, len(warnings))
-        self.assertIn("retained from the store", warnings[0])
+            with patch.object(puller, "fetch_year",
+                              side_effect=lambda fy: {2: row(2)} if fy == 2025 else {}):
+                awards, warnings, notes = puller.pull(
+                    full=True, today=date(2026, 8, 17), repo_root=root)
+        self.assertEqual([], warnings)
 
-    def test_retraction_ledger_has_unique_namespaced_ids(self):
-        ledger = json.loads(
-            (Path(__file__).parents[1] / "reference" /
-             "nih_reporter_retractions.json").read_text()
-        )
-        records = ledger["records"]
-        self.assertEqual(2, ledger["schemaVersion"])
-        self.assertEqual(31, len(records))
-        self.assertEqual(31, len({record["id"] for record in records}))
-        self.assertTrue(all(record["id"].startswith("nih:") for record in records))
-        self.assertTrue(all(record["reporterAgency"] for record in records))
-        self.assertTrue(all(record["month"] == record["awardDate"][:7]
-                            for record in records))
-        by_class = {}
-        for record in records:
-            classification = record["classification"]
-            by_class.setdefault(classification, []).append(record)
-        self.assertEqual({
-            "reporter-record-retraction-or-supersession": 29,
-            "confirmed-bilateral-termination": 2,
-        }, {key: len(value) for key, value in by_class.items()})
-        self.assertEqual(7904720,
-                         sum(record["amount"] for record in records))
-        self.assertEqual(120886, sum(
-            record["amount"]
-            for record in by_class["confirmed-bilateral-termination"]
-        ))
-        self.assertEqual({
-            ("nih:11241477", "F30HL178229", "2026-08-27"),
-            ("nih:11241491", "F32DK142455", "2026-08-29"),
-        }, {
-            (record["id"], record["awardNumber"], record["terminationDate"])
-            for record in by_class["confirmed-bilateral-termination"]
-            if record["terminationType"] == "Bilateral Termination"
-        })
 
-    def test_approved_20260824_retractions_match_exact_evidence(self):
-        root = Path(__file__).parents[1]
-        ledger = json.loads(
-            (root / "reference" / "nih_reporter_retractions.json").read_text()
-        )
-        evidence = json.loads(
-            (root / "reference" /
-             "nih_reporter_retraction_evidence_20260824.json").read_text()
-        )
-        expected_ids = {
-            "nih:11161340", "nih:11327923", "nih:11462449",
-            "nih:11380142", "nih:11461896", "nih:11286738",
-            "nih:11290350", "nih:11555862", "nih:11437634",
-        }
-        self.assertTrue(evidence["control"]["returned"])
-        self.assertEqual([], evidence["candidateIdsReturned"])
-        self.assertEqual(expected_ids,
-                         {record["id"] for record in evidence["records"]})
-        self.assertEqual(1288767,
-                         sum(record["amount"] for record in evidence["records"]))
-        ledger_by_id = {record["id"]: record for record in ledger["records"]}
-        returned_ids = {
-            "nih:11462449", "nih:11461896", "nih:11555862",
-            "nih:11437634",
-        }
-        active_ids = expected_ids - returned_ids
-        self.assertEqual(active_ids, expected_ids & set(ledger_by_id))
-        self.assertFalse(returned_ids & set(ledger_by_id))
-        stores = {}
-        for record in evidence["records"]:
-            unit = record["unit"]
-            if unit not in stores:
-                stores[unit] = load_store(root / "data" / unit)
-            if record["id"] in active_ids:
-                self.assertNotIn(record["id"], stores[unit])
-            else:
-                self.assertIn(record["id"], stores[unit])
-
-    def test_approved_20260908_source_exclusions_match_exact_evidence(self):
-        root = Path(__file__).parents[1]
-        ledger = json.loads(
-            (root / "reference" / "nih_reporter_retractions.json").read_text()
-        )
-        evidence = json.loads(
-            (root / "reference" /
-             "nih_reporter_source_evidence_20260908.json").read_text()
-        )
-        missing_ids = {
-            "nih:11043767", "nih:11088961", "nih:11176793",
-            "nih:11234633", "nih:11241477", "nih:11241491",
-            "nih:11266582", "nih:11313204", "nih:11380040",
-            "nih:11384307", "nih:11398315", "nih:11415246",
-            "nih:11416109", "nih:11418121", "nih:11458848",
-        }
-        returned_ids = {
-            "nih:11294928", "nih:11437634", "nih:11461896",
-            "nih:11462449", "nih:11555862",
-        }
-        terminated_ids = {"nih:11241477", "nih:11241491"}
-        reporter_record_ids = missing_ids - terminated_ids
-        self.assertTrue(evidence["reporter"]["control"]["returned"])
-        self.assertEqual(
-            returned_ids | {"nih:11126249"},
-            set(evidence["reporter"]["exactQuery"]["returnedIds"]),
-        )
-        self.assertEqual(
-            reporter_record_ids,
-            set(evidence["classification"]
-                ["reporterRecordRetractionsOrSupersessions"]),
-        )
-        self.assertEqual(
-            terminated_ids,
-            set(evidence["classification"]
-                ["confirmedBilateralTerminations"]),
-        )
-        self.assertEqual({
-            "missingRecordCount": 15,
-            "missingRecordAmount": 5531355,
-            "reporterRecordRetractionOrSupersessionCount": 13,
-            "reporterRecordRetractionOrSupersessionAmount": 5410469,
-            "confirmedBilateralTerminationCount": 2,
-            "confirmedBilateralTerminationHistoricalRowAmount": 120886,
-            "returnedPriorExclusionCount": 5,
-            "returnedPriorExclusionCurrentReporterAmount": 517955,
-            "returnedPriorExclusionRecordedLedgerAmount": 751955,
-        }, evidence["totals"])
-
-        evidence_by_id = {
-            record["id"]: record
-            for record in evidence["missingStoredRecords"]
-        }
-        ledger_by_id = {record["id"]: record for record in ledger["records"]}
-        self.assertEqual(missing_ids, set(evidence_by_id))
-        self.assertEqual(missing_ids, missing_ids & set(ledger_by_id))
-        self.assertFalse(returned_ids & set(ledger_by_id))
-        for record_id, evidence_record in evidence_by_id.items():
-            ledger_record = ledger_by_id[record_id]
-            stored = evidence_record["stored"]
-            self.assertEqual(stored["date"], ledger_record["awardDate"])
-            self.assertEqual(int(stored["estimatedTotalAmt"]),
-                             ledger_record["amount"])
-            self.assertEqual(stored["title"], ledger_record["title"])
-            expected_class = (
-                "confirmed-bilateral-termination"
-                if record_id in terminated_ids
-                else "reporter-record-retraction-or-supersession"
+class MoveLedgerTests(unittest.TestCase):
+    def test_field_changes_are_appended_and_deterministic(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            store_path = root / "data" / "nih" / "nigms" / "nigms" / "awards"
+            write_store(store_path, [
+                NihReporterPull("NIGMS", {}, store_path).normalize(row(1))[0],
+            ])
+            puller = NihReporterPull(
+                "NIGMS", {"min_total": 0, "max_total": 1000, "max_monthly": 1000},
+                store_path,
             )
-            self.assertEqual(expected_class, ledger_record["classification"])
-            store = load_store(root / "data" / evidence_record["unit"])
-            if record_id in store:
-                actual = store[record_id]
-                self.assertEqual(stored["date"], actual["date"])
-                self.assertEqual(int(stored["estimatedTotalAmt"]),
-                                 actual["amount"])
-                self.assertEqual(stored["transType"], actual["transType"])
-                self.assertEqual(stored["title"], actual["title"])
-                self.assertEqual(stored["awardeeName"], actual["awardee"])
+            re_dated = row(1, award_notice_date="2025-03-01T00:00:00")
+            with patch.object(puller, "fetch_year",
+                              side_effect=lambda fy: {1: re_dated} if fy == 2025 else {}):
+                awards, warnings, notes = puller.pull(
+                    full=True, today=date(2026, 8, 17), repo_root=root)
+            self.assertEqual([], warnings)
+            rows = load_changes_ledger(store_path)
+            self.assertEqual(1, len(rows))
+            self.assertEqual(rows[0]["id"], "nih:1")
+            self.assertEqual(rows[0]["field"], "date")
+            self.assertEqual(rows[0]["old"], "2025-01-15")
+            self.assertEqual(rows[0]["new"], "2025-03-01")
+            self.assertEqual(rows[0]["pullDate"], "2026-08-17")
 
-        returned_by_id = {
-            record["id"]: record
-            for record in evidence["returnedPriorExclusions"]
-        }
-        self.assertEqual(returned_ids, set(returned_by_id))
-        for record_id, returned in returned_by_id.items():
-            store = load_store(
-                root / "data" / returned["priorLedgerRecord"]["unit"]
+            path = changes_ledger_path(store_path)
+            bytes_first = path.read_bytes()
+            # Re-appending the same content produces byte-identical output
+            # (fixed gzip mtime + deterministic sort).
+            from adapters.nih_reporter import append_changes_ledger
+            append_changes_ledger(store_path, [])
+            self.assertEqual(bytes_first, path.read_bytes())
+
+    def test_changes_accumulate_append_only_across_pulls(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            store_path = root / "data" / "nih" / "nigms" / "nigms" / "awards"
+            write_store(store_path, [
+                NihReporterPull("NIGMS", {}, store_path).normalize(row(1))[0],
+            ])
+            puller = NihReporterPull(
+                "NIGMS", {"min_total": 0, "max_total": 1000, "max_monthly": 1000},
+                store_path,
             )
-            self.assertIn(record_id, store)
+            first_change = row(1, award_notice_date="2025-03-01T00:00:00")
+            with patch.object(puller, "fetch_year",
+                              side_effect=lambda fy: {1: first_change} if fy == 2025 else {}):
+                first_awards, _, _ = puller.pull(
+                    full=True, today=date(2026, 8, 17), repo_root=root)
+            # Simulate scripts/pull_unit.py writing the store back between
+            # pulls, so the second pull diffs against the updated date.
+            write_store(store_path, first_awards)
+            second_change = row(1, award_notice_date="2025-04-01T00:00:00")
+            with patch.object(puller, "fetch_year",
+                              side_effect=lambda fy: {1: second_change} if fy == 2025 else {}):
+                puller.pull(full=True, today=date(2026, 8, 24), repo_root=root)
+            rows = load_changes_ledger(store_path)
+            self.assertEqual(2, len(rows))
+            self.assertEqual(["2026-08-17", "2026-08-24"], [r["pullDate"] for r in rows])
+            # Original row untouched (append-only).
+            self.assertEqual(rows[0]["old"], "2025-01-15")
+            self.assertEqual(rows[0]["new"], "2025-03-01")
+            self.assertEqual(rows[1]["old"], "2025-03-01")
+            self.assertEqual(rows[1]["new"], "2025-04-01")
 
+
+class ChurnThresholdTests(unittest.TestCase):
+    def _store_of_size(self, store_path, n):
+        write_store(store_path, [
+            NihReporterPull("NIGMS", {}, store_path).normalize(row(i))[0]
+            for i in range(1, n + 1)
+        ])
+
+    def test_threshold_passes_at_exactly_the_limit(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            store_path = root / "data" / "nih" / "nigms" / "nigms" / "awards"
+            n = 1000  # max(20, 0.1% of 1000) == 20
+            self._store_of_size(store_path, n)
+            limit = int(max(MOVE_RETURN_ABS_MIN, MOVE_RETURN_REL_FRACTION * n))
+            self.assertEqual(limit, 20)
+            changed_rows = {
+                i: row(i, award_notice_date="2025-03-01T00:00:00")
+                for i in range(1, limit + 1)
+            }
+            puller = NihReporterPull(
+                "NIGMS", {"min_total": 0, "max_total": 10000, "max_monthly": 10000},
+                store_path,
+            )
+            all_rows = {i: row(i) for i in range(1, n + 1)}
+            all_rows.update(changed_rows)
+            with patch.object(puller, "fetch_year",
+                              side_effect=lambda fy: all_rows if fy == 2025 else {}):
+                awards, warnings, notes = puller.pull(
+                    full=True, today=date(2026, 8, 17), repo_root=root)
+            self.assertEqual([], warnings)
+
+    def test_threshold_fails_closed_one_above_the_limit(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            store_path = root / "data" / "nih" / "nigms" / "nigms" / "awards"
+            n = 1000
+            self._store_of_size(store_path, n)
+            limit = int(max(MOVE_RETURN_ABS_MIN, MOVE_RETURN_REL_FRACTION * n))
+            over_limit = limit + 1
+            changed_rows = {
+                i: row(i, award_notice_date="2025-03-01T00:00:00")
+                for i in range(1, over_limit + 1)
+            }
+            puller = NihReporterPull(
+                "NIGMS", {"min_total": 0, "max_total": 10000, "max_monthly": 10000},
+                store_path,
+            )
+            all_rows = {i: row(i) for i in range(1, n + 1)}
+            all_rows.update(changed_rows)
+            with patch.object(puller, "fetch_year",
+                              side_effect=lambda fy: all_rows if fy == 2025 else {}):
+                with self.assertRaisesRegex(SystemExit, "pagination"):
+                    puller.pull(full=True, today=date(2026, 8, 17), repo_root=root)
+
+
+class MethodologyAndDataQualityTests(unittest.TestCase):
+    def test_pull_unit_emits_verbatim_methodology_note(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            store_path = root / "data" / "nih" / "nigms" / "nigms" / "awards"
+            unit_cfg = {"params": {"reporter_agency": "NIGMS"},
+                       "checks": {"min_total": 0, "max_total": 10,
+                                  "max_monthly": 10}}
+            puller_row = row(1)
+
+            def fake_fetch_year(self, fy, attempts=3):
+                return {1: puller_row} if fy == 2025 else {}
+
+            with patch.object(NihReporterPull, "fetch_year", fake_fetch_year):
+                awards, warnings, source, metadata = pull_unit(
+                    unit_cfg, store_path, full=True, today=date(2026, 8, 17),
+                    repo_root=root)
+        self.assertEqual(
+            metadata["methodologyNote"],
+            "counts as of the pull date; NIH revises award notice dates.")
+        self.assertEqual(metadata["methodologyNote"], METHODOLOGY_NOTE)
+        self.assertIn("dataQualityNotes", metadata)
+
+    def test_retained_missing_count_parses_notes(self):
+        notes = [
+            "2 stored award record(s) were not returned by the 2026-09-18 "
+            "full pull and are retained; NIH revises and withdraws notices.",
+            "1 award record(s) carry a NIH-reported award notice date "
+            "outside their own declared fiscal year; retained and dated by "
+            "the source's current notice date.",
+        ]
+        self.assertEqual(2, retained_missing_count(notes))
+        self.assertEqual(0, retained_missing_count(None))
+        self.assertEqual(0, retained_missing_count([]))
+
+
+class ConfigSanityTests(unittest.TestCase):
     def test_config_has_all_current_reporter_nih_admin_components(self):
         cfg = json.loads((Path(__file__).parents[1] / "config" / "orgs.json").read_text())
         nih = next(agency for agency in cfg["agencies"] if agency["slug"] == "nih")
