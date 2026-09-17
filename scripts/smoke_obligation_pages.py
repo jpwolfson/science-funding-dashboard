@@ -368,7 +368,11 @@ def page_matrix(repo):
         for fy in row.get("fiscalYears", [])
     ))
     negative = select("negative activity", lambda row: any(
-        period.get("deobligationsCents", 0) < 0
+        # A notReported period's deobligationsCents is null (no derived
+        # activity at all), never merely absent, so `or 0` is required:
+        # `.get(..., 0)` only supplies the default when the key is
+        # missing, not when it is present and None.
+        (period.get("deobligationsCents") or 0) < 0
         for period in row.get("reportingPeriods", [])
     ))
     out_of_range = select("out-of-range File C/net", lambda row: any(
