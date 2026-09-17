@@ -1,5 +1,6 @@
 {
  "schemaVersion": 1,
+ "note": "Phase 3.2d remediation (W1, 2026-09-17): the active ledger this evidence backed (reference/nih_reporter_retractions.json) was migrated verbatim into reference/nih_reporter_exclusions.json (status \"excluded\", decidedOn 2026-09-09) and retired. This file is kept unmodified as dated evidence.",
  "observedAt": "2026-08-24",
  "source": "https://api.reporter.nih.gov/v2/projects/search",
  "method": "Every affected fiscal year was located by exact retained-versus-live counts, then fetched in complete ascending and descending application-ID order and reconciled to meta.total. The missing stored IDs were queried directly in one exact appl_ids request alongside a known-live control.",
