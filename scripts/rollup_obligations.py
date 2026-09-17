@@ -8,12 +8,16 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
-from adapters.obligation_common import aggregate, load_store, write_dashboard
+from adapters.obligation_common import (
+    account_period_status, aggregate, load_store, merge_period_status,
+    write_dashboard,
+)
 
 
 def child_summary(path, name, abbrev, events, current_fy, covered_periods,
-                  partial_fys):
-    stats = aggregate(events, current_fy, covered_periods, partial_fys)
+                  partial_fys, period_status=None):
+    stats = aggregate(events, current_fy, covered_periods, partial_fys,
+                      period_status)
     fy = next((row for row in stats["fiscalYears"] if row["fy"] == current_fy), None)
     return {"path": path, "name": name, "abbrev": abbrev, "hasData": bool(events),
             "currentFYNetObligations": fy["netObligations"] if fy else 0,
@@ -60,6 +64,13 @@ def build(repo=REPO):
             "maxAgeDays": int(account.get("freshnessMaxDays", freshness_max_days)),
         }
         account_freshness[account["path"]] = freshness
+        # Snapshot acceptance rule (docs/obligation-ledger.md "Snapshot
+        # acceptance and not-reported periods"): recomputed once per
+        # account, straight from committed provenance, and reused for the
+        # account itself, every Program Activity child, and the agency/root
+        # rollups below -- notReported is a File B/account-wide property,
+        # not a per-Program-Activity one.
+        period_status = account_period_status(base / "events", events, partial_fys)
         pa_children = []
         for pa in account["programActivities"]:
             pa_events = [e for e in events if (
@@ -73,10 +84,12 @@ def build(repo=REPO):
                 metadata={"federalAccount": account["federalAccount"],
                           "programActivityCode": pa["code"],
                           "freshness": freshness},
-                covered_periods=covered_periods, partial_fys=partial_fys)
+                covered_periods=covered_periods, partial_fys=partial_fys,
+                period_status=period_status)
             pa_children.append(child_summary(path, pa["name"], pa.get("abbrev", ""),
                                              pa_events, current_fy,
-                                             covered_periods, partial_fys))
+                                             covered_periods, partial_fys,
+                                             period_status))
         known = {(pa["code"], pa["name"])
                  for pa in account["programActivities"]}
         unknown = sorted({(e["programActivityCode"], e["programActivityName"])
@@ -90,41 +103,43 @@ def build(repo=REPO):
             current_fy=current_fy,
             metadata={"federalAccount": account["federalAccount"],
                       "freshness": freshness},
-            covered_periods=covered_periods, partial_fys=partial_fys)
+            covered_periods=covered_periods, partial_fys=partial_fys,
+            period_status=period_status)
         agency_slug = account["path"].split("/")[0]
         agency_events.setdefault(agency_slug, []).extend(events)
         account_rows.append((account, events, current_fy, covered_periods,
-                             partial_fys))
+                             partial_fys, period_status))
 
     agency_children = []
     for agency_slug, events in agency_events.items():
-        accounts = [(a, ev, fy, periods, partial) for
-                    a, ev, fy, periods, partial in account_rows
+        accounts = [(a, ev, fy, periods, partial, status) for
+                    a, ev, fy, periods, partial, status in account_rows
                     if a["path"].split("/")[0] == agency_slug]
         ids = [e["id"] for e in events]
         if len(ids) != len(set(ids)):
             raise ValueError(f"duplicate event IDs across {agency_slug} account stores")
         current_fy = max(e["fiscalYear"] for e in events)
-        covered_periods = set().union(*(periods for _, _, _, periods, _ in accounts))
-        partial_fys = set().union(*(partial for _, _, _, _, partial in accounts))
+        covered_periods = set().union(*(periods for _, _, _, periods, _, _ in accounts))
+        partial_fys = set().union(*(partial for _, _, _, _, partial, _ in accounts))
+        period_status = merge_period_status(status for _, _, _, _, _, status in accounts)
         children = [child_summary(f"obligations/{a['path']}", a["name"], a["abbrev"],
-                                  ev, fy, periods, partial)
-                    for a, ev, fy, periods, partial in accounts]
+                                  ev, fy, periods, partial, status)
+                    for a, ev, fy, periods, partial, status in accounts]
         agency_name = accounts[0][0]["agency"]
         accepted = [account_freshness[a["path"]].get("latestAcceptedAt")
-                    for a, _, _, _, _ in accounts
+                    for a, _, _, _, _, _ in accounts
                     if account_freshness[a["path"]].get("latestAcceptedAt")]
         write_dashboard(data_root / agency_slug,
             {"level": "agency", "path": f"obligations/{agency_slug}",
             "name": agency_name, "abbrev": agency_slug.upper()},
             "USAspending File B and File C", events, children=children,
             current_fy=current_fy, covered_periods=covered_periods,
-            partial_fys=partial_fys,
+            partial_fys=partial_fys, period_status=period_status,
             metadata={"freshness": {"latestAcceptedAt": min(accepted) if accepted else None,
                                      "maxAgeDays": freshness_max_days}})
         agency_children.append(child_summary(f"obligations/{agency_slug}", agency_name,
                                              agency_slug.upper(), events, current_fy,
-                                             covered_periods, partial_fys))
+                                             covered_periods, partial_fys, period_status))
 
     all_events = [e for events in agency_events.values() for e in events]
     if all_events:
@@ -133,7 +148,10 @@ def build(repo=REPO):
             raise ValueError("duplicate event IDs across obligation accounts")
         current_fy = max(e["fiscalYear"] for e in all_events)
         covered_periods = {e["submissionPeriod"] for e in all_events}
-        partial_fys = set().union(*(partial for _, _, _, _, partial in account_rows))
+        partial_fys = set().union(*(partial for _, _, _, _, partial, _ in account_rows))
+        period_status = merge_period_status(
+            status for _, _, _, _, _, status in account_rows
+        )
         accepted = [row.get("latestAcceptedAt")
                     for row in account_freshness.values()
                     if row.get("latestAcceptedAt")]
@@ -141,13 +159,14 @@ def build(repo=REPO):
             "name": "Appropriations obligations"}, "USAspending File B and File C",
             all_events, children=agency_children, current_fy=current_fy,
             covered_periods=covered_periods, partial_fys=partial_fys,
+            period_status=period_status,
             metadata={"freshness": {"latestAcceptedAt": min(accepted) if accepted else None,
                                      "maxAgeDays": freshness_max_days}})
 
     index_children = []
     for agency_slug, events in agency_events.items():
         account_nodes = []
-        for account, _, _, _, _ in account_rows:
+        for account, _, _, _, _, _ in account_rows:
             if account["path"].split("/")[0] != agency_slug:
                 continue
             account_nodes.append({"slug": account["path"].split("/")[-1],
@@ -157,7 +176,7 @@ def build(repo=REPO):
                      "abbrev": pa.get("abbrev", ""),
                      "path": f"{account['path']}/{pa['slug']}", "children": []}
                     for pa in account["programActivities"]]})
-        agency_name = next(a["agency"] for a, _, _, _, _ in account_rows
+        agency_name = next(a["agency"] for a, _, _, _, _, _ in account_rows
                            if a["path"].split("/")[0] == agency_slug)
         index_children.append({"slug": agency_slug, "name": agency_name,
                                "abbrev": agency_slug.upper(), "path": agency_slug,

@@ -76,6 +76,51 @@ class ObligationAggregationTests(unittest.TestCase):
         )
         self.assertFalse(out["fiscalYears"][0]["partial"])
 
+    def test_not_reported_period_row_has_null_activity_and_covers_note(self):
+        rows = [ev("p10", 10000, "FY2025P10"), ev("p12", 1300, "FY2025P12")]
+        period_status = {"FY2025P10": "reported", "FY2025P11": "notReported",
+                         "FY2025P12": "reported"}
+        out = aggregate(rows, current_fy=2025,
+                        covered_periods={"FY2025P10", "FY2025P11", "FY2025P12"},
+                        partial_fys=set(), period_status=period_status)
+        by_period = {row["submissionPeriod"]: row for row in out["reportingPeriods"]}
+        self.assertEqual("notReported", by_period["FY2025P11"]["status"])
+        self.assertIsNone(by_period["FY2025P11"]["netObligationsCents"])
+        self.assertEqual("reported", by_period["FY2025P12"]["status"])
+        self.assertEqual(["FY2025P11", "FY2025P12"],
+                         by_period["FY2025P12"]["coversPeriods"])
+        self.assertNotIn("coversPeriods", by_period["FY2025P10"])
+
+    def test_cumulative_point_holds_last_reported_value_at_not_reported_period(self):
+        rows = [ev("p10", 10000, "FY2025P10"), ev("p12", 1300, "FY2025P12")]
+        period_status = {"FY2025P10": "reported", "FY2025P11": "notReported",
+                         "FY2025P12": "reported"}
+        out = aggregate(rows, current_fy=2025,
+                        covered_periods={"FY2025P10", "FY2025P11", "FY2025P12"},
+                        partial_fys=set(), period_status=period_status)
+        points = {p["submissionPeriod"]: p for p in out["fyCumulative"][0]["points"]}
+        self.assertTrue(points["FY2025P11"]["held"])
+        self.assertEqual(points["FY2025P10"]["netObligationsCents"],
+                         points["FY2025P11"]["netObligationsCents"])
+        self.assertNotIn("held", points["FY2025P12"])
+        # The cumulative endpoint invariant still holds exactly.
+        self.assertEqual(out["fiscalYears"][0]["netObligationsCents"],
+                         points["FY2025P12"]["netObligationsCents"])
+
+    def test_dangling_not_reported_final_period_keeps_a_real_endpoint(self):
+        # The most recent period is itself notReported with nothing after
+        # it yet: the endpoint invariant must still hold, so it is shown at
+        # its real (if incomplete) computed value rather than held.
+        rows = [ev("p10", 10000, "FY2025P10")]
+        period_status = {"FY2025P10": "reported", "FY2025P11": "notReported"}
+        out = aggregate(rows, current_fy=2025,
+                        covered_periods={"FY2025P10", "FY2025P11"},
+                        partial_fys={2025}, period_status=period_status)
+        points = {p["submissionPeriod"]: p for p in out["fyCumulative"][0]["points"]}
+        self.assertNotIn("held", points["FY2025P11"])
+        self.assertEqual(out["fiscalYears"][0]["netObligationsCents"],
+                         points["FY2025P11"]["netObligationsCents"])
+
 
 if __name__ == "__main__":
     unittest.main()
