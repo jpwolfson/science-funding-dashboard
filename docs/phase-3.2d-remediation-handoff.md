@@ -91,6 +91,22 @@ parallel.
   "not reported at pull".
 - Validator additions: the >50 % drop-between-reported-periods warning
   requiring a `largeChangeNote` in that FY's provenance; the P12 rule.
+- **Rule refinements from data (2026-09-17, after W3's first offline
+  rebuild tripped its own validator on five account-years):**
+  (1) a sub-half period is `notReported` only when a later period in the
+  FY recovers to ≥ 0.5 × the last reported count, or when no later period
+  exists yet (provisional); a sustained drop is a restructuring and becomes
+  the new baseline — `commerce/census-current-surveys` FY2020 rows
+  101 → 44 at P07 and stays, FY total reconciles. (2) Backward rule: rows
+  below 0.25 × the FY's final accepted period's rows are `notReported`
+  (final period exempt) — `commerce/noaa-orf` FY2024 has 5–10 rows for
+  P04–P08 against 551 at P12. (3) The >50 % cumulative-drop check applies
+  only above 100,000,000 cents previous cumulative and its curated
+  explanation lives in the baseline file (`fiscalYears.<FY>.periodNotes`),
+  not in generated provenance — `usda/nifa-integrated-activities` FY2022
+  fired on a $24k base. `commerce/nist-its` FY2025 P11 and `dhs/cisa-rd`
+  FY2023 P04 have full row counts with collapsed dollars: no row rule can
+  classify them; they carry provisional notes until the CI re-pull.
 - **P10 hatches: retire by landing.** The six `source-label-unavailable-*`
   identities are needed for any pull that reaches P10 to succeed (attempt 1
   of run 34141166514 failed on exactly those PARKs), so they stay; a fresh
