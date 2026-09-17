@@ -22,8 +22,10 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from adapters.common import SERIES_START, fiscal_year  # noqa: E402
 from adapters.nih_reporter import (  # noqa: E402
-    FUNDING_MECHANISMS, INCLUDE_FIELDS, NihReporterPull, api_post,
-    parse_trans_type,
+    CHANGES_HEADER, FUNDING_MECHANISMS, INCLUDE_FIELDS, LIVE_GAP_ABS_MIN,
+    LIVE_GAP_REL_FRACTION, METHODOLOGY_NOTE, NihReporterPull, api_post,
+    changes_ledger_path, load_exclusion_ledger, parse_trans_type,
+    retained_missing_count,
 )
 
 DATA = REPO_ROOT / "data"
@@ -115,8 +117,57 @@ def read_store(leaf_path):
     return rows, errors
 
 
+def _check_changes_ledger(leaf_path):
+    """Validate one unit's move ledger (data/nih/<ic>/<ic>/changes.csv.gz):
+    readable, exact columns, and sorted by (pullDate, id, field). Absence is
+    fine -- the ledger cannot be produced offline; only a live pull appends
+    to it."""
+    path = changes_ledger_path(leaf_path / "awards")
+    if not path.exists():
+        return []
+    errors = []
+    try:
+        with gzip.open(path, "rt", newline="") as fh:
+            reader = csv.DictReader(fh)
+            if reader.fieldnames != CHANGES_HEADER:
+                return [f"{path}: unexpected columns {reader.fieldnames}, "
+                        f"expected {CHANGES_HEADER}"]
+            rows = list(reader)
+    except (OSError, UnicodeError, csv.Error) as exc:
+        return [f"{path}: unreadable gzip CSV: {exc}"]
+    keys = [(row.get("pullDate"), row.get("id"), row.get("field")) for row in rows]
+    if keys != sorted(keys):
+        errors.append(f"{path}: rows are not sorted by (pullDate, id, field)")
+    return errors
+
+
 def within_relative(actual, expected, tolerance):
     return abs(actual - expected) <= abs(expected) * tolerance
+
+
+def live_gap_tolerance(store_count):
+    """max(3, 0.01%) per docs/verification-regime.md "NIH award-ledger
+    invariants"."""
+    return max(LIVE_GAP_ABS_MIN, LIVE_GAP_REL_FRACTION * store_count)
+
+
+def reconcile_live_total(store_count, excluded_count, retained_missing,
+                         source_total):
+    """Decompose store vs independent RePORTER meta.total. Equality is not
+    required -- only a bounded, explained gap (docs/verification-regime.md)."""
+    expected = store_count - excluded_count - retained_missing
+    gap = abs(source_total - expected)
+    tolerance = live_gap_tolerance(store_count)
+    return {
+        "storeCount": store_count,
+        "excludedCount": excluded_count,
+        "retainedMissingCount": retained_missing,
+        "expected": expected,
+        "sourceTotal": source_total,
+        "gap": gap,
+        "tolerance": tolerance,
+        "withinTolerance": gap <= tolerance,
+    }
 
 
 def in_data_book_scope(row):
@@ -203,10 +254,19 @@ def validate(repo_root=REPO_ROOT, live=False, allow_warnings=False):
     baseline = json.loads(DATA_BOOK_BASELINE.read_text())
     errors, notes = [], []
     global_ids = {}
+    aggregated_global_ids = set()
     fy_counts, fy_dollars = Counter(), Counter()
     databook_fy_counts, databook_fy_dollars = Counter(), Counter()
     first_fy = fiscal_year(SERIES_START)
     last_fy = fiscal_year(date.today())
+
+    try:
+        exclusion_ledger = load_exclusion_ledger(repo_root)
+    except (RuntimeError, OSError, ValueError) as exc:
+        errors.append(f"reference/nih_reporter_exclusions.json: {exc}")
+        exclusion_ledger = {"schemaVersion": 1, "records": []}
+    excluded = {r["id"] for r in exclusion_ledger["records"] if r["status"] == "excluded"}
+    returned_in_ledger = {r["id"] for r in exclusion_ledger["records"] if r["status"] == "returned"}
 
     units = list(nih_units(cfg))
     for unit in units:
@@ -218,12 +278,17 @@ def validate(repo_root=REPO_ROOT, live=False, allow_warnings=False):
         if duplicates:
             errors.append(
                 f"{unit['path']}: {len(duplicates)} duplicate IDs within shards")
+        aggregated_rows = []
         for row in rows:
             aid = row.get("id")
             if aid in global_ids and global_ids[aid] != unit["path"]:
                 errors.append(
                     f"{aid} appears in both {global_ids[aid]} and {unit['path']}")
             global_ids[aid] = unit["path"]
+            if aid in excluded:
+                continue  # soft-deleted: retained in the store, skipped here
+            aggregated_global_ids.add(aid)
+            aggregated_rows.append(row)
             try:
                 fy = fiscal_year(date.fromisoformat(row["date"]))
                 amount = int(row["estimatedTotalAmt"])
@@ -241,11 +306,11 @@ def validate(repo_root=REPO_ROOT, live=False, allow_warnings=False):
                 databook_fy_dollars[fy] += amount
 
         checks = unit["checks"]
-        if not checks["min_total"] <= len(rows) <= checks["max_total"]:
+        if not checks["min_total"] <= len(aggregated_rows) <= checks["max_total"]:
             errors.append(
-                f"{unit['path']}: {len(rows)} rows outside configured range "
-                f"{checks['min_total']}..{checks['max_total']}")
-        monthly = Counter(row.get("date", "")[:7] for row in rows)
+                f"{unit['path']}: {len(aggregated_rows)} rows outside configured "
+                f"range {checks['min_total']}..{checks['max_total']}")
+        monthly = Counter(row.get("date", "")[:7] for row in aggregated_rows)
         too_large = [(month, n) for month, n in monthly.items()
                      if n > checks["max_monthly"]]
         if too_large:
@@ -255,28 +320,62 @@ def validate(repo_root=REPO_ROOT, live=False, allow_warnings=False):
                 f"{checks['max_monthly']}")
 
         dashboard_path = leaf / "dashboard.json"
+        dashboard = {}
         if not dashboard_path.exists():
             errors.append(f"{unit['path']}: missing dashboard.json")
         else:
             dashboard = json.loads(dashboard_path.read_text())
-            if dashboard.get("totalAwards") != len(rows):
+            if dashboard.get("totalAwards") != len(aggregated_rows):
                 errors.append(
                     f"{unit['path']}: dashboard totalAwards="
-                    f"{dashboard.get('totalAwards')} but store has {len(rows)}")
+                    f"{dashboard.get('totalAwards')} but aggregated store has "
+                    f"{len(aggregated_rows)} (of {len(rows)} stored, "
+                    f"{len(rows) - len(aggregated_rows)} excluded)")
+            if dashboard.get("methodologyNote") != METHODOLOGY_NOTE:
+                errors.append(
+                    f"{unit['path']}: methodologyNote is "
+                    f"{dashboard.get('methodologyNote')!r}, expected the "
+                    "approved verbatim text")
             warnings = dashboard.get("warnings") or []
             if warnings and not allow_warnings:
                 errors.append(
                     f"{unit['path']}: dashboard has {len(warnings)} warning(s)")
 
+        errors.extend(_check_changes_ledger(leaf))
+
         if live and not row_errors:
             source_total = live_reporter_total(unit["agency"], first_fy, last_fy)
-            if source_total != len(rows):
+            retained_missing = retained_missing_count(dashboard.get("dataQualityNotes"))
+            unit_excluded = len(rows) - len(aggregated_rows)
+            result = reconcile_live_total(
+                len(rows), unit_excluded, retained_missing, source_total)
+            notes.append(
+                f"{unit['path']}: live decomposition store={result['storeCount']} "
+                f"excluded={result['excludedCount']} "
+                f"retainedMissing={result['retainedMissingCount']} "
+                f"expected={result['expected']} sourceTotal={result['sourceTotal']} "
+                f"gap={result['gap']} tolerance={result['tolerance']:.2f}")
+            if not result["withinTolerance"]:
                 errors.append(
-                    f"{unit['path']}: store has {len(rows)} rows but independent "
-                    f"multi-year RePORTER meta.total is {source_total}")
-            else:
-                notes.append(
-                    f"{unit['path']}: live RePORTER total reconciled ({len(rows)})")
+                    f"{unit['path']}: live RePORTER total {source_total} vs "
+                    f"expected {result['expected']} (store {len(rows)} - "
+                    f"excluded {unit_excluded} - retainedMissing "
+                    f"{retained_missing}) differs by {result['gap']}, above "
+                    f"tolerance {result['tolerance']:.2f}")
+
+    # Exclusions-ledger cross-checks: an "excluded" id must never contribute
+    # to an aggregated total, and a "returned" id present in the store must
+    # always be counted (soft delete never silently drops a returned id).
+    for eid in excluded:
+        if eid in aggregated_global_ids:
+            errors.append(
+                f"exclusion ledger: {eid} is marked excluded but is present "
+                "in an aggregated total")
+    for rid in returned_in_ledger:
+        if rid in global_ids and rid not in aggregated_global_ids:
+            errors.append(
+                f"exclusion ledger: {rid} is marked returned and present in "
+                "the store, but is excluded from aggregated totals")
 
     # Funding-mechanism values are global, so one union query over all current
     # administrative ICs detects drift without multiplying requests by 28.
@@ -297,12 +396,26 @@ def validate(repo_root=REPO_ROOT, live=False, allow_warnings=False):
         errors.append("nih: missing agency dashboard.json")
     else:
         nih_dashboard = json.loads(nih_dashboard_path.read_text())
-        if nih_dashboard.get("totalAwards") != len(global_ids):
+        if nih_dashboard.get("totalAwards") != len(aggregated_global_ids):
             errors.append(
                 f"nih dashboard totalAwards={nih_dashboard.get('totalAwards')} "
-                f"but leaf union has {len(global_ids)}")
+                f"but leaf union has {len(aggregated_global_ids)}")
         if nih_dashboard.get("dataComplete") is not True:
             errors.append("nih dashboard dataComplete is not true")
+        if nih_dashboard.get("methodologyNote") != METHODOLOGY_NOTE:
+            errors.append(
+                "nih dashboard methodologyNote is "
+                f"{nih_dashboard.get('methodologyNote')!r}, expected the "
+                "approved verbatim text")
+
+    root_dashboard_path = DATA / "dashboard.json"
+    if root_dashboard_path.exists():
+        root_dashboard = json.loads(root_dashboard_path.read_text())
+        if root_dashboard.get("methodologyNote") != METHODOLOGY_NOTE:
+            errors.append(
+                "award-root dashboard methodologyNote is "
+                f"{root_dashboard.get('methodologyNote')!r}, expected the "
+                "approved verbatim text")
 
     comparison = baseline["comparison"]
     for fy_text, expected in baseline["fiscalYears"].items():
@@ -331,6 +444,8 @@ def validate(repo_root=REPO_ROOT, live=False, allow_warnings=False):
         "liveReporter": live,
         "units": len(units),
         "uniqueAwards": len(global_ids),
+        "aggregatedAwards": len(aggregated_global_ids),
+        "excludedAwards": len(excluded),
         "fiscalYears": {
             str(fy): {"awards": fy_counts[fy], "dollars": fy_dollars[fy]}
             for fy in sorted(fy_counts)

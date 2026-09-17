@@ -10,11 +10,14 @@ same write_dashboard() path scripts/pull_unit.py uses -- so any change to
 aggregate() (e.g. a new output key) reaches every leaf without a live pull.
 Each leaf's node/source metadata is preserved by reading it back from that
 leaf's *current* dashboard.json rather than recomputing it (this script has
-no adapter context to rebuild it from). Existing published warnings are
-carried forward too, except for an exact month/count shrink now explained by
-the reviewed NIH retraction ledger. Finishes by running scripts/rollup.py's build
-so directorate/agency/root dashboards and data/index.json stay consistent
-with the rewritten leaves.
+no adapter context to rebuild it from). For a NIH leaf, awards whose id is
+currently marked "excluded" in reference/nih_reporter_exclusions.json are
+skipped from aggregation (the physical store keeps every row; this is a
+soft delete) and previously published warnings are dropped and
+recomputed fresh, since the retired month-shrink regime's warnings no
+longer apply under the id-count invariant (adapters.common.write_dashboard).
+Finishes by running scripts/rollup.py's build so directorate/agency/root
+dashboards and data/index.json stay consistent with the rewritten leaves.
 
 This script only loads award stores read-only -- the stores are untouched.
 
@@ -22,11 +25,13 @@ This script only loads award stores read-only -- the stores are untouched.
 date to inherit). The current partial fiscal year's series therefore reflect
 "as of today"; the next weekly CI pull refreshes them naturally.
 
-write_dashboard() enforces a monotonic monthly-award-count invariant against
-each leaf's existing dashboard.json. Re-aggregating an unchanged store must
-never trip it -- if it does, something about this script or aggregate() is
-wrong, so we abort loudly rather than publish a leaf with unexplained new
-warnings.
+write_dashboard() enforces a monotonic store-id-count invariant against each
+leaf's existing dashboard.json: the physical store may only grow. This
+script passes the *raw* (pre-exclusion) store size as store_id_count, so a
+NIH leaf's newly-applied exclusion never trips it -- only a genuine drop in
+the physical store would. Re-aggregating an unchanged store must never trip
+it -- if it does, something about this script or aggregate() is wrong, so we
+abort loudly rather than publish a leaf with unexplained new warnings.
 """
 
 import json
@@ -39,7 +44,7 @@ sys.path.insert(0, str(REPO_ROOT))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from adapters.common import load_store, store_exists, write_dashboard  # noqa: E402
-from adapters.nih_reporter import reviewed_retraction_months_by_unit  # noqa: E402
+from adapters.nih_reporter import METHODOLOGY_NOTE, excluded_ids  # noqa: E402
 import rollup  # scripts/rollup.py, run after every leaf is rewritten  # noqa: E402
 
 DATA = REPO_ROOT / "data"
@@ -56,7 +61,7 @@ def leaf_units(cfg):
 def main():
     cfg = json.loads((REPO_ROOT / "config" / "orgs.json").read_text())
     today = date.today()
-    retraction_months = reviewed_retraction_months_by_unit(REPO_ROOT)
+    nih_excluded = excluded_ids(REPO_ROOT)
 
     reaggregated = 0
     for unit_path, _division in leaf_units(cfg):
@@ -69,16 +74,27 @@ def main():
                       f"{dash_path} does not; "
                       "cannot recover node/source metadata offline")
         prev = json.loads(dash_path.read_text())
-        awards = list(load_store(data_dir).values())
+        is_nih = unit_path.startswith("nih/")
+        raw_awards = list(load_store(data_dir).values())
+        awards = ([a for a in raw_awards if a["id"] not in nih_excluded]
+                  if is_nih else raw_awards)
         metadata = {key: prev[key] for key in
                     ("provider", "dataComplete", "storeFormat", "amountNote",
                      "mechanismLabels")
                     if key in prev}
-        if unit_path in retraction_months:
-            metadata["_allowedMonthlyShrink"] = retraction_months[unit_path]
+        if is_nih:
+            # The retired month-shrink regime's warnings no longer apply
+            # under the id-count invariant; start clean and let
+            # write_dashboard recompute against the true store size.
+            base_warnings = []
+            metadata["methodologyNote"] = METHODOLOGY_NOTE
+            metadata["dataQualityNotes"] = prev.get("dataQualityNotes", [])
+        else:
+            base_warnings = prev.get("warnings", [])
         warnings = write_dashboard(data_dir, prev["node"], prev["source"],
-                                    awards, prev.get("warnings", []), today,
-                                    metadata=metadata)
+                                    awards, base_warnings, today,
+                                    metadata=metadata,
+                                    store_id_count=len(raw_awards))
         new_invariant_warnings = [w for w in warnings if w.startswith("invariant violated")]
         if new_invariant_warnings:
             sys.exit(

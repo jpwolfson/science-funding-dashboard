@@ -20,6 +20,7 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from adapters import nih_reporter, nsf, usaspending  # noqa: E402
 from adapters.common import write_dashboard, write_store  # noqa: E402
+from adapters.nih_reporter import excluded_ids  # noqa: E402
 
 ADAPTERS = {"nsf": nsf, "nih_reporter": nih_reporter,
             "usaspending": usaspending}
@@ -85,8 +86,15 @@ def main():
     node = {"name": division["name"], "abbrev": division["abbrev"],
             "path": unit_path, "level": "division"}
     write_store(store_path, awards)
-    all_warnings = write_dashboard(data_dir, node, source, awards, warnings,
-                                   today, metadata=metadata)
+    # Soft-delete exclusions (NIH only; harmless no-op for other sources
+    # since their ids never match the "nih:" namespace): the physical store
+    # written above retains every id, but a reviewed exclusion is skipped
+    # from the published aggregate until the live source returns it.
+    excluded = excluded_ids(REPO_ROOT)
+    aggregated_awards = [a for a in awards if a["id"] not in excluded]
+    all_warnings = write_dashboard(data_dir, node, source, aggregated_awards,
+                                   warnings, today, metadata=metadata,
+                                   store_id_count=len(awards))
     print(f"Wrote {data_dir}/dashboard.json and {store_path.name} "
           f"({len(awards)} awards, {len(all_warnings)} warnings)")
 

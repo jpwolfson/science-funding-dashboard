@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-09",
+ "generated": "2026-09-17",
  "node": {
   "name": "U.S. National Science Foundation",
   "abbrev": "NSF",
@@ -8,14 +8,11 @@
  },
  "source": "Aggregated from 59 leaf dataset(s) (59 configured); each source page documents its own API provenance.",
  "warnings": [
-  "BIO: EF: 4 stored awards not returned by this full re-pull; retained from the store",
   "BIO: 4 awards appear in more than one division; counted once in this rollup",
-  "CSE: CCF: 2 stored awards not returned by this full re-pull; retained from the store",
   "CSE: 2 awards appear in more than one division; counted once in this rollup",
-  "OD: OIA: 1 stored awards not returned by this full re-pull; retained from the store",
   "7 awards appear in more than one division; counted once in this rollup"
  ],
- "totalAwards": 139542,
+ "totalAwards": 139574,
  "currentFY": 2026,
  "monthly": [
   {
@@ -1307,12 +1304,12 @@
   },
   {
    "month": "2026-09",
-   "awards": 29,
-   "dollars": 43127970,
-   "std": 15,
-   "cont": 0,
+   "awards": 61,
+   "dollars": 112738835,
+   "std": 37,
+   "cont": 2,
    "fell": 0,
-   "other": 14
+   "other": 22
   }
  ],
  "fiscalYears": [
@@ -1715,10 +1712,10 @@
   {
    "fy": 2026,
    "partial": true,
-   "awards": 6688,
-   "dollars": 5425544263,
-   "median": 411090,
-   "exTop3Dollars": 5287974655,
+   "awards": 6720,
+   "dollars": 5495155128,
+   "median": 412343,
+   "exTop3Dollars": 5357585520,
    "octJul": {
     "awards": 4570,
     "dollars": 3540972923,
@@ -3080,17 +3077,23 @@
     },
     {
      "d": 342,
-     "awards": 6688,
-     "dollars": 5425544263
+     "awards": 6696,
+     "dollars": 5434012929
     },
     {
-     "d": 343,
-     "awards": 6688,
-     "dollars": 5425544263
+     "d": 349,
+     "awards": 6720,
+     "dollars": 5495155128
+    },
+    {
+     "d": 351,
+     "awards": 6720,
+     "dollars": 5495155128
     }
    ]
   }
  ],
+ "storeIdCount": 139574,
  "children": [
   {
    "slug": "bfa",
@@ -3127,7 +3130,7 @@
    "path": "nsf/cse",
    "active": true,
    "hasData": true,
-   "totalAwards": 22906,
+   "totalAwards": 22912,
    "currentFY": 2026,
    "octJulAwards": 959,
    "octJulDollars": 615941275,
@@ -3141,7 +3144,7 @@
    "path": "nsf/edu",
    "active": true,
    "hasData": true,
-   "totalAwards": 13008,
+   "totalAwards": 13018,
    "currentFY": 2026,
    "octJulAwards": 203,
    "octJulDollars": 181347358,
@@ -3155,7 +3158,7 @@
    "path": "nsf/eng",
    "active": true,
    "hasData": true,
-   "totalAwards": 20179,
+   "totalAwards": 20183,
    "currentFY": 2026,
    "octJulAwards": 760,
    "octJulDollars": 356257176,
@@ -3169,7 +3172,7 @@
    "path": "nsf/geo",
    "active": true,
    "hasData": true,
-   "totalAwards": 17126,
+   "totalAwards": 17129,
    "currentFY": 2026,
    "octJulAwards": 546,
    "octJulDollars": 402934769,
@@ -3197,7 +3200,7 @@
    "path": "nsf/mps",
    "active": true,
    "hasData": true,
-   "totalAwards": 29849,
+   "totalAwards": 29853,
    "currentFY": 2026,
    "octJulAwards": 1082,
    "octJulDollars": 650070778,
@@ -3281,7 +3284,7 @@
    "path": "nsf/tip",
    "active": true,
    "hasData": true,
-   "totalAwards": 9774,
+   "totalAwards": 9779,
    "currentFY": 2026,
    "octJulAwards": 309,
    "octJulDollars": 742130577,
@@ -3297,5 +3300,6 @@
   "fell": "Fellowships",
   "other": "Other awards"
  },
- "dataComplete": true
+ "dataComplete": true,
+ "dataQualityNotes": []
 }

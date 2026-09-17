@@ -18,10 +18,6 @@ from pathlib import Path
 SERIES_START = date(2014, 10, 1)  # FY2015 onward
 
 CSV_HEADER = ["id", "date", "estimatedTotalAmt", "transType", "title", "awardeeName"]
-_SHRINK_WARNING_RE = re.compile(
-    r"^invariant violated: (?P<month>\d{4}-\d{2}) shrank from "
-    r"(?P<before>\d+) to (?P<after>\d+) awards$"
-)
 
 
 def norm_type(t):
@@ -254,46 +250,43 @@ def aggregate(awards, today, series_start=SERIES_START):
 
 
 def write_dashboard(data_dir, node, source, awards, warnings, today,
-                    children=None, series_start=SERIES_START, metadata=None):
+                    children=None, series_start=SERIES_START, metadata=None,
+                    store_id_count=None):
     """Aggregate and write dashboard.json for one node (leaf or rollup).
 
-    Invariant check: per-unit monthly counts may only grow. The store is
-    never pruned, so a shrinking month means a code or merge bug — warn
-    loudly (into the published warnings, so it surfaces on the site) rather
-    than publish silently.
+    Invariant check: the underlying award-id store may only grow. A source
+    is free to change which of its ids get aggregated (e.g. NIH's soft-
+    delete exclusions ledger skips a reviewed id from every total without
+    ever removing its row) -- that can legitimately make ``totalAwards``
+    smaller than the physical store, and must not be confused with real
+    data loss. ``store_id_count`` lets a caller pass the true physical
+    store id count when it differs from ``len(awards)``; it is published
+    verbatim as ``storeIdCount`` so the check has a physical-count field to
+    compare against on the *next* run, rather than the aggregated
+    ``totalAwards`` (comparing against ``totalAwards`` would let a store
+    that lost exactly as many rows as it has excluded ids pass silently).
+    The warning fires only when the new physical count drops below the
+    previously published ``storeIdCount`` -- a signal that the store
+    itself lost a row, which should never happen (retain and warn, per
+    CLAUDE.md data-integrity rule 4). The first run after this check was
+    introduced falls back to the previous ``totalAwards`` (no
+    ``storeIdCount`` published yet). This check is source-agnostic and
+    shared by every adapter (NSF and NIH alike).
     """
     data_dir = Path(data_dir)
     warnings = list(warnings)
     metadata = dict(metadata or {})
-    allowed_monthly_shrink = metadata.pop("_allowedMonthlyShrink", {})
-    if not isinstance(allowed_monthly_shrink, dict) or any(
-            not isinstance(month, str) or not isinstance(count, int) or count < 0
-            for month, count in allowed_monthly_shrink.items()):
-        raise ValueError("_allowedMonthlyShrink must map months to non-negative integers")
-    retained_warnings = []
-    for warning in warnings:
-        match = _SHRINK_WARNING_RE.fullmatch(warning)
-        if match:
-            month = match.group("month")
-            shrink = int(match.group("before")) - int(match.group("after"))
-            if shrink == allowed_monthly_shrink.get(month, 0):
-                continue
-        retained_warnings.append(warning)
-    warnings = retained_warnings
     agg = aggregate(awards, today, series_start)
+    new_store_count = len(awards) if store_id_count is None else store_id_count
 
     prev_path = data_dir / "dashboard.json"
     if prev_path.exists():
         prev = json.loads(prev_path.read_text())
-        prev_counts = {m["month"]: m["awards"] for m in prev.get("monthly", [])}
-        new_counts = {m["month"]: m["awards"] for m in agg["monthly"]}
-        for month, n in sorted(prev_counts.items()):
-            new_count = new_counts.get(month, 0)
-            shrink = n - new_count
-            if shrink > allowed_monthly_shrink.get(month, 0):
-                warnings.append(
-                    f"invariant violated: {month} shrank from {n} to "
-                    f"{new_count} awards")
+        prev_store_count = prev.get("storeIdCount", prev.get("totalAwards"))
+        if isinstance(prev_store_count, int) and new_store_count < prev_store_count:
+            warnings.append(
+                f"invariant violated: award id count shrank from "
+                f"{prev_store_count} to {new_store_count}")
 
     out = {
         "generated": today.isoformat(),
@@ -301,6 +294,7 @@ def write_dashboard(data_dir, node, source, awards, warnings, today,
         "source": source,
         "warnings": warnings,
         **agg,
+        "storeIdCount": new_store_count,
         "children": children if children is not None else [],
     }
     if metadata:

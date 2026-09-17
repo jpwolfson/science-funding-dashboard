@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-09",
+ "generated": "2026-09-17",
  "node": {
   "name": "National Library of Medicine",
   "abbrev": "NLM",
@@ -8,7 +8,7 @@
  },
  "source": "Aggregated from 1 leaf dataset(s) (1 configured); each source page documents its own API provenance.",
  "warnings": [],
- "totalAwards": 2383,
+ "totalAwards": 2397,
  "currentFY": 2026,
  "monthly": [
   {
@@ -1300,11 +1300,11 @@
   },
   {
    "month": "2026-09",
-   "awards": 10,
-   "dollars": 6226011,
-   "std": 3,
-   "cont": 7,
-   "fell": 0,
+   "awards": 24,
+   "dollars": 11036740,
+   "std": 8,
+   "cont": 15,
+   "fell": 1,
    "other": 0
   }
  ],
@@ -1708,10 +1708,10 @@
   {
    "fy": 2026,
    "partial": true,
-   "awards": 153,
-   "dollars": 68613073,
-   "median": 351900,
-   "exTop3Dollars": 63308110,
+   "awards": 167,
+   "dollars": 73423802,
+   "median": 351000,
+   "exTop3Dollars": 67998802,
    "octJul": {
     "awards": 106,
     "dollars": 48037202,
@@ -1734,10 +1734,10 @@
      "amount": 1575000
     },
     {
-     "id": "nih:11366130",
-     "title": "Statistical Methods for Integrating Irregularly Collected Longitudinal Multi-Modal data into Prediction Models",
-     "awardee": "UNIVERSITY OF PENNSYLVANIA",
-     "amount": 1454963
+     "id": "nih:11433199",
+     "title": "Improving clinician-AI teaming through Algorithmovigilance Checkpoints for Trust and Safety (ACTS)",
+     "awardee": "VANDERBILT UNIVERSITY MEDICAL CENTER",
+     "amount": 1575000
     }
    ]
   }
@@ -3073,17 +3073,23 @@
     },
     {
      "d": 342,
-     "awards": 153,
-     "dollars": 68613073
+     "awards": 158,
+     "dollars": 71326980
     },
     {
-     "d": 343,
-     "awards": 153,
-     "dollars": 68613073
+     "d": 349,
+     "awards": 167,
+     "dollars": 73423802
+    },
+    {
+     "d": 351,
+     "awards": 167,
+     "dollars": 73423802
     }
    ]
   }
  ],
+ "storeIdCount": 2397,
  "children": [],
  "provider": "nih",
  "amountNote": "Dollar figures are RePORTER award amounts, not outlays.",
@@ -3095,5 +3101,7 @@
  },
  "storeFormat": "fiscal-year-gzip",
  "storePath": "nih/nlm/nlm",
- "dataComplete": true
+ "dataComplete": true,
+ "methodologyNote": "counts as of the pull date; NIH revises award notice dates.",
+ "dataQualityNotes": []
 }

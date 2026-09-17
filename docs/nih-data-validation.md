@@ -22,7 +22,36 @@ the unit is not written after a persistent failure. The unique-count check
 specifically detects the cross-page duplicate displacement observed in the NSF
 API: a repeated row can no longer silently replace a missing row.
 
-## Store and aggregation contract
+## Store and aggregation contract (source-current semantics)
+
+RePORTER re-dates, retracts, and un-retracts records between weekly pulls.
+This is normal source behavior, not a pipeline defect, so the pipeline
+publishes it legibly instead of hiding it behind a per-month "allowed
+shrink" exception (the pre-2026-09-17 design; see
+`docs/phase-3.2d-remediation-brief.md` and the HIGH-1 finding in
+`docs/reviews/2026-09-15-phase-3.2d-independent-review.md` for why it broke).
+
+A stored award id is **never deleted** from the physical store
+(`adapters.common.write_store`): every pull only ever adds to, or
+overwrites fields on, an existing row. Two committed ledgers make source
+churn auditable:
+
+- **Exclusions ledger** (`reference/nih_reporter_exclusions.json`, schema
+  `{schemaVersion, records: [{id, unit, classification, reason, decidedOn,
+  status}]}`, `status` in `{excluded, returned}`) is a reviewed, human-
+  curated **soft delete**. `status: "excluded"` means the adapter pull,
+  `scripts/rollup.py`, and `scripts/reaggregate.py` all skip that id from
+  every aggregate (`totalAwards`, monthly, fiscal-year, and cumulative
+  series) -- but the physical store keeps the row. If a live pull ever
+  re-emits an id currently marked `excluded`, the pull flips its status to
+  `returned`, re-includes it in every aggregate, and prints a `NOTICE` --
+  this is expected source behavior and never fails the pull.
+- **Move ledger** (`data/nih/<ic>/<ic>/changes.csv.gz`, columns
+  `pullDate,id,field,old,new`, append-only, sorted by `(pullDate, id,
+  field)`, gzip with a fixed mtime for reproducible bytes) records every
+  overwrite a pull makes to an already-stored id's `date`, `amount`,
+  `title`, or `type`. It cannot be produced offline (only a live pull
+  appends to it); its absence is not an error.
 
 `scripts/validate_nih.py` checks all committed NIH stores without contacting an
 API by default:
@@ -30,11 +59,21 @@ API by default:
 - gzip shards are readable, their rows belong to the named fiscal year, and
   the manifest record count and year list are exact;
 - IDs are unique within and across institutes and use the `nih:` namespace;
-- leaf dashboard totals equal raw store rows;
-- the NIH agency rollup equals the union of all leaf IDs and is marked
-  `dataComplete`;
-- each institute remains within its configured FY2015-present volume range;
-- monthly counts remain under the plausibility cap; and
+- leaf dashboard totals equal the store's rows **minus** currently-excluded
+  ids; the NIH agency rollup and the award root equal the same
+  exclusion-aware union;
+- the NIH agency rollup is marked `dataComplete`;
+- every NIH leaf, IC rollup, the NIH agency rollup, and the award root
+  carry the exact `methodologyNote` string (see "NIH award-ledger
+  invariants" in `docs/verification-regime.md`);
+- the exclusions ledger's own schema is valid, every `excluded` id is
+  absent from every aggregated total, and every `returned` id present in
+  the store is counted;
+- the move ledger, where present, is readable, has exactly the
+  `pullDate,id,field,old,new` columns, and is sorted;
+- each institute remains within its configured FY2015-present volume range
+  (measured on the aggregated, exclusion-filtered rows);
+- monthly counts remain under the plausibility cap (same aggregated rows); and
 - published dashboard warnings fail validation unless explicitly allowed.
 
 Each normalized row also persists the RePORTER funding mechanism, activity
@@ -43,17 +82,53 @@ benchmark scope reproducible from the committed store. Legacy rows without
 that structured detail fail validation and require a full re-pull; the
 validator never guesses a mechanism from the dashboard's broader award bin.
 
-The pull itself is non-destructive. An ID omitted by a later full pull remains
-in the store and produces a visible warning. Deterministic shard rewrites also
-prevent a corrected date from leaving one ID in two fiscal-year files.
+The pull itself is non-destructive: it never pops an id, even a reviewed
+exclusion, from the store. A full pull's own id-level bookkeeping is
+published, never silently absorbed:
+
+- an id stored but not returned by a full pull, and not already in the
+  exclusions ledger, is retained and reported in a plain-language
+  `dataQualityNotes` entry on the leaf dashboard -- never a warning, never
+  a failure ("N stored award records were not returned by the pull and are
+  retained; NIH revises and withdraws notices");
+- a re-dated record whose new, source-current date falls outside the
+  record's own declared `fiscal_year` is retained, counted under that new
+  date, and reported the same way, rather than silently clamped to the
+  fiscal year's start (the pre-2026-09-17 behavior);
+- moves (tracked-field overwrites) plus ledger returns, summed over one
+  pull for one institute, are checked against a churn threshold; above it
+  the pull fails closed, because that volume of churn is the
+  pagination/duplicate-displacement bug signature (CLAUDE.md data
+  integrity rule 4), not ordinary source revision.
+
+Deterministic shard rewrites (`adapters.common.write_store`) also prevent a
+corrected date from leaving one ID in two fiscal-year files -- verified by
+`tests/test_common_store.py`.
+
+`adapters.common.write_dashboard`'s id-count invariant is source-agnostic
+and shared with NSF: a caller may pass the true physical `store_id_count`
+separately from the aggregated `awards` it publishes. That physical count
+is itself published on every dashboard as `storeIdCount`, and the next
+run's check compares against the *previous* `storeIdCount` (falling back
+to the previous `totalAwards` only on the first run after this field was
+introduced) -- never against the previous aggregated `totalAwards` -- so a
+legitimate aggregation-level exclusion (NIH's soft delete) never trips the
+warning, while a store that lost exactly as many rows as it has excluded
+ids still does.
 
 ## Orthogonal and external reconciliation
 
 With `--live`, the validator issues one multi-year `meta.total` query per
-institute and requires exact equality with the committed store. This uses a
-different query shape from the per-year pagination and detects partition,
-registry, union, and store-loss errors. It is same-source reconciliation, not
-an independent source.
+institute. Equality is **not** required: `meta.total` is compared against
+`store - excluded - retainedMissing` (the store's exclusion- and
+missing-uncovered-aware expected count) within a bounded, printed gap --
+see "NIH award-ledger invariants" in `docs/verification-regime.md` for the
+exact tolerance. Every institute's decomposition (`store`, `excluded`,
+`retainedMissing`, `expected`, `sourceTotal`, `gap`, `tolerance`) is printed
+so a divergence is diagnosable, not just pass/fail. This uses a different
+query shape from the per-year pagination and detects partition, registry,
+union, and store-loss errors. It is same-source reconciliation, not an
+independent source.
 
 Independent reasonableness gates use NIH Data Book reports 400 and 401. Those
 reports are produced through NIH's monthly extramural-awards publication path,

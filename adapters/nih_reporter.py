@@ -10,16 +10,40 @@ RePORTER also contains intramural project records whose award amounts and
 award notice dates are generally absent.  This funding dashboard therefore
 pulls every documented mechanism except ``IM`` (intramural), while retaining
 grants, cooperative agreements, contracts, and interagency agreements.
+
+Source-current semantics (Phase 3.2d remediation, W1). RePORTER re-dates,
+retracts, and un-retracts records between weekly pulls -- this is normal
+source behavior, not a pipeline defect. A stored award id is never deleted
+from the physical store (``adapters.common.write_store``); every pull only
+ever adds to or overwrites fields on the store, never removes a row. Two
+ledgers, both committed alongside the data they describe, make this legible:
+
+- ``reference/nih_reporter_exclusions.json`` -- a reviewed, human-curated
+  list of ids that a full pull's aggregation should currently *skip*
+  (``status: "excluded"``) because RePORTER stopped returning them for a
+  documented reason. This is a soft delete: the row stays in the store, but
+  ``totalAwards`` and every aggregate skip it. If the live source ever
+  re-emits an excluded id, the pull flips its ledger status to ``"returned"``
+  and re-includes it -- this is expected source behavior, not a failure.
+- ``data/nih/<ic>/<ic>/changes.csv.gz`` -- an append-only, per-unit log of
+  every tracked field (date, amount, title, type) a pull overwrote on an
+  already-stored id, for auditability of the source-current overwrite.
+
+See ``docs/nih-data-validation.md`` and ``docs/verification-regime.md`` for
+the full contract and the churn/live-reconciliation constants.
 """
 
+import csv
+import gzip
+import io
 import json
 import re
 import sys
 import time
 import urllib.error
 import urllib.request
-from collections import Counter
 from datetime import date
+from pathlib import Path
 
 from .common import SERIES_START, fiscal_year, load_store, store_exists
 
@@ -31,51 +55,162 @@ FUNDING_MECHANISMS = [
     "SB", "RP", "RC", "OR", "TR", "TI", "CO", "IAA", "RDC", "SRDC",
     "OTHER",
 ]
+
+# ---------------------------------------------------------------------------
+# Exclusions ledger (soft-delete): reference/nih_reporter_exclusions.json
+# ---------------------------------------------------------------------------
+
+EXCLUSION_LEDGER_SCHEMA_VERSION = 1
+EXCLUSION_STATUSES = {"excluded", "returned"}
 SOURCE_EXCLUSION_CLASSIFICATIONS = {
     "reporter-record-retraction-or-supersession",
     "confirmed-bilateral-termination",
 }
+METHODOLOGY_NOTE = "counts as of the pull date; NIH revises award notice dates."
+
+# Invariant constants (docs/verification-regime.md "NIH award-ledger
+# invariants" carries the authoritative copy of these numbers).
+MOVE_RETURN_ABS_MIN = 20
+MOVE_RETURN_REL_FRACTION = 0.001  # 0.1%
+LIVE_GAP_ABS_MIN = 3
+LIVE_GAP_REL_FRACTION = 0.0001  # 0.01%
+
+TRACKED_FIELDS = ("date", "amount", "title", "type")
+CHANGES_HEADER = ["pullDate", "id", "field", "old", "new"]
+
+_RETAINED_MISSING_NOTE_RE = re.compile(
+    r"^(?P<n>\d+) stored award record\(s\) were not returned by the "
+    r"(?P<date>\d{4}-\d{2}-\d{2}) full pull and are retained; NIH revises "
+    r"and withdraws notices\.$"
+)
+_FY_ANOMALY_NOTE_RE = re.compile(
+    r"^(?P<n>\d+) award record\(s\) carry a NIH-reported award notice date "
+    r"outside their own declared fiscal year; retained and dated by the "
+    r"source's current notice date\.$"
+)
 
 
-def load_retraction_records(repo_root):
-    ledger_path = repo_root / "reference" / "nih_reporter_retractions.json"
-    if not ledger_path.exists():
-        return []
-    records = json.loads(ledger_path.read_text()).get("records") or []
-    if len({record.get("id") for record in records}) != len(records):
-        raise RuntimeError(f"duplicate NIH source-exclusion ID in {ledger_path}")
+def exclusion_ledger_path(repo_root):
+    return Path(repo_root) / "reference" / "nih_reporter_exclusions.json"
+
+
+def _validate_exclusion_ledger(ledger, path):
+    if ledger.get("schemaVersion") != EXCLUSION_LEDGER_SCHEMA_VERSION:
+        raise RuntimeError(f"unexpected schemaVersion in {path}: {ledger.get('schemaVersion')!r}")
+    records = ledger.get("records")
+    if not isinstance(records, list):
+        raise RuntimeError(f"{path}: 'records' must be a list")
+    ids = [record.get("id") for record in records]
+    if len(set(ids)) != len(ids):
+        raise RuntimeError(f"duplicate NIH exclusion ledger ID in {path}")
     for record in records:
-        classification = record.get("classification")
-        if classification not in SOURCE_EXCLUSION_CLASSIFICATIONS:
+        if not isinstance(record.get("id"), str) or not record["id"].startswith("nih:"):
+            raise RuntimeError(f"invalid NIH exclusion ledger id in {path}: {record.get('id')!r}")
+        if not record.get("unit"):
+            raise RuntimeError(f"{path}: {record.get('id')} missing 'unit'")
+        if record.get("classification") not in SOURCE_EXCLUSION_CLASSIFICATIONS:
             raise RuntimeError(
-                f"invalid NIH source-exclusion classification for "
-                f"{record.get('id')} in {ledger_path}"
+                f"{path}: {record.get('id')} has invalid classification "
+                f"{record.get('classification')!r}"
             )
-        award_date = record.get("awardDate")
-        month = record.get("month")
-        if not isinstance(award_date, str) or not isinstance(month, str) \
-                or award_date[:7] != month:
+        if not record.get("reason"):
+            raise RuntimeError(f"{path}: {record.get('id')} missing 'reason'")
+        if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(record.get("decidedOn") or "")):
+            raise RuntimeError(f"{path}: {record.get('id')} has invalid 'decidedOn'")
+        if record.get("status") not in EXCLUSION_STATUSES:
             raise RuntimeError(
-                f"invalid month/date evidence for {record.get('id')} "
-                f"in {ledger_path}"
+                f"{path}: {record.get('id')} has invalid status {record.get('status')!r}"
             )
-        if classification == "confirmed-bilateral-termination":
-            if record.get("terminationType") != "Bilateral Termination" \
-                    or not record.get("awardNumber") \
-                    or not re.fullmatch(r"\d{4}-\d{2}-\d{2}",
-                                        str(record.get("terminationDate") or "")):
-                raise RuntimeError(
-                    f"incomplete NIH bilateral-termination evidence for "
-                    f"{record.get('id')} in {ledger_path}"
-                )
-    return records
 
 
-def reviewed_retraction_months_by_unit(repo_root):
-    by_unit = {}
-    for record in load_retraction_records(repo_root):
-        by_unit.setdefault(record["unit"], Counter())[record["month"]] += 1
-    return {unit: dict(months) for unit, months in by_unit.items()}
+def load_exclusion_ledger(repo_root):
+    """Load, validate, and return the exclusions ledger dict.
+
+    A missing file is treated as an empty ledger -- this file cannot be
+    produced offline (it is only ever mutated by a live pull), so every
+    offline consumer (validator, rollup, reaggregate) must tolerate its
+    absence.
+    """
+    path = exclusion_ledger_path(repo_root)
+    if not path.exists():
+        return {"schemaVersion": EXCLUSION_LEDGER_SCHEMA_VERSION, "records": []}
+    ledger = json.loads(path.read_text())
+    _validate_exclusion_ledger(ledger, path)
+    return ledger
+
+
+def save_exclusion_ledger(repo_root, ledger):
+    path = exclusion_ledger_path(repo_root)
+    records = sorted(ledger.get("records") or [], key=lambda r: r["id"])
+    out = {"schemaVersion": ledger.get("schemaVersion", EXCLUSION_LEDGER_SCHEMA_VERSION),
+           "records": records}
+    _validate_exclusion_ledger(out, path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(out, indent=1) + "\n")
+
+
+def excluded_ids(repo_root):
+    """Ids whose ledger status is currently 'excluded' -- skip from every
+    aggregation (adapter pull, rollup.py, reaggregate.py). The physical
+    store retains these rows if present; this is a soft delete."""
+    return {record["id"] for record in load_exclusion_ledger(repo_root)["records"]
+            if record["status"] == "excluded"}
+
+
+def retained_missing_count(notes):
+    """Sum the counts embedded in any missing-uncovered dataQualityNotes."""
+    total = 0
+    for note in notes or []:
+        match = _RETAINED_MISSING_NOTE_RE.fullmatch(note)
+        if match:
+            total += int(match.group("n"))
+    return total
+
+
+# ---------------------------------------------------------------------------
+# Move ledger (append-only, per unit): data/nih/<ic>/<ic>/changes.csv.gz
+# ---------------------------------------------------------------------------
+
+
+def changes_ledger_path(store_path):
+    return Path(store_path).parent / "changes.csv.gz"
+
+
+def load_changes_ledger(store_path):
+    """Return the committed change rows, or [] if the ledger does not exist
+    yet (it cannot be produced offline -- only a live pull appends to it)."""
+    path = changes_ledger_path(store_path)
+    if not path.exists():
+        return []
+    with gzip.open(path, "rt", newline="") as fh:
+        reader = csv.DictReader(fh)
+        return list(reader)
+
+
+def append_changes_ledger(store_path, new_rows):
+    """Append field-change rows, never rewriting or removing an existing
+    row. Rewrites the whole gzip file (mtime=0) with the full row set,
+    sorted deterministically by (pullDate, id, field), so the output bytes
+    are reproducible and the file stays small and append-only in content."""
+    if not new_rows:
+        return
+    combined = load_changes_ledger(store_path) + [
+        {"pullDate": row["pullDate"], "id": row["id"], "field": row["field"],
+         "old": row["old"], "new": row["new"]}
+        for row in new_rows
+    ]
+    combined.sort(key=lambda row: (row["pullDate"], row["id"], row["field"]))
+    path = changes_ledger_path(store_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "wb") as raw:
+        with gzip.GzipFile(filename="", mode="wb", fileobj=raw, mtime=0) as zipped:
+            with io.TextIOWrapper(zipped, encoding="utf-8", newline="") as fh:
+                writer = csv.DictWriter(fh, fieldnames=CHANGES_HEADER)
+                writer.writeheader()
+                for row in combined:
+                    writer.writerow(row)
+
+
 INCLUDE_FIELDS = [
     "ApplId", "FiscalYear", "ProjectNum", "AwardNoticeDate", "BudgetStart",
     "ProjectStartDate", "AwardAmount", "AwardType", "ActivityCode",
@@ -155,17 +290,11 @@ def parse_trans_type(value):
 
 
 class NihReporterPull:
-    def __init__(self, agency, checks, store_path, retracted_ids=None,
-                 retracted_months=None):
+    def __init__(self, agency, checks, store_path):
         self.agency = agency
         self.checks = checks
-        self.store_path = store_path
-        self.retracted_ids = set(retracted_ids or ())
-        self.retracted_months = dict(retracted_months or {})
-        if set(self.retracted_months) - self.retracted_ids:
-            raise ValueError("retracted_months contains an ID outside retracted_ids")
+        self.store_path = Path(store_path)
         self.warnings = []
-        self.allowed_monthly_shrink = {}
 
     def warn(self, message):
         self.warnings.append(message)
@@ -286,16 +415,33 @@ class NihReporterPull:
         raise last_error
 
     def normalize(self, row):
+        """Return (award dict, used_fallback, fy_anomaly).
+
+        Source-current: when RePORTER reports an award notice date, that
+        date is used as-is, even when it falls outside the record's own
+        declared ``fiscal_year`` -- this is a source anomaly to retain and
+        report (invariant D3), not to silently paper over by substituting a
+        different candidate date. ``used_fallback`` is only set when the
+        award notice date is absent entirely and a budget/project start
+        date (or the fiscal-year start) had to stand in for it.
+        """
         fy = int(row["fiscal_year"])
         fy_start, fy_end = date(fy - 1, 10, 1), date(fy, 9, 30)
-        candidates = [_iso_day(row.get("award_notice_date")),
-                      _iso_day(row.get("budget_start")),
-                      _iso_day(row.get("project_start_date"))]
-        award_day = next((day for day in candidates
-                          if day is not None and fy_start <= day <= fy_end), None)
-        used_fallback = not candidates[0] or candidates[0] != award_day
-        if award_day is None:
-            award_day = fy_start
+        notice_day = _iso_day(row.get("award_notice_date"))
+        fy_anomaly = False
+        if notice_day is not None:
+            award_day = notice_day
+            used_fallback = False
+            if not (fy_start <= award_day <= fy_end):
+                fy_anomaly = True
+        else:
+            candidates = [_iso_day(row.get("budget_start")),
+                          _iso_day(row.get("project_start_date"))]
+            award_day = next((day for day in candidates
+                              if day is not None and fy_start <= day <= fy_end), None)
+            used_fallback = True
+            if award_day is None:
+                award_day = fy_start
         activity = row.get("activity_code") or ""
         award_type = row.get("award_type") or ""
         mechanism = str(row.get("funding_mechanism") or "").strip()
@@ -304,7 +450,7 @@ class NihReporterPull:
                 f"application {row.get('appl_id')} is missing funding_mechanism")
         kind = _award_kind(activity, award_type)
         organization = row.get("organization") or {}
-        return {
+        award = {
             "id": f"nih:{row['appl_id']}",
             "date": award_day.isoformat(),
             "month": award_day.strftime("%Y-%m"),
@@ -315,9 +461,10 @@ class NihReporterPull:
                 kind, str(award_type), activity, mechanism),
             "title": row.get("project_title") or row.get("project_num") or "",
             "awardee": organization.get("org_name") or "",
-        }, used_fallback
+        }
+        return award, used_fallback, fy_anomaly
 
-    def pull(self, full, today):
+    def pull(self, full, today, repo_root=None):
         stored = load_store(self.store_path)
         has_prior_store = store_exists(self.store_path)
         current_fy = fiscal_year(today)
@@ -334,55 +481,120 @@ class NihReporterPull:
 
         collected = {}
         fallback_dates = 0
+        fy_anomaly_ids = []
         for fy in years:
             rows = self.fetch_year(fy)
             for row in rows.values():
-                award, used_fallback = self.normalize(row)
+                award, used_fallback, fy_anomaly = self.normalize(row)
                 collected[award["id"]] = award
                 fallback_dates += int(used_fallback)
+                if fy_anomaly:
+                    fy_anomaly_ids.append(award["id"])
             print(f"  FY{fy}: {len(rows)} applications", flush=True)
 
         if fallback_dates:
             print(f"NOTICE: {fallback_dates} RePORTER records used a "
                   "budget/project start date or fiscal-year start because "
-                  "the award notice date was absent or outside its fiscal year")
+                  "the award notice date was absent")
 
-        merged = dict(stored)
-        merged.update(collected)
+        # Load the reviewed exclusions ledger (soft-delete). A live pull that
+        # re-emits an id currently marked "excluded" flips it to "returned"
+        # and re-includes it -- expected source behavior, never a failure.
+        ledger = load_exclusion_ledger(repo_root) if repo_root is not None \
+            else {"schemaVersion": EXCLUSION_LEDGER_SCHEMA_VERSION, "records": []}
+        records_by_id = {record["id"]: record for record in ledger["records"]}
+        currently_excluded = {aid for aid, record in records_by_id.items()
+                              if record["status"] == "excluded"}
+
+        returned_ids = sorted(set(collected) & currently_excluded)
+        for award_id in returned_ids:
+            records_by_id[award_id]["status"] = "returned"
+        if returned_ids:
+            if repo_root is not None:
+                save_exclusion_ledger(repo_root, {
+                    "schemaVersion": ledger.get("schemaVersion",
+                                                EXCLUSION_LEDGER_SCHEMA_VERSION),
+                    "records": list(records_by_id.values()),
+                })
+            print(f"NOTICE: {len(returned_ids)} previously excluded RePORTER "
+                  f"record(s) returned to the live source for {self.agency} "
+                  "and re-included: " + ", ".join(returned_ids))
+
+        # Carry forward the missing-uncovered note across incremental pulls
+        # (only a full pull can determine full-coverage; an incremental
+        # pull's window is too narrow to speak to older fiscal years).
+        data_quality_notes = []
+        if mode != "full":
+            prior_dashboard_path = self.store_path.parent / "dashboard.json"
+            if prior_dashboard_path.exists():
+                try:
+                    prior = json.loads(prior_dashboard_path.read_text())
+                except (OSError, ValueError):
+                    prior = {}
+                data_quality_notes = [
+                    note for note in (prior.get("dataQualityNotes") or [])
+                    if _RETAINED_MISSING_NOTE_RE.fullmatch(note)
+                ]
+
         if mode == "full":
             missing_ids = set(stored) - set(collected)
-            reviewed_exclusions = missing_ids & self.retracted_ids
-            for award_id in reviewed_exclusions:
-                month = stored[award_id]["month"]
-                ledger_month = self.retracted_months.get(award_id)
-                if ledger_month is not None and ledger_month != month:
-                    raise RuntimeError(
-                        f"reviewed source exclusion {award_id} month changed from "
-                        f"ledger {ledger_month} to stored {month}"
-                    )
-                self.allowed_monthly_shrink[month] = (
-                    self.allowed_monthly_shrink.get(month, 0) + 1
+            unexplained_missing = sorted(missing_ids - currently_excluded)
+            if unexplained_missing:
+                data_quality_notes.append(
+                    f"{len(unexplained_missing)} stored award record(s) were "
+                    f"not returned by the {today.isoformat()} full pull and "
+                    "are retained; NIH revises and withdraws notices."
                 )
-                merged.pop(award_id, None)
-            if reviewed_exclusions:
-                print(
-                    f"NOTICE: removed {len(reviewed_exclusions)} reviewed "
-                    "RePORTER source exclusion(s) from the store"
-                )
-            unreviewed_missing = missing_ids - reviewed_exclusions
-            if unreviewed_missing:
-                self.warn(
-                    f"{len(unreviewed_missing)} stored awards not returned by "
-                    "this full re-pull; "
-                    "retained from the store"
-                )
-            returned_exclusions = set(collected) & self.retracted_ids
-            if returned_exclusions:
-                self.warn(
-                    f"{len(returned_exclusions)} reviewed RePORTER source "
-                    "exclusion(s) returned to the live source; ledger review "
-                    "required"
-                )
+
+        # Source-current field overwrite: every id present in both the store
+        # and this pull's fetch is diffed on the tracked fields and any
+        # change is appended to the per-unit move ledger.
+        moves = []
+        for award_id, new_award in collected.items():
+            old_award = stored.get(award_id)
+            if old_award is None:
+                continue
+            for field in TRACKED_FIELDS:
+                if old_award.get(field) != new_award.get(field):
+                    moves.append({
+                        "pullDate": today.isoformat(),
+                        "id": award_id,
+                        "field": field,
+                        "old": str(old_award.get(field)),
+                        "new": str(new_award.get(field)),
+                    })
+
+        move_return_count = len(moves) + len(returned_ids)
+        limit = max(MOVE_RETURN_ABS_MIN, MOVE_RETURN_REL_FRACTION * len(stored))
+        if move_return_count > limit:
+            raise SystemExit(
+                f"FATAL: {self.agency} pull has {len(moves)} field move(s) + "
+                f"{len(returned_ids)} return(s) = {move_return_count}, above "
+                f"the max(20, 0.1% of store) = {limit:.1f} threshold for a "
+                f"{len(stored)}-award store; this is the pagination/"
+                "duplicate-displacement bug signature (CLAUDE.md data "
+                "integrity rule 4) -- refusing to publish"
+            )
+
+        if moves:
+            append_changes_ledger(self.store_path, moves)
+
+        if fy_anomaly_ids:
+            print(f"NOTICE: {len(fy_anomaly_ids)} RePORTER record(s) carry an "
+                  "award notice date outside their own declared fiscal year; "
+                  "retained and dated by the source's current notice date")
+            data_quality_notes.append(
+                f"{len(fy_anomaly_ids)} award record(s) carry a NIH-reported "
+                "award notice date outside their own declared fiscal year; "
+                "retained and dated by the source's current notice date."
+            )
+
+        # Never pop: the store retains every id ever seen. Aggregation-level
+        # exclusion (the "excluded" ledger status) is applied downstream by
+        # the caller (scripts/pull_unit.py), not here, so the physical store
+        # this method's caller writes always contains the full history.
+        merged = dict(stored)
+        merged.update(collected)
 
         awards = list(merged.values())
         total = len(awards)
@@ -404,40 +616,20 @@ class NihReporterPull:
                 f"{self.checks['max_monthly']}/month plausibility cap"
             )
         print(f"Total unique awards [{self.agency}]: {total}")
-        return awards, self.warnings
+        return awards, self.warnings, data_quality_notes
 
 
 def pull_unit(unit_cfg, store_path, full, today, repo_root):
     agency = unit_cfg["params"]["reporter_agency"]
-    retracted_ids = set()
-    retracted_months = {}
-    records = load_retraction_records(repo_root)
-    if records:
-        retracted_ids = {
-            record["id"]
-            for record in records
-            if record.get("reporterAgency") == agency
-        }
-        retracted_months = {
-            record["id"]: record["month"]
-            for record in records
-            if record.get("reporterAgency") == agency
-        }
-    puller = NihReporterPull(
-        agency,
-        unit_cfg["checks"],
-        store_path,
-        retracted_ids=retracted_ids,
-        retracted_months=retracted_months,
-    )
-    awards, warnings = puller.pull(full=full, today=today)
+    puller = NihReporterPull(agency, unit_cfg["checks"], store_path)
+    awards, warnings, data_quality_notes = puller.pull(
+        full=full, today=today, repo_root=repo_root)
     source = (
         f"{API} (NIH RePORTER v2), administering IC {agency}; "
         "one application record per fiscal year; intramural projects excluded; "
         "dated by award notice, then budget/project start when unavailable"
     )
     metadata = {
-        "_allowedMonthlyShrink": puller.allowed_monthly_shrink,
         "provider": "nih",
         "dataComplete": True,
         "storeFormat": "fiscal-year-gzip",
@@ -448,5 +640,7 @@ def pull_unit(unit_cfg, store_path, full, today, repo_root):
             "fell": "Fellowships",
             "other": "Other awards",
         },
+        "methodologyNote": METHODOLOGY_NOTE,
+        "dataQualityNotes": data_quality_notes,
     }
     return awards, warnings, source, metadata
