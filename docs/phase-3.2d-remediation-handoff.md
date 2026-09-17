@@ -146,6 +146,7 @@ parallel.
 | When | Workflow / ref | Purpose | Result |
 |---|---|---|---|
 | 2026-09-17 15:05 UTC | PR #63 merged to `main` (`98f9990`) | W2 gate decoupling; fast 5/7 (HIGH-1 signature only), rendered 4/4 | merged |
+| 2026-09-17 15:40 UTC | PR #64 merged to `main` (`f22750e`) | W6 moving-pin tests: 109 obligation tests green, scratch P09→P10 bump proof, registry 374/374 | merged |
 
 ## Finding closure evidence (filled at closeout)
 
