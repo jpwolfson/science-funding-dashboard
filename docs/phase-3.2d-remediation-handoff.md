@@ -164,6 +164,7 @@ parallel.
 | 2026-09-17 15:05 UTC | PR #63 merged to `main` (`98f9990`) | W2 gate decoupling; fast 5/7 (HIGH-1 signature only), rendered 4/4 | merged |
 | 2026-09-17 15:40 UTC | PR #64 merged to `main` (`f22750e`) | W6 moving-pin tests: 109 obligation tests green, scratch P09→P10 bump proof, registry 374/374 | merged |
 | 2026-09-17 15:32 UTC | PR #65 merged to `main` (`0e00cb5`) | W1 NIH source-current ledger + offline reaggregation; fast 7/7, rendered 4/4; root == leaf union == 721,056 | merged |
+| 2026-09-17 ~16:10 UTC | PR #66 merged to `main` (`6f4677f`) | W4 DoD interpretationNote, award-root coverage line, obligation subtitle, sentinel card language, sentinel height fix (65,219 → 12,488 px, clipped-tail defect reproduced in before-screenshot); registry 380/380, fast 7/7, rendered 4/4 | merged |
 | 2026-09-17 15:33 UTC | `Update data` dispatched (run 35240994598) on `main` (units=nih, full_refresh=true) | First full NIH pull under the new contract: source-current fields, changes ledgers, exclusions ledger returns, `validate_nih.py --live` bounded gap | running |
 
 ## Finding closure evidence (filled at closeout)
