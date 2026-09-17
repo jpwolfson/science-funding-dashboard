@@ -1,0 +1,92 @@
+{
+ "schemaVersion": 1,
+ "tier": "fast",
+ "account": null,
+ "generatedAt": "2026-09-15T02:48:01.138438+00:00",
+ "durationSeconds": 386.173,
+ "passed": false,
+ "checks": [
+  {
+   "name": "unit-tests",
+   "passed": false,
+   "evidence": "full NIH RePORTER pull [NIGMS]: FY2015..FY2026 (2 awards in store)\nFY2015: 0 applications\nFY2016: 0 applications\nFY2017: 0 applications\nFY2018: 0 applications\nFY2019: 0 applications\nFY2020: 0 applications\nFY2021: 0 applications\nFY2022: 0 applications\nFY2023: 0 applications\nFY2024: 0 applications\nFY2025: 1 applications\nFY2026: 0 applications\nNOTICE: removed 1 reviewed RePORTER source exclusion(s) from the store\nTotal unique awards [NIGMS]: 1\nfull NIH RePORTER pull [NIGMS]: FY2015..FY2026 (1 awards in store)\nFY2015: 0 applications\nFY2016: 0 applications\nFY2017: 0 applications\nFY2018: 0 applications\nFY2019: 0 applications\nFY2020: 0 applications\nFY2021: 0 applications\nFY2022: 0 applications\nFY2023: 0 applications\nFY2024: 0 applications\nFY2025: 0 applications\nFY2026: 0 applications\nTotal unique awards [NIGMS]: 1\nreused accepted FY2026 P02 object_class_program_activity: 1 rows\nreused accepted normalized partition for agency/account FY2026\nskipping FY2017: registry baseline marks source-unavailable\nrequesting FY2018 P12 award_financial\naccepted FY2018 P12 award_financial: 0 rows\nrequesting FY2018 P12 award_financial\nrequesting FY2018 P12 award_financial\nDeleted exact preserved artifact 9159398924 obligation-raw-nsf--mrefc-FY2024\n..................................F.....retrying FY2025 snapshot: FY2025 NIGMS ordered passes disagree (asc 2/2, desc 2/2)\nretrying FY2025 snapshot: FY2025 NIGMS ordered passes disagree (asc 2/2, desc 2/2)\n.....WARNING: 1 stored awards not returned by this full re-pull; retained from the store\n.....................................................................................................................................s.........................................................USAspending archive download interrupted (RemoteDisconnected); retry 2/10 in 1s\nUSAspending archive download interrupted (RemoteDisconnected); retry 3/10 in 2s\nUSAspending archive download interrupted (RemoteDisconnected); retry 4/10 in 4s\nUSAspending archive download interrupted (RemoteDisconnected); retry 5/10 in 8s\nUSAspending archive download interrupted (RemoteDisconnected); retry 6/10 in 16s\nUSAspending archive download interrupted (RemoteDisconnected); retry 7/10 in 32s\n..USAspending request interrupted (HTTPError); retry 2/20 in 1s\n..........USAspending request interrupted (RemoteDisconnected); retry 2/2 in 1s\n........................\n======================================================================\nFAIL: test_approved_20260908_source_exclusions_match_exact_evidence (test_nih_reporter.NihReporterTests.test_approved_20260908_source_exclusions_match_exact_evidence)\n----------------------------------------------------------------------\nTraceback (most recent call last):\nFile \"/home/user/science-funding-dashboard/tests/test_nih_reporter.py\", line 347, in test_approved_20260908_source_exclusions_match_exact_evidence\nself.assertEqual(stored[\"date\"], actual[\"date\"])\nAssertionError: '2024-10-01' != '2026-05-04'\n- 2024-10-01\n+ 2026-05-04\n----------------------------------------------------------------------\nRan 272 tests in 134.845s\nFAILED (failures=1, skipped=1)",
+   "seconds": 135.169
+  },
+  {
+   "name": "validate-obligations",
+   "passed": true,
+   "evidence": "Obligation ledger validation passed (empty stores allowed)",
+   "seconds": 210.247
+  },
+  {
+   "name": "validate-nih",
+   "passed": false,
+   "evidence": "ERROR: nih/nhlbi/nhlbi: dashboard has 1 warning(s)\nERROR: nih dashboard totalAwards=719240 but leaf union has 721060\nNIH validation failed with 2 error(s)",
+   "seconds": 4.295
+  },
+  {
+   "name": "validate-usaspending-calibration",
+   "passed": true,
+   "evidence": "USAspending calibration gate passed (status: ready)",
+   "seconds": 0.021
+  },
+  {
+   "name": "validate-funding-sentinel",
+   "passed": true,
+   "evidence": "Funding-action sentinel validation passed",
+   "seconds": 35.523
+  },
+  {
+   "name": "verify-dms-baseline",
+   "passed": true,
+   "evidence": "DMS baseline verification PASSED: 141 months exact, 2 trailing months >= baseline, 11617 awards in store.",
+   "seconds": 0.057
+  },
+  {
+   "name": "validate-award-invariants",
+   "passed": true,
+   "evidence": "Award invariant validation passed (132 award-ledger dashboard(s): totalAwards == sum(fiscalYears) == sum(monthly); fyCumulative endpoints exact; root == sum(children))",
+   "seconds": 0.862
+  }
+ ],
+ "footprint": {
+  "perTreeBytes": {
+   ".github": 33957,
+   ".gitignore": 51,
+   "CLAUDE.md": 13777,
+   "README.md": 7063,
+   "adapters": 137682,
+   "config": 172624,
+   "data": 665775669,
+   "docs": 327407,
+   "reference": 669573,
+   "scripts": 296216,
+   "site": 98619,
+   "tests": 375171
+  },
+  "totalTrackedBytes": 667907809,
+  "gzippedStoreBytes": 363832661,
+  "pagesArtifact": {
+   "fileCount": 1851,
+   "totalBytes": 338086764,
+   "status": "ok",
+   "warningThresholdBytes": 850000000,
+   "stopThresholdBytes": 950000000,
+   "pagesLimitBytes": 1000000000,
+   "headroomBytes": 661913236,
+   "excludedFromArtifact": "data/obligations/**/events/*.csv.gz"
+  },
+  "trajectory": {
+   "method": "linear extrapolation of the data/ tree's committed byte total from the first commit that touched data/ to HEAD, projected 52 weeks forward",
+   "note": "the sampled history to date is dominated by one-time historical backfills (Phases 1-3.2c), not steady-state weekly incremental refreshes, so this rate is a conservative UPPER BOUND, not a steady-state forecast; re-derive after several weeks of pure incremental refresh history exist",
+   "firstDataCommit": "dc911f286a1b5dac3e536921adfdf81bd708a4a2",
+   "firstDataCommitDate": "2026-08-08T00:01:49+00:00",
+   "weeksElapsed": 5.45,
+   "currentDataTreeBytes": 665775669,
+   "weeklyGrowthBytesUpperBound": 121963776,
+   "projected52WeekBytesUpperBound": 7007892002,
+   "thresholdBytes": 966367641,
+   "approachesOneGigabyte": true
+  }
+ }
+}
