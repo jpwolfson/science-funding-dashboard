@@ -1,7 +1,7 @@
 {
  "schemaVersion": 2,
  "kind": "obligations",
- "generated": "2026-09-01",
+ "generated": "2026-09-17",
  "node": {
   "level": "account",
   "path": "obligations/doe/eere",
@@ -35,6 +35,7 @@
   {
    "submissionPeriod": "FY2017P06",
    "month": "2017-03",
+   "status": "reported",
    "netObligationsCents": 95847530646,
    "netObligations": 958475306.46,
    "awardLinkedObligationsCents": 42875929331,
@@ -51,6 +52,7 @@
   {
    "submissionPeriod": "FY2017P07",
    "month": "2017-04",
+   "status": "reported",
    "netObligationsCents": 0,
    "netObligations": 0.0,
    "awardLinkedObligationsCents": 0,
@@ -67,6 +69,7 @@
   {
    "submissionPeriod": "FY2017P08",
    "month": "2017-05",
+   "status": "reported",
    "netObligationsCents": 0,
    "netObligations": 0.0,
    "awardLinkedObligationsCents": 0,
@@ -83,6 +86,7 @@
   {
    "submissionPeriod": "FY2017P09",
    "month": "2017-06",
+   "status": "reported",
    "netObligationsCents": 46560215127,
    "netObligations": 465602151.27,
    "awardLinkedObligationsCents": 36811512746,
@@ -99,6 +103,7 @@
   {
    "submissionPeriod": "FY2017P10",
    "month": "2017-07",
+   "status": "reported",
    "netObligationsCents": 0,
    "netObligations": 0.0,
    "awardLinkedObligationsCents": 0,
@@ -115,6 +120,7 @@
   {
    "submissionPeriod": "FY2017P11",
    "month": "2017-08",
+   "status": "reported",
    "netObligationsCents": 0,
    "netObligations": 0.0,
    "awardLinkedObligationsCents": 0,
@@ -131,6 +137,7 @@
   {
    "submissionPeriod": "FY2017P12",
    "month": "2017-09",
+   "status": "reported",
    "netObligationsCents": 96904010890,
    "netObligations": 969040108.9,
    "awardLinkedObligationsCents": 86196931621,
@@ -145,8 +152,26 @@
    "fileCToNetRatio": 0.8895083993875746
   },
   {
+   "submissionPeriod": "FY2018P02",
+   "month": "2017-11",
+   "status": "notReported",
+   "netObligationsCents": null,
+   "netObligations": null,
+   "awardLinkedObligationsCents": null,
+   "awardLinkedObligations": null,
+   "residualObligationsCents": null,
+   "residualObligations": null,
+   "grossObligationsCents": null,
+   "grossObligations": null,
+   "deobligationsCents": null,
+   "deobligations": null,
+   "distinctLinkedAwards": null,
+   "fileCToNetRatio": null
+  },
+  {
    "submissionPeriod": "FY2018P03",
    "month": "2017-12",
+   "status": "reported",
    "netObligationsCents": 26712816517,
    "netObligations": 267128165.17,
    "awardLinkedObligationsCents": 20691046083,
@@ -158,11 +183,16 @@
    "deobligationsCents": -1303227418,
    "deobligations": -13032274.18,
    "distinctLinkedAwards": 275,
-   "fileCToNetRatio": 0.7745737357882965
+   "fileCToNetRatio": 0.7745737357882965,
+   "coversPeriods": [
+    "FY2018P02",
+    "FY2018P03"
+   ]
   },
   {
    "submissionPeriod": "FY2018P04",
    "month": "2018-01",
+   "status": "reported",
    "netObligationsCents": 0,
    "netObligations": 0.0,
    "awardLinkedObligationsCents": 0,
@@ -179,6 +209,7 @@
   {
    "submissionPeriod": "FY2018P05",
    "month": "2018-02",
+   "status": "reported",
    "netObligationsCents": 0,
    "netObligations": 0.0,
    "awardLinkedObligationsCents": 0,
@@ -195,6 +226,7 @@
   {
    "submissionPeriod": "FY2018P06",
    "month": "2018-03",
+   "status": "reported",
    "netObligationsCents": 31041259333,
    "netObligations": 310412593.33,
    "awardLinkedObligationsCents": 21873379847,
@@ -211,6 +243,7 @@
   {
    "submissionPeriod": "FY2018P07",
    "month": "2018-04",
+   "status": "reported",
    "netObligationsCents": 0,
    "netObligations": 0.0,
    "awardLinkedObligationsCents": 0,
@@ -227,6 +260,7 @@
   {
    "submissionPeriod": "FY2018P08",
    "month": "2018-05",
+   "status": "reported",
    "netObligationsCents": 0,
    "netObligations": 0.0,
    "awardLinkedObligationsCents": 0,
@@ -243,6 +277,7 @@
   {
    "submissionPeriod": "FY2018P09",
    "month": "2018-06",
+   "status": "reported",
    "netObligationsCents": 46699285164,
    "netObligations": 466992851.64,
    "awardLinkedObligationsCents": 38409012044,
@@ -259,6 +294,7 @@
   {
    "submissionPeriod": "FY2018P10",
    "month": "2018-07",
+   "status": "reported",
    "netObligationsCents": 0,
    "netObligations": 0.0,
    "awardLinkedObligationsCents": 0,
@@ -275,6 +311,7 @@
   {
    "submissionPeriod": "FY2018P11",
    "month": "2018-08",
+   "status": "reported",
    "netObligationsCents": 0,
    "netObligations": 0.0,
    "awardLinkedObligationsCents": 0,
@@ -291,6 +328,7 @@
   {
    "submissionPeriod": "FY2018P12",
    "month": "2018-09",
+   "status": "reported",
    "netObligationsCents": 135741401719,
    "netObligations": 1357414017.19,
    "awardLinkedObligationsCents": 126707923891,
@@ -305,8 +343,26 @@
    "fileCToNetRatio": 0.933450828460573
   },
   {
+   "submissionPeriod": "FY2019P02",
+   "month": "2018-11",
+   "status": "notReported",
+   "netObligationsCents": null,
+   "netObligations": null,
+   "awardLinkedObligationsCents": null,
+   "awardLinkedObligations": null,
+   "residualObligationsCents": null,
+   "residualObligations": null,
+   "grossObligationsCents": null,
+   "grossObligations": null,
+   "deobligationsCents": null,
+   "deobligations": null,
+   "distinctLinkedAwards": null,
+   "fileCToNetRatio": null
+  },
+  {
    "submissionPeriod": "FY2019P03",
    "month": "2018-12",
+   "status": "reported",
    "netObligationsCents": 24687543672,
    "netObligations": 246875436.72,
    "awardLinkedObligationsCents": 17877661086,
@@ -318,11 +374,16 @@
    "deobligationsCents": -3068164287,
    "deobligations": -30681642.87,
    "distinctLinkedAwards": 225,
-   "fileCToNetRatio": 0.7241571427082233
+   "fileCToNetRatio": 0.7241571427082233,
+   "coversPeriods": [
+    "FY2019P02",
+    "FY2019P03"
+   ]
   },
   {
    "submissionPeriod": "FY2019P04",
    "month": "2019-01",
+   "status": "reported",
    "netObligationsCents": 0,
    "netObligations": 0.0,
    "awardLinkedObligationsCents": 0,
@@ -339,6 +400,7 @@
   {
    "submissionPeriod": "FY2019P05",
    "month": "2019-02",
+   "status": "reported",
    "netObligationsCents": 0,
    "netObligations": 0.0,
    "awardLinkedObligationsCents": 0,
@@ -355,6 +417,7 @@
   {
    "submissionPeriod": "FY2019P06",
    "month": "2019-03",
+   "status": "reported",
    "netObligationsCents": 53443829357,
    "netObligations": 534438293.57,
    "awardLinkedObligationsCents": 46753076692,
@@ -371,6 +434,7 @@
   {
    "submissionPeriod": "FY2019P07",
    "month": "2019-04",
+   "status": "reported",
    "netObligationsCents": 0,
    "netObligations": 0.0,
    "awardLinkedObligationsCents": 0,
@@ -387,6 +451,7 @@
   {
    "submissionPeriod": "FY2019P08",
    "month": "2019-05",
+   "status": "reported",
    "netObligationsCents": 0,
    "netObligations": 0.0,
    "awardLinkedObligationsCents": 0,
@@ -403,6 +468,7 @@
   {
    "submissionPeriod": "FY2019P09",
    "month": "2019-06",
+   "status": "reported",
    "netObligationsCents": 63077488883,
    "netObligations": 630774888.83,
    "awardLinkedObligationsCents": 56575785669,
@@ -419,6 +485,7 @@
   {
    "submissionPeriod": "FY2019P10",
    "month": "2019-07",
+   "status": "reported",
    "netObligationsCents": 0,
    "netObligations": 0.0,
    "awardLinkedObligationsCents": 0,
@@ -435,6 +502,7 @@
   {
    "submissionPeriod": "FY2019P11",
    "month": "2019-08",
+   "status": "reported",
    "netObligationsCents": 0,
    "netObligations": 0.0,
    "awardLinkedObligationsCents": 0,
@@ -451,6 +519,7 @@
   {
    "submissionPeriod": "FY2019P12",
    "month": "2019-09",
+   "status": "reported",
    "netObligationsCents": 100819781189,
    "netObligations": 1008197811.89,
    "awardLinkedObligationsCents": 93384218162,
@@ -465,8 +534,26 @@
    "fileCToNetRatio": 0.9262489668266483
   },
   {
+   "submissionPeriod": "FY2020P02",
+   "month": "2019-11",
+   "status": "notReported",
+   "netObligationsCents": null,
+   "netObligations": null,
+   "awardLinkedObligationsCents": null,
+   "awardLinkedObligations": null,
+   "residualObligationsCents": null,
+   "residualObligations": null,
+   "grossObligationsCents": null,
+   "grossObligations": null,
+   "deobligationsCents": null,
+   "deobligations": null,
+   "distinctLinkedAwards": null,
+   "fileCToNetRatio": null
+  },
+  {
    "submissionPeriod": "FY2020P03",
    "month": "2019-12",
+   "status": "reported",
    "netObligationsCents": 37928149675,
    "netObligations": 379281496.75,
    "awardLinkedObligationsCents": 31919113471,
@@ -478,11 +565,16 @@
    "deobligationsCents": -672390922,
    "deobligations": -6723909.22,
    "distinctLinkedAwards": 278,
-   "fileCToNetRatio": 0.8415679052236813
+   "fileCToNetRatio": 0.8415679052236813,
+   "coversPeriods": [
+    "FY2020P02",
+    "FY2020P03"
+   ]
   },
   {
    "submissionPeriod": "FY2020P04",
    "month": "2020-01",
+   "status": "reported",
    "netObligationsCents": 0,
    "netObligations": 0.0,
    "awardLinkedObligationsCents": 0,
@@ -499,6 +591,7 @@
   {
    "submissionPeriod": "FY2020P05",
    "month": "2020-02",
+   "status": "reported",
    "netObligationsCents": 0,
    "netObligations": 0.0,
    "awardLinkedObligationsCents": 0,
@@ -515,6 +608,7 @@
   {
    "submissionPeriod": "FY2020P06",
    "month": "2020-03",
+   "status": "reported",
    "netObligationsCents": 57002262374,
    "netObligations": 570022623.74,
    "awardLinkedObligationsCents": 49554446927,
@@ -531,6 +625,7 @@
   {
    "submissionPeriod": "FY2020P07",
    "month": "2020-04",
+   "status": "reported",
    "netObligationsCents": 29488575302,
    "netObligations": 294885753.02,
    "awardLinkedObligationsCents": 26137135116,
@@ -547,6 +642,7 @@
   {
    "submissionPeriod": "FY2020P08",
    "month": "2020-05",
+   "status": "reported",
    "netObligationsCents": 29542978196,
    "netObligations": 295429781.96,
    "awardLinkedObligationsCents": 26590268889,
@@ -563,6 +659,7 @@
   {
    "submissionPeriod": "FY2020P09",
    "month": "2020-06",
+   "status": "reported",
    "netObligationsCents": 31802072755,
    "netObligations": 318020727.55,
    "awardLinkedObligationsCents": 29600006945,
@@ -579,6 +676,7 @@
   {
    "submissionPeriod": "FY2020P10",
    "month": "2020-07",
+   "status": "reported",
    "netObligationsCents": 16603932059,
    "netObligations": 166039320.59,
    "awardLinkedObligationsCents": 14769966956,
@@ -595,6 +693,7 @@
   {
    "submissionPeriod": "FY2020P11",
    "month": "2020-08",
+   "status": "reported",
    "netObligationsCents": 25613116002,
    "netObligations": 256131160.02,
    "awardLinkedObligationsCents": 23702140927,
@@ -611,6 +710,7 @@
   {
    "submissionPeriod": "FY2020P12",
    "month": "2020-09",
+   "status": "reported",
    "netObligationsCents": 73419593924,
    "netObligations": 734195939.24,
    "awardLinkedObligationsCents": 67820685326,
@@ -627,6 +727,7 @@
   {
    "submissionPeriod": "FY2021P02",
    "month": "2020-11",
+   "status": "reported",
    "netObligationsCents": 15225119357,
    "netObligations": 152251193.57,
    "awardLinkedObligationsCents": 11872575854,
@@ -643,6 +744,7 @@
   {
    "submissionPeriod": "FY2021P03",
    "month": "2020-12",
+   "status": "reported",
    "netObligationsCents": 15296242647,
    "netObligations": 152962426.47,
    "awardLinkedObligationsCents": 13537112191,
@@ -659,6 +761,7 @@
   {
    "submissionPeriod": "FY2021P04",
    "month": "2021-01",
+   "status": "reported",
    "netObligationsCents": 10850419358,
    "netObligations": 108504193.58,
    "awardLinkedObligationsCents": 8245772573,
@@ -675,6 +778,7 @@
   {
    "submissionPeriod": "FY2021P05",
    "month": "2021-02",
+   "status": "reported",
    "netObligationsCents": 13250025591,
    "netObligations": 132500255.91,
    "awardLinkedObligationsCents": 11393599959,
@@ -691,6 +795,7 @@
   {
    "submissionPeriod": "FY2021P06",
    "month": "2021-03",
+   "status": "reported",
    "netObligationsCents": 24956525149,
    "netObligations": 249565251.49,
    "awardLinkedObligationsCents": 22031210194,
@@ -707,6 +812,7 @@
   {
    "submissionPeriod": "FY2021P07",
    "month": "2021-04",
+   "status": "reported",
    "netObligationsCents": 18214889971,
    "netObligations": 182148899.71,
    "awardLinkedObligationsCents": 15833387012,
@@ -723,6 +829,7 @@
   {
    "submissionPeriod": "FY2021P08",
    "month": "2021-05",
+   "status": "reported",
    "netObligationsCents": 25906305585,
    "netObligations": 259063055.85,
    "awardLinkedObligationsCents": 22825087733,
@@ -739,6 +846,7 @@
   {
    "submissionPeriod": "FY2021P09",
    "month": "2021-06",
+   "status": "reported",
    "netObligationsCents": 38900739996,
    "netObligations": 389007399.96,
    "awardLinkedObligationsCents": 35918227897,
@@ -755,6 +863,7 @@
   {
    "submissionPeriod": "FY2021P10",
    "month": "2021-07",
+   "status": "reported",
    "netObligationsCents": 19632322179,
    "netObligations": 196323221.79,
    "awardLinkedObligationsCents": 17020445169,
@@ -771,6 +880,7 @@
   {
    "submissionPeriod": "FY2021P11",
    "month": "2021-08",
+   "status": "reported",
    "netObligationsCents": 33418445287,
    "netObligations": 334184452.87,
    "awardLinkedObligationsCents": 31151822042,
@@ -787,6 +897,7 @@
   {
    "submissionPeriod": "FY2021P12",
    "month": "2021-09",
+   "status": "reported",
    "netObligationsCents": 74563282845,
    "netObligations": 745632828.45,
    "awardLinkedObligationsCents": 72040286212,
@@ -803,6 +914,7 @@
   {
    "submissionPeriod": "FY2022P02",
    "month": "2021-11",
+   "status": "reported",
    "netObligationsCents": 15538325137,
    "netObligations": 155383251.37,
    "awardLinkedObligationsCents": 12525290225,
@@ -819,6 +931,7 @@
   {
    "submissionPeriod": "FY2022P03",
    "month": "2021-12",
+   "status": "reported",
    "netObligationsCents": 21789900030,
    "netObligations": 217899000.3,
    "awardLinkedObligationsCents": 19674562860,
@@ -835,6 +948,7 @@
   {
    "submissionPeriod": "FY2022P04",
    "month": "2022-01",
+   "status": "reported",
    "netObligationsCents": 23582488253,
    "netObligations": 235824882.53,
    "awardLinkedObligationsCents": 20701476857,
@@ -851,6 +965,7 @@
   {
    "submissionPeriod": "FY2022P05",
    "month": "2022-02",
+   "status": "reported",
    "netObligationsCents": 14491593180,
    "netObligations": 144915931.8,
    "awardLinkedObligationsCents": 12643214463,
@@ -867,6 +982,7 @@
   {
    "submissionPeriod": "FY2022P06",
    "month": "2022-03",
+   "status": "reported",
    "netObligationsCents": 20240648865,
    "netObligations": 202406488.65,
    "awardLinkedObligationsCents": 17214861596,
@@ -883,6 +999,7 @@
   {
    "submissionPeriod": "FY2022P07",
    "month": "2022-04",
+   "status": "reported",
    "netObligationsCents": 11162871960,
    "netObligations": 111628719.6,
    "awardLinkedObligationsCents": 7182768644,
@@ -899,6 +1016,7 @@
   {
    "submissionPeriod": "FY2022P08",
    "month": "2022-05",
+   "status": "reported",
    "netObligationsCents": 24172911884,
    "netObligations": 241729118.84,
    "awardLinkedObligationsCents": 21406055155,
@@ -915,6 +1033,7 @@
   {
    "submissionPeriod": "FY2022P09",
    "month": "2022-06",
+   "status": "reported",
    "netObligationsCents": 36356018093,
    "netObligations": 363560180.93,
    "awardLinkedObligationsCents": 32435142452,
@@ -931,6 +1050,7 @@
   {
    "submissionPeriod": "FY2022P10",
    "month": "2022-07",
+   "status": "reported",
    "netObligationsCents": 29851596482,
    "netObligations": 298515964.82,
    "awardLinkedObligationsCents": 26754876532,
@@ -947,6 +1067,7 @@
   {
    "submissionPeriod": "FY2022P11",
    "month": "2022-08",
+   "status": "reported",
    "netObligationsCents": 72121823299,
    "netObligations": 721218232.99,
    "awardLinkedObligationsCents": 67655431537,
@@ -963,6 +1084,7 @@
   {
    "submissionPeriod": "FY2022P12",
    "month": "2022-09",
+   "status": "reported",
    "netObligationsCents": 69896475137,
    "netObligations": 698964751.37,
    "awardLinkedObligationsCents": 65595379855,
@@ -979,6 +1101,7 @@
   {
    "submissionPeriod": "FY2023P02",
    "month": "2022-11",
+   "status": "reported",
    "netObligationsCents": 42379573267,
    "netObligations": 423795732.67,
    "awardLinkedObligationsCents": 38408270034,
@@ -995,6 +1118,7 @@
   {
    "submissionPeriod": "FY2023P03",
    "month": "2022-12",
+   "status": "reported",
    "netObligationsCents": 11501751102,
    "netObligations": 115017511.02,
    "awardLinkedObligationsCents": 8313231809,
@@ -1011,6 +1135,7 @@
   {
    "submissionPeriod": "FY2023P04",
    "month": "2023-01",
+   "status": "reported",
    "netObligationsCents": 30449029227,
    "netObligations": 304490292.27,
    "awardLinkedObligationsCents": 27269066191,
@@ -1027,6 +1152,7 @@
   {
    "submissionPeriod": "FY2023P05",
    "month": "2023-02",
+   "status": "reported",
    "netObligationsCents": 27079940256,
    "netObligations": 270799402.56,
    "awardLinkedObligationsCents": 24622522537,
@@ -1043,6 +1169,7 @@
   {
    "submissionPeriod": "FY2023P06",
    "month": "2023-03",
+   "status": "reported",
    "netObligationsCents": 59430358642,
    "netObligations": 594303586.42,
    "awardLinkedObligationsCents": 56221451122,
@@ -1059,6 +1186,7 @@
   {
    "submissionPeriod": "FY2023P07",
    "month": "2023-04",
+   "status": "reported",
    "netObligationsCents": 56977088725,
    "netObligations": 569770887.25,
    "awardLinkedObligationsCents": 54708346355,
@@ -1075,6 +1203,7 @@
   {
    "submissionPeriod": "FY2023P08",
    "month": "2023-05",
+   "status": "reported",
    "netObligationsCents": 57508348708,
    "netObligations": 575083487.08,
    "awardLinkedObligationsCents": 54838497224,
@@ -1091,6 +1220,7 @@
   {
    "submissionPeriod": "FY2023P09",
    "month": "2023-06",
+   "status": "reported",
    "netObligationsCents": 84655844534,
    "netObligations": 846558445.34,
    "awardLinkedObligationsCents": 80445803608,
@@ -1107,6 +1237,7 @@
   {
    "submissionPeriod": "FY2023P10",
    "month": "2023-07",
+   "status": "reported",
    "netObligationsCents": 49807781869,
    "netObligations": 498077818.69,
    "awardLinkedObligationsCents": 47255644681,
@@ -1123,6 +1254,7 @@
   {
    "submissionPeriod": "FY2023P11",
    "month": "2023-08",
+   "status": "reported",
    "netObligationsCents": 88307602891,
    "netObligations": 883076028.91,
    "awardLinkedObligationsCents": 83239997698,
@@ -1139,6 +1271,7 @@
   {
    "submissionPeriod": "FY2023P12",
    "month": "2023-09",
+   "status": "reported",
    "netObligationsCents": 230231288691,
    "netObligations": 2302312886.91,
    "awardLinkedObligationsCents": 226103953155,
@@ -1155,6 +1288,7 @@
   {
    "submissionPeriod": "FY2024P02",
    "month": "2023-11",
+   "status": "reported",
    "netObligationsCents": 74157960988,
    "netObligations": 741579609.88,
    "awardLinkedObligationsCents": 66346279711,
@@ -1171,6 +1305,7 @@
   {
    "submissionPeriod": "FY2024P03",
    "month": "2023-12",
+   "status": "reported",
    "netObligationsCents": 27811114804,
    "netObligations": 278111148.04,
    "awardLinkedObligationsCents": 25009277688,
@@ -1187,6 +1322,7 @@
   {
    "submissionPeriod": "FY2024P04",
    "month": "2024-01",
+   "status": "reported",
    "netObligationsCents": 33085718408,
    "netObligations": 330857184.08,
    "awardLinkedObligationsCents": 29830071227,
@@ -1203,6 +1339,7 @@
   {
    "submissionPeriod": "FY2024P05",
    "month": "2024-02",
+   "status": "reported",
    "netObligationsCents": 25133472348,
    "netObligations": 251334723.48,
    "awardLinkedObligationsCents": 15537715171,
@@ -1219,6 +1356,7 @@
   {
    "submissionPeriod": "FY2024P06",
    "month": "2024-03",
+   "status": "reported",
    "netObligationsCents": 33668445352,
    "netObligations": 336684453.52,
    "awardLinkedObligationsCents": 30773981094,
@@ -1235,6 +1373,7 @@
   {
    "submissionPeriod": "FY2024P07",
    "month": "2024-04",
+   "status": "reported",
    "netObligationsCents": 45612467099,
    "netObligations": 456124670.99,
    "awardLinkedObligationsCents": 41997256033,
@@ -1251,6 +1390,7 @@
   {
    "submissionPeriod": "FY2024P08",
    "month": "2024-05",
+   "status": "reported",
    "netObligationsCents": 36621253657,
    "netObligations": 366212536.57,
    "awardLinkedObligationsCents": 32467858087,
@@ -1267,6 +1407,7 @@
   {
    "submissionPeriod": "FY2024P09",
    "month": "2024-06",
+   "status": "reported",
    "netObligationsCents": 80454119723,
    "netObligations": 804541197.23,
    "awardLinkedObligationsCents": 76936895176,
@@ -1283,6 +1424,7 @@
   {
    "submissionPeriod": "FY2024P10",
    "month": "2024-07",
+   "status": "reported",
    "netObligationsCents": 100200859392,
    "netObligations": 1002008593.92,
    "awardLinkedObligationsCents": 96931151064,
@@ -1299,6 +1441,7 @@
   {
    "submissionPeriod": "FY2024P11",
    "month": "2024-08",
+   "status": "reported",
    "netObligationsCents": 115920474428,
    "netObligations": 1159204744.28,
    "awardLinkedObligationsCents": 111853883026,
@@ -1315,6 +1458,7 @@
   {
    "submissionPeriod": "FY2024P12",
    "month": "2024-09",
+   "status": "reported",
    "netObligationsCents": 227296234982,
    "netObligations": 2272962349.82,
    "awardLinkedObligationsCents": 223522680521,
@@ -1331,6 +1475,7 @@
   {
    "submissionPeriod": "FY2025P02",
    "month": "2024-11",
+   "status": "reported",
    "netObligationsCents": 110194289506,
    "netObligations": 1101942895.06,
    "awardLinkedObligationsCents": 104002287540,
@@ -1347,6 +1492,7 @@
   {
    "submissionPeriod": "FY2025P03",
    "month": "2024-12",
+   "status": "reported",
    "netObligationsCents": 402906639287,
    "netObligations": 4029066392.87,
    "awardLinkedObligationsCents": 399174547750,
@@ -1363,6 +1509,7 @@
   {
    "submissionPeriod": "FY2025P04",
    "month": "2025-01",
+   "status": "reported",
    "netObligationsCents": 1003216308143,
    "netObligations": 10032163081.43,
    "awardLinkedObligationsCents": 994174367913,
@@ -1379,6 +1526,7 @@
   {
    "submissionPeriod": "FY2025P05",
    "month": "2025-02",
+   "status": "reported",
    "netObligationsCents": 15116488780,
    "netObligations": 151164887.8,
    "awardLinkedObligationsCents": -4873393123,
@@ -1395,6 +1543,7 @@
   {
    "submissionPeriod": "FY2025P06",
    "month": "2025-03",
+   "status": "reported",
    "netObligationsCents": 15573777300,
    "netObligations": 155737773.0,
    "awardLinkedObligationsCents": 14368162054,
@@ -1411,6 +1560,7 @@
   {
    "submissionPeriod": "FY2025P07",
    "month": "2025-04",
+   "status": "reported",
    "netObligationsCents": 24942784136,
    "netObligations": 249427841.36,
    "awardLinkedObligationsCents": 20764031115,
@@ -1427,6 +1577,7 @@
   {
    "submissionPeriod": "FY2025P08",
    "month": "2025-05",
+   "status": "reported",
    "netObligationsCents": 21256244628,
    "netObligations": 212562446.28,
    "awardLinkedObligationsCents": 15242350082,
@@ -1443,6 +1594,7 @@
   {
    "submissionPeriod": "FY2025P09",
    "month": "2025-06",
+   "status": "reported",
    "netObligationsCents": 22791801286,
    "netObligations": 227918012.86,
    "awardLinkedObligationsCents": 20248016302,
@@ -1459,6 +1611,7 @@
   {
    "submissionPeriod": "FY2025P10",
    "month": "2025-07",
+   "status": "reported",
    "netObligationsCents": 7734922944,
    "netObligations": 77349229.44,
    "awardLinkedObligationsCents": 4452637153,
@@ -1475,6 +1628,7 @@
   {
    "submissionPeriod": "FY2025P11",
    "month": "2025-08",
+   "status": "reported",
    "netObligationsCents": 3702376939,
    "netObligations": 37023769.39,
    "awardLinkedObligationsCents": -1383499952,
@@ -1491,6 +1645,7 @@
   {
    "submissionPeriod": "FY2025P12",
    "month": "2025-09",
+   "status": "reported",
    "netObligationsCents": 85599766844,
    "netObligations": 855997668.44,
    "awardLinkedObligationsCents": 80319643938,
@@ -1507,6 +1662,7 @@
   {
    "submissionPeriod": "FY2026P02",
    "month": "2025-11",
+   "status": "reported",
    "netObligationsCents": 2542698984,
    "netObligations": 25426989.84,
    "awardLinkedObligationsCents": -5096442297,
@@ -1523,6 +1679,7 @@
   {
    "submissionPeriod": "FY2026P03",
    "month": "2025-12",
+   "status": "reported",
    "netObligationsCents": 12696135610,
    "netObligations": 126961356.1,
    "awardLinkedObligationsCents": 9009048725,
@@ -1539,6 +1696,7 @@
   {
    "submissionPeriod": "FY2026P04",
    "month": "2026-01",
+   "status": "reported",
    "netObligationsCents": 25968468726,
    "netObligations": 259684687.26,
    "awardLinkedObligationsCents": 20119893768,
@@ -1555,6 +1713,7 @@
   {
    "submissionPeriod": "FY2026P05",
    "month": "2026-02",
+   "status": "reported",
    "netObligationsCents": 9232869219,
    "netObligations": 92328692.19,
    "awardLinkedObligationsCents": 6240675325,
@@ -1571,6 +1730,7 @@
   {
    "submissionPeriod": "FY2026P06",
    "month": "2026-03",
+   "status": "reported",
    "netObligationsCents": 17227374176,
    "netObligations": 172273741.76,
    "awardLinkedObligationsCents": 13019333000,
@@ -1587,6 +1747,7 @@
   {
    "submissionPeriod": "FY2026P07",
    "month": "2026-04",
+   "status": "reported",
    "netObligationsCents": 31437667422,
    "netObligations": 314376674.22,
    "awardLinkedObligationsCents": 27300070004,
@@ -1603,6 +1764,7 @@
   {
    "submissionPeriod": "FY2026P08",
    "month": "2026-05",
+   "status": "reported",
    "netObligationsCents": 11524854054,
    "netObligations": 115248540.54,
    "awardLinkedObligationsCents": 7245158735,
@@ -1619,18 +1781,19 @@
   {
    "submissionPeriod": "FY2026P09",
    "month": "2026-06",
-   "netObligationsCents": 18295473081,
-   "netObligations": 182954730.81,
-   "awardLinkedObligationsCents": 13236822966,
-   "awardLinkedObligations": 132368229.66,
-   "residualObligationsCents": 5058650115,
-   "residualObligations": 50586501.15,
-   "grossObligationsCents": 117085932850,
-   "grossObligations": 1170859328.5,
-   "deobligationsCents": -98790459769,
-   "deobligations": -987904597.69,
-   "distinctLinkedAwards": 68,
-   "fileCToNetRatio": 0.7235026340885686
+   "status": "notReported",
+   "netObligationsCents": null,
+   "netObligations": null,
+   "awardLinkedObligationsCents": null,
+   "awardLinkedObligations": null,
+   "residualObligationsCents": null,
+   "residualObligations": null,
+   "grossObligationsCents": null,
+   "grossObligations": null,
+   "deobligationsCents": null,
+   "deobligations": null,
+   "distinctLinkedAwards": null,
+   "fileCToNetRatio": null
   }
  ],
  "fiscalYears": [
@@ -8063,6 +8226,7 @@
     {
      "d": 60,
      "submissionPeriod": "FY2022P02",
+     "status": "reported",
      "netObligationsCents": 15538325137,
      "netObligations": 155383251.37,
      "awardLinkedObligationsCents": 12525290225,
@@ -8079,6 +8243,7 @@
     {
      "d": 91,
      "submissionPeriod": "FY2022P03",
+     "status": "reported",
      "netObligationsCents": 37328225167,
      "netObligations": 373282251.67,
      "awardLinkedObligationsCents": 32199853085,
@@ -8095,6 +8260,7 @@
     {
      "d": 122,
      "submissionPeriod": "FY2022P04",
+     "status": "reported",
      "netObligationsCents": 60910713420,
      "netObligations": 609107134.2,
      "awardLinkedObligationsCents": 52901329942,
@@ -8111,6 +8277,7 @@
     {
      "d": 150,
      "submissionPeriod": "FY2022P05",
+     "status": "reported",
      "netObligationsCents": 75402306600,
      "netObligations": 754023066.0,
      "awardLinkedObligationsCents": 65544544405,
@@ -8127,6 +8294,7 @@
     {
      "d": 181,
      "submissionPeriod": "FY2022P06",
+     "status": "reported",
      "netObligationsCents": 95642955465,
      "netObligations": 956429554.65,
      "awardLinkedObligationsCents": 82759406001,
@@ -8143,6 +8311,7 @@
     {
      "d": 211,
      "submissionPeriod": "FY2022P07",
+     "status": "reported",
      "netObligationsCents": 106805827425,
      "netObligations": 1068058274.25,
      "awardLinkedObligationsCents": 89942174645,
@@ -8159,6 +8328,7 @@
     {
      "d": 242,
      "submissionPeriod": "FY2022P08",
+     "status": "reported",
      "netObligationsCents": 130978739309,
      "netObligations": 1309787393.09,
      "awardLinkedObligationsCents": 111348229800,
@@ -8175,6 +8345,7 @@
     {
      "d": 272,
      "submissionPeriod": "FY2022P09",
+     "status": "reported",
      "netObligationsCents": 167334757402,
      "netObligations": 1673347574.02,
      "awardLinkedObligationsCents": 143783372252,
@@ -8191,6 +8362,7 @@
     {
      "d": 303,
      "submissionPeriod": "FY2022P10",
+     "status": "reported",
      "netObligationsCents": 197186353884,
      "netObligations": 1971863538.84,
      "awardLinkedObligationsCents": 170538248784,
@@ -8207,6 +8379,7 @@
     {
      "d": 334,
      "submissionPeriod": "FY2022P11",
+     "status": "reported",
      "netObligationsCents": 269308177183,
      "netObligations": 2693081771.83,
      "awardLinkedObligationsCents": 238193680321,
@@ -8223,6 +8396,7 @@
     {
      "d": 364,
      "submissionPeriod": "FY2022P12",
+     "status": "reported",
      "netObligationsCents": 339204652320,
      "netObligations": 3392046523.2,
      "awardLinkedObligationsCents": 303789060176,
@@ -8245,6 +8419,7 @@
     {
      "d": 60,
      "submissionPeriod": "FY2023P02",
+     "status": "reported",
      "netObligationsCents": 42379573267,
      "netObligations": 423795732.67,
      "awardLinkedObligationsCents": 38408270034,
@@ -8261,6 +8436,7 @@
     {
      "d": 91,
      "submissionPeriod": "FY2023P03",
+     "status": "reported",
      "netObligationsCents": 53881324369,
      "netObligations": 538813243.69,
      "awardLinkedObligationsCents": 46721501843,
@@ -8277,6 +8453,7 @@
     {
      "d": 122,
      "submissionPeriod": "FY2023P04",
+     "status": "reported",
      "netObligationsCents": 84330353596,
      "netObligations": 843303535.96,
      "awardLinkedObligationsCents": 73990568034,
@@ -8293,6 +8470,7 @@
     {
      "d": 150,
      "submissionPeriod": "FY2023P05",
+     "status": "reported",
      "netObligationsCents": 111410293852,
      "netObligations": 1114102938.52,
      "awardLinkedObligationsCents": 98613090571,
@@ -8309,6 +8487,7 @@
     {
      "d": 181,
      "submissionPeriod": "FY2023P06",
+     "status": "reported",
      "netObligationsCents": 170840652494,
      "netObligations": 1708406524.94,
      "awardLinkedObligationsCents": 154834541693,
@@ -8325,6 +8504,7 @@
     {
      "d": 211,
      "submissionPeriod": "FY2023P07",
+     "status": "reported",
      "netObligationsCents": 227817741219,
      "netObligations": 2278177412.19,
      "awardLinkedObligationsCents": 209542888048,
@@ -8341,6 +8521,7 @@
     {
      "d": 242,
      "submissionPeriod": "FY2023P08",
+     "status": "reported",
      "netObligationsCents": 285326089927,
      "netObligations": 2853260899.27,
      "awardLinkedObligationsCents": 264381385272,
@@ -8357,6 +8538,7 @@
     {
      "d": 272,
      "submissionPeriod": "FY2023P09",
+     "status": "reported",
      "netObligationsCents": 369981934461,
      "netObligations": 3699819344.61,
      "awardLinkedObligationsCents": 344827188880,
@@ -8373,6 +8555,7 @@
     {
      "d": 303,
      "submissionPeriod": "FY2023P10",
+     "status": "reported",
      "netObligationsCents": 419789716330,
      "netObligations": 4197897163.3,
      "awardLinkedObligationsCents": 392082833561,
@@ -8389,6 +8572,7 @@
     {
      "d": 334,
      "submissionPeriod": "FY2023P11",
+     "status": "reported",
      "netObligationsCents": 508097319221,
      "netObligations": 5080973192.21,
      "awardLinkedObligationsCents": 475322831259,
@@ -8405,6 +8589,7 @@
     {
      "d": 364,
      "submissionPeriod": "FY2023P12",
+     "status": "reported",
      "netObligationsCents": 738328607912,
      "netObligations": 7383286079.12,
      "awardLinkedObligationsCents": 701426784414,
@@ -8427,6 +8612,7 @@
     {
      "d": 60,
      "submissionPeriod": "FY2024P02",
+     "status": "reported",
      "netObligationsCents": 74157960988,
      "netObligations": 741579609.88,
      "awardLinkedObligationsCents": 66346279711,
@@ -8443,6 +8629,7 @@
     {
      "d": 91,
      "submissionPeriod": "FY2024P03",
+     "status": "reported",
      "netObligationsCents": 101969075792,
      "netObligations": 1019690757.92,
      "awardLinkedObligationsCents": 91355557399,
@@ -8459,6 +8646,7 @@
     {
      "d": 122,
      "submissionPeriod": "FY2024P04",
+     "status": "reported",
      "netObligationsCents": 135054794200,
      "netObligations": 1350547942.0,
      "awardLinkedObligationsCents": 121185628626,
@@ -8475,6 +8663,7 @@
     {
      "d": 151,
      "submissionPeriod": "FY2024P05",
+     "status": "reported",
      "netObligationsCents": 160188266548,
      "netObligations": 1601882665.48,
      "awardLinkedObligationsCents": 136723343797,
@@ -8491,6 +8680,7 @@
     {
      "d": 182,
      "submissionPeriod": "FY2024P06",
+     "status": "reported",
      "netObligationsCents": 193856711900,
      "netObligations": 1938567119.0,
      "awardLinkedObligationsCents": 167497324891,
@@ -8507,6 +8697,7 @@
     {
      "d": 212,
      "submissionPeriod": "FY2024P07",
+     "status": "reported",
      "netObligationsCents": 239469178999,
      "netObligations": 2394691789.99,
      "awardLinkedObligationsCents": 209494580924,
@@ -8523,6 +8714,7 @@
     {
      "d": 243,
      "submissionPeriod": "FY2024P08",
+     "status": "reported",
      "netObligationsCents": 276090432656,
      "netObligations": 2760904326.56,
      "awardLinkedObligationsCents": 241962439011,
@@ -8539,6 +8731,7 @@
     {
      "d": 273,
      "submissionPeriod": "FY2024P09",
+     "status": "reported",
      "netObligationsCents": 356544552379,
      "netObligations": 3565445523.79,
      "awardLinkedObligationsCents": 318899334187,
@@ -8555,6 +8748,7 @@
     {
      "d": 304,
      "submissionPeriod": "FY2024P10",
+     "status": "reported",
      "netObligationsCents": 456745411771,
      "netObligations": 4567454117.71,
      "awardLinkedObligationsCents": 415830485251,
@@ -8571,6 +8765,7 @@
     {
      "d": 335,
      "submissionPeriod": "FY2024P11",
+     "status": "reported",
      "netObligationsCents": 572665886199,
      "netObligations": 5726658861.99,
      "awardLinkedObligationsCents": 527684368277,
@@ -8587,6 +8782,7 @@
     {
      "d": 365,
      "submissionPeriod": "FY2024P12",
+     "status": "reported",
      "netObligationsCents": 799962121181,
      "netObligations": 7999621211.81,
      "awardLinkedObligationsCents": 751207048798,
@@ -8609,6 +8805,7 @@
     {
      "d": 60,
      "submissionPeriod": "FY2025P02",
+     "status": "reported",
      "netObligationsCents": 110194289506,
      "netObligations": 1101942895.06,
      "awardLinkedObligationsCents": 104002287540,
@@ -8625,6 +8822,7 @@
     {
      "d": 91,
      "submissionPeriod": "FY2025P03",
+     "status": "reported",
      "netObligationsCents": 513100928793,
      "netObligations": 5131009287.93,
      "awardLinkedObligationsCents": 503176835290,
@@ -8641,6 +8839,7 @@
     {
      "d": 122,
      "submissionPeriod": "FY2025P04",
+     "status": "reported",
      "netObligationsCents": 1516317236936,
      "netObligations": 15163172369.36,
      "awardLinkedObligationsCents": 1497351203203,
@@ -8657,6 +8856,7 @@
     {
      "d": 150,
      "submissionPeriod": "FY2025P05",
+     "status": "reported",
      "netObligationsCents": 1531433725716,
      "netObligations": 15314337257.16,
      "awardLinkedObligationsCents": 1492477810080,
@@ -8673,6 +8873,7 @@
     {
      "d": 181,
      "submissionPeriod": "FY2025P06",
+     "status": "reported",
      "netObligationsCents": 1547007503016,
      "netObligations": 15470075030.16,
      "awardLinkedObligationsCents": 1506845972134,
@@ -8689,6 +8890,7 @@
     {
      "d": 211,
      "submissionPeriod": "FY2025P07",
+     "status": "reported",
      "netObligationsCents": 1571950287152,
      "netObligations": 15719502871.52,
      "awardLinkedObligationsCents": 1527610003249,
@@ -8705,6 +8907,7 @@
     {
      "d": 242,
      "submissionPeriod": "FY2025P08",
+     "status": "reported",
      "netObligationsCents": 1593206531780,
      "netObligations": 15932065317.8,
      "awardLinkedObligationsCents": 1542852353331,
@@ -8721,6 +8924,7 @@
     {
      "d": 272,
      "submissionPeriod": "FY2025P09",
+     "status": "reported",
      "netObligationsCents": 1615998333066,
      "netObligations": 16159983330.66,
      "awardLinkedObligationsCents": 1563100369633,
@@ -8737,6 +8941,7 @@
     {
      "d": 303,
      "submissionPeriod": "FY2025P10",
+     "status": "reported",
      "netObligationsCents": 1623733256010,
      "netObligations": 16237332560.1,
      "awardLinkedObligationsCents": 1567553006786,
@@ -8753,6 +8958,7 @@
     {
      "d": 334,
      "submissionPeriod": "FY2025P11",
+     "status": "reported",
      "netObligationsCents": 1627435632949,
      "netObligations": 16274356329.49,
      "awardLinkedObligationsCents": 1566169506834,
@@ -8769,6 +8975,7 @@
     {
      "d": 364,
      "submissionPeriod": "FY2025P12",
+     "status": "reported",
      "netObligationsCents": 1713035399793,
      "netObligations": 17130353997.93,
      "awardLinkedObligationsCents": 1646489150772,
@@ -8791,6 +8998,7 @@
     {
      "d": 60,
      "submissionPeriod": "FY2026P02",
+     "status": "reported",
      "netObligationsCents": 2542698984,
      "netObligations": 25426989.84,
      "awardLinkedObligationsCents": -5096442297,
@@ -8807,6 +9015,7 @@
     {
      "d": 91,
      "submissionPeriod": "FY2026P03",
+     "status": "reported",
      "netObligationsCents": 15238834594,
      "netObligations": 152388345.94,
      "awardLinkedObligationsCents": 3912606428,
@@ -8823,6 +9032,7 @@
     {
      "d": 122,
      "submissionPeriod": "FY2026P04",
+     "status": "reported",
      "netObligationsCents": 41207303320,
      "netObligations": 412073033.2,
      "awardLinkedObligationsCents": 24032500196,
@@ -8839,6 +9049,7 @@
     {
      "d": 150,
      "submissionPeriod": "FY2026P05",
+     "status": "reported",
      "netObligationsCents": 50440172539,
      "netObligations": 504401725.39,
      "awardLinkedObligationsCents": 30273175521,
@@ -8855,6 +9066,7 @@
     {
      "d": 181,
      "submissionPeriod": "FY2026P06",
+     "status": "reported",
      "netObligationsCents": 67667546715,
      "netObligations": 676675467.15,
      "awardLinkedObligationsCents": 43292508521,
@@ -8871,6 +9083,7 @@
     {
      "d": 211,
      "submissionPeriod": "FY2026P07",
+     "status": "reported",
      "netObligationsCents": 99105214137,
      "netObligations": 991052141.37,
      "awardLinkedObligationsCents": 70592578525,
@@ -8887,6 +9100,7 @@
     {
      "d": 242,
      "submissionPeriod": "FY2026P08",
+     "status": "reported",
      "netObligationsCents": 110630068191,
      "netObligations": 1106300681.91,
      "awardLinkedObligationsCents": 77837737260,
@@ -8903,6 +9117,7 @@
     {
      "d": 272,
      "submissionPeriod": "FY2026P09",
+     "status": "notReported",
      "netObligationsCents": 128925541272,
      "netObligations": 1289255412.72,
      "awardLinkedObligationsCents": 91074560226,
