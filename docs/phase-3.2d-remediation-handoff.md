@@ -111,6 +111,36 @@ parallel.
   `config/orgs.json` and `config/obligation_accounts.json` and assert the
   verbatim strings.
 
+### Wave 0 triage outcomes (2026-09-17) and resulting additions
+
+- The 2026-09-14 scheduled obligation run was not stuck: all 106
+  account-year pulls succeeded serially in 28.4 h (median job 16 min), and
+  the reconcile failed only at the fast tier — the NIH defect (HIGH-1) plus
+  53 failures in `test_obligations_other_civilian` because every agency
+  test file pins the current FY's partial `asOfPeriod`/cents literally.
+  Any weekly advance therefore fails the gate. **Added W6** (branch
+  `claude/rem-w6-moving-pins`): current-FY partial rows are asserted
+  structurally; historical complete pins stay literal.
+- The same reconcile advanced `ed/ies` FY2026 to `asOfPeriod 10,
+  obligationsCents 0`: the empty-snapshot defect (HIGH-5) reaches the
+  partial-pin update path too. **W3 addition:** a pin may only advance to
+  a period whose File B snapshot is `reported`; a zero File A total after a
+  positive one is not pinned.
+- Run 34141166514 (09-07) failed on `ed/ies` FY2018 P12 `award_financial`
+  in all 7 attempts with the adapter's own 2 h download cap. The weekly
+  rotation (`isocalendar week % len(historical)`) selects FY2018 for
+  `ed/ies` in ISO weeks 37 and 46 (next: 2026-11-09), not in the soak
+  window (09-21 → FY2020). Recorded as an operational follow-up, not a
+  remediation item.
+- Sizing: a 12-account-year custom re-pull ≈ 3.2 h; a weekly run ≈ 28 h.
+  A full NIH re-pull has no measured precedent; the 10-unit targeted
+  repair took 43 min.
+- Test on PR #62 (run 35234915388) fails the fast tier with the HIGH-1
+  signature, so every PR's CI is red on `validate-nih`/`unit-tests` until
+  W1 merges. Merge order becomes W2 → W6 → W1 → W3 → W4, with W1's PR
+  carrying the offline reaggregation so the fast tier is green on `main`
+  before the CI full re-pull is dispatched there.
+
 ## CI runs (filled as they happen)
 
 | When | Workflow / ref | Purpose | Result |
