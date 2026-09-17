@@ -176,6 +176,7 @@ parallel.
 | 2026-09-17 17:20 UTC | `Update funding-action sentinel` dispatched on `main` | First sentinel run under the decoupled gate (W2); sources were 23 days stale against the 10-day SLA | running |
 | 2026-09-17 17:16 UTC | sentinel run 35251254148 | Built, validated, rendered green under the decoupled gate; failed only at `git push` (non-fast-forward: NIH leaf commits landed on main meanwhile). Single-push commit steps in the sentinel and obligation reconcile had no rebase retry. | failure, diagnosed |
 | 2026-09-17 17:32 UTC | weekly run 35251206571 cancelled; PR #71 merged (`f5a9106`); weekly obligation run and sentinel run re-dispatched on `main` | W9: both commit steps replay on the branch tip up to five times (`pull --rebase -X theirs`), as the award workflow already did | running |
+| 2026-09-17 17:32–17:37 UTC | sentinel run 35253304028 | **SUCCESS** — first accepted sentinel snapshot since 2026-08-25, under the decoupled gate (W2) and the retry push (W9); committed to `main` | green |
 
 ## Finding closure evidence (filled at closeout)
 
