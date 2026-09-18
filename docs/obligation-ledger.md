@@ -246,6 +246,33 @@ to publish a File A/File B pin of exactly zero cents over a previously
 positive pin in the same fiscal year; the last accepted pin is kept
 unchanged rather than advanced.
 
+**Validating a not-reported latest period (Phase 3.2d remediation W10,
+2026-09-18).** The first full 53-account weekly refresh (run 35253300879)
+pulled doe/sc and doe/fossil-energy FY2026 through P10 and, correctly per
+the acceptance rule above, classified P10 `notReported` on both (a
+provisional dip with no later period yet to test recovery against — 92 of
+219 File B rows at doe/fossil-energy, 39 of 149 at doe/sc). The pin
+correctly stayed at P09 on both, exactly as designed. Two
+`scripts/validate_obligations.py` checks had not been updated for that
+otherwise-correct state and failed closed on it: the same-period GTAS pin
+check compared the pin's `asOfPeriod` against the latest *stored* period
+(P10, which still carries real File C events even though it is
+`notReported`) rather than the latest *reported* period (P09); and the
+one-residual-per-bucket check expected every `(period, programActivity)`
+bucket with a File C event to also carry exactly one residual, which a
+`notReported` period never has by design. The fix: for a partial fiscal
+year, the same-period pin comparison uses the latest period File B
+classifies `reported`, and only once every later period the store actually
+holds is itself `notReported` (never a period simply not yet pulled) — a
+pin sitting on a `notReported` period, or lagging behind a fully reported
+latest period, still fails exactly as before. The residual check skips (as
+opposed to zero-asserts) a `notReported` bucket, since an *internal*
+mid-year dip that a later pull already covers may still carry a residual
+booked under an earlier pull's per-period reconciliation from before that
+period was reclassified by a later refinement of the row-count rule — only
+the account's own actual dangling latest period is guaranteed residual-free
+by construction, and that is what the pin check above depends on.
+
 ## Reconciliation gate
 
 For every covered account-year:

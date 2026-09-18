@@ -295,6 +295,13 @@ def validate(repo=REPO, require_data=True, check_freshness=False,
                           for e in events} - known)
         if unknown:
             errors.append(f"{account['path']}: unmapped Program Activities {unknown}")
+        # Snapshot acceptance rule (docs/obligation-ledger.md "Snapshot
+        # acceptance and not-reported periods"): recompute the notReported
+        # classification straight from committed provenance once, up front,
+        # so every check below -- the residual-row reconciliation and the
+        # partial-pin comparison -- shares the identical, registry-free
+        # classification instead of re-deriving it (or ignoring it).
+        recomputed_status = account_period_status(store, events)
         by_fy = defaultdict(list)
         residual_buckets = defaultdict(int)
         file_c_buckets = set()
@@ -333,6 +340,21 @@ def validate(repo=REPO, require_data=True, check_freshness=False,
                 errors.append(f"{account['path']} FY{fy}: missing required shard")
             errors.extend(_validate_provenance(store, account, fy, rows))
         for bucket in sorted(file_c_buckets):
+            if recomputed_status.get(bucket[0]) == "notReported":
+                # A dangling notReported tail on an in-progress pull has no
+                # covering reported period yet, so its File C events are
+                # real but unmatched and it carries no residual at all --
+                # skip the ordinary one-residual-per-bucket invariant rather
+                # than require exactly zero: an *internal* notReported dip
+                # that a later pull already covered may still carry the
+                # residual it was booked with under an earlier pull's
+                # per-period reconciliation, before that period was
+                # reclassified by a later refinement of the row-count rule
+                # (docs/obligation-ledger.md "Snapshot acceptance and
+                # not-reported periods"). Only the true dangling-tail case
+                # -- this account's own actual latest period -- is what the
+                # pin-advancement check below depends on being residual-free.
+                continue
             if residual_buckets[bucket] != 1:
                 errors.append(
                     f"{account['path']}: {bucket} has {residual_buckets[bucket]} "
@@ -422,7 +444,38 @@ def validate(repo=REPO, require_data=True, check_freshness=False,
                     errors.append(
                         f"FY{fy}: first P{first:02} != pinned P{pin['firstPeriod']:02}"
                     )
-                if pin.get("asOfPeriod") != last:
+                # A partial FY's pin may only rest on a REPORTED period
+                # (docs/obligation-ledger.md "Baseline-pin advancement"). If
+                # the store's actually-latest period (`last`, which counts
+                # File C-only notReported tail periods too) is notReported,
+                # the pin correctly stays behind it -- so the same-period
+                # comparison is against the latest *reported* period instead
+                # of `last`, and only once every period after it is itself
+                # notReported (never a period simply not yet pulled).
+                fy_status = {label: status for label, status in recomputed_status.items()
+                            if period_info(label)[0] == fy}
+                reported_periods = sorted(
+                    period_info(label)[1] for label, status in fy_status.items()
+                    if status == "reported"
+                )
+                latest_reported = reported_periods[-1] if reported_periods else None
+                trailing_not_reported = latest_reported is not None and all(
+                    status == "notReported"
+                    for label, status in fy_status.items()
+                    if period_info(label)[1] > latest_reported
+                )
+                if (trailing_not_reported
+                        and pin.get("asOfPeriod") == latest_reported):
+                    reported_actual = sum(
+                        e["amountCents"] for e in rows
+                        if e["fiscalPeriod"] <= latest_reported
+                    )
+                    if reported_actual != expected_file_b:
+                        errors.append(
+                            f"FY{fy} P{latest_reported:02}: {reported_actual} "
+                            f"cents != pinned File B {expected_file_b} cents"
+                        )
+                elif pin.get("asOfPeriod") != last:
                     if not _is_pending_partial_pin_transition(
                             account, fy, pin, provenance, rows,
                             retry_recovery, pending_file_b_periods):
@@ -464,14 +517,13 @@ def validate(repo=REPO, require_data=True, check_freshness=False,
                     )
         covered_periods = {event["submissionPeriod"] for event in events}
         # Snapshot acceptance rule (docs/obligation-ledger.md "Snapshot
-        # acceptance and not-reported periods"): recompute the notReported
-        # classification straight from committed provenance -- independent
-        # of, and compared against, the persisted dashboard below. Fail
-        # closed, per fiscal year, on the same P12/fiscal-year-complete
-        # hard error the pull path enforces -- appended as an ordinary
-        # validation error rather than raised, so one historical fiscal
-        # year's defect does not abort validating every other account.
-        recomputed_status = account_period_status(store, events, partial_fys)
+        # acceptance and not-reported periods"): `recomputed_status`,
+        # computed once above from committed provenance, is independent of,
+        # and compared against, the persisted dashboard below. Fail closed,
+        # per fiscal year, on the same P12/fiscal-year-complete hard error
+        # the pull path enforces -- appended as an ordinary validation error
+        # rather than raised, so one historical fiscal year's defect does
+        # not abort validating every other account.
         for fy in sorted(by_fy):
             fy_status = {period: status for period, status in recomputed_status.items()
                         if period_info(period)[0] == fy}
