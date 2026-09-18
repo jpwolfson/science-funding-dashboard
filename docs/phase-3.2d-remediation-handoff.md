@@ -182,6 +182,7 @@ parallel.
 | 2026-09-17 22:25 UTC | run 35253300879 progress | 18/106 account-year pulls complete, 0 failed, ~14 min/job ⇒ reconcile expected ~19:00 UTC 2026-09-18. Closeout branch `claude/rem-closeout` pushed (manifest deleted, ci.yml lint line dropped, manifest test → absence test); PR opens only after the weekly run commits. | running |
 | 2026-09-17 22:40 UTC | local `validate_obligations.py` on current `main` with the manifest deleted | HIGH-3 measured: **1 error** remains (`dhs/cwmd-rd FY2026: latest P09 has no same-period GTAS pin` — pin at P10, store at P09); the six `source-label-unavailable-*` identities no longer error (W3 rebuild gave them store data). The running weekly refresh pulls CWMD through P10 and closes it. | measured |
 | 2026-09-18 02:35 UTC | run 35253300879 progress | 35/106 pulls complete, 0 failed; reconcile expected ~20:00 UTC 2026-09-18 | running |
+| 2026-09-18 09:55 UTC | run 35253300879 progress | 64/106 pulls complete, 0 failed; reconcile expected ~20:30 UTC | running |
 
 ## Finding closure evidence (filled at closeout)
 
