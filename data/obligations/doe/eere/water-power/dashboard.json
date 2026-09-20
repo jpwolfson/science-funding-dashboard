@@ -1,7 +1,7 @@
 {
  "schemaVersion": 2,
  "kind": "obligations",
- "generated": "2026-09-17",
+ "generated": "2026-09-20",
  "node": {
   "level": "programActivity",
   "path": "obligations/doe/eere/water-power",
@@ -30,7 +30,7 @@
  "totalResidualObligationsCents": 595785175,
  "totalResidualObligations": 5957851.75,
  "currentFY": 2026,
- "asOfPeriod": "FY2026P09",
+ "asOfPeriod": "FY2026P10",
  "reportingPeriods": [
   {
    "submissionPeriod": "FY2017P06",
@@ -1781,18 +1781,35 @@
   {
    "submissionPeriod": "FY2026P09",
    "month": "2026-06",
-   "status": "notReported",
-   "netObligationsCents": null,
-   "netObligations": null,
-   "awardLinkedObligationsCents": null,
-   "awardLinkedObligations": null,
-   "residualObligationsCents": null,
-   "residualObligations": null,
-   "grossObligationsCents": null,
-   "grossObligations": null,
-   "deobligationsCents": null,
-   "deobligations": null,
-   "distinctLinkedAwards": null,
+   "status": "reported",
+   "netObligationsCents": -8134663547,
+   "netObligations": -81346635.47,
+   "awardLinkedObligationsCents": 0,
+   "awardLinkedObligations": 0.0,
+   "residualObligationsCents": -8134663547,
+   "residualObligations": -81346635.47,
+   "grossObligationsCents": 0,
+   "grossObligations": 0.0,
+   "deobligationsCents": -8134663547,
+   "deobligations": -81346635.47,
+   "distinctLinkedAwards": 0,
+   "fileCToNetRatio": -0.0
+  },
+  {
+   "submissionPeriod": "FY2026P10",
+   "month": "2026-07",
+   "status": "reported",
+   "netObligationsCents": 0,
+   "netObligations": 0.0,
+   "awardLinkedObligationsCents": 0,
+   "awardLinkedObligations": 0.0,
+   "residualObligationsCents": 0,
+   "residualObligations": 0.0,
+   "grossObligationsCents": 0,
+   "grossObligations": 0.0,
+   "deobligationsCents": 0,
+   "deobligations": 0.0,
+   "distinctLinkedAwards": 0,
    "fileCToNetRatio": null
   }
  ],
@@ -8684,7 +8701,24 @@
     {
      "d": 272,
      "submissionPeriod": "FY2026P09",
-     "status": "notReported",
+     "status": "reported",
+     "netObligationsCents": 0,
+     "netObligations": 0.0,
+     "awardLinkedObligationsCents": 7951023783,
+     "awardLinkedObligations": 79510237.83,
+     "residualObligationsCents": -7951023783,
+     "residualObligations": -79510237.83,
+     "grossObligationsCents": 8311461949,
+     "grossObligations": 83114619.49,
+     "deobligationsCents": -8311461949,
+     "deobligations": -83114619.49,
+     "distinctLinkedAwards": 17,
+     "fileCToNetRatio": null
+    },
+    {
+     "d": 303,
+     "submissionPeriod": "FY2026P10",
+     "status": "reported",
      "netObligationsCents": 0,
      "netObligations": 0.0,
      "awardLinkedObligationsCents": 7951023783,
@@ -8705,7 +8739,7 @@
  "federalAccount": "089-0321",
  "programActivityCode": "0103",
  "freshness": {
-  "latestAcceptedAt": "2026-08-24T18:03:46+00:00",
+  "latestAcceptedAt": "2026-09-20T06:20:22+00:00",
   "maxAgeDays": 10
  }
 }

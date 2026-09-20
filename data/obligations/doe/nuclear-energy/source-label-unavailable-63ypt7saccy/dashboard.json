@@ -1,7 +1,7 @@
 {
  "schemaVersion": 2,
  "kind": "obligations",
- "generated": "2026-09-17",
+ "generated": "2026-09-20",
  "node": {
   "level": "programActivity",
   "path": "obligations/doe/nuclear-energy/source-label-unavailable-63ypt7saccy",
@@ -11,26 +11,26 @@
  "source": "USAspending File B and File C",
  "warnings": [],
  "dataComplete": true,
- "netObligationsCents": 0,
- "netObligations": 0.0,
- "awardLinkedObligationsCents": 0,
- "awardLinkedObligations": 0.0,
- "residualObligationsCents": 0,
- "residualObligations": 0.0,
- "grossObligationsCents": 0,
- "grossObligations": 0.0,
+ "netObligationsCents": 780253045,
+ "netObligations": 7802530.45,
+ "awardLinkedObligationsCents": 105000000,
+ "awardLinkedObligations": 1050000.0,
+ "residualObligationsCents": 675253045,
+ "residualObligations": 6752530.45,
+ "grossObligationsCents": 780253045,
+ "grossObligations": 7802530.45,
  "deobligationsCents": 0,
  "deobligations": 0.0,
- "distinctLinkedAwards": 0,
- "fileCToNetRatio": null,
- "totalNetObligationsCents": 0,
- "totalNetObligations": 0.0,
- "totalAwardLinkedObligationsCents": 0,
- "totalAwardLinkedObligations": 0.0,
- "totalResidualObligationsCents": 0,
- "totalResidualObligations": 0.0,
+ "distinctLinkedAwards": 2,
+ "fileCToNetRatio": 0.134571727304185,
+ "totalNetObligationsCents": 780253045,
+ "totalNetObligations": 7802530.45,
+ "totalAwardLinkedObligationsCents": 105000000,
+ "totalAwardLinkedObligations": 1050000.0,
+ "totalResidualObligationsCents": 675253045,
+ "totalResidualObligations": 6752530.45,
  "currentFY": 2026,
- "asOfPeriod": "FY2026P09",
+ "asOfPeriod": "FY2026P10",
  "reportingPeriods": [
   {
    "submissionPeriod": "FY2017P06",
@@ -1794,6 +1794,23 @@
    "deobligations": 0.0,
    "distinctLinkedAwards": 0,
    "fileCToNetRatio": null
+  },
+  {
+   "submissionPeriod": "FY2026P10",
+   "month": "2026-07",
+   "status": "reported",
+   "netObligationsCents": 780253045,
+   "netObligations": 7802530.45,
+   "awardLinkedObligationsCents": 105000000,
+   "awardLinkedObligations": 1050000.0,
+   "residualObligationsCents": 675253045,
+   "residualObligations": 6752530.45,
+   "grossObligationsCents": 780253045,
+   "grossObligations": 7802530.45,
+   "deobligationsCents": 0,
+   "deobligations": 0.0,
+   "distinctLinkedAwards": 2,
+   "fileCToNetRatio": 0.134571727304185
   }
  ],
  "fiscalYears": [
@@ -1971,20 +1988,60 @@
   {
    "fy": 2026,
    "partial": true,
-   "netObligationsCents": 0,
-   "netObligations": 0.0,
-   "awardLinkedObligationsCents": 0,
-   "awardLinkedObligations": 0.0,
-   "residualObligationsCents": 0,
-   "residualObligations": 0.0,
-   "grossObligationsCents": 0,
-   "grossObligations": 0.0,
+   "netObligationsCents": 780253045,
+   "netObligations": 7802530.45,
+   "awardLinkedObligationsCents": 105000000,
+   "awardLinkedObligations": 1050000.0,
+   "residualObligationsCents": 675253045,
+   "residualObligations": 6752530.45,
+   "grossObligationsCents": 780253045,
+   "grossObligations": 7802530.45,
    "deobligationsCents": 0,
    "deobligations": 0.0,
-   "distinctLinkedAwards": 0,
-   "fileCToNetRatio": null,
-   "topRecipients": [],
-   "positiveFlows": [],
+   "distinctLinkedAwards": 2,
+   "fileCToNetRatio": 0.134571727304185,
+   "topRecipients": [
+    {
+     "recipientUEI": "HG7XL5RBNX55",
+     "recipient": "BATTELLE ENERGY ALLIANCE, LLC",
+     "netObligationsCents": 95000000,
+     "netObligations": 950000.0,
+     "distinctLinkedAwards": 1
+    },
+    {
+     "recipientUEI": "JW7MLW3RRK34",
+     "recipient": "OAK RIDGE ASSOCIATED UNIVERSITIES, INCORPORATED",
+     "netObligationsCents": 10000000,
+     "netObligations": 100000.0,
+     "distinctLinkedAwards": 1
+    }
+   ],
+   "positiveFlows": [
+    {
+     "id": "219c04b494d704fdcceeadc8427e5f8fc458208557aa357862a38742597db442",
+     "awardId": "CONT_AWD_DEAC0705ID14517_8900_-NONE-_-NONE-",
+     "title": "MANAGEMENT AND OPERATIONS OF THE INL",
+     "recipient": "BATTELLE ENERGY ALLIANCE, LLC",
+     "amountCents": 95000000,
+     "amount": 950000.0,
+     "netAmountCents": 95000000,
+     "netAmount": 950000.0,
+     "submissionPeriod": "FY2026P10",
+     "awardUrl": "https://www.usaspending.gov/award/CONT_AWD_DEAC0705ID14517_8900_-NONE-_-NONE-/"
+    },
+    {
+     "id": "951af41859a46cc5a31dfe190846251a8fc8d45a01fdf0d366568ef9de54f7ef",
+     "awardId": "CONT_AWD_DESC0014664_8900_-NONE-_-NONE-",
+     "title": "IGF::OT::IGF MANAGEMENT OF THE OAK RIDGE INSTITUTE FOR SCIENCE AND EDUCATION",
+     "recipient": "OAK RIDGE ASSOCIATED UNIVERSITIES, INCORPORATED",
+     "amountCents": 10000000,
+     "amount": 100000.0,
+     "netAmountCents": 10000000,
+     "netAmount": 100000.0,
+     "submissionPeriod": "FY2026P10",
+     "awardUrl": "https://www.usaspending.gov/award/CONT_AWD_DESC0014664_8900_-NONE-_-NONE-/"
+    }
+   ],
    "negativeFlows": []
   }
  ],
@@ -2900,6 +2957,23 @@
      "deobligations": 0.0,
      "distinctLinkedAwards": 0,
      "fileCToNetRatio": null
+    },
+    {
+     "d": 303,
+     "submissionPeriod": "FY2026P10",
+     "status": "reported",
+     "netObligationsCents": 780253045,
+     "netObligations": 7802530.45,
+     "awardLinkedObligationsCents": 105000000,
+     "awardLinkedObligations": 1050000.0,
+     "residualObligationsCents": 675253045,
+     "residualObligations": 6752530.45,
+     "grossObligationsCents": 780253045,
+     "grossObligations": 7802530.45,
+     "deobligationsCents": 0,
+     "deobligations": 0.0,
+     "distinctLinkedAwards": 2,
+     "fileCToNetRatio": 0.134571727304185
     }
    ]
   }
@@ -2908,7 +2982,7 @@
  "federalAccount": "089-0319",
  "programActivityCode": "63YPT7SACCY",
  "freshness": {
-  "latestAcceptedAt": "2026-08-24T21:13:37+00:00",
+  "latestAcceptedAt": "2026-09-20T07:49:00+00:00",
   "maxAgeDays": 10
  }
 }

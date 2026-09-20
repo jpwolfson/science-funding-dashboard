@@ -1,7 +1,7 @@
 {
  "schemaVersion": 2,
  "kind": "obligations",
- "generated": "2026-09-17",
+ "generated": "2026-09-20",
  "node": {
   "level": "programActivity",
   "path": "obligations/commerce/noaa-orf/source-label-unavailable-5q0283fwzjm",
@@ -11,26 +11,26 @@
  "source": "USAspending File B and File C",
  "warnings": [],
  "dataComplete": true,
- "netObligationsCents": 0,
- "netObligations": 0.0,
- "awardLinkedObligationsCents": 0,
- "awardLinkedObligations": 0.0,
- "residualObligationsCents": 0,
- "residualObligations": 0.0,
- "grossObligationsCents": 0,
- "grossObligations": 0.0,
+ "netObligationsCents": 165020122,
+ "netObligations": 1650201.22,
+ "awardLinkedObligationsCents": 159439731,
+ "awardLinkedObligations": 1594397.31,
+ "residualObligationsCents": 5580391,
+ "residualObligations": 55803.91,
+ "grossObligationsCents": 165020122,
+ "grossObligations": 1650201.22,
  "deobligationsCents": 0,
  "deobligations": 0.0,
- "distinctLinkedAwards": 0,
- "fileCToNetRatio": null,
- "totalNetObligationsCents": 0,
- "totalNetObligations": 0.0,
- "totalAwardLinkedObligationsCents": 0,
- "totalAwardLinkedObligations": 0.0,
- "totalResidualObligationsCents": 0,
- "totalResidualObligations": 0.0,
+ "distinctLinkedAwards": 2,
+ "fileCToNetRatio": 0.9661835724494253,
+ "totalNetObligationsCents": 165020122,
+ "totalNetObligations": 1650201.22,
+ "totalAwardLinkedObligationsCents": 159439731,
+ "totalAwardLinkedObligations": 1594397.31,
+ "totalResidualObligationsCents": 5580391,
+ "totalResidualObligations": 55803.91,
  "currentFY": 2026,
- "asOfPeriod": "FY2026P09",
+ "asOfPeriod": "FY2026P10",
  "reportingPeriods": [
   {
    "submissionPeriod": "FY2017P06",
@@ -1812,6 +1812,23 @@
    "deobligations": 0.0,
    "distinctLinkedAwards": 0,
    "fileCToNetRatio": null
+  },
+  {
+   "submissionPeriod": "FY2026P10",
+   "month": "2026-07",
+   "status": "reported",
+   "netObligationsCents": 165020122,
+   "netObligations": 1650201.22,
+   "awardLinkedObligationsCents": 159439731,
+   "awardLinkedObligations": 1594397.31,
+   "residualObligationsCents": 5580391,
+   "residualObligations": 55803.91,
+   "grossObligationsCents": 165020122,
+   "grossObligations": 1650201.22,
+   "deobligationsCents": 0,
+   "deobligations": 0.0,
+   "distinctLinkedAwards": 2,
+   "fileCToNetRatio": 0.9661835724494253
   }
  ],
  "fiscalYears": [
@@ -1989,20 +2006,60 @@
   {
    "fy": 2026,
    "partial": true,
-   "netObligationsCents": 0,
-   "netObligations": 0.0,
-   "awardLinkedObligationsCents": 0,
-   "awardLinkedObligations": 0.0,
-   "residualObligationsCents": 0,
-   "residualObligations": 0.0,
-   "grossObligationsCents": 0,
-   "grossObligations": 0.0,
+   "netObligationsCents": 165020122,
+   "netObligations": 1650201.22,
+   "awardLinkedObligationsCents": 159439731,
+   "awardLinkedObligations": 1594397.31,
+   "residualObligationsCents": 5580391,
+   "residualObligations": 55803.91,
+   "grossObligationsCents": 165020122,
+   "grossObligations": 1650201.22,
    "deobligationsCents": 0,
    "deobligations": 0.0,
-   "distinctLinkedAwards": 0,
-   "fileCToNetRatio": null,
-   "topRecipients": [],
-   "positiveFlows": [],
+   "distinctLinkedAwards": 2,
+   "fileCToNetRatio": 0.9661835724494253,
+   "topRecipients": [
+    {
+     "recipientUEI": "TUHBZQDC4XW8",
+     "recipient": "SCIENCE & TECHNOLOGY CORPORATION",
+     "netObligationsCents": 88050312,
+     "netObligations": 880503.12,
+     "distinctLinkedAwards": 1
+    },
+    {
+     "recipientUEI": "J1XXMCNMM386",
+     "recipient": "FREEDOM TECHNOLOGIES, INCORPORATED",
+     "netObligationsCents": 71389419,
+     "netObligations": 713894.19,
+     "distinctLinkedAwards": 1
+    }
+   ],
+   "positiveFlows": [
+    {
+     "id": "3592aec5db69a4dd1b83409d9941eea5be3bdbadbb8d7bbe8e99412b0e87c799",
+     "awardId": "CONT_AWD_1332KP25F0008_1330_1305M423DNEEA0016_1330",
+     "title": "ENVIRONMENTAL SATELLITE RADIO FREQUENCY (RF) ENGINEERING SUPPORT SERVICES",
+     "recipient": "SCIENCE & TECHNOLOGY CORPORATION",
+     "amountCents": 88050312,
+     "amount": 880503.12,
+     "netAmountCents": 88050312,
+     "netAmount": 880503.12,
+     "submissionPeriod": "FY2026P10",
+     "awardUrl": "https://www.usaspending.gov/award/CONT_AWD_1332KP25F0008_1330_1305M423DNEEA0016_1330/"
+    },
+    {
+     "id": "733d3fe974a6366e2b35121561c82605b04f164331b07e10138084de3a7ee642",
+     "awardId": "CONT_AWD_1305M426F0065_1330_GS00F013CA_4732",
+     "title": "FY26 RADIO FREQUENCY MANAGEMENT DIVISION (RFMD) SPECTRUM MANAGEMENT ENGINEERING AND TECHNICAL SUPPORT",
+     "recipient": "FREEDOM TECHNOLOGIES, INCORPORATED",
+     "amountCents": 71389419,
+     "amount": 713894.19,
+     "netAmountCents": 71389419,
+     "netAmount": 713894.19,
+     "submissionPeriod": "FY2026P10",
+     "awardUrl": "https://www.usaspending.gov/award/CONT_AWD_1305M426F0065_1330_GS00F013CA_4732/"
+    }
+   ],
    "negativeFlows": []
   }
  ],
@@ -2920,6 +2977,23 @@
      "deobligations": 0.0,
      "distinctLinkedAwards": 0,
      "fileCToNetRatio": null
+    },
+    {
+     "d": 303,
+     "submissionPeriod": "FY2026P10",
+     "status": "reported",
+     "netObligationsCents": 165020122,
+     "netObligations": 1650201.22,
+     "awardLinkedObligationsCents": 159439731,
+     "awardLinkedObligations": 1594397.31,
+     "residualObligationsCents": 5580391,
+     "residualObligations": 55803.91,
+     "grossObligationsCents": 165020122,
+     "grossObligations": 1650201.22,
+     "deobligationsCents": 0,
+     "deobligations": 0.0,
+     "distinctLinkedAwards": 2,
+     "fileCToNetRatio": 0.9661835724494253
     }
    ]
   }
@@ -2928,7 +3002,7 @@
  "federalAccount": "013-1450",
  "programActivityCode": "5Q0283FWZJM",
  "freshness": {
-  "latestAcceptedAt": "2026-08-24T13:50:51+00:00",
+  "latestAcceptedAt": "2026-09-20T02:55:42+00:00",
   "maxAgeDays": 10
  }
 }
