@@ -224,30 +224,15 @@ def fixture():
 
 
 class ObligationRetryRecoveryTests(unittest.TestCase):
-    def test_repository_manifest_has_exact_recovery_scope(self):
+    def test_repository_carries_no_retry_manifest(self):
+        """The retry manifest is a temporary, bounded artifact for one failed
+        run (docs/verification-regime.md). The Phase 3.2d remediation retired
+        the last one (run 34141166514) once P10 landed through an ordinary
+        weekly refresh; `main` must not carry a manifest, so every validator
+        hatch it activates stays inert."""
         repo = Path(__file__).resolve().parent.parent
-        manifest = json.loads(
-            (repo / "reference" / "obligation_retry_recovery.json").read_text()
-        )
-        RetryRecovery(repo, manifest, lambda _: b"")
-        self.assertEqual(RUN_ID, manifest["workflowRunId"])
-        self.assertEqual(EVIDENCE_SHA, manifest["evidenceCommit"])
-        self.assertEqual(9, len(manifest["preservedArtifacts"]))
-        self.assertEqual(8, len(manifest["rawEvidence"]))
-        self.assertEqual(1, len(manifest["normalizedPartitions"]))
-        self.assertEqual([{
-            "accountPath": "dhs/cwmd-rd",
-            "fiscalYear": 2026,
-            "pin": CWMD_P10_PIN,
-        }], manifest["baselinePins"])
-        baseline = json.loads(
-            (repo / "reference" / "dhs_cwmd_rd_obligation_baseline.json").read_text()
-        )
-        self.assertEqual(CWMD_P10_PIN, baseline["fiscalYears"]["2026"])
-        self.assertEqual(
-            CWMD_P10_PIN["obligationsCents"]
-            - CWMD_P10_PIN["fileBObligationsCents"],
-            CWMD_P10_PIN["fileAFileBVarianceCents"],
+        self.assertFalse(
+            (repo / "reference" / "obligation_retry_recovery.json").exists()
         )
 
     def test_manifest_is_inert_outside_exact_retry(self):
