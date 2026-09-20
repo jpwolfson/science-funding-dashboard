@@ -106,10 +106,35 @@ manifests, provenance, hashes, and diffs remain in Git.
 
 Before polling an accepted asynchronous request, the puller writes an exact
 schema-v1 resume handoff into the raw-artifact directory. A finished download
-replaces that handoff with the source ZIP; a timeout leaves the handoff in the
-14-day raw artifact. A reviewed handoff may be committed temporarily as
-`reference/obligation_download_resumes.json` so a bounded retry resumes the
-same accepted request and scope instead of submitting a duplicate download.
+replaces that handoff with the source ZIP; a timeout -- or any interruption
+other than a source-declared terminal failure, including the job's own
+timeout cap killing the process mid-poll -- leaves the handoff in the 14-day
+raw artifact.
+
+A GitHub Actions rerun of a failed pull-account-year job resumes
+automatically, with no manual step: before pulling, the workflow downloads
+the previous attempt's raw artifact (if any) into `_raw_previous`, and
+`pull_obligation_account.py` reads a handoff found there (`--resume-from`,
+defaulted to `_raw_previous` when it exists) exactly as it would a reviewed
+one, validating the echoed request scope (`resume_download`,
+`require_echo=True`) before resuming. Each handoff also records the writing
+run's ID and head SHA; a handoff from the run's own earlier attempt is
+always trusted, but one from any other run is resumed only when its head SHA
+and account/fiscal-year scope also match, and a handoff with no recorded run
+identity is never trusted across runs. The handoff is tried at most once: a
+resumed request the source has since declared failed (or an unrecognized
+terminal status), or one whose scope no longer echoes, falls through to a
+fresh request rather than aborting the job. This closes the failure mode
+where `rerun_failed_jobs` blindly resubmitted a new download from scratch and
+typically hit the adapter's 2 h cap again (ed/ies FY2018: 7 identical
+failures on 2026-09-07; usda/nifa-research-education FY2019: 2 more on
+2026-09-19/20).
+
+A reviewed handoff may still be committed temporarily as
+`reference/obligation_download_resumes.json` so a bounded retry across
+*separate* workflow runs -- not just the current run's next attempt --
+resumes the same accepted request and scope instead of submitting a
+duplicate download; that manual path is unaffected by the automatic one.
 
 ## Dashboard contract
 
