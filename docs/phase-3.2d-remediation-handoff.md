@@ -157,6 +157,30 @@ parallel.
   carrying the offline reaggregation so the fast tier is green on `main`
   before the CI full re-pull is dispatched there.
 
+### Run resilience (owner-agreed 2026-09-20)
+
+Two weekly passes were lost to one job each. W11 made the reconcile
+tolerate a failed rotating-historical re-pull. The owner agreed to two
+further changes, implemented as W12 and W13 after the current-FY custom
+run of 2026-09-20 commits (the reconcile job syncs to the tip of `main`
+before it runs, so nothing merges while that reconcile can be in flight):
+
+- **W12 — per-account atomicity with published staleness.** The
+  invariants that matter are per account; cross-account atomicity only
+  meant one validated tree deploys, which still holds. A current-FY pull
+  that fails no longer vetoes the pass: that account keeps its last
+  accepted snapshot, is recorded `stale` in a committed
+  `data/obligations/refresh_status.json`, passes freshness only because it
+  is marked, and its page carries "Not refreshed since <date>: the most
+  recent scheduled pull for this account did not complete; figures are the
+  last accepted snapshot." An unmarked stale account is still an error.
+- **W13 — resume, don't resubmit.** A download that times out at the
+  adapter's 2 h cap already leaves an exact resume handoff in the raw
+  artifact; the run's next attempt now downloads the previous attempt's
+  raw artifact and resumes the accepted USAspending request (scope echo
+  and head SHA verified, used at most once) instead of submitting a new
+  one that hits the cap again.
+
 ## CI runs (filled as they happen)
 
 | When | Workflow / ref | Purpose | Result |
