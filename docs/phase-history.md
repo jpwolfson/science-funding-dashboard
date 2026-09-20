@@ -335,3 +335,100 @@ evidence.
   the FY row. Fixed in `adapters/common.py` by ending the partial year at
   the latest data date; all 511 endpoint series verified exact after
   reaggregation.
+
+## Post-completion review and remediation (started 2026-09-17, soak pending)
+
+Independent review `docs/reviews/2026-09-15-phase-3.2d-independent-review.md`
+found five severity-high defects in the Phase 3.2d operating state (fast
+tier red on `main`, no scheduled refresh green since the DoD merge, retry
+hatches load-bearing rather than temporary, DoD disclosure unpublished,
+fabricated multi-billion-dollar File B period swings) and held Stage 2
+(`docs/display-improvements-ledger.md`) per the regime's sequencing rule.
+Owner decision A (2026-09-17): repair the operating state first, re-review,
+then release Stage 2. Six verbatim owner decisions covering sequencing, the
+not-yet-reported File B period display, the DoD disclosure text, award-root
+and obligation-landing framing text, sentinel-facing language, and NIH
+award-ledger semantics are recorded in
+`docs/phase-3.2d-remediation-brief.md`. One coordinator session ran the
+repair 2026-09-17 → (TBD); the running record, wave plan, CI-run log, and
+per-finding evidence are in `docs/phase-3.2d-remediation-handoff.md`.
+
+**Finding closure:**
+- HIGH-1 (fast tier red on `main`): closed by W1 (#65)/W7 (#67)/W8 (#70).
+  `verify.py --tier fast` PASS on `main` (`Verify main` runs 35253809178,
+  35259203139) and on every PR since; full source-current NIH pull (run
+  35250546983) gives root `totalAwards` 860,636 = `storeIdCount`, NIH
+  721,062 = leaf union, zero warnings; month-shrink rule replaced by
+  id-level invariants (`docs/verification-regime.md`).
+- HIGH-2 (soak gate not met): [SOAK: Update data run <id> <conclusion>;
+  Update obligation ledger run <id> <conclusion>; Update funding-action
+  sentinel run <id> <conclusion>]
+- HIGH-3 (retry hatches permanent): closed by W3 (#68), closeout (#76).
+  Weekly-mode P10 pull (run 35481780814) gave every account a P10 partition;
+  `reference/obligation_retry_recovery.json` deleted in #76;
+  `validate_obligations.py` zero errors, no hatch
+  (`tests/test_obligation_retry_recovery.py` asserts absence).
+- HIGH-4 (DoD disclosure unpublished): closed by W4 (#66). Owner-approved
+  text lives as registry field `interpretationNote` on the six DoD
+  accounts, rendered on every DoD account/PA page and the landing-table DoD
+  row, pinned verbatim by `tests/test_site_contract.py`; deployed 2026-09-17
+  18:30 UTC (run 35250546983). Screenshots:
+  `docs/reviews/evidence-2026-09-17-w4/`.
+- HIGH-5 (fabricated period swings): closed by W3 (#68), W10 (#72), and CI
+  re-pulls. Universal `classify_file_b_periods` acceptance rule plus
+  reporting-span reconciliation and a pin-advancement guard; 165
+  account-years classified, 24 material. Screenshots:
+  `docs/reviews/evidence-2026-09-17-w3/`.
+
+**Engineering changes landed** (one line each, PR numbers per
+`docs/phase-3.2d-remediation-handoff.md`'s CI-run log):
+- NIH ledger (W1 #65, W7 #67, W8 #70): source-current field overwrite,
+  soft-delete exclusions ledger, append-only move ledger, id-count invariant.
+- Publication gates (W2 #63, W6 #64, W9 #71): sentinel/obligation workflows
+  no longer run the NIH suite; structural (not literal) current-FY pin
+  tests; commit-step rebase retry on branch tip.
+- File B acceptance (W3 #68, W10 #72): `notReported` classification + span
+  reconciliation + pin-advancement guard; validator checks re-aligned to
+  `notReported` state.
+- Framing/DoD/sentinel (W4 #66): `interpretationNote`; award-root/obligation
+  coverage text; sentinel gross/net language; clipped sentinel-card layout
+  fixed.
+- Run resilience (W11 #73, W12 #75, W13 #74): reconcile tolerates a failed
+  rotating-historical job; per-account `stale` marking with a rendered
+  note; resumable (not resubmitted) timed-out downloads.
+- Closeout (#76): retry-recovery manifest deleted; absence test added.
+- Confirmed notes: DHS CISA FY2023 P03 and USDA NIFA Integrated Activities
+  FY2022 P02→P03 periodNotes confirmed (branch `claude/rem-dhs-note`); no PR
+  number recorded for these in the handoff.
+
+**Measured outcomes:**
+- NIH: root `totalAwards` 860,636, NIH 721,062 (leaf union), zero warnings,
+  `validate_nih.py --live` green, per-IC gaps 0–3 within tolerance (run
+  35250546983).
+- The 13 account-years the review flagged were re-pulled on CI (runs
+  35520419335, 35528556931, 35535164305, 35538536444): all persistent at
+  the source, not adapter bugs. Six DoD FY2025 accounts and
+  `commerce/nist-its` FY2025 still return a 1-row P11 File B snapshot;
+  NOAA ORF/PAC FY2024 and Air Force RDT&E FY2024 still return near-empty
+  mid-year snapshots — `notReported` with a held cumulative and hollow
+  marker is the permanent public state. Two confirmed real conditions: a
+  DHS CISA FY2023 P03 source over-report corrected at P04, and a genuine
+  small USDA NIFA Integrated Activities FY2022 net deobligation.
+- 165 account-years classified under the File B acceptance rule; 24
+  material.
+- CI: first accepted 53-account obligation snapshot is run 35481780814
+  (2026-09-20, commit `ea328c4a`). Two scheduled weekly passes were lost to
+  single-job failures before resilience landed: 2026-09-18 (reconcile
+  failed on `doe/sc`/`doe/fossil-energy` FY2026 P10 validator
+  misalignment, fixed by W10 #72) and 2026-09-19
+  (`usda/nifa-research-education` FY2019 rotating-historical download hit
+  the adapter's 2h cap twice, tolerated going forward by W11 #73).
+
+**Explicitly out of scope (operational follow-ups):**
+- Rotating-historical account-years hitting the 2h download cap (`ed/ies`
+  FY2018, `usda/nifa-research-education` FY2019) are not remediation items:
+  W11 (#73) tolerates their failure, W13 (#74) makes the retry resume
+  rather than resubmit. Landing them is ordinary rotation.
+- Stage 2 (`docs/display-improvements-ledger.md`) stays held until the
+  HIGH-2 soak placeholder above is filled and the review's mechanical
+  tiers are re-run.
