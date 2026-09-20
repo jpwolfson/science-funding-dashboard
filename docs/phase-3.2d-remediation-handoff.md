@@ -220,6 +220,8 @@ before it runs, so nothing merges while that reconcile can be in flight):
 | 2026-09-20 15:42–18:04 UTC | run 35520419335 (custom FY2025, six DoD + nist-its) | **SUCCESS**, snapshot `6a0a1733`. Source still returns a 1-row P11 File B snapshot for all six DoD accounts (P10 213–335 rows, P11 = 1, P12 217–342): a persistent source defect, so P11 stays `notReported` by rule and the held cumulative + hollow marker is the permanent public state. `commerce/nist-its` P11 returns 62 rows (= P10 = P12). W12 (#75) merged after this run. | green |
 | 2026-09-20 18:17–19:30 UTC | run 35528556931 (custom FY2024: noaa-orf, noaa-pac, air-force-rdte) | **SUCCESS**, snapshot `a31611e7`. Source unchanged: NOAA ORF rows P02..P12 = 0,0,6,6,5,10,9,0,0,0,551 and NOAA PAC 0,0,1,1,2,6,4,0,0,0,204 (P02–P11 `notReported`, P12 reported); Air Force RDT&E 195,203,182,29,32,32,34,35,35,221,222 (P05–P10 `notReported`). Persistent source stubs; classification is the permanent state. | green |
 | 2026-09-20 20:20 UTC | FY2023 custom re-pull dispatched (`dhs/cisa-rd`, P12) | Tests the provisional P04 periodNote (full rows, collapsed dollars) | running |
+| 2026-09-20 20:19–20:51 UTC | run 35535164305 (custom FY2023: dhs/cisa-rd) | **SUCCESS**, snapshot `465765cd`. Full rows every period (10–16); P03 reports 1,290,038,168 cents cumulative, above the FY2023 pin (984,707,477), P04 100,000,000 and consistent thereafter: a source over-report at P03 corrected at P04. Provisional periodNote → confirmed (branch `claude/rem-dhs-note`). | green |
+| 2026-09-20 21:25 UTC | FY2022 custom re-pull dispatched (`usda/nifa-integrated-activities`, P12) | Last of the review's 13 affected account-years | running |
 
 ## Finding closure evidence (filled at closeout)
 
