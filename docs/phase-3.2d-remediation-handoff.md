@@ -191,6 +191,75 @@ before it runs, so nothing merges while that reconcile can be in flight):
   account-years; the review's scan counted 13 by criterion (8 exact-zero
   cumulative points + 5 >50 % drops) with overlap. All 12 were re-pulled.
 
+## Post-soak handoff (for a fresh agent, written 2026-09-20 23:00 UTC)
+
+State at handoff: every workstream is merged to `main` (PRs #63–#68,
+#70–#78); the three ledgers each have a green dispatched run on `main`;
+all review-flagged account-years are re-pulled; the closeout manifest is
+gone; the finding table below carries evidence for HIGH-1, HIGH-3, HIGH-4,
+HIGH-5. The mechanical tiers were re-run on the final tree on 2026-09-20
+(`docs/reviews/evidence-2026-09-20/verify-*.json`) and a fresh-agent
+reader review of the touched pages is recorded in
+`docs/reviews/evidence-2026-09-20/reader-review.md`. Draft phase-history
+entry: PR #79 (draft) with a `[SOAK: …]` placeholder in its HIGH-2 line
+and the proposed CLAUDE.md bullet in its body.
+
+What remains is reading the three scheduled soak runs and closing out.
+Do exactly this, in a fresh session, no earlier than Tuesday 2026-09-22
+~16:00 UTC (after the sentinel cron and the obligation run's expected
+end):
+
+1. **Read the three scheduled runs** (event `schedule`, branch `main`):
+   - `Update data`, cron Mon 09:13 UTC (`update-data.yml`). Expect: all
+     87 leaf jobs green in *incremental* mode (this is the first
+     incremental run under the source-current NIH adapter), `rollup` job
+     with `validate_nih.py --live` green, `deploy` green. Read the rollup
+     log's per-IC `live decomposition` lines.
+   - `Update obligation ledger`, cron Mon 10:37 UTC, weekly mode, 106
+     jobs, ~28 h. Expect the reconcile to run even if a rotating-historical
+     job fails (W11) and to commit; read the job summary for `SKIPPED`
+     lines and `data/obligations/refresh_status.json` for any `stale`
+     account (W12). A `stale` account is a published state, not a failure;
+     record which and why. The rotation this ISO week selects FY2020 for
+     most accounts.
+   - `Update funding-action sentinel`, cron Tue 12:17 UTC. Expect green and
+     a committed snapshot.
+   - `Verify main` (`verify-main.yml`) fires after each; confirm PASS and
+     that no `verify-main-failure` issue was filed.
+   Any failure: `get_job_logs failed_only`, diagnose, fix under the same
+   regime (Sonnet worker, PR, fast+rendered evidence), re-dispatch the
+   failed workflow, and count the re-dispatched green run as the soak for
+   that ledger only if the failure was in code merged during this
+   remediation; otherwise the next scheduled run is the soak.
+2. **Fill HIGH-2** in the finding table below and in PR #79's placeholder
+   with the three run IDs and conclusions; add the CI-runs rows.
+3. **Finalize PR #79**: apply the three reconciliations from
+   "Reconciliation of figures cited in this file" (721,056 vs 721,062; 12
+   distinct account-years; PR #77/#78 numbers), mark ready, merge.
+4. **CLAUDE.md**: replace the single status bullet "Phase 3.2d remediation
+   (owner-approved 2026-09-17, in progress)" with the bullet proposed in
+   PR #79's body (checked, terse, pointing to the phase-history entry and
+   this handoff). One edit, one PR. Do not touch anything else in
+   CLAUDE.md.
+5. **Release Stage 2** only after 1–4: change the CLAUDE.md
+   "Display-improvements batch — AFTER 3.2d remediation" bullet's hold
+   wording to state the remediation closed on the date of step 4, in the
+   same PR as step 4.
+6. Do not start Stage 2 work in that session. Report completion to the
+   owner with the three run IDs and the merged PR numbers.
+
+Standing facts the new agent needs:
+- Environment has no egress to federal APIs or to `github.io`; all pulls
+  run on Actions. `list_workflow_jobs` results exceed the tool's output
+  limit for 100-job runs: summarize the saved tool-result file with
+  Python, never read it raw.
+- The reconcile job syncs to the tip of `main` before running scripts;
+  never merge script changes while an obligation reconcile can be in
+  flight.
+- Two account-years reliably hit USAspending's 2 h download cap
+  (`ed/ies` FY2018, `usda/nifa-research-education` FY2019); W11 skips
+  them and W13 resumes on the run's next attempt. Not remediation items.
+
 ## CI runs (filled as they happen)
 
 | When | Workflow / ref | Purpose | Result |
