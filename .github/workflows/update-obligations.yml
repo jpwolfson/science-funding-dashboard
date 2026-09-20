@@ -124,6 +124,21 @@ jobs:
 
   reconcile:
     needs: [plan, pull-account-year]
+    # A 106-job serial matrix means a single rotating-historical re-pull
+    # hitting a transient per-download cap (e.g. usda/nifa-research-education
+    # FY2019 on 2026-09-19, ed/ies FY2018 in run 34141166514) otherwise skips
+    # reconcile entirely and the whole weekly pass commits nothing, even
+    # though the already-committed historical partition is untouched and
+    # loses no data. Only the current fiscal year's atomic all-or-nothing
+    # contract is load-bearing (the freshness SLA and
+    # --require-current-provenance below already fail this job if a
+    # current-FY partition is missing or stale), so reconcile now runs
+    # whenever planning succeeded, regardless of individual pull-job
+    # failures; the missing-partitions step and reconcile script below
+    # enforce the current-FY guarantee explicitly instead of relying on the
+    # matrix job dependency. See docs/obligation-ledger.md, "Refresh,
+    # freshness, and publication".
+    if: ${{ !cancelled() && needs.plan.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
@@ -141,8 +156,45 @@ jobs:
         with:
           pattern: obligation-partition-*
           path: _partitions
+          if-no-files-found: warn
+      - name: Detect account-years missing from this run's partitions
+        env:
+          PLAN_MATRIX: ${{ needs.plan.outputs.matrix }}
+        shell: python
+        run: |
+          import json
+          import os
+          from pathlib import Path
+
+          # A failed pull-account-year job uploads no partition artifact for
+          # its account-year (the upload step never runs after the pull
+          # step fails). Compare the planned matrix against what actually
+          # landed in _partitions and hand the gap to
+          # reconcile_obligation_artifacts.py, which enforces the
+          # current-FY-is-mandatory / rotating-historical-is-tolerated
+          # distinction.
+          plan = json.loads(os.environ["PLAN_MATRIX"])
+          staging = Path("_partitions")
+          missing = []
+          for job in plan["include"]:
+              directory = staging / (
+                  f"obligation-partition-{job['artifact']}-FY{job['fiscalYear']}"
+              )
+              if not directory.is_dir() or not any(directory.iterdir()):
+                  missing.append(job)
+                  print(
+                      f"MISSING partition: {job['account']} FY{job['fiscalYear']} "
+                      f"(purpose={job['purpose']})"
+                  )
+          Path("_missing_partitions.json").write_text(json.dumps(missing))
+          print(
+              f"{len(missing)} of {len(plan['include'])} planned account-years "
+              "have no partition from this run"
+          )
       - name: Reconcile every account into one candidate snapshot
-        run: python scripts/reconcile_obligation_artifacts.py --staging _partitions
+        run: >-
+          python scripts/reconcile_obligation_artifacts.py --staging _partitions
+          --plan _missing_partitions.json
       - name: Validate all account stores, baselines, provenance, freshness, and dashboards
         # --check-freshness/--require-current-provenance are a temporal SLA
         # gate meaningful only right after a live pull (a submission-age

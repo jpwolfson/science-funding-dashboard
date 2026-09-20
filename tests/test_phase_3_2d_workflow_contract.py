@@ -210,3 +210,58 @@ class PushRetryTests(unittest.TestCase):
                     'subprocess.run(["git", "push", "origin", f"HEAD:{branch}"], check=True)',
                     text,
                 )
+
+
+class ReconcileTolerantOfHistoricalPullFailureTests(unittest.TestCase):
+    """Phase 3.2d remediation, W11: a single failed rotating-historical
+    re-pull in the 106-job serial matrix (e.g. usda/nifa-research-education
+    FY2019 on 2026-09-19, ed/ies FY2018 in every attempt of run
+    34141166514) must not skip reconcile and lose the whole weekly pass.
+    Only a missing current-FY partition may still block publication -- see
+    docs/obligation-ledger.md, "Refresh, freshness, and publication"."""
+
+    def setUp(self):
+        self.workflow = (
+            REPO / ".github/workflows/update-obligations.yml"
+        ).read_text()
+
+    def test_reconcile_runs_even_if_a_pull_job_failed(self):
+        reconcile_start = self.workflow.index("  reconcile:")
+        deploy_start = self.workflow.index("  deploy:")
+        reconcile_job = self.workflow[reconcile_start:deploy_start]
+        self.assertIn("needs: [plan, pull-account-year]", reconcile_job)
+        self.assertIn(
+            "if: ${{ !cancelled() && needs.plan.result == 'success' }}",
+            reconcile_job,
+        )
+
+    def test_deploy_still_requires_reconcile_to_succeed(self):
+        deploy_start = self.workflow.index("  deploy:")
+        deploy_job = self.workflow[deploy_start:]
+        self.assertIn("needs: reconcile", deploy_job)
+        # No override here: deploy keeps the default success()-only gate.
+        self.assertNotIn("needs.reconcile.result", deploy_job)
+
+    def test_missing_partitions_are_detected_before_reconciling(self):
+        detect_start = self.workflow.index(
+            "Detect account-years missing from this run's partitions"
+        )
+        reconcile_step = self.workflow.index(
+            "Reconcile every account into one candidate snapshot"
+        )
+        self.assertLess(detect_start, reconcile_step)
+        detection = self.workflow[detect_start:reconcile_step]
+        self.assertIn("needs.plan.outputs.matrix", detection)
+        self.assertIn("_missing_partitions.json", detection)
+        reconcile_call = self.workflow[reconcile_step:]
+        self.assertIn(
+            "reconcile_obligation_artifacts.py --staging _partitions\n"
+            "          --plan _missing_partitions.json",
+            reconcile_call,
+        )
+
+    def test_reconcile_script_distinguishes_current_from_historical_purpose(self):
+        script = (REPO / "scripts/reconcile_obligation_artifacts.py").read_text()
+        self.assertIn('MANDATORY_PURPOSE = "current"', script)
+        self.assertIn("SKIPPED (pull failed)", script)
+        self.assertIn("GITHUB_STEP_SUMMARY", script)

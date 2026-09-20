@@ -3,6 +3,7 @@
 
 import argparse
 import json
+import os
 import shutil
 import sys
 from pathlib import Path
@@ -16,6 +17,101 @@ from adapters.obligation_common import (
 )
 from adapters.funding_sentinel import build as build_sentinel
 from scripts.rollup_obligations import build as build_obligations
+
+# Written by update-obligations.yml's "Detect account-years missing from
+# this run's partitions" step: the planned account-years (or the plan's
+# full "include" matrix) that this run's serial pull matrix did not upload
+# a partition for. Read by default so a plain
+# `reconcile_obligation_artifacts.py --staging _partitions` invocation from
+# the workflow still enforces the current-FY guarantee without an explicit
+# --plan flag; tests and ad hoc invocations pass --plan (or the `plan`
+# keyword argument) explicitly instead.
+DEFAULT_MISSING_PARTITIONS_PATH = Path("_missing_partitions.json")
+
+# Fiscal years pulled to satisfy the account's mandatory current-FY refresh.
+# A missing partition with this purpose fails the reconcile outright, per
+# the atomic all-or-nothing contract in docs/obligation-ledger.md, "Refresh,
+# freshness, and publication". Every other purpose
+# (rotating-historical/historical/custom -- a rotation re-pull of a fiscal
+# year the store already has a committed partition for) loses no data when
+# its re-pull fails, so a missing partition there is skipped and retried by
+# the rotation instead of blocking the whole weekly pass.
+MANDATORY_PURPOSE = "current"
+
+
+def _load_plan_jobs(path):
+    """Load the planned account-year jobs to check for missing partitions.
+
+    ``path`` may point either at a full plan matrix (the JSON
+    ``{"include": [...]}`` object ``scripts/plan_obligation_refresh.py``
+    emits) or at an already-filtered list of missing jobs (the shape
+    ``update-obligations.yml`` writes to ``_missing_partitions.json``).
+    Both shapes carry the same per-job fields (``account``, ``fiscalYear``,
+    ``purpose``, ...), so callers never need to know which one they have.
+    """
+    if path:
+        data = json.loads(Path(path).read_text())
+    elif DEFAULT_MISSING_PARTITIONS_PATH.exists():
+        data = json.loads(DEFAULT_MISSING_PARTITIONS_PATH.read_text())
+    else:
+        return []
+    return data.get("include", []) if isinstance(data, dict) else list(data)
+
+
+def _resolve_missing(plan_jobs, seen):
+    """Planned account-years with no partition among the reconciled set."""
+    return [
+        job for job in plan_jobs
+        if (job["account"], int(job["fiscalYear"])) not in seen
+    ]
+
+
+def _apply_missing_partition_tolerance(missing):
+    """Fail closed on a missing current-FY partition; skip the rest.
+
+    Returns the list of tolerated skips (for the job summary). Raises
+    ``ValueError`` immediately on the first missing mandatory (current-FY)
+    account-year -- the atomic reconcile cannot proceed without it.
+    """
+    skipped = []
+    for job in missing:
+        account, fy = job["account"], int(job["fiscalYear"])
+        purpose = job.get("purpose", MANDATORY_PURPOSE)
+        if purpose == MANDATORY_PURPOSE:
+            raise ValueError(
+                f"{account} FY{fy}: current-FY pull produced no partition; "
+                "the atomic reconcile cannot proceed without it "
+                "(docs/obligation-ledger.md, \"Refresh, freshness, and "
+                "publication\")"
+            )
+        print(
+            f"SKIPPED (pull failed): {account} FY{fy}, committed partition "
+            "retained"
+        )
+        skipped.append({"account": account, "fiscalYear": fy, "purpose": purpose})
+    return skipped
+
+
+def _write_job_summary(skipped):
+    summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
+    if not summary_path:
+        return
+    with open(summary_path, "a", encoding="utf-8") as handle:
+        handle.write("## Obligation reconcile: tolerated pull failures\n\n")
+        if not skipped:
+            handle.write("All planned account-years produced a partition.\n\n")
+            return
+        handle.write(
+            "The committed partition for each account-year below is "
+            "retained unchanged; the weekly rotation will retry it.\n\n"
+        )
+        handle.write("| Account | Fiscal year | Purpose |\n")
+        handle.write("|---|---|---|\n")
+        for job in skipped:
+            handle.write(
+                f"| {job['account']} | FY{job['fiscalYear']} | {job['purpose']} |\n"
+            )
+        handle.write("\n")
 
 
 def _reject_zero_collapse_pin(account_path, fy, current_pin, pin):
@@ -112,7 +208,7 @@ def _preserve_current_complete_pin(account_path, fy, current, artifact,
     return dict(current)
 
 
-def reconcile(staging, repo=REPO):
+def reconcile(staging, repo=REPO, plan=None):
     repo, staging = Path(repo), Path(staging)
     config = json.loads((repo / "config" / "obligation_accounts.json").read_text())
     accounts = {row["path"]: row for row in config["accounts"]}
@@ -196,6 +292,16 @@ def reconcile(staging, repo=REPO):
                 provenance = dict(provenance)
                 provenance["baselinePin"] = pin
             planned.append((account, int(fy), descriptor_path.parent, provenance))
+
+    # A planned account-year with no partition in staging means its pull job
+    # failed (or never uploaded). A missing current-FY partition fails the
+    # reconcile outright -- the atomic all-or-nothing contract is load-
+    # bearing there. A missing rotating-historical/historical/custom
+    # partition loses no data (the committed partition is untouched) and is
+    # tolerated: skipped here and retried by the next rotation.
+    missing = _resolve_missing(plan or [], seen)
+    skipped = _apply_missing_partition_tolerance(missing)
+
     if not planned:
         raise ValueError("no obligation account-year artifacts found")
 
@@ -242,15 +348,24 @@ def reconcile(staging, repo=REPO):
     # Rebuild it inside the same disposable candidate tree so verification
     # and publication can never see a newly live account with stale coverage.
     build_sentinel(repo)
-    return len(planned), sorted(touched)
+    return len(planned), sorted(touched), skipped
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--staging", required=True)
+    parser.add_argument(
+        "--plan",
+        help="Path to the planned account x fiscal-year matrix JSON "
+             "(plan_obligation_refresh.py's {\"include\": [...]} output) or "
+             "an already-filtered missing-jobs list. Defaults to "
+             f"{DEFAULT_MISSING_PARTITIONS_PATH} if present.",
+    )
     args = parser.parse_args()
-    count, accounts = reconcile(args.staging)
+    plan_jobs = _load_plan_jobs(args.plan)
+    count, accounts, skipped = reconcile(args.staging, plan=plan_jobs)
     print(f"Reconciled {count} account-year partitions across {len(accounts)} accounts")
+    _write_job_summary(skipped)
 
 
 if __name__ == "__main__":
