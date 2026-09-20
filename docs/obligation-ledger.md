@@ -313,12 +313,28 @@ that registry: every account refreshes the newest source-available fiscal year
 weekly and reconciles one historical fiscal year on a rotating basis. A full or
 bounded custom plan remains dispatchable.
 
-All account-year jobs must succeed before reconciliation. The reconcile job
-applies every replacement to one candidate tree, updates partial baseline pins,
-rebuilds all manifests and dashboards, validates every registered account, and
-runs the rendered browser matrix. Only that exact validated tree is committed
-and uploaded as the Pages artifact. The ordinary award deployment workflow
-does not independently redeploy obligation-only commits.
+Every current-FY account-year job must still succeed before reconciliation
+publishes; a failed rotating-historical (or full/custom) re-pull job does not
+by itself block reconciliation (see below). The reconcile job applies every
+replacement to one candidate tree, updates partial baseline pins, rebuilds all
+manifests and dashboards, validates every registered account, and runs the
+rendered browser matrix. Only that exact validated tree is committed and
+uploaded as the Pages artifact. The ordinary award deployment workflow does
+not independently redeploy obligation-only commits.
+
+Every account's current-FY partition is still all-or-nothing: the reconcile
+job compares the planned account × fiscal-year matrix against the partitions
+this run actually produced, and a missing current-FY partition fails the
+reconcile outright, exactly as before -- `--check-freshness` and
+`--require-current-provenance` guard the same guarantee independently. A
+failed rotating-historical (or full/custom) re-pull is different: it loses no
+data, because the store's already-committed partition for that fiscal year is
+untouched, so the reconcile job now tolerates it -- it logs the skip, retains
+the committed partition unchanged, and proceeds to publish every other
+account's refresh; the weekly rotation retries that fiscal year on its next
+turn. This distinction, not the pull-job dependency, is what makes one
+transient failure in a 100+-job serial matrix no longer discard the whole
+weekly pass.
 
 Publication deliberately separates runtime data from durable audit evidence.
 `scripts/assemble_pages_site.py` publishes the site shell and every JSON file

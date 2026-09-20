@@ -368,6 +368,16 @@ place that still checks the *whole* committed tree on `main`, on its own
 schedule, without being able to hold up any of the three ledgers' own
 publication.
 
+The reconcile job's `--check-freshness --require-current-provenance` gate is
+unconditional: a missing current-FY partition still fails it exactly as
+before. Phase 3.2d remediation W11 only changes what happens upstream of
+that gate — the job itself now runs even after a rotating-historical
+account-year's pull job failed, and `scripts/reconcile_obligation_artifacts.py`
+skips that missing partition (retaining its committed data untouched) while
+still hard-failing on a missing current-FY partition before this gate ever
+runs. See `docs/obligation-ledger.md`, "Refresh, freshness, and
+publication".
+
 ## Fast-tier addition: File B snapshot acceptance (Phase 3.2d remediation, 2026-09-17)
 
 `validate_obligations.py`, part of the `fast` tier, gained three checks for
