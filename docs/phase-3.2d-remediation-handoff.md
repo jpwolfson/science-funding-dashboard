@@ -217,6 +217,7 @@ before it runs, so nothing merges while that reconcile can be in flight):
 | 2026-09-20 15:40 UTC | PR #74 merged (`a4597fc`) | W13 automatic resume of a timed-out download on the run's next attempt | merged |
 | 2026-09-20 15:50 UTC | PR #76 merged (`1305df1`) | Closeout: `reference/obligation_retry_recovery.json` deleted, ci.yml lint dropped, absence test; `validate_obligations.py` on `ea328c4a` with the manifest absent: **zero errors** | merged |
 | 2026-09-20 15:52 UTC | FY2025 custom re-pull dispatched on `main` (six DoD accounts + commerce/nist-its, P12) | Replaces the empty FY2025 P11 File B snapshots behind HIGH-5 if the source now returns full ones; regenerates those shards under the span rule. W12 (#75) merges after this run completes (the reconcile job syncs to main's tip). | running |
+| 2026-09-20 15:42–18:04 UTC | run 35520419335 (custom FY2025, six DoD + nist-its) | **SUCCESS**, snapshot `6a0a1733`. Source still returns a 1-row P11 File B snapshot for all six DoD accounts (P10 213–335 rows, P11 = 1, P12 217–342): a persistent source defect, so P11 stays `notReported` by rule and the held cumulative + hollow marker is the permanent public state. `commerce/nist-its` P11 returns 62 rows (= P10 = P12). W12 (#75) merged after this run. | green |
 
 ## Finding closure evidence (filled at closeout)
 
