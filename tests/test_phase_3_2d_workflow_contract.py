@@ -300,3 +300,66 @@ class ReconcileTolerantOfHistoricalPullFailureTests(unittest.TestCase):
         self.assertIn("def _write_refresh_status(", script)
         self.assertIn("no partition was produced for any of the", script)
         self.assertIn("all-accounts-stale snapshot", script)
+
+
+class AutomaticResumeWorkflowContractTests(unittest.TestCase):
+    """W13: an automatic same-run resume for a timed-out USAspending
+    download, staged from the previous attempt's raw artifact before the
+    pull step runs. See docs/obligation-ledger.md, "Persistence and
+    corrections"."""
+
+    def setUp(self):
+        self.workflow = (
+            REPO / ".github/workflows/update-obligations.yml"
+        ).read_text()
+        pull_start = self.workflow.index("  pull-account-year:")
+        reconcile_start = self.workflow.index("  reconcile:")
+        self.pull_job = self.workflow[pull_start:reconcile_start]
+
+    def test_previous_attempt_raw_artifact_is_downloaded_before_the_pull_step(self):
+        download_step = self.pull_job.index(
+            "Download the previous attempt's raw artifact for automatic resume"
+        )
+        pull_step = self.pull_job.index(
+            "name: Pull ${{ matrix.account }} FY${{ matrix.fiscalYear }} "
+            "through P${{ matrix.period }}"
+        )
+        self.assertLess(download_step, pull_step)
+        download_block = self.pull_job[download_step:pull_step]
+        self.assertIn("if: ${{ github.run_attempt > 1 }}", download_block)
+        self.assertIn("continue-on-error: true", download_block)
+        self.assertIn("uses: actions/download-artifact@v4", download_block)
+        self.assertIn(
+            "name: obligation-raw-${{ matrix.artifact }}-FY"
+            "${{ matrix.fiscalYear }}-attempt"
+            "${{ steps.previous_attempt.outputs.value }}",
+            download_block,
+        )
+        self.assertIn("path: _raw_previous", download_block)
+
+    def test_previous_attempt_number_is_computed_before_the_download_step(self):
+        compute_step = self.pull_job.index(
+            "Compute the previous attempt number for automatic resume"
+        )
+        download_step = self.pull_job.index(
+            "Download the previous attempt's raw artifact for automatic resume"
+        )
+        self.assertLess(compute_step, download_step)
+        compute_block = self.pull_job[compute_step:download_step]
+        self.assertIn("id: previous_attempt", compute_block)
+        self.assertIn("if: ${{ github.run_attempt > 1 }}", compute_block)
+        self.assertIn("GITHUB_OUTPUT", compute_block)
+
+    def test_pull_step_command_is_unchanged_by_automatic_resume(self):
+        # main() defaults --resume-from to _raw_previous on its own when
+        # that directory exists, so the pull invocation itself needs no
+        # new flag.
+        pull_step = self.pull_job.index(
+            "name: Pull ${{ matrix.account }} FY${{ matrix.fiscalYear }} "
+            "through P${{ matrix.period }}"
+        )
+        next_step = self.pull_job.index(
+            "Retain normalized account-year artifact for reconciliation"
+        )
+        pull_command = self.pull_job[pull_step:next_step]
+        self.assertNotIn("--resume-from", pull_command)

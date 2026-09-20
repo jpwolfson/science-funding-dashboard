@@ -340,6 +340,12 @@ it only on the dedicated `agent/3-2d-retry-artifact-operation` operational
 branch. This path is solely for already-running legacy graphs. Newly dispatched
 runs use attempt-specific raw names and need no cleanup.
 
+Separately, and unconditionally on every run, the pull-account-year job
+stages the previous attempt's raw artifact (if any) into `_raw_previous`
+before pulling, so `pull_obligation_account.py` can resume a same-run
+timeout automatically -- see docs/obligation-ledger.md, "Persistence and
+corrections" -- without waiting for this legacy recovery workflow at all.
+
 ## Workflow-to-gate mapping (Phase 3.2d remediation, W2)
 
 Each ledger's committing workflow runs only the checks that ledger owns.

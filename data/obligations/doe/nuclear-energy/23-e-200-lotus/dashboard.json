@@ -1,7 +1,7 @@
 {
  "schemaVersion": 2,
  "kind": "obligations",
- "generated": "2026-09-17",
+ "generated": "2026-09-20",
  "node": {
   "level": "programActivity",
   "path": "obligations/doe/nuclear-energy/23-e-200-lotus",
@@ -11,26 +11,26 @@
  "source": "USAspending File B and File C",
  "warnings": [],
  "dataComplete": true,
- "netObligationsCents": 9811200000,
- "netObligations": 98112000.0,
+ "netObligationsCents": 6811200000,
+ "netObligations": 68112000.0,
  "awardLinkedObligationsCents": 9811200000,
  "awardLinkedObligations": 98112000.0,
- "residualObligationsCents": 0,
- "residualObligations": 0.0,
+ "residualObligationsCents": -3000000000,
+ "residualObligations": -30000000.0,
  "grossObligationsCents": 10074800000,
  "grossObligations": 100748000.0,
- "deobligationsCents": -263600000,
- "deobligations": -2636000.0,
+ "deobligationsCents": -3263600000,
+ "deobligations": -32636000.0,
  "distinctLinkedAwards": 1,
- "fileCToNetRatio": 1.0,
- "totalNetObligationsCents": 9811200000,
- "totalNetObligations": 98112000.0,
+ "fileCToNetRatio": 1.4404510218463706,
+ "totalNetObligationsCents": 6811200000,
+ "totalNetObligations": 68112000.0,
  "totalAwardLinkedObligationsCents": 9811200000,
  "totalAwardLinkedObligations": 98112000.0,
- "totalResidualObligationsCents": 0,
- "totalResidualObligations": 0.0,
+ "totalResidualObligationsCents": -3000000000,
+ "totalResidualObligations": -30000000.0,
  "currentFY": 2026,
- "asOfPeriod": "FY2026P09",
+ "asOfPeriod": "FY2026P10",
  "reportingPeriods": [
   {
    "submissionPeriod": "FY2017P06",
@@ -1794,6 +1794,23 @@
    "deobligations": 0.0,
    "distinctLinkedAwards": 0,
    "fileCToNetRatio": null
+  },
+  {
+   "submissionPeriod": "FY2026P10",
+   "month": "2026-07",
+   "status": "reported",
+   "netObligationsCents": -3000000000,
+   "netObligations": -30000000.0,
+   "awardLinkedObligationsCents": 0,
+   "awardLinkedObligations": 0.0,
+   "residualObligationsCents": -3000000000,
+   "residualObligations": -30000000.0,
+   "grossObligationsCents": 0,
+   "grossObligations": 0.0,
+   "deobligationsCents": -3000000000,
+   "deobligations": -30000000.0,
+   "distinctLinkedAwards": 0,
+   "fileCToNetRatio": -0.0
   }
  ],
  "fiscalYears": [
@@ -2131,18 +2148,18 @@
   {
    "fy": 2026,
    "partial": true,
-   "netObligationsCents": 3000000000,
-   "netObligations": 30000000.0,
+   "netObligationsCents": 0,
+   "netObligations": 0.0,
    "awardLinkedObligationsCents": 3000000000,
    "awardLinkedObligations": 30000000.0,
-   "residualObligationsCents": 0,
-   "residualObligations": 0.0,
+   "residualObligationsCents": -3000000000,
+   "residualObligations": -30000000.0,
    "grossObligationsCents": 3000000000,
    "grossObligations": 30000000.0,
-   "deobligationsCents": 0,
-   "deobligations": 0.0,
+   "deobligationsCents": -3000000000,
+   "deobligations": -30000000.0,
    "distinctLinkedAwards": 1,
-   "fileCToNetRatio": 1.0,
+   "fileCToNetRatio": null,
    "topRecipients": [
     {
      "recipientUEI": "HG7XL5RBNX55",
@@ -3105,6 +3122,23 @@
      "deobligations": 0.0,
      "distinctLinkedAwards": 1,
      "fileCToNetRatio": 1.0
+    },
+    {
+     "d": 303,
+     "submissionPeriod": "FY2026P10",
+     "status": "reported",
+     "netObligationsCents": 0,
+     "netObligations": 0.0,
+     "awardLinkedObligationsCents": 3000000000,
+     "awardLinkedObligations": 30000000.0,
+     "residualObligationsCents": -3000000000,
+     "residualObligations": -30000000.0,
+     "grossObligationsCents": 3000000000,
+     "grossObligations": 30000000.0,
+     "deobligationsCents": -3000000000,
+     "deobligations": -30000000.0,
+     "distinctLinkedAwards": 1,
+     "fileCToNetRatio": null
     }
    ]
   }
@@ -3113,7 +3147,7 @@
  "federalAccount": "089-0319",
  "programActivityCode": "0051",
  "freshness": {
-  "latestAcceptedAt": "2026-08-24T21:13:37+00:00",
+  "latestAcceptedAt": "2026-09-20T07:49:00+00:00",
   "maxAgeDays": 10
  }
 }

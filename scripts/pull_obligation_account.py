@@ -4,6 +4,7 @@
 import argparse
 import hashlib
 import json
+import os
 import shutil
 import sys
 from datetime import datetime, timezone
@@ -79,54 +80,138 @@ def _resume_handoff_path(raw_archive_dir, account, fy, period, kind):
     )
 
 
-def _write_resume_handoff(path, account, fy, period, kind, request):
+def _write_resume_handoff(path, account, fy, period, kind, request,
+                          run_identity=None):
     if path is None:
         return
     path.parent.mkdir(parents=True, exist_ok=True)
-    value = {
-        "schemaVersion": 1,
-        "requests": [{
-            "account": account["path"],
-            "fiscalYear": fy,
-            "period": period,
-            "submissionType": kind,
-            "result": request,
-        }],
+    row = {
+        "account": account["path"],
+        "fiscalYear": fy,
+        "period": period,
+        "submissionType": kind,
+        "result": request,
     }
+    # runId/headSha are recorded only when known (the automatic same-run
+    # resume path supplies them) so a manually authored handoff, or one
+    # written outside a workflow run, keeps its historical exact shape.
+    if run_identity:
+        if run_identity.get("runId") is not None:
+            row["runId"] = run_identity["runId"]
+        if run_identity.get("headSha") is not None:
+            row["headSha"] = run_identity["headSha"]
+    value = {"schemaVersion": 1, "requests": [row]}
     path.write_text(json.dumps(value, indent=1, sort_keys=True) + "\n")
 
 
-def _download(repo, account, account_id, fy, period, kind, columns,
-              raw_archive_dir=None, recovery=None):
-    if recovery:
-        recovered = recovery.recover_raw(
-            account, account_id, fy, period, kind, columns, raw_archive_dir
-        )
-        if recovered is not None:
-            return recovered
-    print(f"requesting FY{fy} P{period:02} {kind}", flush=True)
-    recovery_result = recovery.resume_result(
-        account, account_id, fy, period, kind
-    ) if recovery else None
-    resumed = (
-        resume_download(
-            account_id, fy, period, kind, columns, recovery_result
-        ) if recovery_result else _resume_request(
-            repo, account, account_id, fy, period, kind, columns
-        )
+def run_identity_from_environ(environ=None):
+    """This process's run identity, for handoff provenance and matching.
+
+    Returns ``None`` outside a workflow run (no ``GITHUB_RUN_ID``/
+    ``GITHUB_SHA``), which disables the run/head-SHA guard entirely --
+    the same behavior as before this feature existed.
+    """
+    env = os.environ if environ is None else environ
+    run_id = env.get("GITHUB_RUN_ID")
+    head_sha = env.get("GITHUB_SHA")
+    if run_id is None and head_sha is None:
+        return None
+    return {"runId": run_id, "headSha": head_sha}
+
+
+def _load_resume_handoffs(resume_from):
+    """Load every schema-v1 resume handoff file under ``resume_from``.
+
+    Each file is the exact shape ``_write_resume_handoff`` produces: one
+    request per file, keyed by (account, fiscalYear, period,
+    submissionType). This is a second source of handoffs alongside the
+    single reviewed ``reference/obligation_download_resumes.json``
+    manifest that ``_resume_request`` reads, validated identically.
+    """
+    directory = Path(resume_from)
+    handoffs = {}
+    if not directory.is_dir():
+        return handoffs
+    for path in sorted(directory.glob("obligation-download-resume-*.json")):
+        document = json.loads(path.read_text())
+        if document.get("schemaVersion") != 1:
+            raise ValueError(
+                f"{path}: obligation download resume handoff must be schema v1"
+            )
+        requests = document.get("requests")
+        if not isinstance(requests, list):
+            raise ValueError(
+                f"{path}: obligation download resume handoff requests "
+                "must be a list"
+            )
+        for row in requests:
+            key = (row.get("account"), row.get("fiscalYear"),
+                   row.get("period"), row.get("submissionType"))
+            if key in handoffs:
+                raise ValueError(
+                    f"duplicate automatic obligation download resume "
+                    f"handoff for {key}"
+                )
+            handoffs[key] = row
+    return handoffs
+
+
+def _resume_handoff_matches_run(row, run_identity, account, fy):
+    """Reject a handoff that cannot be trusted to describe this pull.
+
+    A handoff from the same workflow run (the ordinary next-attempt case)
+    is always trusted. One from a different run is trusted only when it
+    also records the same head SHA and the same account/fiscal-year
+    scope; anything else -- including a handoff with no recorded run
+    identity at all -- is rejected rather than resumed. Passing
+    ``run_identity=None`` (no workflow run context) disables the check
+    entirely, matching this repo's other run-identity guards.
+    """
+    if run_identity is None:
+        return True
+    if row.get("runId") is not None and row.get("runId") == run_identity.get("runId"):
+        return True
+    head_sha = run_identity.get("headSha")
+    return (
+        head_sha is not None
+        and row.get("headSha") == head_sha
+        and row.get("account") == account["path"]
+        and row.get("fiscalYear") == fy
     )
-    if resumed:
-        print(f"resuming accepted FY{fy} P{period:02} {kind}", flush=True)
-        request, request_scope = resumed
-    else:
-        request, request_scope = request_download(
-            account_id, fy, period, kind, columns
+
+
+def _auto_resume(account, account_id, fy, period, kind, columns,
+                 resume_handoffs, run_identity):
+    row = resume_handoffs.get((account["path"], fy, period, kind))
+    if not row:
+        return None
+    if not _resume_handoff_matches_run(row, run_identity, account, fy):
+        print(
+            f"ignoring automatic resume handoff for {account['path']} "
+            f"FY{fy} P{period:02} {kind}: run/head SHA/account mismatch",
+            flush=True,
         )
+        return None
+    result = row.get("result")
+    if not isinstance(result, dict):
+        return None
+    try:
+        return resume_download(account_id, fy, period, kind, columns, result)
+    except ValueError as error:
+        print(
+            f"automatic resume handoff rejected for {account['path']} "
+            f"FY{fy} P{period:02} {kind}: {error}", flush=True,
+        )
+        return None
+
+
+def _finish(account, fy, period, kind, raw_archive_dir, request,
+           request_scope, run_identity=None):
     handoff_path = _resume_handoff_path(
         raw_archive_dir, account, fy, period, kind
     )
     _write_resume_handoff(
-        handoff_path, account, fy, period, kind, request
+        handoff_path, account, fy, period, kind, request, run_identity
     )
     try:
         payload, status = finish_download(request)
@@ -167,6 +252,68 @@ def _download(repo, account, account_id, fy, period, kind, columns,
     }
     print(f"accepted FY{fy} P{period:02} {kind}: {parsed:,} rows", flush=True)
     return members, audit
+
+
+def _download(repo, account, account_id, fy, period, kind, columns,
+              raw_archive_dir=None, recovery=None, resume_handoffs=None,
+              run_identity=None):
+    if recovery:
+        recovered = recovery.recover_raw(
+            account, account_id, fy, period, kind, columns, raw_archive_dir
+        )
+        if recovered is not None:
+            return recovered
+    print(f"requesting FY{fy} P{period:02} {kind}", flush=True)
+    recovery_result = recovery.resume_result(
+        account, account_id, fy, period, kind
+    ) if recovery else None
+
+    if resume_handoffs and not recovery_result:
+        auto_resumed = _auto_resume(
+            account, account_id, fy, period, kind, columns,
+            resume_handoffs, run_identity,
+        )
+        if auto_resumed is not None:
+            request, request_scope = auto_resumed
+            print(
+                f"resuming accepted FY{fy} P{period:02} {kind} "
+                "(automatic, previous attempt)", flush=True,
+            )
+            try:
+                return _finish(
+                    account, fy, period, kind, raw_archive_dir,
+                    request, request_scope, run_identity,
+                )
+            except (RuntimeError, ValueError) as error:
+                # The handoff is used at most once: a resumed request the
+                # source has since declared failed (or an unrecognized
+                # terminal state), or one that a defensive check has just
+                # rejected, is not retried as-is. Fall through exactly as
+                # if no automatic handoff had matched.
+                print(
+                    f"automatic resume for FY{fy} P{period:02} {kind} did "
+                    f"not finish cleanly ({error}); requesting a fresh "
+                    "download", flush=True,
+                )
+
+    resumed = (
+        resume_download(
+            account_id, fy, period, kind, columns, recovery_result
+        ) if recovery_result else _resume_request(
+            repo, account, account_id, fy, period, kind, columns
+        )
+    )
+    if resumed:
+        print(f"resuming accepted FY{fy} P{period:02} {kind}", flush=True)
+        request, request_scope = resumed
+    else:
+        request, request_scope = request_download(
+            account_id, fy, period, kind, columns
+        )
+    return _finish(
+        account, fy, period, kind, raw_archive_dir, request, request_scope,
+        run_identity,
+    )
 
 
 def _baseline_pin(repo, account, fy, last_period, file_b_total,
@@ -359,9 +506,11 @@ def _export_skipped_partition(account, years, destination):
 
 
 def pull(account, years, current_period=12, repo=REPO, rollup=True,
-         raw_archive_dir=None, partition_output=None):
+         raw_archive_dir=None, partition_output=None, resume_from=None,
+         run_identity=None):
     repo = Path(repo)
     years = list(years)
+    resume_handoffs = _load_resume_handoffs(resume_from) if resume_from else {}
     recovery = load_retry_recovery(repo)
     if recovery and recovery.restore_partition(
         account, years, partition_output
@@ -420,6 +569,7 @@ def pull(account, years, current_period=12, repo=REPO, rollup=True,
                 repo, account, account_id, fy, period,
                 "object_class_program_activity",
                 FILE_B_COLUMNS, raw_archive_dir, recovery,
+                resume_handoffs, run_identity,
             )
             downloads.append(download)
             rows = [row for part in members.values() for row in part]
@@ -446,7 +596,7 @@ def pull(account, years, current_period=12, repo=REPO, rollup=True,
         c_members, download = _download(
             repo, account, account_id, fy, last_period, "award_financial",
             FILE_C_COLUMNS, raw_archive_dir,
-            recovery,
+            recovery, resume_handoffs, run_identity,
         )
         downloads.append(download)
         file_c = parse_file_c(c_members, account["federalAccount"], aliases)
@@ -510,14 +660,28 @@ def main():
     parser.add_argument("--no-rollup", action="store_true")
     parser.add_argument("--raw-archive-dir")
     parser.add_argument("--partition-output")
+    parser.add_argument(
+        "--resume-from",
+        help=(
+            "Directory of schema-v1 resume handoffs (as written into a "
+            "prior attempt's raw-artifact dir) to try before requesting a "
+            "fresh download. Defaults to _raw_previous when that directory "
+            "exists, so a workflow that stages the previous attempt's raw "
+            "artifact there needs no explicit flag."
+        ),
+    )
     args = parser.parse_args()
     config = json.loads((REPO / "config" / "obligation_accounts.json").read_text())
     account = next((a for a in config["accounts"] if a["path"] == args.account), None)
     if not account:
         raise SystemExit(f"unknown obligation account {args.account}")
+    resume_from = args.resume_from
+    if resume_from is None and Path("_raw_previous").is_dir():
+        resume_from = "_raw_previous"
     pull(account, range(args.from_fy, args.to_fy + 1), args.current_period,
          rollup=not args.no_rollup, raw_archive_dir=args.raw_archive_dir,
-         partition_output=args.partition_output)
+         partition_output=args.partition_output, resume_from=resume_from,
+         run_identity=run_identity_from_environ())
 
 
 if __name__ == "__main__":

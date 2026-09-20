@@ -90,6 +90,28 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Compute the previous attempt number for automatic resume
+        id: previous_attempt
+        if: ${{ github.run_attempt > 1 }}
+        run: echo "value=$(( ${{ github.run_attempt }} - 1 ))" >> "$GITHUB_OUTPUT"
+      - name: Download the previous attempt's raw artifact for automatic resume
+        # A rerun of a failed matrix job shares one workflow run with a
+        # higher attempt number. If the previous attempt's account-year
+        # download timed out inside the adapter's 2 h cap, it wrote an
+        # exact resume handoff into that attempt's raw-artifact upload
+        # (see docs/obligation-ledger.md, "Persistence and corrections").
+        # Staging it at _raw_previous lets pull_obligation_account.py
+        # resume the same accepted request instead of submitting a
+        # duplicate download that is likely to hit the same cap again.
+        # continue-on-error: true because there may be no such artifact --
+        # a first attempt, one that never reached the timeout handoff, or
+        # one that finished cleanly all leave nothing to download.
+        if: ${{ github.run_attempt > 1 }}
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: obligation-raw-${{ matrix.artifact }}-FY${{ matrix.fiscalYear }}-attempt${{ steps.previous_attempt.outputs.value }}
+          path: _raw_previous
       - name: Pull ${{ matrix.account }} FY${{ matrix.fiscalYear }} through P${{ matrix.period }}
         run: |
           python scripts/pull_obligation_account.py \

@@ -157,6 +157,30 @@ parallel.
   carrying the offline reaggregation so the fast tier is green on `main`
   before the CI full re-pull is dispatched there.
 
+### Run resilience (owner-agreed 2026-09-20)
+
+Two weekly passes were lost to one job each. W11 made the reconcile
+tolerate a failed rotating-historical re-pull. The owner agreed to two
+further changes, implemented as W12 and W13 after the current-FY custom
+run of 2026-09-20 commits (the reconcile job syncs to the tip of `main`
+before it runs, so nothing merges while that reconcile can be in flight):
+
+- **W12 — per-account atomicity with published staleness.** The
+  invariants that matter are per account; cross-account atomicity only
+  meant one validated tree deploys, which still holds. A current-FY pull
+  that fails no longer vetoes the pass: that account keeps its last
+  accepted snapshot, is recorded `stale` in a committed
+  `data/obligations/refresh_status.json`, passes freshness only because it
+  is marked, and its page carries "Not refreshed since <date>: the most
+  recent scheduled pull for this account did not complete; figures are the
+  last accepted snapshot." An unmarked stale account is still an error.
+- **W13 — resume, don't resubmit.** A download that times out at the
+  adapter's 2 h cap already leaves an exact resume handoff in the raw
+  artifact; the run's next attempt now downloads the previous attempt's
+  raw artifact and resumes the accepted USAspending request (scope echo
+  and head SHA verified, used at most once) instead of submitting a new
+  one that hits the cap again.
+
 ## CI runs (filled as they happen)
 
 | When | Workflow / ref | Purpose | Result |
@@ -189,6 +213,8 @@ parallel.
 | 2026-09-19 23:22 UTC | run 35398624617 attempt 1 | 105/106 pulls green; `usda/nifa-research-education` FY2019 (rotating historical) failed after 2 h 12 min — the adapter's per-download 2 h cap; reconcile skipped. Recovery: `rerun_failed_jobs` (attempt 2 on the same commit; the 105 partition artifacts persist in the run). | rerun |
 | 2026-09-20 00:50 UTC | PR #73 merged | W11: the reconcile job now runs when the matrix has failures; a missing current-FY partition still fails the pass (freshness + current-provenance gate), a missing rotating-historical partition is skipped with the committed partition retained and listed in the job summary. Protects Monday's scheduled soak run from the 2 h download cap on one historical account-year. Attempt 2 of run 35398624617 (rerun of the single failed pull) still in progress. | merged |
 | 2026-09-20 01:40 UTC | run 35398624617 attempt 2 failed identically (`usda/nifa-research-education` FY2019, 2 h 10 min, download cap); custom run dispatched on `main`: mode=custom, accounts=all, FY2026 only, current_period=10 (53 jobs, ~13 h) | The current-FY set is what the freshness gate requires; the stalled FY2019 historical re-pull is left to the rotation (W11 now tolerates its failure). Reconcile expected ~15:00 UTC 2026-09-20. | running |
+| 2026-09-20 01:35–15:35 UTC | run 35481780814 (custom, FY2026 P10, 53 accounts) | **SUCCESS** — 53/53 pulls, reconcile validated (W10 rule held: `doe/sc` and `doe/fossil-energy` P10 `notReported`, pins at P09), atomic snapshot committed (`ea328c4a`, 976 files), Pages deployed. First accepted 53-account obligation snapshot; freshness restored for every account; `dhs/cwmd-rd` FY2026 store now reaches its P10 pin. | green |
+| 2026-09-20 15:40 UTC | PR #74 merged (`a4597fc`) | W13 automatic resume of a timed-out download on the run's next attempt | merged |
 
 ## Finding closure evidence (filled at closeout)
 
