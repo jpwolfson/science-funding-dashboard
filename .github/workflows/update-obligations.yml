@@ -124,20 +124,23 @@ jobs:
 
   reconcile:
     needs: [plan, pull-account-year]
-    # A 106-job serial matrix means a single rotating-historical re-pull
-    # hitting a transient per-download cap (e.g. usda/nifa-research-education
-    # FY2019 on 2026-09-19, ed/ies FY2018 in run 34141166514) otherwise skips
-    # reconcile entirely and the whole weekly pass commits nothing, even
-    # though the already-committed historical partition is untouched and
-    # loses no data. Only the current fiscal year's atomic all-or-nothing
-    # contract is load-bearing (the freshness SLA and
-    # --require-current-provenance below already fail this job if a
-    # current-FY partition is missing or stale), so reconcile now runs
-    # whenever planning succeeded, regardless of individual pull-job
-    # failures; the missing-partitions step and reconcile script below
-    # enforce the current-FY guarantee explicitly instead of relying on the
-    # matrix job dependency. See docs/obligation-ledger.md, "Refresh,
-    # freshness, and publication".
+    # A 106-job serial matrix means a single account-year re-pull hitting a
+    # transient failure (e.g. usda/nifa-research-education FY2019 on
+    # 2026-09-19, ed/ies FY2018 in run 34141166514, or a current-FY pull
+    # hitting the same cap) otherwise skips reconcile entirely and the whole
+    # weekly pass commits nothing, even though every other account's
+    # already-committed partition is untouched and loses no data. Per-account
+    # atomicity (Phase 3.2d remediation W12) tolerates a missing partition of
+    # ANY purpose -- current-FY included -- the same way: skip it, retain the
+    # committed data, and publish that one account as disclosed-stale in
+    # data/obligations/refresh_status.json instead of discarding every other
+    # account's fresh refresh. reconcile now runs whenever planning
+    # succeeded, regardless of individual pull-job failures; the
+    # missing-partitions step and reconcile script below compute the actual
+    # gap and apply this tolerance instead of relying on the matrix job
+    # dependency. The only remaining hard failure is every planned
+    # account-year coming up missing at once. See docs/obligation-ledger.md,
+    # "Refresh, freshness, and publication".
     if: ${{ !cancelled() && needs.plan.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -168,11 +171,15 @@ jobs:
 
           # A failed pull-account-year job uploads no partition artifact for
           # its account-year (the upload step never runs after the pull
-          # step fails). Compare the planned matrix against what actually
-          # landed in _partitions and hand the gap to
-          # reconcile_obligation_artifacts.py, which enforces the
-          # current-FY-is-mandatory / rotating-historical-is-tolerated
-          # distinction.
+          # step fails). This step only prints diagnostics for the log; the
+          # FULL planned matrix (not a pre-filtered missing subset) is
+          # handed to reconcile_obligation_artifacts.py, which re-derives
+          # the same gap against the partitions it actually staged and
+          # tolerates every purpose (current-FY included) the same way:
+          # skip, retain the committed partition, and publish per-account
+          # staleness instead of failing the whole reconcile. See
+          # docs/obligation-ledger.md, "Refresh, freshness, and
+          # publication" (Phase 3.2d remediation W12).
           plan = json.loads(os.environ["PLAN_MATRIX"])
           staging = Path("_partitions")
           missing = []
@@ -186,7 +193,9 @@ jobs:
                       f"MISSING partition: {job['account']} FY{job['fiscalYear']} "
                       f"(purpose={job['purpose']})"
                   )
-          Path("_missing_partitions.json").write_text(json.dumps(missing))
+          Path("_missing_partitions.json").write_text(
+              json.dumps({"include": plan["include"]})
+          )
           print(
               f"{len(missing)} of {len(plan['include'])} planned account-years "
               "have no partition from this run"

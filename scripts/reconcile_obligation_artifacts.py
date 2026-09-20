@@ -6,14 +6,16 @@ import json
 import os
 import shutil
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
 from adapters.obligation_common import (
-    baseline_file_b_cents, baseline_pin_problems, file_sha256, load_store,
-    rebuild_manifest, write_partition_provenance,
+    baseline_file_b_cents, baseline_pin_problems, file_sha256,
+    load_partition_provenance, load_store, rebuild_manifest,
+    write_partition_provenance,
 )
 from adapters.funding_sentinel import build as build_sentinel
 from scripts.rollup_obligations import build as build_obligations
@@ -28,15 +30,18 @@ from scripts.rollup_obligations import build as build_obligations
 # keyword argument) explicitly instead.
 DEFAULT_MISSING_PARTITIONS_PATH = Path("_missing_partitions.json")
 
-# Fiscal years pulled to satisfy the account's mandatory current-FY refresh.
-# A missing partition with this purpose fails the reconcile outright, per
-# the atomic all-or-nothing contract in docs/obligation-ledger.md, "Refresh,
-# freshness, and publication". Every other purpose
-# (rotating-historical/historical/custom -- a rotation re-pull of a fiscal
-# year the store already has a committed partition for) loses no data when
-# its re-pull fails, so a missing partition there is skipped and retried by
-# the rotation instead of blocking the whole weekly pass.
+# Fiscal years pulled to satisfy the account's current-FY refresh. Used to
+# identify, from the plan, which fiscal year is "the" current year for each
+# account when building data/obligations/refresh_status.json (see
+# _current_fy_plan_by_account below). A missing partition with this purpose
+# no longer fails the whole reconcile (Phase 3.2d remediation W12): it is
+# tolerated exactly like a missing historical partition -- skipped, its
+# committed data retained, and published as a disclosed per-account stale
+# state instead of discarding every other account's fresh data. See
+# docs/obligation-ledger.md, "Refresh, freshness, and publication".
 MANDATORY_PURPOSE = "current"
+
+REFRESH_STATUS_PATH = Path("data") / "obligations" / "refresh_status.json"
 
 
 def _load_plan_jobs(path):
@@ -66,30 +71,131 @@ def _resolve_missing(plan_jobs, seen):
     ]
 
 
-def _apply_missing_partition_tolerance(missing):
-    """Fail closed on a missing current-FY partition; skip the rest.
+def _apply_missing_partition_tolerance(missing, plan_total):
+    """Skip every missing account-year, current or historical.
 
-    Returns the list of tolerated skips (for the job summary). Raises
-    ``ValueError`` immediately on the first missing mandatory (current-FY)
-    account-year -- the atomic reconcile cannot proceed without it.
+    Returns the list of tolerated skips (for the job summary and
+    ``refresh_status.json``). A missing current-FY partition is no longer a
+    hard error (Phase 3.2d remediation W12, "per-account atomicity"): it is
+    tolerated like a historical skip, the committed partition is retained,
+    and the account is published as ``stale`` in ``refresh_status.json``
+    instead. The only remaining hard failure here is every planned
+    account-year coming up missing at once -- a broken run must never
+    publish a snapshot where every account is silently marked stale; see
+    the ``if not planned`` check in ``reconcile`` for the companion
+    "nothing was staged at all" case.
     """
+    if plan_total and len(missing) == plan_total:
+        raise ValueError(
+            f"no partition was produced for any of the {plan_total} planned "
+            "account-years in this run; refusing to publish an "
+            "all-accounts-stale snapshot (docs/obligation-ledger.md, "
+            "\"Refresh, freshness, and publication\")"
+        )
     skipped = []
     for job in missing:
         account, fy = job["account"], int(job["fiscalYear"])
         purpose = job.get("purpose", MANDATORY_PURPOSE)
-        if purpose == MANDATORY_PURPOSE:
-            raise ValueError(
-                f"{account} FY{fy}: current-FY pull produced no partition; "
-                "the atomic reconcile cannot proceed without it "
-                "(docs/obligation-ledger.md, \"Refresh, freshness, and "
-                "publication\")"
-            )
         print(
-            f"SKIPPED (pull failed): {account} FY{fy}, committed partition "
-            "retained"
+            f"SKIPPED (pull failed): {account} FY{fy} (purpose={purpose}), "
+            "committed partition retained"
         )
         skipped.append({"account": account, "fiscalYear": fy, "purpose": purpose})
     return skipped
+
+
+def _current_fy_plan_by_account(plan_jobs):
+    """{account path: fiscal year} for every planned current-FY job.
+
+    Used to decide, per account, whether *this run* even attempted a
+    current-FY refresh at all (a scoped custom run may not touch every
+    account) and which fiscal year that attempt targeted.
+    """
+    result = {}
+    for job in plan_jobs or []:
+        if job.get("purpose", MANDATORY_PURPOSE) == MANDATORY_PURPOSE:
+            result[job["account"]] = int(job["fiscalYear"])
+    return result
+
+
+def _load_previous_refresh_status(repo):
+    path = Path(repo) / REFRESH_STATUS_PATH
+    if not path.exists():
+        return {}
+    try:
+        data = json.loads(path.read_text())
+    except json.JSONDecodeError:
+        return {}
+    accounts = data.get("accounts") if isinstance(data, dict) else None
+    return accounts if isinstance(accounts, dict) else {}
+
+
+def _build_refresh_status(repo, accounts, plan_jobs, seen, planned, generated_at):
+    """Per-account freshness state for every registered account.
+
+    An account this run did not even plan a current-FY job for (e.g. a
+    custom run scoped to other accounts) keeps whatever was already
+    published; a brand-new account with no prior record defaults to
+    ``fresh``. An account this run planned and staged is ``fresh``. An
+    account this run planned but could not stage (the missing-partition
+    case ``_apply_missing_partition_tolerance`` tolerates) is ``stale``,
+    carrying the date its last accepted snapshot was published
+    (``staleSince``) so the site can render "Not refreshed since <date>"
+    without guessing, and a plain-language ``reason``. ``staleSince`` is
+    preserved unchanged across repeated failed runs rather than reset to
+    "today" every week -- it names when the account stopped being current,
+    not when this run happened to notice.
+    """
+    current_fy_plan = _current_fy_plan_by_account(plan_jobs)
+    accepted_at_by_key = {
+        (account["path"], fy): provenance.get("acceptedAt")
+        for account, fy, _source_dir, provenance in planned
+    }
+    previous = _load_previous_refresh_status(repo)
+    result = {}
+    for path in accounts:
+        prior = previous.get(path) or {}
+        if path not in current_fy_plan:
+            result[path] = prior if prior else {"status": "fresh"}
+            continue
+        fy = current_fy_plan[path]
+        if (path, fy) in seen:
+            result[path] = {
+                "lastRefreshAttemptAt": generated_at,
+                "lastAcceptedAt": accepted_at_by_key.get((path, fy)) or generated_at,
+                "status": "fresh",
+            }
+            continue
+        store = Path(repo) / "data" / "obligations" / path / "events"
+        committed = load_partition_provenance(store, fy)
+        committed_accepted = (committed or {}).get("acceptedAt")
+        if prior.get("status") == "stale" and prior.get("staleSince"):
+            stale_since = prior["staleSince"]
+        elif committed_accepted:
+            stale_since = committed_accepted[:10]
+        else:
+            stale_since = generated_at[:10]
+        result[path] = {
+            "lastRefreshAttemptAt": generated_at,
+            "lastAcceptedAt": prior.get("lastAcceptedAt") or committed_accepted,
+            "status": "stale",
+            "staleSince": stale_since,
+            "reason": (
+                f"the scheduled current-FY (FY{fy}) pull for this account "
+                "did not produce a partition in this run"
+            ),
+        }
+    return result
+
+
+def _write_refresh_status(repo, entries, generated_at):
+    path = Path(repo) / REFRESH_STATUS_PATH
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps({
+        "schemaVersion": 1,
+        "generatedAt": generated_at,
+        "accounts": entries,
+    }, indent=1, sort_keys=True) + "\n")
 
 
 def _write_job_summary(skipped):
@@ -294,13 +400,15 @@ def reconcile(staging, repo=REPO, plan=None):
             planned.append((account, int(fy), descriptor_path.parent, provenance))
 
     # A planned account-year with no partition in staging means its pull job
-    # failed (or never uploaded). A missing current-FY partition fails the
-    # reconcile outright -- the atomic all-or-nothing contract is load-
-    # bearing there. A missing rotating-historical/historical/custom
-    # partition loses no data (the committed partition is untouched) and is
-    # tolerated: skipped here and retried by the next rotation.
-    missing = _resolve_missing(plan or [], seen)
-    skipped = _apply_missing_partition_tolerance(missing)
+    # failed (or never uploaded). Every purpose -- current-FY or
+    # rotating-historical/historical/custom -- is now tolerated the same
+    # way: the committed partition is untouched, so skipping loses no data.
+    # A missing current-FY partition instead publishes as a disclosed
+    # per-account stale state (Phase 3.2d remediation W12; see
+    # docs/obligation-ledger.md, "Refresh, freshness, and publication").
+    plan_jobs = plan or []
+    missing = _resolve_missing(plan_jobs, seen)
+    skipped = _apply_missing_partition_tolerance(missing, len(plan_jobs))
 
     if not planned:
         raise ValueError("no obligation account-year artifacts found")
@@ -342,6 +450,15 @@ def reconcile(staging, repo=REPO, plan=None):
                 "federalAccount": account["federalAccount"],
                 "baseline": account["baseline"],
             })
+    # Published staleness (Phase 3.2d remediation W12): written before the
+    # rollup so scripts/rollup_obligations.py can copy each account's
+    # refreshStatus into its dashboard.json (and the root's
+    # staleAccountCount) from the same file the site and the validator read.
+    generated_at = datetime.now(timezone.utc).isoformat()
+    refresh_status = _build_refresh_status(
+        repo, accounts, plan_jobs, seen, planned, generated_at,
+    )
+    _write_refresh_status(repo, refresh_status, generated_at)
     build_obligations(repo)
     # The sentinel's financial-coverage disclosure is registry-derived and
     # its observations are downstream of the exact File C candidate above.

@@ -15,7 +15,7 @@ from adapters.obligation_common import (
 
 
 def child_summary(path, name, abbrev, events, current_fy, covered_periods,
-                  partial_fys, period_status=None, note=None):
+                  partial_fys, period_status=None, note=None, refresh_status=None):
     stats = aggregate(events, current_fy, covered_periods, partial_fys,
                       period_status)
     fy = next((row for row in stats["fiscalYears"] if row["fy"] == current_fy), None)
@@ -29,7 +29,65 @@ def child_summary(path, name, abbrev, events, current_fy, covered_periods,
     # field-driven -- no name or agency check.
     if note:
         summary["interpretationNote"] = note
+    # refreshStatus (Phase 3.2d remediation W12, published staleness): only
+    # attached for a genuinely stale row, mirroring interpretationNote's
+    # presence-driven pattern -- a fresh child carries no field at all, so
+    # the site's dagger marker is purely field-driven too.
+    if refresh_status and refresh_status.get("status") == "stale":
+        summary["refreshStatus"] = refresh_status
     return summary
+
+
+def _load_refresh_status(repo):
+    """The published per-account staleness map, or {} if none exists yet.
+
+    Written by scripts/reconcile_obligation_artifacts.py
+    (data/obligations/refresh_status.json, schema 1). Read defensively --
+    an offline rebuild (scripts/reaggregate.py) may run against a store the
+    reconcile step has never touched.
+    """
+    path = repo / "data" / "obligations" / "refresh_status.json"
+    if not path.exists():
+        return {}
+    try:
+        data = json.loads(path.read_text())
+    except json.JSONDecodeError:
+        return {}
+    accounts = data.get("accounts") if isinstance(data, dict) else None
+    return accounts if isinstance(accounts, dict) else {}
+
+
+def _default_refresh_entry(account_refresh):
+    """Mirrors scripts/reconcile_obligation_artifacts.py's own default: an
+    account with no recorded entry is fresh."""
+    return account_refresh if account_refresh else {"status": "fresh"}
+
+
+def _agency_refresh_status(accounts, account_refresh_by_path):
+    """A non-uniform aggregate for an agency's row on the obligations root.
+
+    Unlike interpretationNote (which only propagates when every account
+    agrees on the identical text), staleness is inherently per-account, so
+    this fires whenever ANY account under the agency is stale and names how
+    many, pointing the reader to the agency page for which one.
+    """
+    stale = [
+        (a["path"], account_refresh_by_path[a["path"]])
+        for a, *_ in accounts
+        if account_refresh_by_path[a["path"]].get("status") == "stale"
+    ]
+    if not stale:
+        return None
+    stale_sinces = [entry.get("staleSince") for _, entry in stale if entry.get("staleSince")]
+    return {
+        "status": "stale",
+        "staleSince": min(stale_sinces) if stale_sinces else None,
+        "reason": (
+            f"{len(stale)} of {len(accounts)} account(s) in this agency were "
+            "not refreshed in the most recent scheduled pull; see the "
+            "agency page for which account."
+        ),
+    }
 
 
 def agency_interpretation_note(accounts):
@@ -71,6 +129,7 @@ def build(repo=REPO):
     freshness_max_days = int(config.get("refreshDefaults", {}).get(
         "freshnessMaxDays", 10
     ))
+    refresh_status_map = _load_refresh_status(repo)
     account_rows = []
     account_freshness = {}
     agency_events = {}
@@ -83,9 +142,18 @@ def build(repo=REPO):
         covered_periods = {e["submissionPeriod"] for e in events}
         partial_fys = account_availability(repo, account)
         manifest = json.loads((base / "events" / "manifest.json").read_text())
+        # Published staleness (Phase 3.2d remediation W12): copied verbatim
+        # from refresh_status.json into this account's own freshness block
+        # (and, via the same `freshness` dict, its Program Activity
+        # children's freshness blocks below) so the site can render the
+        # "Not refreshed since" header note directly from the dashboard.
+        account_refresh_entry = _default_refresh_entry(
+            refresh_status_map.get(account["path"])
+        )
         freshness = {
             "latestAcceptedAt": manifest.get("latestAcceptedAt"),
             "maxAgeDays": int(account.get("freshnessMaxDays", freshness_max_days)),
+            "refreshStatus": account_refresh_entry,
         }
         account_freshness[account["path"]] = freshness
         # Snapshot acceptance rule (docs/obligation-ledger.md "Snapshot
@@ -162,13 +230,22 @@ def build(repo=REPO):
         period_status = merge_period_status(status for _, _, _, _, _, status in accounts)
         children = [child_summary(f"obligations/{a['path']}", a["name"], a["abbrev"],
                                   ev, fy, periods, partial, period_status=status,
-                                  note=a.get("interpretationNote"))
+                                  note=a.get("interpretationNote"),
+                                  refresh_status=account_freshness[a["path"]].get(
+                                      "refreshStatus"))
                     for a, ev, fy, periods, partial, status in accounts]
         agency_name = accounts[0][0]["agency"]
         accepted = [account_freshness[a["path"]].get("latestAcceptedAt")
                     for a, _, _, _, _, _ in accounts
                     if account_freshness[a["path"]].get("latestAcceptedAt")]
         agency_note = agency_interpretation_note([a for a, _, _, _, _, _ in accounts])
+        # Non-uniform aggregate (Phase 3.2d remediation W12): unlike the
+        # note above, staleness fires whenever ANY account under the agency
+        # is stale, not only when every account agrees.
+        agency_refresh = _agency_refresh_status(
+            accounts, {a["path"]: account_freshness[a["path"]]["refreshStatus"]
+                       for a, *_ in accounts}
+        )
         agency_metadata = {"freshness": {"latestAcceptedAt": min(accepted) if accepted else None,
                                          "maxAgeDays": freshness_max_days}}
         if agency_note:
@@ -184,7 +261,8 @@ def build(repo=REPO):
                                              agency_slug.upper(), events, current_fy,
                                              covered_periods, partial_fys,
                                              period_status=period_status,
-                                             note=agency_note))
+                                             note=agency_note,
+                                             refresh_status=agency_refresh))
 
     all_events = [e for events in agency_events.values() for e in events]
     if all_events:
@@ -204,6 +282,13 @@ def build(repo=REPO):
         # account total, so the award root's coverage line and the
         # obligations landing/root-tile subtitle can derive their number
         # from data the site already loads instead of a hardcoded literal.
+        # staleAccountCount (Phase 3.2d remediation W12): how many of those
+        # accounts are currently published as stale, independent of which
+        # agency they fall under.
+        stale_account_count = sum(
+            1 for freshness in account_freshness.values()
+            if freshness.get("refreshStatus", {}).get("status") == "stale"
+        )
         write_dashboard(data_root, {"level": "root", "path": "obligations",
             "name": "Appropriations obligations"}, "USAspending File B and File C",
             all_events, children=agency_children, current_fy=current_fy,
@@ -211,7 +296,8 @@ def build(repo=REPO):
             period_status=period_status,
             metadata={"freshness": {"latestAcceptedAt": min(accepted) if accepted else None,
                                      "maxAgeDays": freshness_max_days},
-                      "accountCount": len(account_rows)})
+                      "accountCount": len(account_rows),
+                      "staleAccountCount": stale_account_count})
 
     index_children = []
     for agency_slug, events in agency_events.items():

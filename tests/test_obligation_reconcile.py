@@ -411,10 +411,12 @@ class ObligationReconcileTests(unittest.TestCase):
         finally:
             temp.cleanup()
 
-    def test_missing_current_partition_fails_reconcile(self):
-        # The current fiscal year's atomic all-or-nothing contract is
-        # load-bearing: a failed current-FY pull must fail the reconcile,
-        # never publish a candidate that silently omits it.
+    def test_missing_every_planned_partition_fails_reconcile(self):
+        # Phase 3.2d remediation W12: per-account atomicity tolerates any
+        # ONE account-year coming up missing, current-FY included -- but a
+        # run that stages NOTHING at all (every planned account-year
+        # missing) must still fail outright rather than publish a snapshot
+        # where every account is silently marked stale.
         temp = tempfile.TemporaryDirectory()
         try:
             root = Path(temp.name) / "repo"
@@ -439,13 +441,164 @@ class ObligationReconcileTests(unittest.TestCase):
                 "fiscalYears": {"2025": {"status": "complete",
                                           "obligationsCents": 500}},
             }))
-            # Nothing is staged: the current-FY pull job failed outright.
+            # Nothing is staged: the current-FY pull job failed outright,
+            # and it is the ONLY planned account-year this run.
             plan_jobs = [
                 {"account": "doe/sc", "fiscalYear": 2026, "purpose": "current"},
             ]
             with self.assertRaisesRegex(
-                    ValueError, "current-FY pull produced no partition"):
+                    ValueError, "refusing to publish an all-accounts-stale"):
                 reconcile(staging, root, plan=plan_jobs)
+        finally:
+            temp.cleanup()
+
+    def test_missing_current_partition_is_skipped_and_marked_stale(self):
+        # Phase 3.2d remediation W12: a missing CURRENT-FY partition for one
+        # account is tolerated exactly like a missing historical one -- as
+        # long as at least one other planned account-year in this run
+        # succeeded, reconcile must not raise, the failed account's
+        # committed store must be untouched, and refresh_status.json must
+        # record it stale with a reason and a staleSince date.
+        temp = tempfile.TemporaryDirectory()
+        try:
+            root = Path(temp.name) / "repo"
+            staging = Path(temp.name) / "staging" / "artifact"
+            producer = Path(temp.name) / "producer"
+            for path in (root / "config", root / "reference", staging, producer):
+                path.mkdir(parents=True, exist_ok=True)
+            (root / "config" / "obligation_accounts.json").write_text(json.dumps({
+                "schemaVersion": 2,
+                "accounts": [
+                    {
+                        "path": "doe/sc", "name": "Science", "abbrev": "SC",
+                        "agency": "Energy", "federalAccount": "089-0222",
+                        "baseline": "reference/doe.json",
+                        "availability": {"firstFiscalYear": 2025,
+                                         "firstFiscalYearPeriod": 2,
+                                         "regularFirstPeriod": 2},
+                        "programActivities": [{"slug": "bes", "code": "0001",
+                                               "name": "BES"}],
+                    },
+                    {
+                        "path": "doe/fossil-energy", "name": "Fossil Energy",
+                        "abbrev": "FE", "agency": "Energy",
+                        "federalAccount": "089-0223",
+                        "baseline": "reference/doe_fe.json",
+                        "availability": {"firstFiscalYear": 2025,
+                                         "firstFiscalYearPeriod": 2,
+                                         "regularFirstPeriod": 2},
+                        "programActivities": [{"slug": "fe", "code": "0001",
+                                               "name": "FE"}],
+                    },
+                ],
+            }))
+
+            # doe/sc already has a committed, accepted current-FY (2026)
+            # partition from a previous week's run at P08.
+            stale_row = normalize_event({
+                "id": "stale-one", "source": "file_b_residual",
+                "submissionPeriod": "FY2026P08", "federalAccount": "089-0222",
+                "programActivityCode": "0001", "programActivityName": "BES",
+                "amountCents": 300, "awardId": "", "linked": False,
+            })
+            stale_provenance = {
+                "schemaVersion": 2, "collectionStatus": "accepted",
+                "acceptedAt": "2026-09-01T00:00:00+00:00",
+                "accountPath": "doe/sc", "federalAccount": "089-0222",
+                "fiscalYear": 2026, "asOfPeriod": 8, "downloads": [],
+                "normalized": {"recordCount": 1,
+                               "eventFingerprint": event_fingerprint([stale_row]),
+                               "netObligationsCents": 300},
+                "replacement": {}, "diff": partition_diff([], [stale_row]),
+                "baselinePin": {"status": "partial", "asOfPeriod": 8,
+                                "firstPeriod": 8, "obligationsCents": 300},
+            }
+            sc_store = root / "data" / "obligations" / "doe" / "sc" / "events"
+            write_store(sc_store, [stale_row], {"federalAccount": "089-0222"},
+                        partition_metadata={2026: stale_provenance})
+            pre_shard = (sc_store / "FY2026.csv.gz").read_bytes()
+            pre_provenance = (sc_store / "FY2026.provenance.json").read_text()
+            (root / "reference" / "doe.json").write_text(json.dumps({
+                "schemaVersion": 2, "federalAccount": "089-0222",
+                "fiscalYears": {"2026": {"status": "partial", "asOfPeriod": 8,
+                                          "firstPeriod": 8,
+                                          "obligationsCents": 300}},
+            }))
+
+            # doe/fossil-energy's current-FY (2026) pull succeeds this run.
+            fresh_row = normalize_event({
+                "id": "fresh-one", "source": "file_b_residual",
+                "submissionPeriod": "FY2026P09", "federalAccount": "089-0223",
+                "programActivityCode": "0001", "programActivityName": "FE",
+                "amountCents": 100, "awardId": "", "linked": False,
+            })
+            fresh_provenance = {
+                "schemaVersion": 2, "collectionStatus": "accepted",
+                "acceptedAt": "2026-09-20T00:00:00+00:00",
+                "accountPath": "doe/fossil-energy", "federalAccount": "089-0223",
+                "fiscalYear": 2026, "asOfPeriod": 9, "downloads": [],
+                "normalized": {"recordCount": 1,
+                               "eventFingerprint": event_fingerprint([fresh_row]),
+                               "netObligationsCents": 100},
+                "replacement": {}, "diff": partition_diff([], [fresh_row]),
+                "baselinePin": {"status": "partial", "asOfPeriod": 9,
+                                "firstPeriod": 9, "obligationsCents": 100},
+            }
+            (root / "reference" / "doe_fe.json").write_text(json.dumps({
+                "schemaVersion": 2, "federalAccount": "089-0223",
+                "fiscalYears": {}
+            }))
+            write_store(producer, [fresh_row], {"federalAccount": "089-0223"},
+                        partition_metadata={2026: fresh_provenance})
+            names = ["FY2026.csv.gz", "FY2026.provenance.json"]
+            for name in names:
+                shutil.copy2(producer / name, staging / name)
+            (staging / "partition.json").write_text(json.dumps({
+                "schemaVersion": 2, "accountPath": "doe/fossil-energy",
+                "federalAccount": "089-0223",
+                "baselinePath": "reference/doe_fe.json",
+                "fiscalYears": [2026],
+                "files": [{"name": name, "sha256": file_sha256(staging / name)}
+                          for name in names],
+            }))
+
+            # doe/sc's current-FY pull failed this run and uploaded no
+            # partition; only doe/fossil-energy is in staging.
+            plan_jobs = [
+                {"account": "doe/sc", "fiscalYear": 2026, "purpose": "current"},
+                {"account": "doe/fossil-energy", "fiscalYear": 2026,
+                 "purpose": "current"},
+            ]
+            with patch("scripts.reconcile_obligation_artifacts.build_obligations"), \
+                    patch("scripts.reconcile_obligation_artifacts.build_sentinel"):
+                count, accounts, skipped = reconcile(
+                    staging.parent, root, plan=plan_jobs
+                )
+            self.assertEqual(1, count)
+            self.assertEqual(["doe/fossil-energy"], accounts)
+            self.assertEqual(
+                [{"account": "doe/sc", "fiscalYear": 2026, "purpose": "current"}],
+                skipped,
+            )
+            # doe/sc's committed store is byte-for-byte untouched.
+            self.assertEqual(pre_shard, (sc_store / "FY2026.csv.gz").read_bytes())
+            self.assertEqual(
+                pre_provenance, (sc_store / "FY2026.provenance.json").read_text()
+            )
+
+            refresh_status = json.loads(
+                (root / "data" / "obligations" / "refresh_status.json").read_text()
+            )
+            self.assertEqual(1, refresh_status["schemaVersion"])
+            sc_status = refresh_status["accounts"]["doe/sc"]
+            self.assertEqual("stale", sc_status["status"])
+            self.assertEqual("2026-09-01", sc_status["staleSince"])
+            self.assertTrue(sc_status["reason"])
+            fe_status = refresh_status["accounts"]["doe/fossil-energy"]
+            self.assertEqual("fresh", fe_status["status"])
+            self.assertEqual(
+                "2026-09-20T00:00:00+00:00", fe_status["lastAcceptedAt"]
+            )
         finally:
             temp.cleanup()
 

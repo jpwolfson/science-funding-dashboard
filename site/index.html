@@ -543,12 +543,19 @@ function obligationChildrenCard(data, title = null, note = null) {
   // purely field-driven, so any future account with the field is covered
   // the same way with no code change.
   const annotated = [];
+  // Rows carrying a stale `refreshStatus` (Phase 3.2d remediation W12) get
+  // a separate dagger marker + footnote, purely field-driven the same way
+  // -- a fresh row carries no `refreshStatus` at all.
+  const staleRows = [];
   for (const c of sorted) {
     const tr = el("tr"), tdUnit = el("td");
     const path = String(c.path || "").startsWith("obligations") ? c.path : `obligations/${c.path}`;
     const hasNote = Boolean(c.interpretationNote);
     if (hasNote) annotated.push(c);
-    tdUnit.append(el("a", { href: `index.html?org=${path}`, text: unitLabel(c) + (hasNote ? " *" : "") }));
+    const isStale = c.refreshStatus?.status === "stale";
+    if (isStale) staleRows.push(c);
+    tdUnit.append(el("a", { href: `index.html?org=${path}`,
+      text: unitLabel(c) + (hasNote ? " *" : "") + (isStale ? " †" : "") }));
     tr.append(tdUnit);
     if (!c.hasData) {
       tr.append(el("td", { class: "num", text: "no data yet" }),
@@ -579,6 +586,32 @@ function obligationChildrenCard(data, title = null, note = null) {
       if (!firstGroup) p.append(document.createTextNode(" "));
       firstGroup = false;
       p.append(el("strong", { text: `* ${names.join(", ")}: ` }), document.createTextNode(note));
+    }
+    card.append(p);
+  }
+  if (staleRows.length) {
+    // Rows sharing the identical staleness text (same staleSince date)
+    // group into one line, same pattern as the interpretationNote footnote
+    // above.
+    const groups = new Map();
+    for (const c of staleRows) {
+      // The agency-level aggregate row's reason names how many of its
+      // accounts are stale (never "this account" -- it is not one); a
+      // single account row's own reason is specific to it. Either way this
+      // is the plain-language `reason` scripts/reconcile_obligation_
+      // artifacts.py / scripts/rollup_obligations.py wrote, not the
+      // header's fixed "Not refreshed since" wording, which only makes
+      // sense naming exactly one account.
+      const text = c.refreshStatus.reason;
+      if (!groups.has(text)) groups.set(text, []);
+      groups.get(text).push(unitLabel(c));
+    }
+    const p = el("p", { class: "note", id: "staleFootnotes" });
+    let firstGroup = true;
+    for (const [text, names] of groups) {
+      if (!firstGroup) p.append(document.createTextNode(" "));
+      firstGroup = false;
+      p.append(el("strong", { text: `† ${names.join(", ")}: ` }), document.createTextNode(text));
     }
     card.append(p);
   }
@@ -1431,6 +1464,24 @@ function renderInterpretationNote(text, container = $app) {
   container.append(box);
 }
 
+// Published staleness (Phase 3.2d remediation W12): data/obligations/
+// refresh_status.json, copied verbatim by scripts/rollup_obligations.py
+// into an account dashboard's `freshness.refreshStatus`. A stale account's
+// figures are still the last fully validated, accepted snapshot -- this is
+// a neutral disclosure, not a warning, styled identically to
+// renderInterpretationNote above. The wording is owner-approved verbatim
+// text (Phase 3.2d remediation brief): only the date varies.
+const staleAccountNoteText = staleSince =>
+  `Not refreshed since ${staleSince}: the most recent scheduled pull for this account did not complete; figures are the last accepted snapshot.`;
+
+function renderStaleNote(freshness, container = $app) {
+  const status = freshness?.refreshStatus;
+  if (!status || status.status !== "stale") return;
+  const box = el("div", { class: "interpretation-note", id: "staleNote" });
+  box.append(document.createTextNode(staleAccountNoteText(status.staleSince)));
+  container.append(box);
+}
+
 // W1's dashboard-level data-quality notes (plain, non-blocking observations
 // such as a stored id not returned by the latest full re-pull) render in a
 // dedicated notes block, deliberately separate from the red `.banner`
@@ -1924,6 +1975,12 @@ async function boot() {
     // the only switch -- present on every DoD account/PA dashboard, absent
     // everywhere else, no agency check here.
     renderInterpretationNote(data.interpretationNote);
+    // Phase 3.2d remediation W12: the stale-refresh header note renders
+    // only on an account's own page -- the landing table (agency and root
+    // pages) instead gets a dagger marker plus footnote per stale row (see
+    // obligationChildrenCard), which is the only place a reader browsing
+    // above the account level would otherwise miss the disclosure.
+    if (node.level === "account") renderStaleNote(data.freshness);
     if (data.warnings?.length) {
       const b = el("div", { class: "banner" });
       b.append(el("strong", { text: "Data quality warnings from the last pull: " }),

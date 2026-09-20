@@ -217,8 +217,14 @@ class ReconcileTolerantOfHistoricalPullFailureTests(unittest.TestCase):
     re-pull in the 106-job serial matrix (e.g. usda/nifa-research-education
     FY2019 on 2026-09-19, ed/ies FY2018 in every attempt of run
     34141166514) must not skip reconcile and lose the whole weekly pass.
-    Only a missing current-FY partition may still block publication -- see
-    docs/obligation-ledger.md, "Refresh, freshness, and publication"."""
+
+    Phase 3.2d remediation, W12 (per-account atomicity): a missing
+    current-FY partition is now tolerated the same way -- skipped, its
+    committed partition retained, and the account published as disclosed-
+    stale in data/obligations/refresh_status.json -- instead of blocking
+    the whole weekly pass. The only remaining hard failure is every planned
+    account-year coming up missing at once. See docs/obligation-ledger.md,
+    "Refresh, freshness, and publication"."""
 
     def setUp(self):
         self.workflow = (
@@ -265,3 +271,32 @@ class ReconcileTolerantOfHistoricalPullFailureTests(unittest.TestCase):
         self.assertIn('MANDATORY_PURPOSE = "current"', script)
         self.assertIn("SKIPPED (pull failed)", script)
         self.assertIn("GITHUB_STEP_SUMMARY", script)
+
+    def test_missing_partitions_step_hands_reconcile_the_full_plan(self):
+        # Phase 3.2d remediation W12: reconcile_obligation_artifacts.py now
+        # needs the FULL planned matrix (not a pre-filtered missing-only
+        # list) to build data/obligations/refresh_status.json for every
+        # planned current-FY account-year, fresh or stale -- not only the
+        # ones this run failed to produce a partition for.
+        detect_start = self.workflow.index(
+            "Detect account-years missing from this run's partitions"
+        )
+        reconcile_step = self.workflow.index(
+            "Reconcile every account into one candidate snapshot"
+        )
+        detection = self.workflow[detect_start:reconcile_step]
+        self.assertIn(
+            'Path("_missing_partitions.json").write_text(\n'
+            '              json.dumps({"include": plan["include"]})\n'
+            "          )",
+            detection,
+        )
+
+    def test_reconcile_script_publishes_per_account_refresh_status(self):
+        script = (REPO / "scripts/reconcile_obligation_artifacts.py").read_text()
+        self.assertIn('REFRESH_STATUS_PATH = Path("data") / "obligations" / "refresh_status.json"',
+                      script)
+        self.assertIn("def _build_refresh_status(", script)
+        self.assertIn("def _write_refresh_status(", script)
+        self.assertIn("no partition was produced for any of the", script)
+        self.assertIn("all-accounts-stale snapshot", script)

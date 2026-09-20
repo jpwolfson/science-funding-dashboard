@@ -111,6 +111,14 @@ replaces that handoff with the source ZIP; a timeout leaves the handoff in the
 `reference/obligation_download_resumes.json` so a bounded retry resumes the
 same accepted request and scope instead of submitting a duplicate download.
 
+`data/obligations/refresh_status.json` is a small, separately committed store
+file, sibling to the per-account event stores above rather than part of any
+one account's own directory: one schema-1 object naming every registered
+account's current publication freshness (`fresh` or `stale`, with `staleSince`
+and `reason` when stale). See "Refresh, freshness, and publication" below for
+its exact schema and how the reconcile job, the validator, and the site each
+use it.
+
 ## Dashboard contract
 
 Every obligation dashboard has `kind: "obligations"`; missing `kind` continues
@@ -313,28 +321,63 @@ that registry: every account refreshes the newest source-available fiscal year
 weekly and reconciles one historical fiscal year on a rotating basis. A full or
 bounded custom plan remains dispatchable.
 
-Every current-FY account-year job must still succeed before reconciliation
-publishes; a failed rotating-historical (or full/custom) re-pull job does not
-by itself block reconciliation (see below). The reconcile job applies every
-replacement to one candidate tree, updates partial baseline pins, rebuilds all
-manifests and dashboards, validates every registered account, and runs the
-rendered browser matrix. Only that exact validated tree is committed and
-uploaded as the Pages artifact. The ordinary award deployment workflow does
-not independently redeploy obligation-only commits.
+No single account-year job blocks reconciliation for every other account
+(Phase 3.2d remediation W12, "per-account atomicity"). The reconcile job
+applies every successfully-staged replacement to one candidate tree, updates
+partial baseline pins, rebuilds all manifests and dashboards, validates every
+registered account, and runs the rendered browser matrix. Only that exact
+validated tree is committed and uploaded as the Pages artifact. The ordinary
+award deployment workflow does not independently redeploy obligation-only
+commits.
 
-Every account's current-FY partition is still all-or-nothing: the reconcile
-job compares the planned account × fiscal-year matrix against the partitions
-this run actually produced, and a missing current-FY partition fails the
-reconcile outright, exactly as before -- `--check-freshness` and
-`--require-current-provenance` guard the same guarantee independently. A
-failed rotating-historical (or full/custom) re-pull is different: it loses no
-data, because the store's already-committed partition for that fiscal year is
-untouched, so the reconcile job now tolerates it -- it logs the skip, retains
-the committed partition unchanged, and proceeds to publish every other
-account's refresh; the weekly rotation retries that fiscal year on its next
-turn. This distinction, not the pull-job dependency, is what makes one
-transient failure in a 100+-job serial matrix no longer discard the whole
+**Per-account atomicity and published staleness.** The reconcile job compares
+the planned account × fiscal-year matrix against the partitions this run
+actually produced. A missing partition -- current-FY or rotating-historical,
+full, or custom -- loses no data: the store's already-committed partition for
+that account-year is untouched, so the reconcile job tolerates it. It logs the
+skip in the job summary and, for a missing **current-FY** partition
+specifically, records the account as `stale` in the committed
+`data/obligations/refresh_status.json` (schema 1:
+`{generatedAt, accounts: {"<path>": {lastRefreshAttemptAt, lastAcceptedAt,
+status: "fresh"|"stale", staleSince?, reason?}}}`), derived from the plan, the
+partitions this run actually staged, and each account's latest committed
+current-FY provenance `acceptedAt`. An account with a present, accepted
+current-FY partition is `fresh`. `staleSince` is the date the account's last
+accepted current-FY snapshot was published, and it is preserved unchanged
+across repeated failed runs rather than reset to "today" every week -- it
+names when the account stopped being current, not when a given run happened
+to notice. Reconciliation then proceeds to publish every other account's
+refresh regardless; the weekly rotation retries the missing account-year on
+its next turn. This distinction, not the pull-job dependency, is what makes
+one transient failure in a 100+-job serial matrix no longer discard the whole
 weekly pass.
+
+`scripts/validate_obligations.py --check-freshness` and
+`--require-current-provenance` read `refresh_status.json` for the same
+per-account tolerance: an account beyond the freshness SLA is an error only
+if it is not properly marked `stale` with a non-empty `reason`; a marked-stale
+account passes freshness, but its `dashboard.json` must still carry the exact
+`refreshStatus` object the site renders from (`scripts/rollup_obligations.py`
+copies it verbatim into the account's `freshness` block, the obligations root
+and agency listing rows, and the root's `staleAccountCount`) -- a dashboard
+whose `refreshStatus` disagrees with `refresh_status.json` fails validation, so
+staleness can never go undisclosed on a published page. An account beyond the
+SLA with **no** entry in `refresh_status.json` at all is still an error:
+nothing may go stale silently. The only remaining hard failure at the
+reconcile stage is every planned account-year coming up missing at once (an
+empty staging directory, or a total plan-vs-staging mismatch) -- a broken run
+must never publish a snapshot in which every account is silently marked
+stale.
+
+The site renders a stale account's own page with a neutral header note ("Not
+refreshed since \<date\>: the most recent scheduled pull for this account did
+not complete; figures are the last accepted snapshot.") and marks its row on
+every listing table (the account's own agency page, and an aggregated marker
+on that agency's row on the obligations root landing page) with a `†` and a
+footnote -- the same field-driven pattern `interpretationNote` already uses,
+never an agency name check. The underlying figures are still the last fully
+validated, accepted snapshot; staleness is a publication-freshness disclosure,
+not a data-quality warning.
 
 Publication deliberately separates runtime data from durable audit evidence.
 `scripts/assemble_pages_site.py` publishes the site shell and every JSON file
