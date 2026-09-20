@@ -42,6 +42,25 @@ def _load_pending_retry_contract(repo, errors):
     return recovery, file_b_periods
 
 
+def _default_refresh_entry(account_refresh):
+    """The account's refresh_status.json entry, defaulted when absent.
+
+    Mirrors the same default scripts/reconcile_obligation_artifacts.py and
+    scripts/rollup_obligations.py apply: an account with no recorded entry
+    (including a repo with no refresh_status.json at all) is "fresh".
+    """
+    return account_refresh if account_refresh else {"status": "fresh"}
+
+
+def _is_marked_stale(account_refresh):
+    """True only for a *properly disclosed* stale account.
+
+    A bare ``status: "stale"`` with no ``reason`` does not count -- nothing
+    may go stale silently (Phase 3.2d remediation W12).
+    """
+    return account_refresh.get("status") == "stale" and bool(account_refresh.get("reason"))
+
+
 def _is_pending_partial_pin_transition(
         account, fy, pin, provenance, rows, recovery, file_b_periods):
     """Recognize only the one-period transition sealed by retry evidence."""
@@ -258,6 +277,25 @@ def validate(repo=REPO, require_data=True, check_freshness=False,
         "freshnessMaxDays", 10
     ))
     data_root = repo / "data" / "obligations"
+    # Published per-account staleness (Phase 3.2d remediation W12): read
+    # once, straight from the committed file scripts/reconcile_obligation_
+    # artifacts.py writes, never re-derived here. An account with no entry
+    # (including a repo with no refresh_status.json at all) defaults to
+    # "fresh" -- the same default the reconcile and rollup scripts apply --
+    # so an account beyond the SLA with no recorded reason is still an
+    # error: nothing may go stale silently.
+    refresh_status_path = data_root / "refresh_status.json"
+    refresh_status = {}
+    if refresh_status_path.exists():
+        try:
+            refresh_status = json.loads(refresh_status_path.read_text()).get(
+                "accounts", {}
+            )
+            if not isinstance(refresh_status, dict):
+                errors.append("data/obligations/refresh_status.json: accounts must be an object")
+                refresh_status = {}
+        except json.JSONDecodeError:
+            errors.append("data/obligations/refresh_status.json: invalid JSON")
     for path in sorted(data_root.rglob("dashboard.json")) if data_root.exists() else []:
         page = json.loads(path.read_text())
         if page.get("kind") != "obligations" or page.get("schemaVersion") != 2:
@@ -274,6 +312,7 @@ def validate(repo=REPO, require_data=True, check_freshness=False,
     agency_events = defaultdict(list)
     for account in config["accounts"]:
         store = repo / "data" / "obligations" / account["path"] / "events"
+        account_refresh = _default_refresh_entry(refresh_status.get(account["path"]))
         events = load_store(store) if store.exists() else []
         try:
             baseline = load_baseline(repo, account)
@@ -490,6 +529,17 @@ def validate(repo=REPO, require_data=True, check_freshness=False,
         partial_fys = {fy for fy, pin in expected_fys.items() if pin["status"] == "partial"}
         latest_fy = max(expected_fys) if expected_fys else None
         if latest_fy and require_current_provenance:
+            # Phase 3.2d remediation W12: a marked-stale account already
+            # tolerates this check without any special-casing here. A run
+            # that could not stage this account's current-FY partition never
+            # touches its store (scripts/reconcile_obligation_artifacts.py
+            # skips it and retains the committed partition byte-for-byte),
+            # so the committed provenance -- from whichever run last
+            # accepted it, however old -- is still there with
+            # collectionStatus "accepted". Only a genuinely missing or
+            # never-accepted partition (no prior successful pull at all)
+            # fails here, and that failure is not something a stale marking
+            # can excuse: there would be nothing to publish for the account.
             provenance = load_partition_provenance(store, latest_fy)
             if not provenance or provenance.get("collectionStatus") != "accepted":
                 errors.append(
@@ -510,10 +560,21 @@ def validate(repo=REPO, require_data=True, check_freshness=False,
             if provenance and provenance.get("collectionStatus") == "accepted" and accepted:
                 age = (as_of - accepted).days
                 max_days = int(account.get("freshnessMaxDays", freshness_default))
-                if age < -1 or age > max_days:
+                # Phase 3.2d remediation W12: an account beyond the SLA is
+                # only an error when it is NOT properly disclosed as stale.
+                # A future-dated snapshot (age < -1, e.g. clock skew or a
+                # corrupt timestamp) is never excusable by a stale marking
+                # -- that is a different, more fundamental defect.
+                if age < -1:
                     errors.append(
                         f"{account['path']} FY{latest_fy}: source snapshot age {age} days "
                         f"is outside the 0–{max_days}-day SLA"
+                    )
+                elif age > max_days and not _is_marked_stale(account_refresh):
+                    errors.append(
+                        f"{account['path']} FY{latest_fy}: source snapshot age {age} days "
+                        f"is outside the 0–{max_days}-day SLA and is not recorded as stale "
+                        "in data/obligations/refresh_status.json"
                     )
         covered_periods = {event["submissionPeriod"] for event in events}
         # Snapshot acceptance rule (docs/obligation-ledger.md "Snapshot
@@ -590,6 +651,17 @@ def validate(repo=REPO, require_data=True, check_freshness=False,
                 dashboard_freshness = page.get("freshness") or {}
                 if dashboard_freshness.get("latestAcceptedAt") != manifest.get("latestAcceptedAt"):
                     errors.append(f"{account['path']}: dashboard freshness metadata is stale")
+                # Published staleness (Phase 3.2d remediation W12): a
+                # marked-stale account passes the SLA age check above, but
+                # its dashboard must still surface that fact -- the site's
+                # header note and landing-table marker read this exact
+                # field, so a dashboard silently missing it would publish a
+                # stale account with no visible disclosure at all.
+                if dashboard_freshness.get("refreshStatus") != account_refresh:
+                    errors.append(
+                        f"{account['path']}: dashboard freshness.refreshStatus "
+                        "does not match data/obligations/refresh_status.json"
+                    )
             page_fys = {row["fy"]: row for row in page.get("fiscalYears", [])}
             for row in stats["fiscalYears"]:
                 actual = page_fys.get(row["fy"])

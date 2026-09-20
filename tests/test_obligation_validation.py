@@ -1,11 +1,13 @@
 import json
 import tempfile
 import unittest
+from datetime import date
 from pathlib import Path
 
 from adapters.obligation_common import (
     event_fingerprint, normalize_event, partition_diff, write_store,
 )
+from scripts.rollup_obligations import build as build_obligations
 from scripts.validate_obligations import (
     _is_pending_neutral_child,
     _is_pending_partial_pin_transition,
@@ -757,6 +759,270 @@ class InterpretationNoteRollupTests(unittest.TestCase):
                               if c["path"] == "obligations/doe")
             self.assertEqual("Note text.", dod_child["interpretationNote"])
             self.assertNotIn("interpretationNote", doe_child)
+        finally:
+            temp.cleanup()
+
+
+class RefreshStatusValidationTests(unittest.TestCase):
+    """Phase 3.2d remediation W12: per-account atomicity + published
+    staleness. A marked-stale account (data/obligations/refresh_status.json)
+    must pass --check-freshness/--require-current-provenance instead of
+    failing the whole reconcile, but its dashboard.json must still surface
+    the disclosure; an account beyond the SLA with no such marking is still
+    an error."""
+
+    def build_fixture(self, accepted_at):
+        temp = tempfile.TemporaryDirectory()
+        root = Path(temp.name)
+        (root / "config").mkdir()
+        (root / "reference").mkdir()
+        (root / "config" / "obligation_accounts.json").write_text(json.dumps({
+            "schemaVersion": 2, "refreshDefaults": {"freshnessMaxDays": 10},
+            "accounts": [{
+                "path": "doe/sc", "name": "Science", "abbrev": "SC",
+                "agency": "Energy", "federalAccount": "089-0222",
+                "baseline": "reference/doe_sc_baseline.json",
+                "programActivities": [{"slug": "bes", "code": "0001",
+                                       "name": "BES"}],
+            }],
+        }))
+        (root / "reference" / "doe_sc_baseline.json").write_text(json.dumps({
+            "schemaVersion": 2, "federalAccount": "089-0222",
+            "fiscalYears": {"2026": {"status": "partial", "asOfPeriod": 9,
+                                      "firstPeriod": 9,
+                                      "obligationsCents": 300}},
+        }))
+        row = normalize_event({
+            "id": "one", "source": "file_b_residual",
+            "submissionPeriod": "FY2026P09", "federalAccount": "089-0222",
+            "programActivityCode": "0001", "programActivityName": "BES",
+            "amountCents": 300, "awardId": "", "linked": False,
+        })
+        empty_sha = "0" * 64
+        downloads = []
+        for kind, period in (
+                [("object_class_program_activity", value) for value in range(2, 10)]
+                + [("award_financial", 9)]):
+            row_count = 1 if kind == "object_class_program_activity" and period == 9 else 0
+            downloads.append({
+                "submissionType": kind,
+                "requestScope": {"filters": {
+                    "fy": 2026, "period": period,
+                    "submission_types": [kind], "federal_account": "5778",
+                }, "columns": ["submission_period"]},
+                "acceptedRequestScope": {"filters": {
+                    "fy": 2026, "period": period, "federal_account": "5778",
+                }, "download_types": [kind]},
+                "status": "finished", "statusRowCount": row_count,
+                "parsedRowCount": row_count,
+                "memberRowCounts": {"file": row_count} if row_count else {},
+                "archiveSha256": empty_sha,
+                "rawArtifactFile": f"{kind}-P{period:02}.zip",
+            })
+        provenance = {
+            "schemaVersion": 2, "collectionStatus": "accepted",
+            "acceptedAt": accepted_at,
+            "accountPath": "doe/sc", "federalAccount": "089-0222",
+            "fiscalYear": 2026, "asOfPeriod": 9, "downloads": downloads,
+            "normalized": {"recordCount": 1,
+                           "eventFingerprint": event_fingerprint([row]),
+                           "netObligationsCents": 300},
+            "replacement": {"previousEventFingerprint": empty_sha,
+                            "previousProvenanceSha256": None},
+            "diff": partition_diff([], [row]),
+            "baselinePin": {"status": "partial", "asOfPeriod": 9,
+                            "firstPeriod": 9, "obligationsCents": 300},
+        }
+        write_store(root / "data" / "obligations" / "doe" / "sc" / "events",
+                    [row], {"federalAccount": "089-0222"},
+                    partition_metadata={2026: provenance})
+        return temp, root
+
+    def write_refresh_status(self, root, entry):
+        (root / "data" / "obligations" / "refresh_status.json").write_text(
+            json.dumps({"schemaVersion": 1, "generatedAt": "2026-09-20T00:00:00+00:00",
+                        "accounts": {"doe/sc": entry} if entry else {}})
+        )
+
+    def test_marked_stale_account_passes_freshness_and_dashboard_carries_it(self):
+        temp, root = self.build_fixture("2026-08-25T00:00:00+00:00")
+        try:
+            stale_entry = {
+                "lastRefreshAttemptAt": "2026-09-20T10:00:00+00:00",
+                "lastAcceptedAt": "2026-08-25T00:00:00+00:00",
+                "status": "stale", "staleSince": "2026-08-25",
+                "reason": "the scheduled current-FY (FY2026) pull for this "
+                          "account did not produce a partition in this run",
+            }
+            self.write_refresh_status(root, stale_entry)
+            build_obligations(root)
+            dashboard = json.loads(
+                (root / "data" / "obligations" / "doe" / "sc" / "dashboard.json")
+                .read_text()
+            )
+            self.assertEqual(stale_entry, dashboard["freshness"]["refreshStatus"])
+            errors = validate(root, require_data=True, check_freshness=True,
+                              require_current_provenance=True,
+                              as_of=date(2026, 9, 20))
+            self.assertEqual([], errors)
+        finally:
+            temp.cleanup()
+
+    def test_unmarked_stale_account_still_fails_freshness(self):
+        temp, root = self.build_fixture("2026-08-25T00:00:00+00:00")
+        try:
+            # No refresh_status.json at all: the account defaults to
+            # "fresh", so an SLA breach is still an error -- nothing may go
+            # stale silently.
+            build_obligations(root)
+            errors = validate(root, require_data=True, check_freshness=True,
+                              require_current_provenance=True,
+                              as_of=date(2026, 9, 20))
+            self.assertTrue(
+                any("outside the 0" in error and "not recorded as stale" in error
+                    for error in errors),
+                errors,
+            )
+        finally:
+            temp.cleanup()
+
+    def test_stale_status_without_reason_still_fails_freshness(self):
+        temp, root = self.build_fixture("2026-08-25T00:00:00+00:00")
+        try:
+            # A bare status: "stale" with no reason does not count as a
+            # proper disclosure.
+            self.write_refresh_status(root, {"status": "stale"})
+            build_obligations(root)
+            errors = validate(root, require_data=True, check_freshness=True,
+                              require_current_provenance=True,
+                              as_of=date(2026, 9, 20))
+            self.assertTrue(
+                any("not recorded as stale" in error for error in errors), errors,
+            )
+        finally:
+            temp.cleanup()
+
+    def test_fresh_account_is_unaffected_by_refresh_status(self):
+        temp, root = self.build_fixture("2026-09-18T00:00:00+00:00")
+        try:
+            # Recently accepted, well within the SLA, and no
+            # refresh_status.json at all -- ordinary, unaffected accounts
+            # must see no behavior change from this feature.
+            build_obligations(root)
+            dashboard = json.loads(
+                (root / "data" / "obligations" / "doe" / "sc" / "dashboard.json")
+                .read_text()
+            )
+            self.assertEqual({"status": "fresh"}, dashboard["freshness"]["refreshStatus"])
+            errors = validate(root, require_data=True, check_freshness=True,
+                              require_current_provenance=True,
+                              as_of=date(2026, 9, 20))
+            self.assertEqual([], errors)
+        finally:
+            temp.cleanup()
+
+    def test_rollup_propagates_stale_account_to_agency_and_root_rows(self):
+        # Phase 3.2d remediation W12: refreshStatus reaches every listing a
+        # reader could browse without opening the stale account's own page
+        # -- the agency page's account row and the root page's agency row
+        # (aggregated, since staleness is not agency-uniform) -- plus the
+        # root's own staleAccountCount.
+        temp = tempfile.TemporaryDirectory()
+        try:
+            root = Path(temp.name)
+            (root / "config").mkdir()
+            (root / "reference").mkdir()
+            accounts = [
+                {"path": "doe/sc", "name": "Science", "abbrev": "SC",
+                 "agency": "Energy", "federalAccount": "089-0222",
+                 "baseline": "reference/doe_sc_baseline.json",
+                 "programActivities": [{"slug": "bes", "code": "0001",
+                                        "name": "BES"}]},
+                {"path": "doe/fossil-energy", "name": "Fossil Energy",
+                 "abbrev": "FE", "agency": "Energy",
+                 "federalAccount": "089-0223",
+                 "baseline": "reference/doe_fe_baseline.json",
+                 "programActivities": [{"slug": "fe", "code": "0001",
+                                        "name": "FE"}]},
+            ]
+            (root / "config" / "obligation_accounts.json").write_text(json.dumps({
+                "schemaVersion": 2, "refreshDefaults": {"freshnessMaxDays": 10},
+                "accounts": accounts,
+            }))
+            for account in accounts:
+                (root / account["baseline"]).write_text(json.dumps({
+                    "schemaVersion": 2, "federalAccount": account["federalAccount"],
+                    "fiscalYears": {"2024": {"status": "complete",
+                                              "obligationsCents": 100}},
+                }))
+                row = normalize_event({
+                    "id": f"{account['path']}-one", "source": "file_c",
+                    "submissionPeriod": "FY2024P12",
+                    "federalAccount": account["federalAccount"],
+                    "programActivityCode": "0001",
+                    "programActivityName": account["programActivities"][0]["name"],
+                    "amountCents": 100, "awardId": "", "linked": False,
+                })
+                write_store(root / "data" / "obligations" / account["path"] / "events",
+                           [row])
+            stale_entry = {
+                "lastRefreshAttemptAt": "2026-09-20T10:00:00+00:00",
+                "lastAcceptedAt": "2026-08-25T00:00:00+00:00",
+                "status": "stale", "staleSince": "2026-08-25",
+                "reason": "the scheduled current-FY (FY2026) pull for this "
+                          "account did not produce a partition in this run",
+            }
+            self.write_refresh_status(root, stale_entry)
+            build_obligations(root)
+
+            agency_page = json.loads(
+                (root / "data" / "obligations" / "doe" / "dashboard.json").read_text()
+            )
+            sc_row = next(c for c in agency_page["children"] if c["path"] == "obligations/doe/sc")
+            fe_row = next(c for c in agency_page["children"]
+                         if c["path"] == "obligations/doe/fossil-energy")
+            self.assertEqual(stale_entry, sc_row["refreshStatus"])
+            self.assertNotIn("refreshStatus", fe_row)
+
+            root_page = json.loads(
+                (root / "data" / "obligations" / "dashboard.json").read_text()
+            )
+            self.assertEqual(1, root_page["staleAccountCount"])
+            doe_row = next(c for c in root_page["children"] if c["path"] == "obligations/doe")
+            self.assertEqual("stale", doe_row["refreshStatus"]["status"])
+            self.assertIn("1 of 2", doe_row["refreshStatus"]["reason"])
+            self.assertEqual("2026-08-25", doe_row["refreshStatus"]["staleSince"])
+        finally:
+            temp.cleanup()
+
+    def test_dashboard_refresh_status_mismatch_fails_closed(self):
+        temp, root = self.build_fixture("2026-08-25T00:00:00+00:00")
+        try:
+            stale_entry = {
+                "lastRefreshAttemptAt": "2026-09-20T10:00:00+00:00",
+                "lastAcceptedAt": "2026-08-25T00:00:00+00:00",
+                "status": "stale", "staleSince": "2026-08-25",
+                "reason": "the scheduled current-FY (FY2026) pull for this "
+                          "account did not produce a partition in this run",
+            }
+            self.write_refresh_status(root, stale_entry)
+            build_obligations(root)
+            # Simulate a dashboard that was never rebuilt after
+            # refresh_status.json changed (a staleness disclosure risk this
+            # check is designed to catch).
+            dashboard_path = (root / "data" / "obligations" / "doe" / "sc"
+                              / "dashboard.json")
+            dashboard = json.loads(dashboard_path.read_text())
+            dashboard["freshness"]["refreshStatus"] = {"status": "fresh"}
+            dashboard_path.write_text(json.dumps(dashboard))
+            errors = validate(root, require_data=True, check_freshness=True,
+                              require_current_provenance=True,
+                              as_of=date(2026, 9, 20))
+            self.assertTrue(
+                any("refreshStatus" in error and "does not match" in error
+                    for error in errors),
+                errors,
+            )
         finally:
             temp.cleanup()
 

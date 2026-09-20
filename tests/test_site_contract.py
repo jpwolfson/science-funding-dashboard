@@ -116,6 +116,30 @@ class SiteContractTests(unittest.TestCase):
         ):
             self.assertIn(text, self.html)
 
+    def test_stale_account_note_renders_exact_wording_on_account_pages(self):
+        # Phase 3.2d remediation W12 (per-account atomicity + published
+        # staleness): the header note's wording is fixed and owner-approved
+        # verbatim text -- only the date varies.
+        for text in (
+            "function renderStaleNote(freshness, container = $app)",
+            'const staleAccountNoteText = staleSince =>',
+            "`Not refreshed since ${staleSince}: the most recent scheduled "
+            "pull for this account did not complete; figures are the last "
+            "accepted snapshot.`",
+            'if (node.level === "account") renderStaleNote(data.freshness);',
+            'id: "staleNote"',
+        ):
+            self.assertIn(text, self.html)
+
+    def test_landing_table_carries_a_dagger_marker_for_stale_rows(self):
+        for text in (
+            'const isStale = c.refreshStatus?.status === "stale";',
+            'text: unitLabel(c) + (hasNote ? " *" : "") + (isStale ? " †" : "")',
+            'id: "staleFootnotes"',
+            'el("strong", { text: `† ${names.join(", ")}: ` })',
+        ):
+            self.assertIn(text, self.html)
+
     def test_award_root_coverage_line_and_obligation_subtitles_are_derived(self):
         # Phase 3.2d remediation decision 4 (fixed wording; counts derived
         # in the browser, never hardcoded).

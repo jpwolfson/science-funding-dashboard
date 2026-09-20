@@ -374,15 +374,27 @@ place that still checks the *whole* committed tree on `main`, on its own
 schedule, without being able to hold up any of the three ledgers' own
 publication.
 
-The reconcile job's `--check-freshness --require-current-provenance` gate is
-unconditional: a missing current-FY partition still fails it exactly as
-before. Phase 3.2d remediation W11 only changes what happens upstream of
-that gate — the job itself now runs even after a rotating-historical
-account-year's pull job failed, and `scripts/reconcile_obligation_artifacts.py`
-skips that missing partition (retaining its committed data untouched) while
-still hard-failing on a missing current-FY partition before this gate ever
-runs. See `docs/obligation-ledger.md`, "Refresh, freshness, and
-publication".
+The reconcile job's `--check-freshness --require-current-provenance` gate runs
+unconditionally on every pass. Phase 3.2d remediation W11 changed what
+happens upstream of it -- the job itself now runs even after a
+rotating-historical account-year's pull job failed, and
+`scripts/reconcile_obligation_artifacts.py` skips that missing partition,
+retaining its committed data untouched. Phase 3.2d remediation W12
+("per-account atomicity") extended the same tolerance to a missing
+**current-FY** partition: instead of hard-failing the whole reconcile, it is
+skipped the same way and the account is recorded `stale` (with a `staleSince`
+date and a `reason`) in the committed `data/obligations/refresh_status.json`
+(schema 1: `{generatedAt, accounts: {"<path>": {lastRefreshAttemptAt,
+lastAcceptedAt, status, staleSince?, reason?}}}`). `--check-freshness` reads
+that file: an account beyond the freshness SLA is an error only when it is
+NOT properly marked stale there with a non-empty `reason` -- an account
+beyond the SLA with no entry at all is still an error, and
+`--require-current-provenance` still fails outright on an account with no
+committed accepted provenance at all (a stale marking excuses only the
+*recency* check, never a genuinely missing or unaccepted partition). The one
+remaining hard failure at the reconcile stage is every planned account-year
+coming up missing at once. See `docs/obligation-ledger.md`, "Refresh,
+freshness, and publication".
 
 ## Fast-tier addition: File B snapshot acceptance (Phase 3.2d remediation, 2026-09-17)
 
