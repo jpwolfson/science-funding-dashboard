@@ -188,6 +188,7 @@ parallel.
 | 2026-09-19 10:35 UTC | run 35398624617 progress | 65/106 pulls complete, 0 failed; reconcile expected ~18:30 UTC 2026-09-19 | running |
 | 2026-09-19 23:22 UTC | run 35398624617 attempt 1 | 105/106 pulls green; `usda/nifa-research-education` FY2019 (rotating historical) failed after 2 h 12 min — the adapter's per-download 2 h cap; reconcile skipped. Recovery: `rerun_failed_jobs` (attempt 2 on the same commit; the 105 partition artifacts persist in the run). | rerun |
 | 2026-09-20 00:50 UTC | PR #73 merged | W11: the reconcile job now runs when the matrix has failures; a missing current-FY partition still fails the pass (freshness + current-provenance gate), a missing rotating-historical partition is skipped with the committed partition retained and listed in the job summary. Protects Monday's scheduled soak run from the 2 h download cap on one historical account-year. Attempt 2 of run 35398624617 (rerun of the single failed pull) still in progress. | merged |
+| 2026-09-20 01:40 UTC | run 35398624617 attempt 2 failed identically (`usda/nifa-research-education` FY2019, 2 h 10 min, download cap); custom run dispatched on `main`: mode=custom, accounts=all, FY2026 only, current_period=10 (53 jobs, ~13 h) | The current-FY set is what the freshness gate requires; the stalled FY2019 historical re-pull is left to the rotation (W11 now tolerates its failure). Reconcile expected ~15:00 UTC 2026-09-20. | running |
 
 ## Finding closure evidence (filled at closeout)
 
