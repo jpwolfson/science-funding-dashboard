@@ -1,0 +1,2330 @@
+{
+ "schemaVersion": 1,
+ "tier": "registry",
+ "account": null,
+ "generatedAt": "2026-09-20T23:36:46.100185+00:00",
+ "durationSeconds": 0.217,
+ "passed": true,
+ "checks": [
+  {
+   "name": "registry: schemaVersion",
+   "passed": true,
+   "evidence": "schemaVersion=2",
+   "seconds": 0.0
+  },
+  {
+   "name": "registry: no duplicate account paths",
+   "passed": true,
+   "evidence": "53 account path(s), all unique",
+   "seconds": 0.0
+  },
+  {
+   "name": "registry: no duplicate federal accounts",
+   "passed": true,
+   "evidence": "53 federal account(s), all unique",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/sc: account code format",
+   "passed": true,
+   "evidence": "federalAccount='089-0222' agencyIdentifier='089'",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/sc: registry path format",
+   "passed": true,
+   "evidence": "path='doe/sc'",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/sc: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/sc: baseline file exists",
+   "passed": true,
+   "evidence": "reference/doe_sc_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/sc: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal account fiscal-year snapshots (GTAS/File A)'",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/sc: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/sc: crosswalk correspondence",
+   "passed": true,
+   "evidence": "7 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/arpa-e: account code format",
+   "passed": true,
+   "evidence": "federalAccount='089-0337' agencyIdentifier='089'",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/arpa-e: registry path format",
+   "passed": true,
+   "evidence": "path='doe/arpa-e'",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/arpa-e: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/arpa-e: baseline file exists",
+   "passed": true,
+   "evidence": "reference/doe_arpa_e_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/arpa-e: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending Federal Account endpoint (GTAS/File A): https://api.usaspending.gov/api/v2/federal_accounts/089-0337/'",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/arpa-e: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/arpa-e: crosswalk correspondence",
+   "passed": true,
+   "evidence": "1 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/eere: account code format",
+   "passed": true,
+   "evidence": "federalAccount='089-0321' agencyIdentifier='089'",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/eere: registry path format",
+   "passed": true,
+   "evidence": "path='doe/eere'",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/eere: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/eere: baseline file exists",
+   "passed": true,
+   "evidence": "reference/doe_eere_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/eere: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending Federal Account endpoint (GTAS/File A): https://api.usaspending.gov/api/v2/federal_accounts/089-0321/'",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/eere: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/eere: crosswalk correspondence",
+   "passed": true,
+   "evidence": "10 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/oced: account code format",
+   "passed": true,
+   "evidence": "federalAccount='089-2297' agencyIdentifier='089'",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/oced: registry path format",
+   "passed": true,
+   "evidence": "path='doe/oced'",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/oced: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/oced: baseline file exists",
+   "passed": true,
+   "evidence": "reference/doe_oced_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/oced: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending Federal Account endpoint (GTAS/File A): https://api.usaspending.gov/api/v2/federal_accounts/089-2297/'",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/oced: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/oced: crosswalk correspondence",
+   "passed": true,
+   "evidence": "1 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/fossil-energy: account code format",
+   "passed": true,
+   "evidence": "federalAccount='089-0213' agencyIdentifier='089'",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/fossil-energy: registry path format",
+   "passed": true,
+   "evidence": "path='doe/fossil-energy'",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/fossil-energy: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/fossil-energy: baseline file exists",
+   "passed": true,
+   "evidence": "reference/doe_fossil_energy_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/fossil-energy: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending Federal Account endpoint (GTAS/File A): https://api.usaspending.gov/api/v2/federal_accounts/089-0213/'",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/fossil-energy: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/fossil-energy: crosswalk correspondence",
+   "passed": true,
+   "evidence": "5 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/electricity: account code format",
+   "passed": true,
+   "evidence": "federalAccount='089-0318' agencyIdentifier='089'",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/electricity: registry path format",
+   "passed": true,
+   "evidence": "path='doe/electricity'",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/electricity: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/electricity: baseline file exists",
+   "passed": true,
+   "evidence": "reference/doe_electricity_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/electricity: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending Federal Account endpoint (GTAS/File A): https://api.usaspending.gov/api/v2/federal_accounts/089-0318/'",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/electricity: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/electricity: crosswalk correspondence",
+   "passed": true,
+   "evidence": "1 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/ceser: account code format",
+   "passed": true,
+   "evidence": "federalAccount='089-2250' agencyIdentifier='089'",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/ceser: registry path format",
+   "passed": true,
+   "evidence": "path='doe/ceser'",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/ceser: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/ceser: baseline file exists",
+   "passed": true,
+   "evidence": "reference/doe_ceser_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/ceser: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending Federal Account endpoint (GTAS/File A): https://api.usaspending.gov/api/v2/federal_accounts/089-2250/'",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/ceser: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/ceser: crosswalk correspondence",
+   "passed": true,
+   "evidence": "1 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/nuclear-energy: account code format",
+   "passed": true,
+   "evidence": "federalAccount='089-0319' agencyIdentifier='089'",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/nuclear-energy: registry path format",
+   "passed": true,
+   "evidence": "path='doe/nuclear-energy'",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/nuclear-energy: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/nuclear-energy: baseline file exists",
+   "passed": true,
+   "evidence": "reference/doe_nuclear_energy_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/nuclear-energy: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending Federal Account endpoint (GTAS/File A): https://api.usaspending.gov/api/v2/federal_accounts/089-0319/'",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/nuclear-energy: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/nuclear-energy: crosswalk correspondence",
+   "passed": true,
+   "evidence": "4 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/nnsa-weapons-activities: account code format",
+   "passed": true,
+   "evidence": "federalAccount='089-0240' agencyIdentifier='089'",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/nnsa-weapons-activities: registry path format",
+   "passed": true,
+   "evidence": "path='doe/nnsa-weapons-activities'",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/nnsa-weapons-activities: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/nnsa-weapons-activities: baseline file exists",
+   "passed": true,
+   "evidence": "reference/doe_nnsa_weapons_activities_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/nnsa-weapons-activities: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending Federal Account endpoint (GTAS/File A): https://api.usaspending.gov/api/v2/federal_accounts/089-0240/'",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/nnsa-weapons-activities: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/nnsa-weapons-activities: crosswalk correspondence",
+   "passed": true,
+   "evidence": "7 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/nnsa-defense-nuclear-nonproliferation: account code format",
+   "passed": true,
+   "evidence": "federalAccount='089-0309' agencyIdentifier='089'",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/nnsa-defense-nuclear-nonproliferation: registry path format",
+   "passed": true,
+   "evidence": "path='doe/nnsa-defense-nuclear-nonproliferation'",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/nnsa-defense-nuclear-nonproliferation: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/nnsa-defense-nuclear-nonproliferation: baseline file exists",
+   "passed": true,
+   "evidence": "reference/doe_nnsa_defense_nuclear_nonproliferation_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/nnsa-defense-nuclear-nonproliferation: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending Federal Account endpoint (GTAS/File A): https://api.usaspending.gov/api/v2/federal_accounts/089-0309/'",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/nnsa-defense-nuclear-nonproliferation: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/nnsa-defense-nuclear-nonproliferation: crosswalk correspondence",
+   "passed": true,
+   "evidence": "2 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/eia: account code format",
+   "passed": true,
+   "evidence": "federalAccount='089-0216' agencyIdentifier='089'",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/eia: registry path format",
+   "passed": true,
+   "evidence": "path='doe/eia'",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/eia: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/eia: baseline file exists",
+   "passed": true,
+   "evidence": "reference/doe_eia_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/eia: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending Federal Account endpoint (GTAS/File A): https://api.usaspending.gov/api/v2/federal_accounts/089-0216/'",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/eia: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "doe/eia: crosswalk correspondence",
+   "passed": true,
+   "evidence": "2 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "nsf/rra: account code format",
+   "passed": true,
+   "evidence": "federalAccount='049-0100' agencyIdentifier='049'",
+   "seconds": 0.0
+  },
+  {
+   "name": "nsf/rra: registry path format",
+   "passed": true,
+   "evidence": "path='nsf/rra'",
+   "seconds": 0.0
+  },
+  {
+   "name": "nsf/rra: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "nsf/rra: baseline file exists",
+   "passed": true,
+   "evidence": "reference/nsf_rra_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "nsf/rra: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal account fiscal-year snapshots (GTAS/File A); account title and source availability reviewed 2026-08-12'",
+   "seconds": 0.0
+  },
+  {
+   "name": "nsf/rra: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "nsf/rra: crosswalk correspondence",
+   "passed": true,
+   "evidence": "3 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "nsf/stem-education: account code format",
+   "passed": true,
+   "evidence": "federalAccount='049-0106' agencyIdentifier='049'",
+   "seconds": 0.0
+  },
+  {
+   "name": "nsf/stem-education: registry path format",
+   "passed": true,
+   "evidence": "path='nsf/stem-education'",
+   "seconds": 0.0
+  },
+  {
+   "name": "nsf/stem-education: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "nsf/stem-education: baseline file exists",
+   "passed": true,
+   "evidence": "reference/nsf_stem_education_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "nsf/stem-education: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal account fiscal-year snapshots (GTAS/File A); account title and source availability reviewed 2026-08-12'",
+   "seconds": 0.0
+  },
+  {
+   "name": "nsf/stem-education: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "nsf/stem-education: crosswalk correspondence",
+   "passed": true,
+   "evidence": "2 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "nsf/aoam: account code format",
+   "passed": true,
+   "evidence": "federalAccount='049-0180' agencyIdentifier='049'",
+   "seconds": 0.0
+  },
+  {
+   "name": "nsf/aoam: registry path format",
+   "passed": true,
+   "evidence": "path='nsf/aoam'",
+   "seconds": 0.0
+  },
+  {
+   "name": "nsf/aoam: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "nsf/aoam: baseline file exists",
+   "passed": true,
+   "evidence": "reference/nsf_aoam_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "nsf/aoam: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal account fiscal-year snapshots (GTAS/File A); account title and source availability reviewed 2026-08-12'",
+   "seconds": 0.0
+  },
+  {
+   "name": "nsf/aoam: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "nsf/aoam: crosswalk correspondence",
+   "passed": true,
+   "evidence": "2 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "nsf/mrefc: account code format",
+   "passed": true,
+   "evidence": "federalAccount='049-0551' agencyIdentifier='049'",
+   "seconds": 0.0
+  },
+  {
+   "name": "nsf/mrefc: registry path format",
+   "passed": true,
+   "evidence": "path='nsf/mrefc'",
+   "seconds": 0.0
+  },
+  {
+   "name": "nsf/mrefc: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "nsf/mrefc: baseline file exists",
+   "passed": true,
+   "evidence": "reference/nsf_mrefc_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "nsf/mrefc: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal account fiscal-year snapshots (GTAS/File A); account title and source availability reviewed 2026-08-12'",
+   "seconds": 0.0
+  },
+  {
+   "name": "nsf/mrefc: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "nsf/mrefc: crosswalk correspondence",
+   "passed": true,
+   "evidence": "2 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "hhs/aspr-rd-procurement: account code format",
+   "passed": true,
+   "evidence": "federalAccount='075-1000' agencyIdentifier='075'",
+   "seconds": 0.0
+  },
+  {
+   "name": "hhs/aspr-rd-procurement: registry path format",
+   "passed": true,
+   "evidence": "path='hhs/aspr-rd-procurement'",
+   "seconds": 0.0
+  },
+  {
+   "name": "hhs/aspr-rd-procurement: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "hhs/aspr-rd-procurement: baseline file exists",
+   "passed": true,
+   "evidence": "reference/hhs_aspr_rd_procurement_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "hhs/aspr-rd-procurement: baseline source citation",
+   "passed": true,
+   "evidence": "source='Official federal-account fiscal-year snapshots (GTAS/File A), retrieved 2026-08-14; first material File B/File C period and archive evidence recorded in hhs_aspr_rd_procurement_probe_evidence.json'",
+   "seconds": 0.0
+  },
+  {
+   "name": "hhs/aspr-rd-procurement: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "hhs/aspr-rd-procurement: crosswalk correspondence",
+   "passed": true,
+   "evidence": "1 resolved corresponding row(s); deferred provisional/unresolved rows=['OtherHHS::Project BioShield']",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/science: account code format",
+   "passed": true,
+   "evidence": "federalAccount='080-0120' agencyIdentifier='080'",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/science: registry path format",
+   "passed": true,
+   "evidence": "path='nasa/science'",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/science: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/science: baseline file exists",
+   "passed": true,
+   "evidence": "reference/nasa_science_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/science: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal account fiscal-year snapshots (GTAS/File A), https://api.usaspending.gov/api/v2/federal_accounts/080-0120/?fiscal_year=<FY>, retrieved 2026-08-12'",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/science: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/science: crosswalk correspondence",
+   "passed": true,
+   "evidence": "15 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/aeronautics: account code format",
+   "passed": true,
+   "evidence": "federalAccount='080-0126' agencyIdentifier='080'",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/aeronautics: registry path format",
+   "passed": true,
+   "evidence": "path='nasa/aeronautics'",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/aeronautics: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/aeronautics: baseline file exists",
+   "passed": true,
+   "evidence": "reference/nasa_aeronautics_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/aeronautics: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal account fiscal-year snapshots (GTAS/File A), https://api.usaspending.gov/api/v2/federal_accounts/080-0126/?fiscal_year=<FY>, retrieved 2026-08-12'",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/aeronautics: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/aeronautics: crosswalk correspondence",
+   "passed": true,
+   "evidence": "2 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/space-technology: account code format",
+   "passed": true,
+   "evidence": "federalAccount='080-0131' agencyIdentifier='080'",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/space-technology: registry path format",
+   "passed": true,
+   "evidence": "path='nasa/space-technology'",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/space-technology: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/space-technology: baseline file exists",
+   "passed": true,
+   "evidence": "reference/nasa_space_technology_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/space-technology: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal account fiscal-year snapshots (GTAS/File A), https://api.usaspending.gov/api/v2/federal_accounts/080-0131/?fiscal_year=<FY>, retrieved 2026-08-12'",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/space-technology: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/space-technology: crosswalk correspondence",
+   "passed": true,
+   "evidence": "2 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/stem-engagement: account code format",
+   "passed": true,
+   "evidence": "federalAccount='080-0128' agencyIdentifier='080'",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/stem-engagement: registry path format",
+   "passed": true,
+   "evidence": "path='nasa/stem-engagement'",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/stem-engagement: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/stem-engagement: baseline file exists",
+   "passed": true,
+   "evidence": "reference/nasa_stem_engagement_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/stem-engagement: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal account fiscal-year snapshots (GTAS/File A), https://api.usaspending.gov/api/v2/federal_accounts/080-0128/?fiscal_year=<FY>, retrieved 2026-08-12'",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/stem-engagement: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/stem-engagement: crosswalk correspondence",
+   "passed": true,
+   "evidence": "2 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/exploration: account code format",
+   "passed": true,
+   "evidence": "federalAccount='080-0124' agencyIdentifier='080'",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/exploration: registry path format",
+   "passed": true,
+   "evidence": "path='nasa/exploration'",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/exploration: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/exploration: baseline file exists",
+   "passed": true,
+   "evidence": "reference/nasa_exploration_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/exploration: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal account fiscal-year snapshots (GTAS/File A), https://api.usaspending.gov/api/v2/federal_accounts/080-0124/?fiscal_year=<FY>, retrieved 2026-08-12'",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/exploration: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/exploration: crosswalk correspondence",
+   "passed": true,
+   "evidence": "9 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/space-operations: account code format",
+   "passed": true,
+   "evidence": "federalAccount='080-0115' agencyIdentifier='080'",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/space-operations: registry path format",
+   "passed": true,
+   "evidence": "path='nasa/space-operations'",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/space-operations: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/space-operations: baseline file exists",
+   "passed": true,
+   "evidence": "reference/nasa_space_operations_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/space-operations: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal account fiscal-year snapshots (GTAS/File A), https://api.usaspending.gov/api/v2/federal_accounts/080-0115/?fiscal_year=<FY>, retrieved 2026-08-12'",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/space-operations: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "nasa/space-operations: crosswalk correspondence",
+   "passed": true,
+   "evidence": "2 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "doi/usgs-sir: account code format",
+   "passed": true,
+   "evidence": "federalAccount='014-0804' agencyIdentifier='014'",
+   "seconds": 0.0
+  },
+  {
+   "name": "doi/usgs-sir: registry path format",
+   "passed": true,
+   "evidence": "path='doi/usgs-sir'",
+   "seconds": 0.0
+  },
+  {
+   "name": "doi/usgs-sir: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "doi/usgs-sir: baseline file exists",
+   "passed": true,
+   "evidence": "reference/usgs_sir_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "doi/usgs-sir: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal account fiscal-year snapshots (GTAS/File A), retrieved 2026-08-12'",
+   "seconds": 0.0
+  },
+  {
+   "name": "doi/usgs-sir: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "doi/usgs-sir: crosswalk correspondence",
+   "passed": true,
+   "evidence": "7 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "epa/science-technology: account code format",
+   "passed": true,
+   "evidence": "federalAccount='068-0107' agencyIdentifier='068'",
+   "seconds": 0.0
+  },
+  {
+   "name": "epa/science-technology: registry path format",
+   "passed": true,
+   "evidence": "path='epa/science-technology'",
+   "seconds": 0.0
+  },
+  {
+   "name": "epa/science-technology: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "epa/science-technology: baseline file exists",
+   "passed": true,
+   "evidence": "reference/epa_science_technology_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "epa/science-technology: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal account fiscal-year snapshots (GTAS/File A), retrieved 2026-08-12'",
+   "seconds": 0.0
+  },
+  {
+   "name": "epa/science-technology: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "epa/science-technology: crosswalk correspondence",
+   "passed": true,
+   "evidence": "7 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/noaa-orf: account code format",
+   "passed": true,
+   "evidence": "federalAccount='013-1450' agencyIdentifier='013'",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/noaa-orf: registry path format",
+   "passed": true,
+   "evidence": "path='commerce/noaa-orf'",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/noaa-orf: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/noaa-orf: baseline file exists",
+   "passed": true,
+   "evidence": "reference/noaa_orf_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/noaa-orf: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal-account fiscal-year snapshots (GTAS/File A): https://api.usaspending.gov/api/v2/federal_accounts/3685/fiscal_year_snapshot/{fiscal_year}/; retrieved 2026-08-12'",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/noaa-orf: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/noaa-orf: crosswalk correspondence",
+   "passed": true,
+   "evidence": "6 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/noaa-pac: account code format",
+   "passed": true,
+   "evidence": "federalAccount='013-1460' agencyIdentifier='013'",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/noaa-pac: registry path format",
+   "passed": true,
+   "evidence": "path='commerce/noaa-pac'",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/noaa-pac: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/noaa-pac: baseline file exists",
+   "passed": true,
+   "evidence": "reference/noaa_pac_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/noaa-pac: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal-account fiscal-year snapshots (GTAS/File A): https://api.usaspending.gov/api/v2/federal_accounts/3690/fiscal_year_snapshot/{fiscal_year}/; retrieved 2026-08-12'",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/noaa-pac: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/noaa-pac: crosswalk correspondence",
+   "passed": true,
+   "evidence": "2 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/nist-strs: account code format",
+   "passed": true,
+   "evidence": "federalAccount='013-0500' agencyIdentifier='013'",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/nist-strs: registry path format",
+   "passed": true,
+   "evidence": "path='commerce/nist-strs'",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/nist-strs: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/nist-strs: baseline file exists",
+   "passed": true,
+   "evidence": "reference/nist_strs_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/nist-strs: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal-account fiscal-year snapshots (GTAS/File A): https://api.usaspending.gov/api/v2/federal_accounts/3669/fiscal_year_snapshot/{fiscal_year}/; retrieved 2026-08-12'",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/nist-strs: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/nist-strs: crosswalk correspondence",
+   "passed": true,
+   "evidence": "2 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/nist-its: account code format",
+   "passed": true,
+   "evidence": "federalAccount='013-0525' agencyIdentifier='013'",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/nist-its: registry path format",
+   "passed": true,
+   "evidence": "path='commerce/nist-its'",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/nist-its: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/nist-its: baseline file exists",
+   "passed": true,
+   "evidence": "reference/nist_its_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/nist-its: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal-account fiscal-year snapshots (GTAS/File A): https://api.usaspending.gov/api/v2/federal_accounts/3674/fiscal_year_snapshot/{fiscal_year}/; retrieved 2026-08-12'",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/nist-its: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/nist-its: crosswalk correspondence",
+   "passed": true,
+   "evidence": "2 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/census-current-surveys: account code format",
+   "passed": true,
+   "evidence": "federalAccount='013-0401' agencyIdentifier='013'",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/census-current-surveys: registry path format",
+   "passed": true,
+   "evidence": "path='commerce/census-current-surveys'",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/census-current-surveys: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/census-current-surveys: baseline file exists",
+   "passed": true,
+   "evidence": "reference/census_current_surveys_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/census-current-surveys: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal-account fiscal-year snapshots (GTAS/File A): https://api.usaspending.gov/api/v2/federal_accounts/3666/fiscal_year_snapshot/{fiscal_year}/; retrieved 2026-08-12'",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/census-current-surveys: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/census-current-surveys: crosswalk correspondence",
+   "passed": true,
+   "evidence": "1 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/census-periodic-censuses: account code format",
+   "passed": true,
+   "evidence": "federalAccount='013-0450' agencyIdentifier='013'",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/census-periodic-censuses: registry path format",
+   "passed": true,
+   "evidence": "path='commerce/census-periodic-censuses'",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/census-periodic-censuses: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/census-periodic-censuses: baseline file exists",
+   "passed": true,
+   "evidence": "reference/census_periodic_censuses_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/census-periodic-censuses: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal-account fiscal-year snapshots (GTAS/File A): https://api.usaspending.gov/api/v2/federal_accounts/3667/fiscal_year_snapshot/{fiscal_year}/; retrieved 2026-08-18'",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/census-periodic-censuses: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "commerce/census-periodic-censuses: crosswalk correspondence",
+   "passed": true,
+   "evidence": "1 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/ars-salaries-expenses: account code format",
+   "passed": true,
+   "evidence": "federalAccount='012-1400' agencyIdentifier='012'",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/ars-salaries-expenses: registry path format",
+   "passed": true,
+   "evidence": "path='usda/ars-salaries-expenses'",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/ars-salaries-expenses: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/ars-salaries-expenses: baseline file exists",
+   "passed": true,
+   "evidence": "reference/usda_ars_salaries_expenses_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/ars-salaries-expenses: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal account fiscal-year snapshots (GTAS/File A), retrieved 2026-08-12'",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/ars-salaries-expenses: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/ars-salaries-expenses: crosswalk correspondence",
+   "passed": true,
+   "evidence": "2 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/ars-buildings-facilities: account code format",
+   "passed": true,
+   "evidence": "federalAccount='012-1401' agencyIdentifier='012'",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/ars-buildings-facilities: registry path format",
+   "passed": true,
+   "evidence": "path='usda/ars-buildings-facilities'",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/ars-buildings-facilities: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/ars-buildings-facilities: baseline file exists",
+   "passed": true,
+   "evidence": "reference/usda_ars_buildings_facilities_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/ars-buildings-facilities: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal account fiscal-year snapshots (GTAS/File A), retrieved 2026-08-12'",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/ars-buildings-facilities: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/ars-buildings-facilities: crosswalk correspondence",
+   "passed": true,
+   "evidence": "2 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/forest-rangeland-research: account code format",
+   "passed": true,
+   "evidence": "federalAccount='012-1104' agencyIdentifier='012'",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/forest-rangeland-research: registry path format",
+   "passed": true,
+   "evidence": "path='usda/forest-rangeland-research'",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/forest-rangeland-research: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/forest-rangeland-research: baseline file exists",
+   "passed": true,
+   "evidence": "reference/usda_forest_rangeland_research_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/forest-rangeland-research: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal account fiscal-year snapshots (GTAS/File A), retrieved 2026-08-12'",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/forest-rangeland-research: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/forest-rangeland-research: crosswalk correspondence",
+   "passed": true,
+   "evidence": "1 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/nifa-extension: account code format",
+   "passed": true,
+   "evidence": "federalAccount='012-0502' agencyIdentifier='012'",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/nifa-extension: registry path format",
+   "passed": true,
+   "evidence": "path='usda/nifa-extension'",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/nifa-extension: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/nifa-extension: baseline file exists",
+   "passed": true,
+   "evidence": "reference/usda_nifa_extension_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/nifa-extension: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal account fiscal-year snapshots (GTAS/File A), retrieved 2026-08-12'",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/nifa-extension: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/nifa-extension: crosswalk correspondence",
+   "passed": true,
+   "evidence": "2 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/nifa-research-education: account code format",
+   "passed": true,
+   "evidence": "federalAccount='012-1500' agencyIdentifier='012'",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/nifa-research-education: registry path format",
+   "passed": true,
+   "evidence": "path='usda/nifa-research-education'",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/nifa-research-education: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/nifa-research-education: baseline file exists",
+   "passed": true,
+   "evidence": "reference/usda_nifa_research_education_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/nifa-research-education: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal account fiscal-year snapshots (GTAS/File A), retrieved 2026-08-12'",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/nifa-research-education: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/nifa-research-education: crosswalk correspondence",
+   "passed": true,
+   "evidence": "5 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/nifa-integrated-activities: account code format",
+   "passed": true,
+   "evidence": "federalAccount='012-1502' agencyIdentifier='012'",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/nifa-integrated-activities: registry path format",
+   "passed": true,
+   "evidence": "path='usda/nifa-integrated-activities'",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/nifa-integrated-activities: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/nifa-integrated-activities: baseline file exists",
+   "passed": true,
+   "evidence": "reference/usda_nifa_integrated_activities_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/nifa-integrated-activities: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal account fiscal-year snapshots (GTAS/File A), retrieved 2026-08-12'",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/nifa-integrated-activities: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/nifa-integrated-activities: crosswalk correspondence",
+   "passed": true,
+   "evidence": "2 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/ers: account code format",
+   "passed": true,
+   "evidence": "federalAccount='012-1701' agencyIdentifier='012'",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/ers: registry path format",
+   "passed": true,
+   "evidence": "path='usda/ers'",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/ers: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/ers: baseline file exists",
+   "passed": true,
+   "evidence": "reference/usda_ers_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/ers: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal account fiscal-year snapshots (GTAS/File A), retrieved 2026-08-12'",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/ers: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/ers: crosswalk correspondence",
+   "passed": true,
+   "evidence": "2 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/nass: account code format",
+   "passed": true,
+   "evidence": "federalAccount='012-1801' agencyIdentifier='012'",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/nass: registry path format",
+   "passed": true,
+   "evidence": "path='usda/nass'",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/nass: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/nass: baseline file exists",
+   "passed": true,
+   "evidence": "reference/usda_nass_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/nass: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal account fiscal-year snapshots (GTAS/File A), retrieved 2026-08-12'",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/nass: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "usda/nass: crosswalk correspondence",
+   "passed": true,
+   "evidence": "2 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "va/medical-prosthetic-research: account code format",
+   "passed": true,
+   "evidence": "federalAccount='036-0161' agencyIdentifier='036'",
+   "seconds": 0.0
+  },
+  {
+   "name": "va/medical-prosthetic-research: registry path format",
+   "passed": true,
+   "evidence": "path='va/medical-prosthetic-research'",
+   "seconds": 0.0
+  },
+  {
+   "name": "va/medical-prosthetic-research: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "va/medical-prosthetic-research: baseline file exists",
+   "passed": true,
+   "evidence": "reference/va_medical_prosthetic_research_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "va/medical-prosthetic-research: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal account fiscal-year snapshots (GTAS/File A), retrieved 2026-08-12'",
+   "seconds": 0.0
+  },
+  {
+   "name": "va/medical-prosthetic-research: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "va/medical-prosthetic-research: crosswalk correspondence",
+   "passed": true,
+   "evidence": "1 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "dhs/science-technology-rd: account code format",
+   "passed": true,
+   "evidence": "federalAccount='070-0803' agencyIdentifier='070'",
+   "seconds": 0.0
+  },
+  {
+   "name": "dhs/science-technology-rd: registry path format",
+   "passed": true,
+   "evidence": "path='dhs/science-technology-rd'",
+   "seconds": 0.0
+  },
+  {
+   "name": "dhs/science-technology-rd: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "dhs/science-technology-rd: baseline file exists",
+   "passed": true,
+   "evidence": "reference/dhs_science_technology_rd_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "dhs/science-technology-rd: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal account fiscal-year snapshots (GTAS/File A), retrieved 2026-08-12'",
+   "seconds": 0.0
+  },
+  {
+   "name": "dhs/science-technology-rd: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "dhs/science-technology-rd: crosswalk correspondence",
+   "passed": true,
+   "evidence": "1 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "dhs/cisa-rd: account code format",
+   "passed": true,
+   "evidence": "federalAccount='070-0805' agencyIdentifier='070'",
+   "seconds": 0.0
+  },
+  {
+   "name": "dhs/cisa-rd: registry path format",
+   "passed": true,
+   "evidence": "path='dhs/cisa-rd'",
+   "seconds": 0.0
+  },
+  {
+   "name": "dhs/cisa-rd: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "dhs/cisa-rd: baseline file exists",
+   "passed": true,
+   "evidence": "reference/dhs_cisa_rd_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "dhs/cisa-rd: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal account fiscal-year snapshots (GTAS/File A), retrieved 2026-08-12'",
+   "seconds": 0.0
+  },
+  {
+   "name": "dhs/cisa-rd: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "dhs/cisa-rd: crosswalk correspondence",
+   "passed": true,
+   "evidence": "1 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "dhs/cwmd-rd: account code format",
+   "passed": true,
+   "evidence": "federalAccount='070-0860' agencyIdentifier='070'",
+   "seconds": 0.0
+  },
+  {
+   "name": "dhs/cwmd-rd: registry path format",
+   "passed": true,
+   "evidence": "path='dhs/cwmd-rd'",
+   "seconds": 0.0
+  },
+  {
+   "name": "dhs/cwmd-rd: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "dhs/cwmd-rd: baseline file exists",
+   "passed": true,
+   "evidence": "reference/dhs_cwmd_rd_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "dhs/cwmd-rd: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal account fiscal-year snapshots (GTAS/File A), retrieved 2026-08-12'",
+   "seconds": 0.0
+  },
+  {
+   "name": "dhs/cwmd-rd: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "dhs/cwmd-rd: crosswalk correspondence",
+   "passed": true,
+   "evidence": "1 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "dot/ost-research-technology: account code format",
+   "passed": true,
+   "evidence": "federalAccount='069-1730' agencyIdentifier='069'",
+   "seconds": 0.0
+  },
+  {
+   "name": "dot/ost-research-technology: registry path format",
+   "passed": true,
+   "evidence": "path='dot/ost-research-technology'",
+   "seconds": 0.0
+  },
+  {
+   "name": "dot/ost-research-technology: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "dot/ost-research-technology: baseline file exists",
+   "passed": true,
+   "evidence": "reference/dot_ost_research_technology_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "dot/ost-research-technology: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal account fiscal-year snapshots (GTAS/File A), retrieved 2026-08-12'",
+   "seconds": 0.0
+  },
+  {
+   "name": "dot/ost-research-technology: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "dot/ost-research-technology: crosswalk correspondence",
+   "passed": true,
+   "evidence": "3 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "dot/faa-research-engineering-development: account code format",
+   "passed": true,
+   "evidence": "federalAccount='069-8108' agencyIdentifier='069'",
+   "seconds": 0.0
+  },
+  {
+   "name": "dot/faa-research-engineering-development: registry path format",
+   "passed": true,
+   "evidence": "path='dot/faa-research-engineering-development'",
+   "seconds": 0.0
+  },
+  {
+   "name": "dot/faa-research-engineering-development: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "dot/faa-research-engineering-development: baseline file exists",
+   "passed": true,
+   "evidence": "reference/dot_faa_research_engineering_development_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "dot/faa-research-engineering-development: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal account fiscal-year snapshots (GTAS/File A), retrieved 2026-08-12'",
+   "seconds": 0.0
+  },
+  {
+   "name": "dot/faa-research-engineering-development: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "dot/faa-research-engineering-development: crosswalk correspondence",
+   "passed": true,
+   "evidence": "1 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "dot/fra-rd: account code format",
+   "passed": true,
+   "evidence": "federalAccount='069-0745' agencyIdentifier='069'",
+   "seconds": 0.0
+  },
+  {
+   "name": "dot/fra-rd: registry path format",
+   "passed": true,
+   "evidence": "path='dot/fra-rd'",
+   "seconds": 0.0
+  },
+  {
+   "name": "dot/fra-rd: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "dot/fra-rd: baseline file exists",
+   "passed": true,
+   "evidence": "reference/dot_fra_rd_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "dot/fra-rd: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal account fiscal-year snapshots (GTAS/File A), retrieved 2026-08-12'",
+   "seconds": 0.0
+  },
+  {
+   "name": "dot/fra-rd: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "dot/fra-rd: crosswalk correspondence",
+   "passed": true,
+   "evidence": "1 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "ed/ies: account code format",
+   "passed": true,
+   "evidence": "federalAccount='091-1100' agencyIdentifier='091'",
+   "seconds": 0.0
+  },
+  {
+   "name": "ed/ies: registry path format",
+   "passed": true,
+   "evidence": "path='ed/ies'",
+   "seconds": 0.0
+  },
+  {
+   "name": "ed/ies: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "ed/ies: baseline file exists",
+   "passed": true,
+   "evidence": "reference/ed_ies_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "ed/ies: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal account fiscal-year snapshots (GTAS/File A), retrieved 2026-08-12'",
+   "seconds": 0.0
+  },
+  {
+   "name": "ed/ies: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "ed/ies: crosswalk correspondence",
+   "passed": true,
+   "evidence": "2 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "hhs/ahrq: account code format",
+   "passed": true,
+   "evidence": "federalAccount='075-1700' agencyIdentifier='075'",
+   "seconds": 0.0
+  },
+  {
+   "name": "hhs/ahrq: registry path format",
+   "passed": true,
+   "evidence": "path='hhs/ahrq'",
+   "seconds": 0.0
+  },
+  {
+   "name": "hhs/ahrq: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "hhs/ahrq: baseline file exists",
+   "passed": true,
+   "evidence": "reference/hhs_ahrq_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "hhs/ahrq: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal account fiscal-year snapshots (GTAS/File A), retrieved 2026-08-12'",
+   "seconds": 0.0
+  },
+  {
+   "name": "hhs/ahrq: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "hhs/ahrq: crosswalk correspondence",
+   "passed": true,
+   "evidence": "1 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/army-rdte: account code format",
+   "passed": true,
+   "evidence": "federalAccount='021-2040' agencyIdentifier='021'",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/army-rdte: registry path format",
+   "passed": true,
+   "evidence": "path='dod/army-rdte'",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/army-rdte: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/army-rdte: interpretationNote is a non-empty string",
+   "passed": true,
+   "evidence": "322 character(s)",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/army-rdte: baseline file exists",
+   "passed": true,
+   "evidence": "reference/dod_army_rdte_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/army-rdte: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal account fiscal-year snapshots (GTAS/File A), https://api.usaspending.gov/api/v2/federal_accounts/021-2040/?fiscal_year=<FY>, reverified 2026-08-27'",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/army-rdte: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/army-rdte: crosswalk correspondence",
+   "passed": true,
+   "evidence": "8 resolved corresponding row(s); deferred provisional/unresolved rows=['DODBasicProgs::Defense Research Sciences', 'DODBasicProgs::Univ Research Initiatives', 'DODBasicProgs::University / Industry Research Centers']",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/navy-rdte: account code format",
+   "passed": true,
+   "evidence": "federalAccount='017-1319' agencyIdentifier='017'",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/navy-rdte: registry path format",
+   "passed": true,
+   "evidence": "path='dod/navy-rdte'",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/navy-rdte: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/navy-rdte: interpretationNote is a non-empty string",
+   "passed": true,
+   "evidence": "322 character(s)",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/navy-rdte: baseline file exists",
+   "passed": true,
+   "evidence": "reference/dod_navy_rdte_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/navy-rdte: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal account fiscal-year snapshots (GTAS/File A), https://api.usaspending.gov/api/v2/federal_accounts/017-1319/?fiscal_year=<FY>, reverified 2026-08-27'",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/navy-rdte: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/navy-rdte: crosswalk correspondence",
+   "passed": true,
+   "evidence": "8 resolved corresponding row(s); deferred provisional/unresolved rows=['DODBasicProgs::Defense Research Sciences', 'DODBasicProgs::Univ Research Initiatives', 'DODBasicProgs::University / Industry Research Centers']",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/air-force-rdte: account code format",
+   "passed": true,
+   "evidence": "federalAccount='057-3600' agencyIdentifier='057'",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/air-force-rdte: registry path format",
+   "passed": true,
+   "evidence": "path='dod/air-force-rdte'",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/air-force-rdte: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/air-force-rdte: interpretationNote is a non-empty string",
+   "passed": true,
+   "evidence": "322 character(s)",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/air-force-rdte: baseline file exists",
+   "passed": true,
+   "evidence": "reference/dod_air_force_rdte_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/air-force-rdte: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal account fiscal-year snapshots (GTAS/File A), https://api.usaspending.gov/api/v2/federal_accounts/057-3600/?fiscal_year=<FY>, reverified 2026-08-31'",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/air-force-rdte: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/air-force-rdte: crosswalk correspondence",
+   "passed": true,
+   "evidence": "8 resolved corresponding row(s); deferred provisional/unresolved rows=['DODBasicProgs::Defense Research Sciences', 'DODBasicProgs::Univ Research Initiatives', 'DODBasicProgs::University / Industry Research Centers']",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/space-force-rdte: account code format",
+   "passed": true,
+   "evidence": "federalAccount='057-3620' agencyIdentifier='057'",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/space-force-rdte: registry path format",
+   "passed": true,
+   "evidence": "path='dod/space-force-rdte'",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/space-force-rdte: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/space-force-rdte: interpretationNote is a non-empty string",
+   "passed": true,
+   "evidence": "322 character(s)",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/space-force-rdte: baseline file exists",
+   "passed": true,
+   "evidence": "reference/dod_space_force_rdte_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/space-force-rdte: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal account fiscal-year snapshots (GTAS/File A), https://api.usaspending.gov/api/v2/federal_accounts/057-3620/?fiscal_year=<FY>, reverified 2026-08-31'",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/space-force-rdte: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/space-force-rdte: crosswalk correspondence",
+   "passed": true,
+   "evidence": "8 resolved corresponding row(s); deferred provisional/unresolved rows=['DODBasicProgs::Defense Research Sciences', 'DODBasicProgs::Univ Research Initiatives', 'DODBasicProgs::University / Industry Research Centers']",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/defense-wide-rdte: account code format",
+   "passed": true,
+   "evidence": "federalAccount='097-0400' agencyIdentifier='097'",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/defense-wide-rdte: registry path format",
+   "passed": true,
+   "evidence": "path='dod/defense-wide-rdte'",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/defense-wide-rdte: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/defense-wide-rdte: interpretationNote is a non-empty string",
+   "passed": true,
+   "evidence": "322 character(s)",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/defense-wide-rdte: baseline file exists",
+   "passed": true,
+   "evidence": "reference/dod_defense_wide_rdte_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/defense-wide-rdte: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal account fiscal-year snapshots (GTAS/File A), https://api.usaspending.gov/api/v2/federal_accounts/097-0400/?fiscal_year=<FY>, reverified 2026-09-01'",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/defense-wide-rdte: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/defense-wide-rdte: crosswalk correspondence",
+   "passed": true,
+   "evidence": "10 resolved corresponding row(s); deferred provisional/unresolved rows=['DODBasicProgs::Defense Research Sciences', 'DODBasicProgs::Minority Institutions', 'DODBasicProgs::National Defense Education Program', 'DODBasicProgs::OSD Initiatives', 'DODBasicProgs::Univ Research Initiatives', 'DODBasicProgs::University / Industry Research Centers', 'DODOther::DIU', 'DODOther::National Security Innovation Network']",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/defense-health-program: account code format",
+   "passed": true,
+   "evidence": "federalAccount='097-0130' agencyIdentifier='097'",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/defense-health-program: registry path format",
+   "passed": true,
+   "evidence": "path='dod/defense-health-program'",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/defense-health-program: per-account checks present",
+   "passed": true,
+   "evidence": "all required fields present",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/defense-health-program: interpretationNote is a non-empty string",
+   "passed": true,
+   "evidence": "322 character(s)",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/defense-health-program: baseline file exists",
+   "passed": true,
+   "evidence": "reference/dod_defense_health_program_obligation_baseline.json",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/defense-health-program: baseline source citation",
+   "passed": true,
+   "evidence": "source='USAspending federal account fiscal-year snapshots (GTAS/File A), https://api.usaspending.gov/api/v2/federal_accounts/097-0130/?fiscal_year=<FY>, reverified 2026-09-01'",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/defense-health-program: baseline per-FY status map",
+   "passed": true,
+   "evidence": "12 fiscal year(s) statused, reasons present where required",
+   "seconds": 0.0
+  },
+  {
+   "name": "dod/defense-health-program: crosswalk correspondence",
+   "passed": true,
+   "evidence": "1 resolved corresponding row(s); deferred provisional/unresolved rows=[]",
+   "seconds": 0.0
+  }
+ ],
+ "footprint": {
+  "perTreeBytes": {
+   ".github": 47308,
+   ".gitignore": 70,
+   "CLAUDE.md": 14379,
+   "README.md": 7063,
+   "adapters": 165510,
+   "config": 174730,
+   "data": 679831125,
+   "docs": 4022297,
+   "reference": 629854,
+   "scripts": 352950,
+   "site": 114119,
+   "tests": 530619
+  },
+  "totalTrackedBytes": 685890024,
+  "gzippedStoreBytes": 369665802,
+  "pagesArtifact": {
+   "fileCount": 1886,
+   "totalBytes": 346405764,
+   "status": "ok",
+   "warningThresholdBytes": 850000000,
+   "stopThresholdBytes": 950000000,
+   "pagesLimitBytes": 1000000000,
+   "headroomBytes": 653594236,
+   "excludedFromArtifact": "data/obligations/**/events/*.csv.gz"
+  },
+  "trajectory": {
+   "method": "linear extrapolation of the data/ tree's committed byte total from the first commit that touched data/ to HEAD, projected 52 weeks forward",
+   "note": "the sampled history to date is dominated by one-time historical backfills (Phases 1-3.2c), not steady-state weekly incremental refreshes, so this rate is a conservative UPPER BOUND, not a steady-state forecast; re-derive after several weeks of pure incremental refresh history exist",
+   "firstDataCommit": "89a07e510c377ad9eaa2e15ab49aa2326d388667",
+   "firstDataCommitDate": "2026-09-14T16:03:01+00:00",
+   "weeksElapsed": 1.0,
+   "currentDataTreeBytes": 679831125,
+   "weeklyGrowthBytesUpperBound": 14118207,
+   "projected52WeekBytesUpperBound": 1413977889,
+   "thresholdBytes": 966367641,
+   "approachesOneGigabyte": true
+  }
+ }
+}

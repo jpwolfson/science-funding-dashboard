@@ -1,0 +1,74 @@
+{
+ "schemaVersion": 1,
+ "tier": "rendered",
+ "account": null,
+ "generatedAt": "2026-09-20T23:49:38.831295+00:00",
+ "durationSeconds": 143.242,
+ "passed": true,
+ "checks": [
+  {
+   "name": "smoke-obligation-pages",
+   "passed": true,
+   "evidence": "Rendered obligation page matrix passed (5 cases)",
+   "seconds": 6.006
+  },
+  {
+   "name": "smoke-obligation-pages-all-accounts",
+   "passed": true,
+   "evidence": "Rendered all-accounts obligation page matrix passed (212 cases)",
+   "seconds": 102.651
+  },
+  {
+   "name": "smoke-pages-public-links",
+   "passed": true,
+   "evidence": "Rendered assembled-artifact public-link matrix passed (59 cases)",
+   "seconds": 30.46
+  },
+  {
+   "name": "smoke-sentinel-page",
+   "passed": true,
+   "evidence": "Rendered funding-action sentinel passed (2 cases)",
+   "seconds": 4.124
+  }
+ ],
+ "footprint": {
+  "perTreeBytes": {
+   ".github": 47308,
+   ".gitignore": 70,
+   "CLAUDE.md": 14379,
+   "README.md": 7063,
+   "adapters": 165510,
+   "config": 174730,
+   "data": 679831125,
+   "docs": 4026341,
+   "reference": 629854,
+   "scripts": 352950,
+   "site": 114119,
+   "tests": 530619
+  },
+  "totalTrackedBytes": 685894068,
+  "gzippedStoreBytes": 369665802,
+  "pagesArtifact": {
+   "fileCount": 1886,
+   "totalBytes": 346405764,
+   "status": "ok",
+   "warningThresholdBytes": 850000000,
+   "stopThresholdBytes": 950000000,
+   "pagesLimitBytes": 1000000000,
+   "headroomBytes": 653594236,
+   "excludedFromArtifact": "data/obligations/**/events/*.csv.gz"
+  },
+  "trajectory": {
+   "method": "linear extrapolation of the data/ tree's committed byte total from the first commit that touched data/ to HEAD, projected 52 weeks forward",
+   "note": "the sampled history to date is dominated by one-time historical backfills (Phases 1-3.2c), not steady-state weekly incremental refreshes, so this rate is a conservative UPPER BOUND, not a steady-state forecast; re-derive after several weeks of pure incremental refresh history exist",
+   "firstDataCommit": "89a07e510c377ad9eaa2e15ab49aa2326d388667",
+   "firstDataCommitDate": "2026-09-14T16:03:01+00:00",
+   "weeksElapsed": 1.0,
+   "currentDataTreeBytes": 679831125,
+   "weeklyGrowthBytesUpperBound": 14118207,
+   "projected52WeekBytesUpperBound": 1413977889,
+   "thresholdBytes": 966367641,
+   "approachesOneGigabyte": true
+  }
+ }
+}
