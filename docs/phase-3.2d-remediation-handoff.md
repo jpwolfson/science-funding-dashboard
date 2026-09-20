@@ -215,6 +215,8 @@ before it runs, so nothing merges while that reconcile can be in flight):
 | 2026-09-20 01:40 UTC | run 35398624617 attempt 2 failed identically (`usda/nifa-research-education` FY2019, 2 h 10 min, download cap); custom run dispatched on `main`: mode=custom, accounts=all, FY2026 only, current_period=10 (53 jobs, ~13 h) | The current-FY set is what the freshness gate requires; the stalled FY2019 historical re-pull is left to the rotation (W11 now tolerates its failure). Reconcile expected ~15:00 UTC 2026-09-20. | running |
 | 2026-09-20 01:35–15:35 UTC | run 35481780814 (custom, FY2026 P10, 53 accounts) | **SUCCESS** — 53/53 pulls, reconcile validated (W10 rule held: `doe/sc` and `doe/fossil-energy` P10 `notReported`, pins at P09), atomic snapshot committed (`ea328c4a`, 976 files), Pages deployed. First accepted 53-account obligation snapshot; freshness restored for every account; `dhs/cwmd-rd` FY2026 store now reaches its P10 pin. | green |
 | 2026-09-20 15:40 UTC | PR #74 merged (`a4597fc`) | W13 automatic resume of a timed-out download on the run's next attempt | merged |
+| 2026-09-20 15:50 UTC | PR #76 merged (`1305df1`) | Closeout: `reference/obligation_retry_recovery.json` deleted, ci.yml lint dropped, absence test; `validate_obligations.py` on `ea328c4a` with the manifest absent: **zero errors** | merged |
+| 2026-09-20 15:52 UTC | FY2025 custom re-pull dispatched on `main` (six DoD accounts + commerce/nist-its, P12) | Replaces the empty FY2025 P11 File B snapshots behind HIGH-5 if the source now returns full ones; regenerates those shards under the span rule. W12 (#75) merges after this run completes (the reconcile job syncs to main's tip). | running |
 
 ## Finding closure evidence (filled at closeout)
 
@@ -222,6 +224,6 @@ before it runs, so nothing merges while that reconcile can be in flight):
 |---|---|---|
 | HIGH-1 | W1, W5 | |
 | HIGH-2 | W2, W5 | |
-| HIGH-3 | W3 | |
+| HIGH-3 | W3, closeout #76 | Hatches retired by landing: the weekly-mode P10 pull (run 35481780814) gave every account a P10 partition and the `dhs/cwmd-rd` pin its store; the six placeholder identities validate on store data since the W3 rebuild; manifest deleted in #76 and `validate_obligations.py` passes with zero errors and no hatch (`tests/test_obligation_retry_recovery.py` asserts the manifest is absent). |
 | HIGH-4 | W4 | |
 | HIGH-5 | W3 | |
