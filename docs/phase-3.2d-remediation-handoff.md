@@ -222,6 +222,7 @@ before it runs, so nothing merges while that reconcile can be in flight):
 | 2026-09-20 20:20 UTC | FY2023 custom re-pull dispatched (`dhs/cisa-rd`, P12) | Tests the provisional P04 periodNote (full rows, collapsed dollars) | running |
 | 2026-09-20 20:19–20:51 UTC | run 35535164305 (custom FY2023: dhs/cisa-rd) | **SUCCESS**, snapshot `465765cd`. Full rows every period (10–16); P03 reports 1,290,038,168 cents cumulative, above the FY2023 pin (984,707,477), P04 100,000,000 and consistent thereafter: a source over-report at P03 corrected at P04. Provisional periodNote → confirmed (branch `claude/rem-dhs-note`). | green |
 | 2026-09-20 21:25 UTC | FY2022 custom re-pull dispatched (`usda/nifa-integrated-activities`, P12) | Last of the review's 13 affected account-years | running |
+| 2026-09-20 21:23–21:57 UTC | run 35538536444 (custom FY2022: usda/nifa-integrated-activities) | **SUCCESS**, snapshot `77a45f01`. Rows 13,13,12,14,13,27,27,27,27,27,29 (all reported); P02 2,425,851 → P03 −1,312,516 cents is a genuine small early-year net deobligation below the $1M drop-check floor. **All 13 review-flagged account-years re-pulled**: none changed at the source; classification, span reconciliation, and the two confirmed periodNotes are the permanent state. No custom run in flight for the Monday scheduled soak. | green |
 
 ## Finding closure evidence (filled at closeout)
 
