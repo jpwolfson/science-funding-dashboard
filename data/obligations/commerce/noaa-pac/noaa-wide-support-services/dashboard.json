@@ -1,7 +1,7 @@
 {
  "schemaVersion": 2,
  "kind": "obligations",
- "generated": "2026-09-17",
+ "generated": "2026-09-20",
  "node": {
   "level": "programActivity",
   "path": "obligations/commerce/noaa-pac/noaa-wide-support-services",
@@ -11,26 +11,26 @@
  "source": "USAspending File B and File C",
  "warnings": [],
  "dataComplete": true,
- "netObligationsCents": 11867208085,
- "netObligations": 118672080.85,
- "awardLinkedObligationsCents": 4527700594,
- "awardLinkedObligations": 45277005.94,
+ "netObligationsCents": 11880761378,
+ "netObligations": 118807613.78,
+ "awardLinkedObligationsCents": 4541253887,
+ "awardLinkedObligations": 45412538.87,
  "residualObligationsCents": 7339507491,
  "residualObligations": 73395074.91,
- "grossObligationsCents": 13140621474,
- "grossObligations": 131406214.74,
+ "grossObligationsCents": 13154174767,
+ "grossObligations": 131541747.67,
  "deobligationsCents": -1273413389,
  "deobligations": -12734133.89,
- "distinctLinkedAwards": 158,
- "fileCToNetRatio": 0.3815303954872887,
- "totalNetObligationsCents": 11867208085,
- "totalNetObligations": 118672080.85,
- "totalAwardLinkedObligationsCents": 4527700594,
- "totalAwardLinkedObligations": 45277005.94,
+ "distinctLinkedAwards": 160,
+ "fileCToNetRatio": 0.38223593105818876,
+ "totalNetObligationsCents": 11880761378,
+ "totalNetObligations": 118807613.78,
+ "totalAwardLinkedObligationsCents": 4541253887,
+ "totalAwardLinkedObligations": 45412538.87,
  "totalResidualObligationsCents": 7339507491,
  "totalResidualObligations": 73395074.91,
  "currentFY": 2026,
- "asOfPeriod": "FY2026P09",
+ "asOfPeriod": "FY2026P10",
  "reportingPeriods": [
   {
    "submissionPeriod": "FY2017P06",
@@ -1807,6 +1807,23 @@
    "deobligations": 0.0,
    "distinctLinkedAwards": 0,
    "fileCToNetRatio": 0.0
+  },
+  {
+   "submissionPeriod": "FY2026P10",
+   "month": "2026-07",
+   "status": "reported",
+   "netObligationsCents": 13553293,
+   "netObligations": 135532.93,
+   "awardLinkedObligationsCents": 13553293,
+   "awardLinkedObligations": 135532.93,
+   "residualObligationsCents": 0,
+   "residualObligations": 0.0,
+   "grossObligationsCents": 13553293,
+   "grossObligations": 135532.93,
+   "deobligationsCents": 0,
+   "deobligations": 0.0,
+   "distinctLinkedAwards": 2,
+   "fileCToNetRatio": 1.0
   }
  ],
  "fiscalYears": [
@@ -4308,20 +4325,60 @@
   {
    "fy": 2026,
    "partial": true,
-   "netObligationsCents": 580998479,
-   "netObligations": 5809984.79,
-   "awardLinkedObligationsCents": 0,
-   "awardLinkedObligations": 0.0,
+   "netObligationsCents": 594551772,
+   "netObligations": 5945517.72,
+   "awardLinkedObligationsCents": 13553293,
+   "awardLinkedObligations": 135532.93,
    "residualObligationsCents": 580998479,
    "residualObligations": 5809984.79,
-   "grossObligationsCents": 580998479,
-   "grossObligations": 5809984.79,
+   "grossObligationsCents": 594551772,
+   "grossObligations": 5945517.72,
    "deobligationsCents": 0,
    "deobligations": 0.0,
-   "distinctLinkedAwards": 0,
-   "fileCToNetRatio": 0.0,
-   "topRecipients": [],
-   "positiveFlows": [],
+   "distinctLinkedAwards": 2,
+   "fileCToNetRatio": 0.02279581634145731,
+   "topRecipients": [
+    {
+     "recipientUEI": "R15MK4RSWRD3",
+     "recipient": "DISYS SOLUTIONS, INC.",
+     "netObligationsCents": 8913069,
+     "netObligations": 89130.69,
+     "distinctLinkedAwards": 1
+    },
+    {
+     "recipientUEI": "UER4AJLUB8D5",
+     "recipient": "THUNDERCAT TECHNOLOGY, LLC",
+     "netObligationsCents": 4640224,
+     "netObligations": 46402.24,
+     "distinctLinkedAwards": 1
+    }
+   ],
+   "positiveFlows": [
+    {
+     "id": "41991a486a4163eee7fc5e1322adeff19fad274bdf8731682638c0c1892ba334",
+     "awardId": "CONT_AWD_1331L525F0259_1301_1331L521A13ES0040_1301",
+     "title": "SMARTNET ORDER",
+     "recipient": "DISYS SOLUTIONS, INC.",
+     "amountCents": 8913069,
+     "amount": 89130.69,
+     "netAmountCents": 8913069,
+     "netAmount": 89130.69,
+     "submissionPeriod": "FY2026P10",
+     "awardUrl": "https://www.usaspending.gov/award/CONT_AWD_1331L525F0259_1301_1331L521A13ES0040_1301/"
+    },
+    {
+     "id": "81bfc8cab45ac4ea7c1ec00a0d77ad7abe5b2027270d59a0e709513dc9ea9f1d",
+     "awardId": "CONT_AWD_1331L526F0301_1301_1331L524A13ES0006_1301",
+     "title": "SERVICENOW",
+     "recipient": "THUNDERCAT TECHNOLOGY, LLC",
+     "amountCents": 4640224,
+     "amount": 46402.24,
+     "netAmountCents": 4640224,
+     "netAmount": 46402.24,
+     "submissionPeriod": "FY2026P10",
+     "awardUrl": "https://www.usaspending.gov/award/CONT_AWD_1331L526F0301_1301_1331L524A13ES0006_1301/"
+    }
+   ],
    "negativeFlows": []
   }
  ],
@@ -5237,6 +5294,23 @@
      "deobligations": 0.0,
      "distinctLinkedAwards": 0,
      "fileCToNetRatio": 0.0
+    },
+    {
+     "d": 303,
+     "submissionPeriod": "FY2026P10",
+     "status": "reported",
+     "netObligationsCents": 594551772,
+     "netObligations": 5945517.72,
+     "awardLinkedObligationsCents": 13553293,
+     "awardLinkedObligations": 135532.93,
+     "residualObligationsCents": 580998479,
+     "residualObligations": 5809984.79,
+     "grossObligationsCents": 594551772,
+     "grossObligations": 5945517.72,
+     "deobligationsCents": 0,
+     "deobligations": 0.0,
+     "distinctLinkedAwards": 2,
+     "fileCToNetRatio": 0.02279581634145731
     }
    ]
   }
@@ -5245,7 +5319,7 @@
  "federalAccount": "013-1460",
  "programActivityCode": "0015",
  "freshness": {
-  "latestAcceptedAt": "2026-08-24T14:19:21+00:00",
+  "latestAcceptedAt": "2026-09-20T03:12:06+00:00",
   "maxAgeDays": 10
  }
 }

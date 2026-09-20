@@ -246,6 +246,33 @@ to publish a File A/File B pin of exactly zero cents over a previously
 positive pin in the same fiscal year; the last accepted pin is kept
 unchanged rather than advanced.
 
+**Validating a not-reported latest period (Phase 3.2d remediation W10,
+2026-09-18).** The first full 53-account weekly refresh (run 35253300879)
+pulled doe/sc and doe/fossil-energy FY2026 through P10 and, correctly per
+the acceptance rule above, classified P10 `notReported` on both (a
+provisional dip with no later period yet to test recovery against — 92 of
+219 File B rows at doe/fossil-energy, 39 of 149 at doe/sc). The pin
+correctly stayed at P09 on both, exactly as designed. Two
+`scripts/validate_obligations.py` checks had not been updated for that
+otherwise-correct state and failed closed on it: the same-period GTAS pin
+check compared the pin's `asOfPeriod` against the latest *stored* period
+(P10, which still carries real File C events even though it is
+`notReported`) rather than the latest *reported* period (P09); and the
+one-residual-per-bucket check expected every `(period, programActivity)`
+bucket with a File C event to also carry exactly one residual, which a
+`notReported` period never has by design. The fix: for a partial fiscal
+year, the same-period pin comparison uses the latest period File B
+classifies `reported`, and only once every later period the store actually
+holds is itself `notReported` (never a period simply not yet pulled) — a
+pin sitting on a `notReported` period, or lagging behind a fully reported
+latest period, still fails exactly as before. The residual check skips (as
+opposed to zero-asserts) a `notReported` bucket, since an *internal*
+mid-year dip that a later pull already covers may still carry a residual
+booked under an earlier pull's per-period reconciliation from before that
+period was reclassified by a later refinement of the row-count rule — only
+the account's own actual dangling latest period is guaranteed residual-free
+by construction, and that is what the pin check above depends on.
+
 ## Reconciliation gate
 
 For every covered account-year:
@@ -286,12 +313,28 @@ that registry: every account refreshes the newest source-available fiscal year
 weekly and reconciles one historical fiscal year on a rotating basis. A full or
 bounded custom plan remains dispatchable.
 
-All account-year jobs must succeed before reconciliation. The reconcile job
-applies every replacement to one candidate tree, updates partial baseline pins,
-rebuilds all manifests and dashboards, validates every registered account, and
-runs the rendered browser matrix. Only that exact validated tree is committed
-and uploaded as the Pages artifact. The ordinary award deployment workflow
-does not independently redeploy obligation-only commits.
+Every current-FY account-year job must still succeed before reconciliation
+publishes; a failed rotating-historical (or full/custom) re-pull job does not
+by itself block reconciliation (see below). The reconcile job applies every
+replacement to one candidate tree, updates partial baseline pins, rebuilds all
+manifests and dashboards, validates every registered account, and runs the
+rendered browser matrix. Only that exact validated tree is committed and
+uploaded as the Pages artifact. The ordinary award deployment workflow does
+not independently redeploy obligation-only commits.
+
+Every account's current-FY partition is still all-or-nothing: the reconcile
+job compares the planned account × fiscal-year matrix against the partitions
+this run actually produced, and a missing current-FY partition fails the
+reconcile outright, exactly as before -- `--check-freshness` and
+`--require-current-provenance` guard the same guarantee independently. A
+failed rotating-historical (or full/custom) re-pull is different: it loses no
+data, because the store's already-committed partition for that fiscal year is
+untouched, so the reconcile job now tolerates it -- it logs the skip, retains
+the committed partition unchanged, and proceeds to publish every other
+account's refresh; the weekly rotation retries that fiscal year on its next
+turn. This distinction, not the pull-job dependency, is what makes one
+transient failure in a 100+-job serial matrix no longer discard the whole
+weekly pass.
 
 Publication deliberately separates runtime data from durable audit evidence.
 `scripts/assemble_pages_site.py` publishes the site shell and every JSON file

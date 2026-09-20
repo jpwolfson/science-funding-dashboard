@@ -157,6 +157,30 @@ parallel.
   carrying the offline reaggregation so the fast tier is green on `main`
   before the CI full re-pull is dispatched there.
 
+### Run resilience (owner-agreed 2026-09-20)
+
+Two weekly passes were lost to one job each. W11 made the reconcile
+tolerate a failed rotating-historical re-pull. The owner agreed to two
+further changes, implemented as W12 and W13 after the current-FY custom
+run of 2026-09-20 commits (the reconcile job syncs to the tip of `main`
+before it runs, so nothing merges while that reconcile can be in flight):
+
+- **W12 — per-account atomicity with published staleness.** The
+  invariants that matter are per account; cross-account atomicity only
+  meant one validated tree deploys, which still holds. A current-FY pull
+  that fails no longer vetoes the pass: that account keeps its last
+  accepted snapshot, is recorded `stale` in a committed
+  `data/obligations/refresh_status.json`, passes freshness only because it
+  is marked, and its page carries "Not refreshed since <date>: the most
+  recent scheduled pull for this account did not complete; figures are the
+  last accepted snapshot." An unmarked stale account is still an error.
+- **W13 — resume, don't resubmit.** A download that times out at the
+  adapter's 2 h cap already leaves an exact resume handoff in the raw
+  artifact; the run's next attempt now downloads the previous attempt's
+  raw artifact and resumes the accepted USAspending request (scope echo
+  and head SHA verified, used at most once) instead of submitting a new
+  one that hits the cap again.
+
 ## CI runs (filled as they happen)
 
 | When | Workflow / ref | Purpose | Result |
@@ -179,6 +203,16 @@ parallel.
 | 2026-09-17 17:32–17:37 UTC | sentinel run 35253304028 | **SUCCESS** — first accepted sentinel snapshot since 2026-08-25, under the decoupled gate (W2) and the retry push (W9); committed to `main` | green |
 | 2026-09-17 17:05–18:30 UTC | run 35250546983 (third NIH full pull) | **SUCCESS**: 28/28 ICs pulled under the ledger-initializing exemption, 28 `changes.csv.gz` ledgers created, 4 exclusions flipped to `returned` and committed (W8), rollup rebuilt, `validate_nih.py --live` green, Pages deployed. Root `totalAwards` 860,636 = `storeIdCount`; NIH 721,062 = leaf union; zero NIH warnings, empty `dataQualityNotes`. | green |
 | 2026-09-17 17:37 and 18:30 UTC | `Verify main` runs 35253809178 and 35259203139 (workflow_run after the sentinel and NIH refreshes) | `verify.py --tier fast` **PASS on `main`** twice, on the committed data tree — the HIGH-1 condition (fast tier red on main) is closed in CI, not only locally. Root warnings are the four pre-existing NSF cross-division dedup notes; the stale NSF "not returned by this full re-pull" warnings are gone. | green |
+| 2026-09-17 22:25 UTC | run 35253300879 progress | 18/106 account-year pulls complete, 0 failed, ~14 min/job ⇒ reconcile expected ~19:00 UTC 2026-09-18. Closeout branch `claude/rem-closeout` pushed (manifest deleted, ci.yml lint line dropped, manifest test → absence test); PR opens only after the weekly run commits. | running |
+| 2026-09-17 22:40 UTC | local `validate_obligations.py` on current `main` with the manifest deleted | HIGH-3 measured: **1 error** remains (`dhs/cwmd-rd FY2026: latest P09 has no same-period GTAS pin` — pin at P10, store at P09); the six `source-label-unavailable-*` identities no longer error (W3 rebuild gave them store data). The running weekly refresh pulls CWMD through P10 and closes it. | measured |
+| 2026-09-18 02:35 UTC | run 35253300879 progress | 35/106 pulls complete, 0 failed; reconcile expected ~20:00 UTC 2026-09-18 | running |
+| 2026-09-18 09:55 UTC | run 35253300879 progress | 64/106 pulls complete, 0 failed; reconcile expected ~20:30 UTC | running |
+| 2026-09-18 21:02 UTC | run 35253300879 reconcile | 106/106 pulls green (27.3 h), reconcile merged 53 accounts, then `validate_obligations.py` **failed with 9 errors on 2 accounts** (`doe/sc`, `doe/fossil-energy` FY2026 P10): "has 0 File B residual rows" for 7 (P10, PA) buckets and "latest P10 has no same-period GTAS pin". Diagnosis: P10 classified `notReported` (provisional) — W3's state has File C events, no residual, pin held at P09 — and two validator checks were never aligned with that state (pin check uses latest stored, not latest reported, period; residual check does not skip notReported buckets). Worker W10; then a full weekly re-dispatch (the atomic reconcile committed nothing, so the freshness gate still spans all 53 accounts). | failure, diagnosed |
+| 2026-09-18 21:55 UTC | PR #72 merged (`c1768b3`); weekly `Update obligation ledger` re-dispatched on `main` (~28 h, reconcile expected ~Sun 2026-09-20 02:00 UTC) | W10: hypothesis confirmed from job logs (doe/sc P09 149 → P10 39 rows; doe/fossil-energy 219 → 92; both P10 `notReported`, provisional). Validator: partial-FY pin compared to the latest *reported* period when every later period is notReported; residual invariant skipped for notReported buckets. Noted: shards still carry old-style residual events at periods the refined rule now classifies notReported (DoD historical); the custom re-pulls regenerate those shards. | running |
+| 2026-09-19 10:35 UTC | run 35398624617 progress | 65/106 pulls complete, 0 failed; reconcile expected ~18:30 UTC 2026-09-19 | running |
+| 2026-09-19 23:22 UTC | run 35398624617 attempt 1 | 105/106 pulls green; `usda/nifa-research-education` FY2019 (rotating historical) failed after 2 h 12 min — the adapter's per-download 2 h cap; reconcile skipped. Recovery: `rerun_failed_jobs` (attempt 2 on the same commit; the 105 partition artifacts persist in the run). | rerun |
+| 2026-09-20 00:50 UTC | PR #73 merged | W11: the reconcile job now runs when the matrix has failures; a missing current-FY partition still fails the pass (freshness + current-provenance gate), a missing rotating-historical partition is skipped with the committed partition retained and listed in the job summary. Protects Monday's scheduled soak run from the 2 h download cap on one historical account-year. Attempt 2 of run 35398624617 (rerun of the single failed pull) still in progress. | merged |
+| 2026-09-20 01:40 UTC | run 35398624617 attempt 2 failed identically (`usda/nifa-research-education` FY2019, 2 h 10 min, download cap); custom run dispatched on `main`: mode=custom, accounts=all, FY2026 only, current_period=10 (53 jobs, ~13 h) | The current-FY set is what the freshness gate requires; the stalled FY2019 historical re-pull is left to the rotation (W11 now tolerates its failure). Reconcile expected ~15:00 UTC 2026-09-20. | running |
 
 ## Finding closure evidence (filled at closeout)
 

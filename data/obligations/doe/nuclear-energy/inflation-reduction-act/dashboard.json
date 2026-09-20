@@ -1,7 +1,7 @@
 {
  "schemaVersion": 2,
  "kind": "obligations",
- "generated": "2026-09-17",
+ "generated": "2026-09-20",
  "node": {
   "level": "programActivity",
   "path": "obligations/doe/nuclear-energy/inflation-reduction-act",
@@ -11,26 +11,26 @@
  "source": "USAspending File B and File C",
  "warnings": [],
  "dataComplete": true,
- "netObligationsCents": 53600,
- "netObligations": 536.0,
- "awardLinkedObligationsCents": 0,
- "awardLinkedObligations": 0.0,
- "residualObligationsCents": 53600,
- "residualObligations": 536.0,
- "grossObligationsCents": 53600,
- "grossObligations": 536.0,
- "deobligationsCents": 0,
- "deobligations": 0.0,
- "distinctLinkedAwards": 0,
- "fileCToNetRatio": 0.0,
- "totalNetObligationsCents": 53600,
- "totalNetObligations": 536.0,
- "totalAwardLinkedObligationsCents": 0,
- "totalAwardLinkedObligations": 0.0,
- "totalResidualObligationsCents": 53600,
- "totalResidualObligations": 536.0,
+ "netObligationsCents": 48699955107,
+ "netObligations": 486999551.07,
+ "awardLinkedObligationsCents": 199977505,
+ "awardLinkedObligations": 1999775.05,
+ "residualObligationsCents": 48499977602,
+ "residualObligations": 484999776.02,
+ "grossObligationsCents": 48699977602,
+ "grossObligations": 486999776.02,
+ "deobligationsCents": -22495,
+ "deobligations": -224.95,
+ "distinctLinkedAwards": 2,
+ "fileCToNetRatio": 0.004106318056364199,
+ "totalNetObligationsCents": 48699955107,
+ "totalNetObligations": 486999551.07,
+ "totalAwardLinkedObligationsCents": 199977505,
+ "totalAwardLinkedObligations": 1999775.05,
+ "totalResidualObligationsCents": 48499977602,
+ "totalResidualObligations": 484999776.02,
  "currentFY": 2026,
- "asOfPeriod": "FY2026P09",
+ "asOfPeriod": "FY2026P10",
  "reportingPeriods": [
   {
    "submissionPeriod": "FY2017P06",
@@ -1794,6 +1794,23 @@
    "deobligations": 0.0,
    "distinctLinkedAwards": 0,
    "fileCToNetRatio": null
+  },
+  {
+   "submissionPeriod": "FY2026P10",
+   "month": "2026-07",
+   "status": "reported",
+   "netObligationsCents": 48699901507,
+   "netObligations": 486999015.07,
+   "awardLinkedObligationsCents": 199977505,
+   "awardLinkedObligations": 1999775.05,
+   "residualObligationsCents": 48499924002,
+   "residualObligations": 484999240.02,
+   "grossObligationsCents": 48699924002,
+   "grossObligations": 486999240.02,
+   "deobligationsCents": -22495,
+   "deobligations": -224.95,
+   "distinctLinkedAwards": 2,
+   "fileCToNetRatio": 0.004106322575852761
   }
  ],
  "fiscalYears": [
@@ -1971,21 +1988,62 @@
   {
    "fy": 2026,
    "partial": true,
-   "netObligationsCents": 53600,
-   "netObligations": 536.0,
-   "awardLinkedObligationsCents": 0,
-   "awardLinkedObligations": 0.0,
-   "residualObligationsCents": 53600,
-   "residualObligations": 536.0,
-   "grossObligationsCents": 53600,
-   "grossObligations": 536.0,
-   "deobligationsCents": 0,
-   "deobligations": 0.0,
-   "distinctLinkedAwards": 0,
-   "fileCToNetRatio": 0.0,
-   "topRecipients": [],
-   "positiveFlows": [],
-   "negativeFlows": []
+   "netObligationsCents": 48699955107,
+   "netObligations": 486999551.07,
+   "awardLinkedObligationsCents": 199977505,
+   "awardLinkedObligations": 1999775.05,
+   "residualObligationsCents": 48499977602,
+   "residualObligations": 484999776.02,
+   "grossObligationsCents": 48699977602,
+   "grossObligations": 486999776.02,
+   "deobligationsCents": -22495,
+   "deobligations": -224.95,
+   "distinctLinkedAwards": 2,
+   "fileCToNetRatio": 0.004106318056364199,
+   "topRecipients": [
+    {
+     "recipientUEI": "HG7XL5RBNX55",
+     "recipient": "BATTELLE ENERGY ALLIANCE, LLC",
+     "netObligationsCents": 200000000,
+     "netObligations": 2000000.0,
+     "distinctLinkedAwards": 1
+    },
+    {
+     "recipientUEI": "GLPKRZJL8GM3",
+     "recipient": "ALLEGHENY SCIENCE & TECHNOLOGY CORPORATION",
+     "netObligationsCents": -22495,
+     "netObligations": -224.95,
+     "distinctLinkedAwards": 1
+    }
+   ],
+   "positiveFlows": [
+    {
+     "id": "3d74d63b8432f65af12a3bc6564ec521bd6ccd330db5a5978c588918b0a27007",
+     "awardId": "CONT_AWD_DEAC0705ID14517_8900_-NONE-_-NONE-",
+     "title": "MANAGEMENT AND OPERATIONS OF THE INL",
+     "recipient": "BATTELLE ENERGY ALLIANCE, LLC",
+     "amountCents": 200000000,
+     "amount": 2000000.0,
+     "netAmountCents": 200000000,
+     "netAmount": 2000000.0,
+     "submissionPeriod": "FY2026P10",
+     "awardUrl": "https://www.usaspending.gov/award/CONT_AWD_DEAC0705ID14517_8900_-NONE-_-NONE-/"
+    }
+   ],
+   "negativeFlows": [
+    {
+     "id": "a43085a7b062c007a1111581adbddb9b4c8b2b44ed7d66d5284b1e4d56591d30",
+     "awardId": "CONT_AWD_89243223FNE400097_8900_GS10F053AA_4732",
+     "title": "PROGRAM INFORMATION COLLECTION SYSTEM AD SUPPORT SERVICES (PICSSS) - UNDER THIS TASK ORDER CONTRACT, THE CONTRACTOR WILL PROVIDE EXPERTISE AND SERVICES TO IMPLEMENT INDUSTRY STANDARD PROGRAM MANAGEMENT AND CONTROL PRINCIPLES TO  INCLUDE PROJECT MANAG",
+     "recipient": "ALLEGHENY SCIENCE & TECHNOLOGY CORPORATION",
+     "amountCents": -22495,
+     "amount": -224.95,
+     "netAmountCents": -22495,
+     "netAmount": -224.95,
+     "submissionPeriod": "FY2026P10",
+     "awardUrl": "https://www.usaspending.gov/award/CONT_AWD_89243223FNE400097_8900_GS10F053AA_4732/"
+    }
+   ]
   }
  ],
  "fyCumulative": [
@@ -2900,6 +2958,23 @@
      "deobligations": 0.0,
      "distinctLinkedAwards": 0,
      "fileCToNetRatio": 0.0
+    },
+    {
+     "d": 303,
+     "submissionPeriod": "FY2026P10",
+     "status": "reported",
+     "netObligationsCents": 48699955107,
+     "netObligations": 486999551.07,
+     "awardLinkedObligationsCents": 199977505,
+     "awardLinkedObligations": 1999775.05,
+     "residualObligationsCents": 48499977602,
+     "residualObligations": 484999776.02,
+     "grossObligationsCents": 48699977602,
+     "grossObligations": 486999776.02,
+     "deobligationsCents": -22495,
+     "deobligations": -224.95,
+     "distinctLinkedAwards": 2,
+     "fileCToNetRatio": 0.004106318056364199
     }
    ]
   }
@@ -2908,7 +2983,7 @@
  "federalAccount": "089-0319",
  "programActivityCode": "63YPT7SACCH",
  "freshness": {
-  "latestAcceptedAt": "2026-08-24T21:13:37+00:00",
+  "latestAcceptedAt": "2026-09-20T07:49:00+00:00",
   "maxAgeDays": 10
  }
 }

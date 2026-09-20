@@ -496,6 +496,180 @@ class ObligationValidationTests(unittest.TestCase):
                 )
 
 
+class NotReportedLatestPeriodPinTests(unittest.TestCase):
+    """W10 (Phase 3.2d remediation): a partial fiscal year whose latest File
+    B snapshot collapses to `notReported` must not error just because the
+    pin correctly stays behind it (docs/obligation-ledger.md
+    "Snapshot acceptance and not-reported periods" / "Baseline-pin
+    advancement"). Reproduces the run-35253300879 failure signature on
+    doe/sc and doe/fossil-energy FY2026 P10 on a minimal fixture."""
+
+    FEDERAL_ACCOUNT = "089-0222"
+    PATH = "doe/sc"
+
+    def _download(self, fy, period, kind, row_count):
+        return {
+            "submissionType": kind,
+            "requestScope": {
+                "filters": {"fy": fy, "period": period,
+                           "submission_types": [kind],
+                           "federal_account": self.FEDERAL_ACCOUNT},
+                "columns": ["submission_period"],
+            },
+            "acceptedRequestScope": {
+                "filters": {"fy": fy, "period": period,
+                           "federal_account": self.FEDERAL_ACCOUNT},
+                "download_types": [kind],
+            },
+            "status": "finished", "statusRowCount": row_count,
+            "parsedRowCount": row_count, "memberRowCounts": {"a.csv": row_count},
+            "archiveSha256": "0" * 64, "rawArtifactFile": f"p{period:02}-{kind}.zip",
+        }
+
+    def _fixture(self, file_b_rows, pin_as_of_period, pin_cents,
+                include_p10_residual):
+        """Build a doe/sc FY2026 partial fixture.
+
+        ``file_b_rows`` maps period -> File B statusRowCount (periods 8-10).
+        Period 10 always gets a File C event; it also gets a residual only
+        when ``include_p10_residual``, matching whether P10 is meant to
+        reconcile as an ordinary reported period.
+        """
+        temp = tempfile.TemporaryDirectory()
+        root = Path(temp.name)
+        (root / "config").mkdir()
+        (root / "reference").mkdir()
+        (root / "config" / "obligation_accounts.json").write_text(json.dumps({
+            "schemaVersion": 2,
+            "refreshDefaults": {"freshnessMaxDays": 10},
+            "accounts": [{
+                "path": self.PATH, "federalAccount": self.FEDERAL_ACCOUNT,
+                "baseline": "reference/doe_sc_obligation_baseline.json",
+                "availability": {"regularFirstPeriod": 8},
+                "programActivities": [{"slug": "bes", "code": "0001", "name": "BES"}],
+            }],
+        }))
+        (root / "reference" / "doe_sc_obligation_baseline.json").write_text(json.dumps({
+            "schemaVersion": 2, "federalAccount": self.FEDERAL_ACCOUNT,
+            "fiscalYears": {"2026": {
+                "status": "partial", "asOfPeriod": pin_as_of_period,
+                "obligationsCents": pin_cents,
+            }},
+        }))
+        rows = [
+            normalize_event({
+                "id": "p08-c", "source": "file_c", "submissionPeriod": "FY2026P08",
+                "federalAccount": self.FEDERAL_ACCOUNT, "programActivityCode": "0001",
+                "programActivityName": "BES", "amountCents": 500,
+                "awardId": "", "linked": False,
+            }),
+            normalize_event({
+                "id": "p08-r", "source": "file_b_residual", "submissionPeriod": "FY2026P08",
+                "federalAccount": self.FEDERAL_ACCOUNT, "programActivityCode": "0001",
+                "programActivityName": "BES", "amountCents": 300,
+                "awardId": "", "linked": False,
+            }),
+            normalize_event({
+                "id": "p09-c", "source": "file_c", "submissionPeriod": "FY2026P09",
+                "federalAccount": self.FEDERAL_ACCOUNT, "programActivityCode": "0001",
+                "programActivityName": "BES", "amountCents": 600,
+                "awardId": "", "linked": False,
+            }),
+            normalize_event({
+                "id": "p09-r", "source": "file_b_residual", "submissionPeriod": "FY2026P09",
+                "federalAccount": self.FEDERAL_ACCOUNT, "programActivityCode": "0001",
+                "programActivityName": "BES", "amountCents": 400,
+                "awardId": "", "linked": False,
+            }),
+            normalize_event({
+                "id": "p10-c", "source": "file_c", "submissionPeriod": "FY2026P10",
+                "federalAccount": self.FEDERAL_ACCOUNT, "programActivityCode": "0001",
+                "programActivityName": "BES", "amountCents": 200,
+                "awardId": "", "linked": False,
+            }),
+        ]
+        if include_p10_residual:
+            rows.append(normalize_event({
+                "id": "p10-r", "source": "file_b_residual", "submissionPeriod": "FY2026P10",
+                "federalAccount": self.FEDERAL_ACCOUNT, "programActivityCode": "0001",
+                "programActivityName": "BES", "amountCents": 150,
+                "awardId": "", "linked": False,
+            }))
+        downloads = [
+            self._download(2026, period, "object_class_program_activity", count)
+            for period, count in sorted(file_b_rows.items())
+        ] + [self._download(2026, 10, "award_financial", 1)]
+        provenance = {
+            "schemaVersion": 2, "collectionStatus": "accepted",
+            "acceptedAt": "2026-09-18T00:00:00+00:00",
+            "accountPath": self.PATH, "federalAccount": self.FEDERAL_ACCOUNT,
+            "fiscalYear": 2026, "asOfPeriod": 10, "downloads": downloads,
+            "normalized": {
+                "recordCount": len(rows),
+                "eventFingerprint": event_fingerprint(rows),
+                "netObligationsCents": sum(e["amountCents"] for e in
+                                          (normalize_event(r) for r in rows)),
+            },
+            "replacement": {"previousEventFingerprint": event_fingerprint([]),
+                            "previousProvenanceSha256": None},
+            "diff": partition_diff([], rows),
+            "baselinePin": {"status": "partial", "asOfPeriod": pin_as_of_period,
+                           "obligationsCents": pin_cents},
+        }
+        write_store(
+            root / "data" / "obligations" / "doe" / "sc" / "events", rows,
+            {"federalAccount": self.FEDERAL_ACCOUNT},
+            partition_metadata={2026: provenance},
+        )
+        return temp, root
+
+    def test_pin_at_last_reported_period_with_notreported_tail_passes(self):
+        # P08/P09 reported (20/21 rows), P10 collapses to 5 rows (< half of
+        # 21) with no later period to recover -- provisional notReported,
+        # exactly the run-35253300879 shape. The pin correctly stays at
+        # P09 (the last reported period) with P09's cumulative cents, and
+        # P10 has a real File C event but no residual.
+        temp, root = self._fixture(
+            file_b_rows={8: 20, 9: 21, 10: 5},
+            pin_as_of_period=9, pin_cents=500 + 300 + 600 + 400,
+            include_p10_residual=False,
+        )
+        try:
+            self.assertEqual([], validate(root, require_data=False))
+        finally:
+            temp.cleanup()
+
+    def test_pin_advanced_onto_the_notreported_period_fails(self):
+        # Same notReported P10 collapse, but the pin was wrongly advanced
+        # to P10 instead of staying at P09 -- must error.
+        temp, root = self._fixture(
+            file_b_rows={8: 20, 9: 21, 10: 5},
+            pin_as_of_period=10, pin_cents=500 + 300 + 600 + 400,
+            include_p10_residual=False,
+        )
+        try:
+            self.assertTrue(validate(root, require_data=False))
+        finally:
+            temp.cleanup()
+
+    def test_pin_lagging_a_fully_reported_latest_period_still_fails(self):
+        # No collapse at all -- P10 is an ordinary reported period (22
+        # rows, no dip) -- but the pin was left behind at P09. This must
+        # still error exactly as before the notReported-aware fix.
+        temp, root = self._fixture(
+            file_b_rows={8: 20, 9: 21, 10: 22},
+            pin_as_of_period=9, pin_cents=500 + 300 + 600 + 400,
+            include_p10_residual=True,
+        )
+        try:
+            errors = validate(root, require_data=False)
+            self.assertTrue(
+                any("no same-period GTAS pin" in e for e in errors), errors,
+            )
+        finally:
+            temp.cleanup()
+
+
 class InterpretationNoteRollupTests(unittest.TestCase):
     """Phase 3.2d remediation decision 3: `interpretationNote` is an
     optional registry field (docs/verification-regime.md specialization
