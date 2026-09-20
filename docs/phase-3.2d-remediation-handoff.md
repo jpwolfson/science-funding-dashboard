@@ -181,6 +181,16 @@ before it runs, so nothing merges while that reconcile can be in flight):
   and head SHA verified, used at most once) instead of submitting a new
   one that hits the cap again.
 
+### Reconciliation of figures cited in this file
+
+- NIH aggregated total 721,056 (PR #65, offline reaggregation: 4 ledgered
+  ids physically present but `excluded`) → 721,062 after the first full
+  source-current pull (run 35250546983) flipped those 4 ids to `returned`
+  and added net new records; both figures are correct for their trees.
+- "13 affected account-years" in the brief enumerates to 12 distinct
+  account-years; the review's scan counted 13 by criterion (8 exact-zero
+  cumulative points + 5 >50 % drops) with overlap. All 12 were re-pulled.
+
 ## CI runs (filled as they happen)
 
 | When | Workflow / ref | Purpose | Result |
@@ -217,12 +227,12 @@ before it runs, so nothing merges while that reconcile can be in flight):
 | 2026-09-20 15:40 UTC | PR #74 merged (`a4597fc`) | W13 automatic resume of a timed-out download on the run's next attempt | merged |
 | 2026-09-20 15:50 UTC | PR #76 merged (`1305df1`) | Closeout: `reference/obligation_retry_recovery.json` deleted, ci.yml lint dropped, absence test; `validate_obligations.py` on `ea328c4a` with the manifest absent: **zero errors** | merged |
 | 2026-09-20 15:52 UTC | FY2025 custom re-pull dispatched on `main` (six DoD accounts + commerce/nist-its, P12) | Replaces the empty FY2025 P11 File B snapshots behind HIGH-5 if the source now returns full ones; regenerates those shards under the span rule. W12 (#75) merges after this run completes (the reconcile job syncs to main's tip). | running |
-| 2026-09-20 15:42–18:04 UTC | run 35520419335 (custom FY2025, six DoD + nist-its) | **SUCCESS**, snapshot `6a0a1733`. Source still returns a 1-row P11 File B snapshot for all six DoD accounts (P10 213–335 rows, P11 = 1, P12 217–342): a persistent source defect, so P11 stays `notReported` by rule and the held cumulative + hollow marker is the permanent public state. `commerce/nist-its` P11 returns 62 rows (= P10 = P12). W12 (#75) merged after this run. | green |
+| 2026-09-20 15:42–18:04 UTC | run 35520419335 (custom FY2025, six DoD + nist-its) | **SUCCESS**, snapshot `6a0a1733`. Source still returns a 1-row P11 File B snapshot for all six DoD accounts (P10 213–335 rows, P11 = 1, P12 217–342): a persistent source defect, so P11 stays `notReported` by rule and the held cumulative + hollow marker is the permanent public state. `commerce/nist-its` P11 returns 62 rows (= P10 = P12); its provisional periodNote → confirmed real deobligation (PR #77, merged `ed2a473e`). W12 (#75) merged after this run. | green |
 | 2026-09-20 18:17–19:30 UTC | run 35528556931 (custom FY2024: noaa-orf, noaa-pac, air-force-rdte) | **SUCCESS**, snapshot `a31611e7`. Source unchanged: NOAA ORF rows P02..P12 = 0,0,6,6,5,10,9,0,0,0,551 and NOAA PAC 0,0,1,1,2,6,4,0,0,0,204 (P02–P11 `notReported`, P12 reported); Air Force RDT&E 195,203,182,29,32,32,34,35,35,221,222 (P05–P10 `notReported`). Persistent source stubs; classification is the permanent state. | green |
 | 2026-09-20 20:20 UTC | FY2023 custom re-pull dispatched (`dhs/cisa-rd`, P12) | Tests the provisional P04 periodNote (full rows, collapsed dollars) | running |
-| 2026-09-20 20:19–20:51 UTC | run 35535164305 (custom FY2023: dhs/cisa-rd) | **SUCCESS**, snapshot `465765cd`. Full rows every period (10–16); P03 reports 1,290,038,168 cents cumulative, above the FY2023 pin (984,707,477), P04 100,000,000 and consistent thereafter: a source over-report at P03 corrected at P04. Provisional periodNote → confirmed (branch `claude/rem-dhs-note`). | green |
+| 2026-09-20 20:19–20:51 UTC | run 35535164305 (custom FY2023: dhs/cisa-rd) | **SUCCESS**, snapshot `465765cd`. Full rows every period (10–16); P03 reports 1,290,038,168 cents cumulative, above the FY2023 pin (984,707,477), P04 100,000,000 and consistent thereafter: a source over-report at P03 corrected at P04. Provisional periodNote → confirmed (PR #78, merged `b000c137`). | green |
 | 2026-09-20 21:25 UTC | FY2022 custom re-pull dispatched (`usda/nifa-integrated-activities`, P12) | Last of the review's 13 affected account-years | running |
-| 2026-09-20 21:23–21:57 UTC | run 35538536444 (custom FY2022: usda/nifa-integrated-activities) | **SUCCESS**, snapshot `77a45f01`. Rows 13,13,12,14,13,27,27,27,27,27,29 (all reported); P02 2,425,851 → P03 −1,312,516 cents is a genuine small early-year net deobligation below the $1M drop-check floor. **All 13 review-flagged account-years re-pulled**: none changed at the source; classification, span reconciliation, and the two confirmed periodNotes are the permanent state. No custom run in flight for the Monday scheduled soak. | green |
+| 2026-09-20 21:23–21:57 UTC | run 35538536444 (custom FY2022: usda/nifa-integrated-activities) | **SUCCESS**, snapshot `77a45f01`. Rows 13,13,12,14,13,27,27,27,27,27,29 (all reported); P02 2,425,851 → P03 −1,312,516 cents is a genuine small early-year net deobligation below the $1M drop-check floor. **All review-flagged account-years re-pulled** (12 distinct account-years as enumerated by the brief; the review's "13" tallied by criterion with overlap): none changed at the source; classification, span reconciliation, and the two confirmed periodNotes are the permanent state. No custom run in flight for the Monday scheduled soak. | green |
 
 ## Finding closure evidence (filled at closeout)
 
