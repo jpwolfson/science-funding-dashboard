@@ -10,19 +10,39 @@ from unittest.mock import patch
 from adapters.obligation_common import classify_file_b_periods
 from adapters.usaspending_obligations import (
     DOWNLOAD_STATUS_TIMEOUT_SECONDS,
-    _bytes, _json, alias_map, combine_file_b_file_c, file_b_period_events,
+    _bytes, _download_request_payload, _json, alias_map,
+    combine_file_b_file_c, file_b_period_events,
     finish_download, resume_download,
     parse_file_b_snapshot, parse_file_c,
 )
 from scripts.pull_obligation_account import (
-    FILE_B_COLUMNS, _baseline_pin, _download, _resume_request,
-    _validate_account_total,
+    FILE_B_COLUMNS, _baseline_pin, _download,
+    _load_resume_handoffs, _resume_handoff_matches_run, _resume_request,
+    _validate_account_total, _write_resume_handoff, run_identity_from_environ,
 )
 
 
 ALIASES = {"0001": {"code": "0001", "name": "BES", "park": "PARK1"},
            "PARK1": {"code": "0001", "name": "BES", "park": "PARK1"},
            "0000": {"code": "0000", "name": "Unknown / other", "park": ""}}
+
+
+def _echoed_download_request(account_id, fy, period, kind, columns):
+    """Build the accepted-scope shape USAspending echoes back, exactly as
+    ``_validate_download_result`` expects it (distinct from this repo's
+    outgoing request payload shape)."""
+    payload = _download_request_payload(account_id, fy, period, kind, columns)
+    return {
+        "account_level": payload["account_level"],
+        "file_format": payload["file_format"],
+        "columns": payload["columns"],
+        "download_types": payload["filters"]["submission_types"],
+        "filters": {
+            "federal_account": payload["filters"]["federal_account"],
+            "fy": payload["filters"]["fy"],
+            "period": payload["filters"]["period"],
+        },
+    }
 
 
 class USAspendingObligationTests(unittest.TestCase):
@@ -410,6 +430,293 @@ class USAspendingObligationTests(unittest.TestCase):
             self.assertEqual([], list(Path(temp).glob(
                 "obligation-download-resume-*.json"
             )))
+
+    def test_automatic_resume_finishes_without_a_fresh_request(self):
+        # The adapter's own next-attempt handoff (as staged by the workflow
+        # into _raw_previous) should be picked up and finished without ever
+        # POSTing a new download request.
+        account = {"path": "ed/ies"}
+        result = {
+            "status_url": "https://api.usaspending.gov/api/v2/download/status/resume",
+            "download_request": _echoed_download_request(
+                "5555", 2018, 2, "object_class_program_activity", FILE_B_COLUMNS
+            ),
+        }
+        handoffs = {
+            ("ed/ies", 2018, 2, "object_class_program_activity"): {
+                "account": "ed/ies", "fiscalYear": 2018, "period": 2,
+                "submissionType": "object_class_program_activity",
+                "runId": "111", "headSha": "abc123", "result": result,
+            },
+        }
+        run_identity = {"runId": "111", "headSha": "abc123"}
+        with tempfile.TemporaryDirectory() as temp, \
+             patch("scripts.pull_obligation_account.request_download") as fresh, \
+             patch("scripts.pull_obligation_account.finish_download",
+                   return_value=(b"archive", {"status": "finished",
+                                              "total_rows": 0})), \
+             patch("scripts.pull_obligation_account.archive_rows",
+                   return_value={}):
+            members, audit = _download(
+                temp, account, "5555", 2018, 2,
+                "object_class_program_activity", FILE_B_COLUMNS,
+                raw_archive_dir=temp, resume_handoffs=handoffs,
+                run_identity=run_identity,
+            )
+        fresh.assert_not_called()
+        self.assertEqual({}, members)
+        self.assertEqual(0, audit["parsedRowCount"])
+
+    def test_automatic_resume_falls_through_on_run_and_head_sha_mismatch(self):
+        account = {"path": "ed/ies"}
+        result = {
+            "status_url": "https://api.usaspending.gov/api/v2/download/status/resume",
+            "download_request": {"filters": {"fy": 2018, "period": 2}},
+        }
+        handoffs = {
+            ("ed/ies", 2018, 2, "object_class_program_activity"): {
+                "account": "ed/ies", "fiscalYear": 2018, "period": 2,
+                "submissionType": "object_class_program_activity",
+                "runId": "111", "headSha": "abc123", "result": result,
+            },
+        }
+        # A different run AND a different head SHA: the handoff must never
+        # be trusted, so a brand-new request is issued instead.
+        run_identity = {"runId": "222", "headSha": "def456"}
+        fresh_request = {"status_url": "https://api.usaspending.gov/status/fresh"}
+        with tempfile.TemporaryDirectory() as temp, \
+             patch("scripts.pull_obligation_account._resume_request",
+                   return_value=None), \
+             patch("scripts.pull_obligation_account.request_download",
+                   return_value=(fresh_request, {"requested": True})) as fresh, \
+             patch("scripts.pull_obligation_account.finish_download",
+                   return_value=(b"archive", {"status": "finished",
+                                              "total_rows": 0})), \
+             patch("scripts.pull_obligation_account.archive_rows",
+                   return_value={}):
+            _download(
+                temp, account, "5555", 2018, 2,
+                "object_class_program_activity", FILE_B_COLUMNS,
+                raw_archive_dir=temp, resume_handoffs=handoffs,
+                run_identity=run_identity,
+            )
+        fresh.assert_called_once()
+
+    def test_automatic_resume_falls_through_when_source_declares_it_failed(self):
+        account = {"path": "usda/nifa-research-education"}
+        result = {
+            "status_url": "https://api.usaspending.gov/api/v2/download/status/resume",
+            "download_request": _echoed_download_request(
+                "7777", 2019, 12, "award_financial", FILE_B_COLUMNS
+            ),
+        }
+        handoffs = {
+            ("usda/nifa-research-education", 2019, 12, "award_financial"): {
+                "account": "usda/nifa-research-education", "fiscalYear": 2019,
+                "period": 12, "submissionType": "award_financial",
+                "runId": "999", "headSha": "sha999", "result": result,
+            },
+        }
+        run_identity = {"runId": "999", "headSha": "sha999"}
+        fresh_request = {"status_url": "https://api.usaspending.gov/status/fresh"}
+        with tempfile.TemporaryDirectory() as temp, \
+             patch("scripts.pull_obligation_account._resume_request",
+                   return_value=None), \
+             patch("scripts.pull_obligation_account.request_download",
+                   return_value=(fresh_request, {"requested": True})) as fresh, \
+             patch("scripts.pull_obligation_account.finish_download",
+                   side_effect=[
+                       RuntimeError("custom-account download ended in 'failed'"),
+                       (b"archive", {"status": "finished", "total_rows": 0}),
+                   ]) as finish, \
+             patch("scripts.pull_obligation_account.archive_rows",
+                   return_value={}):
+            members, audit = _download(
+                temp, account, "7777", 2019, 12,
+                "award_financial", FILE_B_COLUMNS,
+                raw_archive_dir=temp, resume_handoffs=handoffs,
+                run_identity=run_identity,
+            )
+        fresh.assert_called_once()
+        self.assertEqual(2, finish.call_count)
+        self.assertEqual({}, members)
+        self.assertEqual(0, audit["parsedRowCount"])
+
+    def test_automatic_resume_handoff_used_at_most_once(self):
+        # A resumed request that times out again must not be retried
+        # against the very same stale handoff -- only a fresh request is
+        # attempted on the fallback.
+        account = {"path": "ed/ies"}
+        result = {
+            "status_url": "https://api.usaspending.gov/api/v2/download/status/resume",
+            "download_request": _echoed_download_request(
+                "5555", 2018, 2, "object_class_program_activity", FILE_B_COLUMNS
+            ),
+        }
+        handoffs = {
+            ("ed/ies", 2018, 2, "object_class_program_activity"): {
+                "account": "ed/ies", "fiscalYear": 2018, "period": 2,
+                "submissionType": "object_class_program_activity",
+                "runId": "111", "headSha": "abc", "result": result,
+            },
+        }
+        run_identity = {"runId": "111", "headSha": "abc"}
+        with tempfile.TemporaryDirectory() as temp, \
+             patch("scripts.pull_obligation_account._resume_request",
+                   return_value=None), \
+             patch("scripts.pull_obligation_account.request_download",
+                   return_value=({"status_url": "https://api.usaspending.gov/status/fresh"},
+                                 {"requested": True})), \
+             patch("scripts.pull_obligation_account.finish_download",
+                   side_effect=[
+                       RuntimeError("custom-account download ended in 'failed'"),
+                       TimeoutError("still running"),
+                   ]) as finish:
+            with self.assertRaisesRegex(TimeoutError, "still running"):
+                _download(
+                    temp, account, "5555", 2018, 2,
+                    "object_class_program_activity", FILE_B_COLUMNS,
+                    raw_archive_dir=temp, resume_handoffs=handoffs,
+                    run_identity=run_identity,
+                )
+            self.assertEqual(2, finish.call_count)
+            # The one handoff on disk now describes the fresh request, not
+            # the stale resumed one -- the next attempt will resume THAT.
+            handoff_files = list(
+                Path(temp).glob("obligation-download-resume-*.json")
+            )
+            self.assertEqual(1, len(handoff_files))
+            written = json.loads(handoff_files[0].read_text())
+            self.assertEqual(
+                "https://api.usaspending.gov/status/fresh",
+                written["requests"][0]["result"]["status_url"],
+            )
+
+    def test_write_resume_handoff_records_run_identity_when_known(self):
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "handoff.json"
+            _write_resume_handoff(
+                path, {"path": "doe/sc"}, 2024, 6, "award_financial",
+                {"status_url": "https://api.usaspending.gov/status/x"},
+                run_identity={"runId": "123", "headSha": "deadbeef"},
+            )
+            row = json.loads(path.read_text())["requests"][0]
+            self.assertEqual("123", row["runId"])
+            self.assertEqual("deadbeef", row["headSha"])
+
+            # Omitting run identity keeps the pre-existing exact shape, so
+            # a manually authored reviewed handoff is unaffected.
+            path.unlink()
+            _write_resume_handoff(
+                path, {"path": "doe/sc"}, 2024, 6, "award_financial",
+                {"status_url": "https://api.usaspending.gov/status/x"},
+            )
+            row = json.loads(path.read_text())["requests"][0]
+            self.assertNotIn("runId", row)
+            self.assertNotIn("headSha", row)
+
+    def test_handoff_survives_a_non_valueerror_interruption(self):
+        # The job-timeout kill signal surfaces as something other than the
+        # adapter's own ValueError (e.g. TimeoutError, or KeyboardInterrupt
+        # if the process is killed mid-poll); only the ValueError branch
+        # ever clears a handoff, so the in-flight request's handoff must
+        # still be on disk after any other interruption.
+        account = {"path": "commerce/bea"}
+        request = {
+            "status_url": "https://api.usaspending.gov/api/v2/download/status/slow",
+            "download_request": {"filters": {"fy": 2018, "period": 12}},
+        }
+        with tempfile.TemporaryDirectory() as temp, \
+             patch("scripts.pull_obligation_account._resume_request",
+                   return_value=None), \
+             patch("scripts.pull_obligation_account.request_download",
+                   return_value=(request, {"requested": True})), \
+             patch("scripts.pull_obligation_account.finish_download",
+                   side_effect=KeyboardInterrupt()):
+            with self.assertRaises(KeyboardInterrupt):
+                _download(
+                    temp, account, "3693", 2018, 12,
+                    "award_financial", FILE_B_COLUMNS,
+                    raw_archive_dir=temp,
+                )
+            handoffs = list(Path(temp).glob("obligation-download-resume-*.json"))
+            self.assertEqual(1, len(handoffs))
+
+    def test_load_resume_handoffs_unions_files_and_rejects_duplicates(self):
+        with tempfile.TemporaryDirectory() as temp:
+            directory = Path(temp)
+            (directory / "obligation-download-resume-a.json").write_text(json.dumps({
+                "schemaVersion": 1,
+                "requests": [{"account": "doe/sc", "fiscalYear": 2024,
+                              "period": 2, "submissionType": "award_financial",
+                              "result": {"status_url": "x"}}],
+            }))
+            (directory / "obligation-download-resume-b.json").write_text(json.dumps({
+                "schemaVersion": 1,
+                "requests": [{"account": "doe/sc", "fiscalYear": 2024,
+                              "period": 3, "submissionType": "award_financial",
+                              "result": {"status_url": "y"}}],
+            }))
+            handoffs = _load_resume_handoffs(directory)
+            self.assertEqual(2, len(handoffs))
+            self.assertIn(("doe/sc", 2024, 2, "award_financial"), handoffs)
+            self.assertIn(("doe/sc", 2024, 3, "award_financial"), handoffs)
+
+            (directory / "obligation-download-resume-c.json").write_text(json.dumps({
+                "schemaVersion": 1,
+                "requests": [{"account": "doe/sc", "fiscalYear": 2024,
+                              "period": 2, "submissionType": "award_financial",
+                              "result": {"status_url": "z"}}],
+            }))
+            with self.assertRaisesRegex(ValueError, "duplicate"):
+                _load_resume_handoffs(directory)
+
+    def test_load_resume_handoffs_is_empty_when_directory_is_absent(self):
+        self.assertEqual({}, _load_resume_handoffs("/no/such/directory"))
+
+    def test_resume_handoff_match_rules(self):
+        account = {"path": "ed/ies"}
+        same_run = {"runId": "1", "headSha": "a", "account": "ed/ies",
+                    "fiscalYear": 2018}
+        # No run-identity context (e.g. local/offline use): always trusted.
+        self.assertTrue(
+            _resume_handoff_matches_run(same_run, None, account, 2018)
+        )
+        # Same run ID: trusted regardless of head SHA bookkeeping.
+        self.assertTrue(_resume_handoff_matches_run(
+            same_run, {"runId": "1", "headSha": "different"}, account, 2018
+        ))
+        # Different run, but matching head SHA and account/FY scope.
+        cross_run = {"runId": "1", "headSha": "a", "account": "ed/ies",
+                     "fiscalYear": 2018}
+        self.assertTrue(_resume_handoff_matches_run(
+            cross_run, {"runId": "2", "headSha": "a"}, account, 2018
+        ))
+        # Different run and different head SHA: rejected.
+        self.assertFalse(_resume_handoff_matches_run(
+            cross_run, {"runId": "2", "headSha": "b"}, account, 2018
+        ))
+        # Different run, matching head SHA, but different account: rejected.
+        self.assertFalse(_resume_handoff_matches_run(
+            cross_run, {"runId": "2", "headSha": "a"},
+            {"path": "ed/other"}, 2018
+        ))
+        # A handoff with no recorded run identity is never trusted across
+        # runs, even if the caller's run identity happens to have a head
+        # SHA -- fail closed rather than assume compatibility.
+        legacy = {"account": "ed/ies", "fiscalYear": 2018}
+        self.assertFalse(_resume_handoff_matches_run(
+            legacy, {"runId": "2", "headSha": "a"}, account, 2018
+        ))
+
+    def test_run_identity_from_environ(self):
+        self.assertIsNone(run_identity_from_environ({}))
+        self.assertEqual(
+            {"runId": "42", "headSha": "abc"},
+            run_identity_from_environ(
+                {"GITHUB_RUN_ID": "42", "GITHUB_SHA": "abc"}
+            ),
+        )
 
     def test_archive_download_outlasts_six_disconnects(self):
         response = io.BytesIO(b"archive")
