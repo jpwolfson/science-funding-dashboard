@@ -329,6 +329,32 @@ class SiteContractTests(unittest.TestCase):
             'const rows = allRows.filter(r => (r.status || "reported") !== "notReported");',
             periods)
 
+    def test_cumulative_chart_skips_null_valued_held_points(self):
+        # Phase 3.2d remediation W14 (2026-09-21): a notReported point with
+        # no earlier reported point in the fiscal year carries a null
+        # cumulative (adapters.obligation_common.aggregate), not $0 --
+        # commerce/noaa-orf FY2024 P02-P11 previously drew a false flat-zero
+        # line before the first real reported point (P12). The chart must
+        # filter such points out of the drawn line, the endpoint/hollow
+        # markers, the hover lookup, and the y-axis domain.
+        cumulative = self.html.split("function obligationCumulativeChart(data) {", 1)[1]
+        cumulative = cumulative.split("function obligationPeriodsChart(data) {", 1)[0]
+        self.assertIn(
+            "s.points.filter(p => p.netObligationsCents != null)", cumulative)
+        self.assertIn(
+            "p.d <= day && p.netObligationsCents != null", cumulative)
+        self.assertIn(
+            ".filter(p => p.netObligationsCents != null)", cumulative)
+        # The line/marker loop draws from the filtered ``visible`` list, not
+        # the raw (possibly null-leading) ``s.points``.
+        self.assertIn("const visible = s.points.filter", cumulative)
+        self.assertIn("visible.map((p, i)", cumulative)
+        self.assertIn("visible.at(-1)", cumulative)
+        # The period table still reads "not reported at pull" for a held
+        # point regardless of whether it carries a real held-over value or
+        # a null one -- unchanged, keyed only on `p.held`.
+        self.assertIn("rows.push(p.held", cumulative)
+
     def test_sentinel_publishes_limits_costs_and_source_staleness(self):
         for text in ("Coverage and interpretation limits",
                      "Current automated financial coverage",

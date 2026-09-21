@@ -1166,7 +1166,9 @@ function obligationCumulativeChart(data) {
   function render() {
     plot.querySelector("svg")?.remove();
     const f = frame(plot, 340, 62, 140), DAYS = 365;
-    const domain = signedDomain(series.flatMap(s => s.points.map(p => Number(p.netObligations || 0))));
+    const domain = signedDomain(series.flatMap(s => s.points
+      .filter(p => p.netObligationsCents != null)
+      .map(p => Number(p.netObligations || 0))));
     const y = signedYAxis(f.svg, f, domain, fmtSignedAxisMoney);
     const x = d => f.L + (Math.min(Math.max(d, 0), DAYS - 1) / (DAYS - 1)) * (f.R - f.L);
     MONTH_OFFSETS.forEach((off, m) => {
@@ -1176,23 +1178,29 @@ function obligationCumulativeChart(data) {
         "text-anchor": "middle", text: MONTH_ABBR[m] }));
     });
     for (const s of [...series].reverse()) {
-      if (!s.points.length) continue;
+      // A notReported point with no earlier reported point yet this fiscal
+      // year carries a null cumulative -- the value is genuinely unknown,
+      // not zero (commerce/noaa-orf FY2024 P02-P11). Skip it entirely: no
+      // line segment into or out of it, no marker; the line starts at the
+      // first point that does carry a real value.
+      const visible = s.points.filter(p => p.netObligationsCents != null);
+      if (!visible.length) continue;
       // Reporting-period observations are discrete. Hold the last reported
       // cumulative value until the next period instead of visually inventing
       // activity between submissions.
-      const line = s.points.map((p, i) => i
+      const line = visible.map((p, i) => i
         ? `H${x(p.d).toFixed(1)}V${y(p.netObligations || 0).toFixed(1)}`
         : `M${x(p.d).toFixed(1)},${y(p.netObligations || 0).toFixed(1)}`).join("");
       f.svg.append(el("path", { d: line, fill: "none", stroke: css(s.v),
         "stroke-width": s.partial ? 3 : 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
-      const end = s.points.at(-1);
+      const end = visible.at(-1);
       f.svg.append(el("circle", { cx: x(end.d), cy: y(end.netObligations || 0), r: s.partial ? 5 : 4,
         fill: css(s.v), stroke: css("--surface"), "stroke-width": 2 }));
       // A held point (the line's value carried forward through a period
       // whose File B snapshot was not reported at pull) gets a hollow
       // marker instead of a filled one, so the flat segment is never read
       // as an actual zero-change observation.
-      for (const p of s.points) {
+      for (const p of visible) {
         if (!p.held || p === end) continue;
         const marker = el("circle", { cx: x(p.d), cy: y(p.netObligations || 0), r: 4,
           fill: css("--surface"), stroke: css(s.v), "stroke-width": 2,
@@ -1218,7 +1226,7 @@ function obligationCumulativeChart(data) {
       const r0 = f.svg.getBoundingClientRect();
       const day = Math.max(0, Math.min(DAYS - 1,
         ((e.clientX - r0.left) / scale() - f.L) / (f.R - f.L) * (DAYS - 1)));
-      const available = series.map(s => ({ s, p: s.points.filter(p => p.d <= day).at(-1) })).filter(x0 => x0.p);
+      const available = series.map(s => ({ s, p: s.points.filter(p => p.d <= day && p.netObligationsCents != null).at(-1) })).filter(x0 => x0.p);
       if (!available.length) return;
       cross.setAttribute("x1", x(day)); cross.setAttribute("x2", x(day)); cross.setAttribute("visibility", "visible");
       showTip(tip, plot, x(day) * scale(), f.T * scale() + 40, `Through day ${Math.round(day) + 1} of the fiscal year`,

@@ -238,7 +238,11 @@ value and add `held: true`, except when it is also the fiscal year's final
 recorded point (nothing later to hold against yet) — that endpoint is
 always its real, if incomplete, computed value, so the cumulative-endpoint
 invariant (`fyCumulative` last point == that FY's total) still holds
-exactly.
+exactly. A `notReported` point with NO earlier reported point yet in the
+same fiscal year (a leading run, e.g. `commerce/noaa-orf` FY2024 P02-P11
+before P12) instead carries `held: true` with `netObligationsCents: null`
+(and null for every other cents/count field) — see "No-prior-reported
+display" below.
 
 **Display.** The obligations-by-period chart omits `notReported` rows
 entirely — there is no derived activity to plot, so it is neither a zero
@@ -247,6 +251,85 @@ nor a gap-worthy point. The cumulative step chart draws a hollow marker
 the usual filled one. Both charts' tables render the literal text "not
 reported at pull" for that row, and the covering row's period label notes
 its span, e.g. "P12 (covers P11-P12)".
+
+**No-prior-reported display (Phase 3.2d remediation W14, 2026-09-21).** A
+`notReported` point whose fiscal year has no earlier *reported* point to
+hold at cannot be shown at its last-reported value (there is none) or at
+its own raw through-period sum (a File-C-only partial total that reads as
+a real, if small, cumulative). Before this fix, `commerce/noaa-orf`
+FY2024 P02-P11 (all `notReported` by the row-count rule) rendered as a
+flat $0 line for eleven months before jumping to the real $7.25B at P12 —
+indistinguishable from "nothing obligated until September." The fix:
+such a point publishes `held: true` with `netObligationsCents: null` (and
+null for the rest of `_metrics`'s fields) instead of a computed value — the
+cumulative is genuinely *unknown*, not zero. The site's cumulative chart
+skips a null-valued point entirely: no line segment into or out of it, no
+marker of either kind; the FY's line starts at its first point that does
+carry a real value. The period table row for it is unaffected — it already
+read the literal "not reported at pull" text for any `held` row regardless
+of whether the held value was real or null. The cumulative-endpoint
+invariant is unaffected: a fiscal year's final recorded point is a
+`reported` period by construction (a `notReported` final period is either
+the ordinary `check_final_period_reported` hard error for a complete year,
+or the dangling-tail case already computed at its real, if incomplete,
+value, both untouched by this fix), so the endpoint this rule could ever
+apply to never exists.
+
+**Dollar-transient rule (rule 4; Phase 3.2d remediation W14, 2026-09-21).**
+The row-count rule above is blind to a File B snapshot that returns a FULL
+row count but an internally inconsistent cumulative dollar total —
+`dod/navy-rdte` FY2024: P10 $25.41B → P11 $54.61B → P12 $29.56B (pin
+2,956,285,398,710 cents, reconciling exactly at P12); FY2023: P05 $11.04B →
+P06 $33.27B → P07 $18.58B. Both the initial spike (an increase, which the
+existing >50% *drop* check never looks for) and the partial retreat back
+down (44-46%, just under that check's 50% threshold) individually evade
+every prior check, so the $54.61B and $33.27B plateaus rendered as genuine
+mid-year balances that later "collapsed."
+
+`adapters.obligation_common.apply_dollar_transient_rule` runs after the row
+rule, over its `reported` periods only: an interior period (never the
+fiscal year's own final period, and only one with both an earlier and a
+later `reported` neighbor) is reclassified `notReported` when its
+cumulative net obligations differ from the immediately preceding reported
+period's cumulative by more than 50% (either direction, using the larger
+magnitude as the percentage base so the same formula serves both the
+"differs by" and "reverts to" halves) **and** the next reported period's
+cumulative reverts back within 50% of that same preceding cumulative. A
+deviation that does not revert — a real, sustained change, e.g.
+`commerce/nist-its` FY2025 P10 $5.73B → P11 $0.70B → P12 $0.72B (a
+confirmed real deobligation) or `dhs/cisa-rd` FY2023 P03→P04 (settles and
+stays) — is left `reported` and keeps triggering the existing >50%
+cumulative-drop check, which still requires a curated `periodNotes`
+explanation. The rule is skipped when the preceding reported cumulative's
+magnitude is below the same $1,000,000 floor as the drop check.
+`classify_file_b_periods(row_counts, cumulative_cents)` applies both rules
+in one call; `account_period_status` (the rebuild/validation path) derives
+`cumulative_cents` straight from committed events — summing every event
+with `fiscalPeriod` at or before a period's own number telescopes to the
+exact true cumulative regardless of any period's own classification, since
+a `notReported` period's dollars are always folded into whichever later
+reported period absorbs its span, never dropped. The reclassified period
+is then treated exactly like a row-rule `notReported` period by the span
+reconciliation above: no independent File B activity or residual, its File
+C events kept under their own period label, and the next reported row
+covers the span. `scripts/rollup_obligations.py` prints the account-years
+each rebuild reclassifies this way. The 2026-09-21 offline rebuild
+reclassified nine account-years beyond the two DoD examples above: six
+Commerce accounts (`commerce/noaa-orf`, `noaa-pac`, `nist-strs`,
+`nist-its`, `census-current-surveys`, `census-periodic-censuses`) all at
+the identical `FY2023P08` — an apparent single, correlated USAspending
+File B submission anomaly across the whole Commerce account family, not
+six independent coincidences — plus `usda/nass` `FY2026P04`, confirming
+the rule generalizes past the account-years it was designed against
+rather than being tuned to them.
+
+`classify_file_b_periods`'s `cumulative_cents` parameter and
+`apply_dollar_transient_rule` are wired into the offline rebuild/validation
+path (`account_period_status`) as of this addition. The pull path
+(`scripts/pull_obligation_account.py`) shares the identical
+`classify_file_b_periods` call and already computes each period's raw File
+B cumulative in `snapshots` before classifying; passing that cumulative
+through is a small follow-up to that file, outside this change's scope.
 
 **`periodNotes`.** A reported-to-reported cumulative File B drop of more
 than 50%, where the previous cumulative is at least $1,000,000 (a lower

@@ -1,7 +1,7 @@
 {
  "schemaVersion": 2,
  "kind": "obligations",
- "generated": "2026-09-20",
+ "generated": "2026-09-21",
  "node": {
   "level": "programActivity",
   "path": "obligations/usda/nass/financial-adjustment-program-not-specified",
@@ -1696,19 +1696,19 @@
   {
    "submissionPeriod": "FY2026P04",
    "month": "2026-01",
-   "status": "reported",
-   "netObligationsCents": -353838308,
-   "netObligations": -3538383.08,
-   "awardLinkedObligationsCents": 0,
-   "awardLinkedObligations": 0.0,
-   "residualObligationsCents": -353838308,
-   "residualObligations": -3538383.08,
-   "grossObligationsCents": 0,
-   "grossObligations": 0.0,
-   "deobligationsCents": -353838308,
-   "deobligations": -3538383.08,
-   "distinctLinkedAwards": 0,
-   "fileCToNetRatio": -0.0
+   "status": "notReported",
+   "netObligationsCents": null,
+   "netObligations": null,
+   "awardLinkedObligationsCents": null,
+   "awardLinkedObligations": null,
+   "residualObligationsCents": null,
+   "residualObligations": null,
+   "grossObligationsCents": null,
+   "grossObligations": null,
+   "deobligationsCents": null,
+   "deobligations": null,
+   "distinctLinkedAwards": null,
+   "fileCToNetRatio": null
   },
   {
    "submissionPeriod": "FY2026P05",
@@ -1725,7 +1725,11 @@
    "deobligationsCents": -248524435,
    "deobligations": -2485244.35,
    "distinctLinkedAwards": 0,
-   "fileCToNetRatio": -0.0
+   "fileCToNetRatio": -0.0,
+   "coversPeriods": [
+    "FY2026P04",
+    "FY2026P05"
+   ]
   },
   {
    "submissionPeriod": "FY2026P06",
@@ -2819,19 +2823,20 @@
     {
      "d": 122,
      "submissionPeriod": "FY2026P04",
-     "status": "reported",
-     "netObligationsCents": 592865787,
-     "netObligations": 5928657.87,
+     "status": "notReported",
+     "netObligationsCents": 946704095,
+     "netObligations": 9467040.95,
      "awardLinkedObligationsCents": 0,
      "awardLinkedObligations": 0.0,
-     "residualObligationsCents": 592865787,
-     "residualObligations": 5928657.87,
+     "residualObligationsCents": 946704095,
+     "residualObligations": 9467040.95,
      "grossObligationsCents": 1272592996,
      "grossObligations": 12725929.96,
-     "deobligationsCents": -679727209,
-     "deobligations": -6797272.09,
+     "deobligationsCents": -325888901,
+     "deobligations": -3258889.01,
      "distinctLinkedAwards": 0,
-     "fileCToNetRatio": 0.0
+     "fileCToNetRatio": 0.0,
+     "held": true
     },
     {
      "d": 150,

@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from adapters.obligation_common import classify_file_b_periods
+from adapters.obligation_common import apply_dollar_transient_rule, classify_file_b_periods
 from adapters.usaspending_obligations import (
     DOWNLOAD_STATUS_TIMEOUT_SECONDS,
     _bytes, _download_request_payload, _json, alias_map,
@@ -886,6 +886,86 @@ class USAspendingObligationTests(unittest.TestCase):
         self.assertNotIn(
             "FY2024P03",
             {e["submissionPeriod"] for e in combined if e["source"] == "file_b_residual"})
+
+
+class DollarTransientClassificationTests(unittest.TestCase):
+    """Rule 4 of the snapshot-acceptance contract (Phase 3.2d remediation
+    W14, 2026-09-21): a full-row-count File B period whose cumulative net
+    obligations spikes or dips by more than 50% and then reverts is a
+    transient inconsistent snapshot, invisible to the row-count rule. Real
+    dod/navy-rdte cents (P10/P11/P12 FY2024 and P05/P06/P07 FY2023)."""
+
+    def test_transient_spike_is_reclassified_not_reported(self):
+        # dod/navy-rdte FY2024: P10 $25.41B, P11 $54.61B (spike), P12
+        # $29.56B (reverts close to P10 and is the GTAS-reconciled total).
+        row_status = {"FY2024P10": "reported", "FY2024P11": "reported",
+                     "FY2024P12": "reported"}
+        cumulative_cents = {"FY2024P10": 2_540_914_848_134,
+                            "FY2024P11": 5_460_831_665_422,
+                            "FY2024P12": 2_956_285_398_710}
+        status = apply_dollar_transient_rule(row_status, cumulative_cents)
+        self.assertEqual("notReported", status["FY2024P11"])
+        self.assertEqual("reported", status["FY2024P10"])
+        self.assertEqual("reported", status["FY2024P12"])
+
+    def test_transient_dip_is_reclassified_not_reported(self):
+        # A dip (rather than a spike) that reverts is caught the same way.
+        row_status = {"FY2024P05": "reported", "FY2024P06": "reported",
+                     "FY2024P07": "reported"}
+        cumulative_cents = {"FY2024P05": 10_000_000_000,
+                            "FY2024P06": 2_000_000_000,   # dip: -80%
+                            "FY2024P07": 10_500_000_000}  # reverts near P05
+        status = apply_dollar_transient_rule(row_status, cumulative_cents)
+        self.assertEqual("notReported", status["FY2024P06"])
+
+    def test_sustained_drop_stays_reported(self):
+        # dhs/cisa-rd FY2023 shape: a real, sustained drop with no later
+        # recovery must stay reported so the existing >50% drop check (and
+        # its required baseline periodNotes) still governs it.
+        row_status = {"FY2023P03": "reported", "FY2023P04": "reported",
+                     "FY2023P05": "reported"}
+        cumulative_cents = {"FY2023P03": 1_290_038_168,
+                            "FY2023P04": 100_000_000,
+                            "FY2023P05": 100_000_000}
+        status = apply_dollar_transient_rule(row_status, cumulative_cents)
+        self.assertEqual("reported", status["FY2023P04"])
+
+    def test_below_floor_previous_cumulative_is_ignored(self):
+        # A deviation that would otherwise qualify is skipped when the
+        # preceding reported cumulative is below the $1M floor -- otherwise
+        # a small account's cumulative can swing past 50% on noise.
+        row_status = {"FY2022P02": "reported", "FY2022P03": "reported",
+                     "FY2022P04": "reported"}
+        cumulative_cents = {"FY2022P02": 24_258,
+                            "FY2022P03": 5_000_000,  # a huge relative swing
+                            "FY2022P04": 24_500}
+        status = apply_dollar_transient_rule(row_status, cumulative_cents)
+        self.assertEqual("reported", status["FY2022P03"])
+
+    def test_final_period_is_exempt_even_if_pattern_qualifies(self):
+        # The pattern must never reclassify the fiscal year's own final
+        # period, even when the shape otherwise looks transient.
+        row_status = {"FY2024P10": "reported", "FY2024P11": "reported",
+                     "FY2024P12": "reported"}
+        cumulative_cents = {"FY2024P10": 1_000_000_000,
+                            "FY2024P11": 1_050_000_000,
+                            "FY2024P12": 3_000_000_000}  # spikes at the end
+        status = apply_dollar_transient_rule(row_status, cumulative_cents)
+        self.assertEqual("reported", status["FY2024P12"])
+
+    def test_classify_file_b_periods_applies_the_dollar_rule_when_given_cumulative(self):
+        # classify_file_b_periods(row_counts) alone (no cumulative_cents)
+        # reproduces the historical row-rule-only behavior; passing
+        # cumulative_cents additionally applies rule 4.
+        row_counts = {"FY2024P10": 221, "FY2024P11": 224, "FY2024P12": 227}
+        cumulative_cents = {"FY2024P10": 2_540_914_848_134,
+                            "FY2024P11": 5_460_831_665_422,
+                            "FY2024P12": 2_956_285_398_710}
+        row_only = classify_file_b_periods(row_counts)
+        self.assertEqual({"FY2024P10": "reported", "FY2024P11": "reported",
+                          "FY2024P12": "reported"}, row_only)
+        with_dollar_rule = classify_file_b_periods(row_counts, cumulative_cents)
+        self.assertEqual("notReported", with_dollar_rule["FY2024P11"])
 
 
 if __name__ == "__main__":

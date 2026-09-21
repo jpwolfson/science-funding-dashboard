@@ -429,3 +429,15 @@ Chart geometry changed for this feature (the period chart omits
 `notReported` rows; the cumulative step chart holds the last reported value
 with a hollow marker), so its release additionally required `rendered` plus
 a before/after screenshot pack per the rule above.
+
+**Rule 4 addition (Phase 3.2d remediation W14, 2026-09-21).** A full-row-count
+File B period whose cumulative net obligations spikes or dips by more than
+50% and then reverts (`dod/navy-rdte` FY2024 P11: $25.41B → $54.61B →
+$29.56B) is reclassified `notReported` by the dollar-transient rule
+(`apply_dollar_transient_rule`), universal and registry-free like the row
+rule it runs alongside; the same rebuild-time recompute
+(`account_period_status`) and the `rendered`/screenshot release bar applied
+again, since a notReported point with no earlier reported point in its
+fiscal year now displays as a null, skipped point rather than a held $0
+(see `docs/obligation-ledger.md`, "Snapshot acceptance and not-reported
+periods").

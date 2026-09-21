@@ -1,7 +1,7 @@
 {
  "schemaVersion": 2,
  "kind": "obligations",
- "generated": "2026-09-20",
+ "generated": "2026-09-21",
  "node": {
   "level": "programActivity",
   "path": "obligations/usda/nass/national-agricultural-statistics-service-reimbursable",
@@ -1696,19 +1696,19 @@
   {
    "submissionPeriod": "FY2026P04",
    "month": "2026-01",
-   "status": "reported",
-   "netObligationsCents": 3766948264,
-   "netObligations": 37669482.64,
-   "awardLinkedObligationsCents": 0,
-   "awardLinkedObligations": 0.0,
-   "residualObligationsCents": 3766948264,
-   "residualObligations": 37669482.64,
-   "grossObligationsCents": 3766948264,
-   "grossObligations": 37669482.64,
-   "deobligationsCents": 0,
-   "deobligations": 0.0,
-   "distinctLinkedAwards": 0,
-   "fileCToNetRatio": 0.0
+   "status": "notReported",
+   "netObligationsCents": null,
+   "netObligations": null,
+   "awardLinkedObligationsCents": null,
+   "awardLinkedObligations": null,
+   "residualObligationsCents": null,
+   "residualObligations": null,
+   "grossObligationsCents": null,
+   "grossObligations": null,
+   "deobligationsCents": null,
+   "deobligations": null,
+   "distinctLinkedAwards": null,
+   "fileCToNetRatio": null
   },
   {
    "submissionPeriod": "FY2026P05",
@@ -1725,7 +1725,11 @@
    "deobligationsCents": -3671071559,
    "deobligations": -36710715.59,
    "distinctLinkedAwards": 1,
-   "fileCToNetRatio": 0.00028806602731766583
+   "fileCToNetRatio": 0.00028806602731766583,
+   "coversPeriods": [
+    "FY2026P04",
+    "FY2026P05"
+   ]
   },
   {
    "submissionPeriod": "FY2026P06",
@@ -3224,19 +3228,20 @@
     {
      "d": 122,
      "submissionPeriod": "FY2026P04",
-     "status": "reported",
-     "netObligationsCents": 3647925491,
-     "netObligations": 36479254.91,
+     "status": "notReported",
+     "netObligationsCents": -119022773,
+     "netObligations": -1190227.73,
      "awardLinkedObligationsCents": 0,
      "awardLinkedObligations": 0.0,
-     "residualObligationsCents": 3647925491,
-     "residualObligations": 36479254.91,
-     "grossObligationsCents": 3813123181,
-     "grossObligations": 38131231.81,
+     "residualObligationsCents": -119022773,
+     "residualObligations": -1190227.73,
+     "grossObligationsCents": 46174917,
+     "grossObligations": 461749.17,
      "deobligationsCents": -165197690,
      "deobligations": -1651976.9,
      "distinctLinkedAwards": 0,
-     "fileCToNetRatio": 0.0
+     "fileCToNetRatio": -0.0,
+     "held": true
     },
     {
      "d": 150,
