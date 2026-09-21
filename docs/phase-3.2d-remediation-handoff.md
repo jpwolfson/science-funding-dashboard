@@ -260,6 +260,20 @@ Standing facts the new agent needs:
   (`ed/ies` FY2018, `usda/nifa-research-education` FY2019); W11 skips
   them and W13 resumes on the run's next attempt. Not remediation items.
 
+### Reader review disposition (2026-09-20, `docs/reviews/evidence-2026-09-20/reader-review.md`)
+
+| # | Sev | Finding | Disposition |
+|---|---|---|---|
+| 1 | High | NIST ITS FY2025 line plateaus ~$5.7B Dec–Aug, endpoint $719M | Correct data: a confirmed $5.03B net deobligation in P11 (PR #77). The explanatory `periodNotes` text is not rendered. Rendering it is a public-claim question (owner escalation in the closing report); until decided, the chart shows the source figures without commentary. |
+| 2 | High | Navy FY2024 mid-year spike to $54.6B, endpoint $29.6B; Navy FY2023 P06 $33.3B | **Data defect, gating.** Transient over-reported snapshots at full row counts, invisible to the row rule. W14 adds the dollar-transient rule (revert-within-one-period ⇒ `notReported`); sustained changes (NIST) stay reported. |
+| 3 | High | NOAA ORF FY2024 solid $0 line through Aug then vertical to $7.25B | **Display defect, gating.** Not-reported periods with no prior reported value were drawn as a held $0. W14 makes such points null/hidden so the FY line starts at the first reported period. |
+| 4, 8 | Med, Low | Sentinel age wording; repeated episode titles | Stage 2 ledger item 6 (sentinel-facing, owner sign-off norm). |
+| 5 | Med | Empty File C sections | Stage 2 ledger item 4. |
+| 6, 7 | Med | Correction pairs dominate period charts | Stage 2 ledger item 5. |
+| 9 | Low | DHS CISA decline unexplained | Stage 2 ledger item 8 (data question first). |
+| 10 | Low | All-time vs FYTD totals adjacent | Stage 2 ledger item 7. |
+| 11 | — | "counts as of the pull date" not found on the 10 pages | Expected: the methodology line renders on NIH award nodes and the award root; the reviewer's award-root capture predates no change — verify in the post-soak pass that `award-root.png` shows it (contract test `tests/test_site_contract.py` pins the string). |
+
 ## CI runs (filled as they happen)
 
 | When | Workflow / ref | Purpose | Result |

@@ -49,3 +49,36 @@ the reader review meaningful).
    A tab's label is a promise about its metric; mixed boxes break that
    promise even when individually labeled — the same principle as the
    metric-identity audit, applied at page level.
+
+4. **Empty File C sections need an inline placeholder** (2026-09-20,
+   reader review `docs/reviews/evidence-2026-09-20/reader-review.md` #5).
+   Accounts with 0.0 % File C linkage render "Top recipients" and gross
+   flow sections with no rows and no explanation at the section; the
+   sparsity note sits higher on the page. Render a one-line "no File C
+   award detail reported for this account" placeholder in the empty
+   section itself.
+
+5. **Callout for correction pairs in period charts** (2026-09-20, reader
+   review #6, #7). A single large negative-then-positive pair (a source
+   correction) dominates a small account's whole multi-year scale and is
+   explained only by a general footnote. Options for the batch: annotate
+   the specific periods inline, or clip the y-axis with an explicit
+   "off-scale correction" marker. Never remove the pair from the data.
+
+6. **Sentinel episode identity and age wording** (2026-09-20, reader
+   review #4, #8). Repeated identical episode titles with different
+   dollar figures invite double-counting; "unreviewed for N days" reads as
+   an SLA the page's own text disclaims. Sentinel-facing language: owner
+   sign-off norm applies.
+
+7. **All-time vs FY-to-date totals on the landing page** (2026-09-20,
+   reader review #10). "$2703.529B net obligations" sits directly above
+   "Net obligations, FY2026 to date $285.826B" with similar weight; label
+   the horizon in the number's own label, not only in the caption.
+
+8. **Small-account decline narrative** (2026-09-20, reader review #9).
+   `dhs/cisa-rd` annual totals fall from ~$16M to under $1M with no
+   on-page statement of whether that is real, a reclassification, or a
+   reporting artifact. Data question first (registry/crosswalk check),
+   then a caption if real.
+
