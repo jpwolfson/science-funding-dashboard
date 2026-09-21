@@ -245,7 +245,16 @@ end):
    "Display-improvements batch — AFTER 3.2d remediation" bullet's hold
    wording to state the remediation closed on the date of step 4, in the
    same PR as step 4.
-6. Do not start Stage 2 work in that session. Report completion to the
+6. Small code follow-up, safe any time no obligation reconcile is in
+   flight: pass `cumulative_cents` into the pull path's
+   `classify_file_b_periods` call in `scripts/pull_obligation_account.py`
+   (W14 wired the rebuild and validator paths only; see PR #80).
+7. Owner escalation carried in the coordinator's closing report, not for
+   the agent to decide: whether to render curated `periodNotes` (NIST ITS
+   FY2025 P11 real deobligation; DHS CISA FY2023 P04 correction) on the
+   account pages. Until the owner answers, the charts show the source
+   figures without commentary.
+8. Do not start Stage 2 work in that session. Report completion to the
    owner with the three run IDs and the merged PR numbers.
 
 Standing facts the new agent needs:
