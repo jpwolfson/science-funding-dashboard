@@ -118,7 +118,96 @@ def baseline_pin_problems(pin):
     return problems
 
 
-def classify_file_b_periods(row_counts):
+DOLLAR_TRANSIENT_FLOOR_CENTS = 100_000_000
+
+
+def _relative_difference(a, b):
+    """Symmetric percentage difference between two cumulative cent values.
+
+    Uses the larger magnitude as the denominator so the measure is the same
+    regardless of which of ``a``/``b`` came first chronologically -- the
+    same formula serves both the "differs by more than 50%" (deviate) and
+    "within 50% of" (reverts) halves of the dollar-transient rule below.
+    """
+    denom = max(abs(a), abs(b))
+    return abs(a - b) / denom if denom else 0.0
+
+
+def apply_dollar_transient_rule(period_status, cumulative_cents,
+                                 floor_cents=DOLLAR_TRANSIENT_FLOOR_CENTS):
+    """Reclassify a transient cumulative-dollar spike/dip as ``notReported``.
+
+    Rule 4 of the snapshot-acceptance contract (see
+    docs/obligation-ledger.md "Snapshot acceptance and not-reported
+    periods"), added in the Phase 3.2d remediation (W14, 2026-09-21) to
+    catch an inconsistent File B snapshot that carries a FULL row count --
+    invisible to ``classify_file_b_periods``'s row-count rule -- but a
+    wildly wrong cumulative dollar total (``dod/navy-rdte`` FY2024: P10
+    $25.41B, P11 $54.61B, P12 $29.56B; the spike at P11 is never a real
+    balance, since P12 reconciles to GTAS at $29.56B).
+
+    ``period_status`` is an existing ``{period: "reported" | "notReported"}``
+    map (typically ``classify_file_b_periods``'s own row-rule result).
+    ``cumulative_cents`` maps the same (or a superset of) period labels to
+    the exact cumulative net obligation cents through that period -- the
+    same value the pull and rebuild paths already compute by summing every
+    event with ``fiscalPeriod`` at or before that period's own, which
+    telescopes to the correct total regardless of any period's own
+    classification (a ``notReported`` period's dollars are, by
+    construction, folded into whichever later reported period absorbs its
+    span, never dropped).
+
+    An interior period already classified ``reported`` -- i.e. not the
+    fiscal year's first or last *reported* period, and never the fiscal
+    year's own final period regardless -- is reclassified ``notReported``
+    when BOTH hold:
+
+    - it differs from the immediately preceding reported period's
+      cumulative by more than 50% (either direction); and
+    - the NEXT reported period's cumulative reverts back to within 50% of
+      that same preceding cumulative.
+
+    A deviation that does not revert (the next reported period stays far
+    from the preceding one, e.g. a real, sustained deobligation) is left
+    ``reported`` -- it still becomes a candidate for the existing >50%
+    cumulative-drop check (``scripts/validate_obligations.py``), which
+    requires a curated ``periodNotes`` explanation rather than silently
+    reclassifying real activity away.
+
+    The rule is skipped entirely when the preceding reported cumulative's
+    magnitude is below ``floor_cents`` (the same floor as the >50% drop
+    check -- a small account's cumulative can otherwise swing past 50% on
+    noise worth only tens of thousands of dollars).
+
+    Returns a new ``{period: status}`` map; never mutates its inputs.
+    """
+    ordered = sorted(period_status, key=lambda label: period_info(label)[:2])
+    if not ordered:
+        return dict(period_status)
+    status = dict(period_status)
+    reported = [label for label in ordered if status[label] == "reported"]
+    final_label = ordered[-1]
+    for index in range(1, len(reported) - 1):
+        label = reported[index]
+        if label == final_label:
+            continue  # never reclassify the fiscal year's final period
+        previous_label, next_label = reported[index - 1], reported[index + 1]
+        if not all(l in cumulative_cents for l in (previous_label, label, next_label)):
+            continue
+        previous_cum = cumulative_cents[previous_label]
+        current_cum = cumulative_cents[label]
+        next_cum = cumulative_cents[next_label]
+        if abs(previous_cum) < floor_cents:
+            continue
+        if _relative_difference(previous_cum, current_cum) <= 0.5:
+            continue  # not a >50% deviation from the preceding period
+        if _relative_difference(previous_cum, next_cum) > 0.5:
+            continue  # does not revert -- a sustained, real change
+        status[label] = "notReported"
+    return status
+
+
+def classify_file_b_periods(row_counts, cumulative_cents=None):
     """Classify one fiscal year's File B period snapshots as accepted.
 
     ``row_counts`` maps canonical submission-period labels, all within one
@@ -154,6 +243,16 @@ def classify_file_b_periods(row_counts):
       P04-P08 against 551 at P12). A small account whose early periods are
       merely proportionately smaller, not stub-sized, is unaffected (3
       rows at P02 against 8 at P12 is 0.375 of the final count and passes).
+
+    ``cumulative_cents`` (optional), when given, additionally applies rule 4
+    -- ``apply_dollar_transient_rule`` -- to the result of the row rule
+    above: an interior period the row rule left ``reported`` but whose
+    cumulative net obligations spike or dip by more than 50% and then
+    revert is reclassified ``notReported`` too (a full-row-count but
+    internally-inconsistent snapshot; see that function's docstring). It is
+    the identical rule applied by both the pull path and the offline
+    rebuild path (``account_period_status``); omitting it reproduces the
+    row-rule-only historical behavior.
 
     Its bytes and provenance are still kept upstream; this function only
     returns the classification.
@@ -202,7 +301,10 @@ def classify_file_b_periods(row_counts):
             if rows[idx] < floor:
                 status[idx] = "notReported"
 
-    return {ordered[idx]: status[idx] for idx in range(n)}
+    result = {ordered[idx]: status[idx] for idx in range(n)}
+    if cumulative_cents:
+        result = apply_dollar_transient_rule(result, cumulative_cents)
+    return result
 
 
 def check_final_period_reported(period_status, fy_complete):
@@ -281,7 +383,7 @@ def file_b_row_counts_from_provenance(provenance):
     return counts
 
 
-def account_period_status(store, events, partial_fys=()):
+def account_period_status(store, events, partial_fys=(), dollar_transients=None):
     """Recompute an account's File B period classification from provenance.
 
     Reads each event-bearing fiscal year's committed
@@ -298,6 +400,18 @@ def account_period_status(store, events, partial_fys=()):
     rebuild for every other account in the same process). Callers that want
     the hard error call ``check_final_period_reported`` themselves per
     fiscal year.
+
+    The dollar-transient rule (rule 4) runs here too: for each fiscal
+    year's row-rule result, the cumulative net obligation cents through
+    every period already present in provenance is derived straight from
+    ``events`` (summing every event with ``fiscalPeriod`` at or before that
+    period's own number -- exact regardless of any period's own
+    classification, since a notReported period's dollars are always folded
+    into whichever later reported period absorbs its span) and handed to
+    ``apply_dollar_transient_rule``. Pass a list as ``dollar_transients`` to
+    have this function append the ``(fiscalYear, period_label)`` pairs it
+    reclassifies -- ``scripts/rollup_obligations.py`` uses this to print
+    what changed on each rebuild.
     """
     partial_fys = set(partial_fys)
     merged = {}
@@ -308,7 +422,20 @@ def account_period_status(store, events, partial_fys=()):
         row_counts = file_b_row_counts_from_provenance(provenance)
         if not row_counts:
             continue
-        merged.update(classify_file_b_periods(row_counts))
+        row_status = classify_file_b_periods(row_counts)
+        fy_events = [event for event in events if event["fiscalYear"] == fy]
+        cumulative_cents = {
+            label: sum(event["amountCents"] for event in fy_events
+                      if event["fiscalPeriod"] <= period_info(label)[1])
+            for label in row_counts
+        }
+        status = apply_dollar_transient_rule(row_status, cumulative_cents)
+        if dollar_transients is not None:
+            dollar_transients.extend(
+                (fy, label) for label in row_status
+                if row_status[label] == "reported" and status[label] == "notReported"
+            )
+        merged.update(status)
     return merged
 
 
@@ -688,16 +815,28 @@ def aggregate(events, current_fy=None, covered_periods=None, partial_fys=None,
             end = period_info(label)[2]
             day = (end - date(fy - 1, 10, 1)).days
             is_last = index == len(fy_rows) - 1
-            if status == "notReported" and last_reported_point is not None and not is_last:
+            if status == "notReported" and not is_last:
                 # Hold the cumulative line at the last reported value
                 # instead of dipping to the partial File-C-only total that
                 # a not-reported period's own events would otherwise imply.
                 # A dangling final period (no later reported point yet to
                 # anchor a hold) is shown at its real, if incomplete, value
                 # so the cumulative-endpoint invariant still holds exactly.
-                point = {**last_reported_point, "d": day,
-                         "submissionPeriod": label, "status": "notReported",
-                         "held": True}
+                if last_reported_point is not None:
+                    point = {**last_reported_point, "d": day,
+                             "submissionPeriod": label, "status": "notReported",
+                             "held": True}
+                else:
+                    # No earlier reported point exists yet this fiscal year
+                    # to hold at: the cumulative is genuinely unknown, not
+                    # zero (commerce/noaa-orf FY2024 P02-P11: a leading run
+                    # of notReported periods was previously drawn as a flat
+                    # $0 line, reading as "nothing obligated" rather than
+                    # "not yet known"). Publish null metrics so the site can
+                    # skip the point entirely rather than draw a false zero.
+                    point = {"d": day, "submissionPeriod": label,
+                             "status": "notReported", "held": True,
+                             **{key: None for key in _metrics([])}}
             else:
                 through = [e for e in fy_events if e["fiscalPeriod"] <= period_info(label)[1]]
                 point = {"d": day, "submissionPeriod": label, "status": status,

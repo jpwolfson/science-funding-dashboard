@@ -1,7 +1,7 @@
 {
  "schemaVersion": 2,
  "kind": "obligations",
- "generated": "2026-09-20",
+ "generated": "2026-09-21",
  "node": {
   "level": "programActivity",
   "path": "obligations/commerce/nist-its/technology-innovation-program",
@@ -1203,18 +1203,18 @@
   {
    "submissionPeriod": "FY2023P08",
    "month": "2023-05",
-   "status": "reported",
-   "netObligationsCents": 0,
-   "netObligations": 0.0,
-   "awardLinkedObligationsCents": 0,
-   "awardLinkedObligations": 0.0,
-   "residualObligationsCents": 0,
-   "residualObligations": 0.0,
-   "grossObligationsCents": 0,
-   "grossObligations": 0.0,
-   "deobligationsCents": 0,
-   "deobligations": 0.0,
-   "distinctLinkedAwards": 0,
+   "status": "notReported",
+   "netObligationsCents": null,
+   "netObligations": null,
+   "awardLinkedObligationsCents": null,
+   "awardLinkedObligations": null,
+   "residualObligationsCents": null,
+   "residualObligations": null,
+   "grossObligationsCents": null,
+   "grossObligations": null,
+   "deobligationsCents": null,
+   "deobligations": null,
+   "distinctLinkedAwards": null,
    "fileCToNetRatio": null
   },
   {
@@ -1232,7 +1232,11 @@
    "deobligationsCents": 0,
    "deobligations": 0.0,
    "distinctLinkedAwards": 0,
-   "fileCToNetRatio": null
+   "fileCToNetRatio": null,
+   "coversPeriods": [
+    "FY2023P08",
+    "FY2023P09"
+   ]
   },
   {
    "submissionPeriod": "FY2023P10",
@@ -2308,7 +2312,7 @@
     {
      "d": 242,
      "submissionPeriod": "FY2023P08",
-     "status": "reported",
+     "status": "notReported",
      "netObligationsCents": -274354,
      "netObligations": -2743.54,
      "awardLinkedObligationsCents": 0,
@@ -2320,7 +2324,8 @@
      "deobligationsCents": -274354,
      "deobligations": -2743.54,
      "distinctLinkedAwards": 0,
-     "fileCToNetRatio": -0.0
+     "fileCToNetRatio": -0.0,
+     "held": true
     },
     {
      "d": 272,

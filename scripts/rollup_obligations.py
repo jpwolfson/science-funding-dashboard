@@ -162,7 +162,12 @@ def build(repo=REPO):
         # account itself, every Program Activity child, and the agency/root
         # rollups below -- notReported is a File B/account-wide property,
         # not a per-Program-Activity one.
-        period_status = account_period_status(base / "events", events, partial_fys)
+        dollar_transients = []
+        period_status = account_period_status(base / "events", events, partial_fys,
+                                              dollar_transients=dollar_transients)
+        for fy, label in sorted(dollar_transients):
+            print(f"{account['path']} FY{fy} {label}: dollar-transient "
+                  "snapshot reclassified notReported (row count was full)")
         interpretation_note = account.get("interpretationNote")
         pa_children = []
         for pa in account["programActivities"]:

@@ -1,7 +1,7 @@
 {
  "schemaVersion": 2,
  "kind": "obligations",
- "generated": "2026-09-20",
+ "generated": "2026-09-21",
  "node": {
   "level": "account",
   "path": "obligations/commerce/nist-its",
@@ -1203,19 +1203,19 @@
   {
    "submissionPeriod": "FY2023P08",
    "month": "2023-05",
-   "status": "reported",
-   "netObligationsCents": 12564599023,
-   "netObligations": 125645990.23,
-   "awardLinkedObligationsCents": 2244429035,
-   "awardLinkedObligations": 22444290.35,
-   "residualObligationsCents": 10320169988,
-   "residualObligations": 103201699.88,
-   "grossObligationsCents": 12577761623,
-   "grossObligations": 125777616.23,
-   "deobligationsCents": -13162600,
-   "deobligations": -131626.0,
-   "distinctLinkedAwards": 53,
-   "fileCToNetRatio": 0.17863117087075225
+   "status": "notReported",
+   "netObligationsCents": null,
+   "netObligations": null,
+   "awardLinkedObligationsCents": null,
+   "awardLinkedObligations": null,
+   "residualObligationsCents": null,
+   "residualObligations": null,
+   "grossObligationsCents": null,
+   "grossObligations": null,
+   "deobligationsCents": null,
+   "deobligations": null,
+   "distinctLinkedAwards": null,
+   "fileCToNetRatio": null
   },
   {
    "submissionPeriod": "FY2023P09",
@@ -1232,7 +1232,11 @@
    "deobligationsCents": -9819833616,
    "deobligations": -98198336.16,
    "distinctLinkedAwards": 19,
-   "fileCToNetRatio": -0.6081601572338384
+   "fileCToNetRatio": -0.6081601572338384,
+   "coversPeriods": [
+    "FY2023P08",
+    "FY2023P09"
+   ]
   },
   {
    "submissionPeriod": "FY2023P10",
@@ -8466,19 +8470,20 @@
     {
      "d": 242,
      "submissionPeriod": "FY2023P08",
-     "status": "reported",
-     "netObligationsCents": 19633467516,
-     "netObligations": 196334675.16,
-     "awardLinkedObligationsCents": 8057018461,
-     "awardLinkedObligations": 80570184.61,
-     "residualObligationsCents": 11576449055,
-     "residualObligations": 115764490.55,
-     "grossObligationsCents": 20246669397,
-     "grossObligations": 202466693.97,
-     "deobligationsCents": -613201881,
-     "deobligations": -6132018.81,
-     "distinctLinkedAwards": 104,
-     "fileCToNetRatio": 0.4103716500630392
+     "status": "notReported",
+     "netObligationsCents": 7068868493,
+     "netObligations": 70688684.93,
+     "awardLinkedObligationsCents": 5812589426,
+     "awardLinkedObligations": 58125894.26,
+     "residualObligationsCents": 1256279067,
+     "residualObligations": 12562790.67,
+     "grossObligationsCents": 7668907774,
+     "grossObligations": 76689077.74,
+     "deobligationsCents": -600039281,
+     "deobligations": -6000392.81,
+     "distinctLinkedAwards": 51,
+     "fileCToNetRatio": 0.8222800341746292,
+     "held": true
     },
     {
      "d": 272,

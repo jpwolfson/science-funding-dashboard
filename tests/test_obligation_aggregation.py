@@ -107,6 +107,47 @@ class ObligationAggregationTests(unittest.TestCase):
         self.assertEqual(out["fiscalYears"][0]["netObligationsCents"],
                          points["FY2025P12"]["netObligationsCents"])
 
+    def test_leading_not_reported_run_holds_null_not_zero(self):
+        # commerce/noaa-orf FY2024 shape: a run of notReported periods at
+        # the START of the fiscal year, before any period has ever been
+        # reported. The cumulative is genuinely unknown there, not $0 --
+        # the site must be able to skip these points rather than draw a
+        # false flat-zero line before the first real reported point.
+        rows = [ev("p12", 725000, "FY2024P12")]
+        period_status = {"FY2024P02": "notReported", "FY2024P03": "notReported",
+                         "FY2024P11": "notReported", "FY2024P12": "reported"}
+        out = aggregate(rows, current_fy=2024,
+                        covered_periods={"FY2024P02", "FY2024P03",
+                                        "FY2024P11", "FY2024P12"},
+                        partial_fys=set(), period_status=period_status)
+        points = {p["submissionPeriod"]: p for p in out["fyCumulative"][0]["points"]}
+        for label in ("FY2024P02", "FY2024P03", "FY2024P11"):
+            self.assertTrue(points[label]["held"], label)
+            self.assertIsNone(points[label]["netObligationsCents"], label)
+            self.assertIsNone(points[label]["netObligations"], label)
+            self.assertIsNone(points[label]["distinctLinkedAwards"], label)
+        # The FY's own final (reported) point is unaffected: it holds its
+        # real value and is not marked held.
+        self.assertNotIn("held", points["FY2024P12"])
+        self.assertEqual(725000, points["FY2024P12"]["netObligationsCents"])
+
+    def test_leading_not_reported_run_then_a_later_reported_period_holds_real_value(self):
+        # Once a reported period exists earlier in the fiscal year, a later
+        # notReported period reverts to the ordinary held-at-real-value
+        # behavior (unaffected by the leading-run fix).
+        rows = [ev("p10", 10000, "FY2025P10"), ev("p12", 1300, "FY2025P12")]
+        period_status = {"FY2025P02": "notReported", "FY2025P10": "reported",
+                         "FY2025P11": "notReported", "FY2025P12": "reported"}
+        out = aggregate(rows, current_fy=2025,
+                        covered_periods={"FY2025P02", "FY2025P10",
+                                        "FY2025P11", "FY2025P12"},
+                        partial_fys=set(), period_status=period_status)
+        points = {p["submissionPeriod"]: p for p in out["fyCumulative"][0]["points"]}
+        self.assertIsNone(points["FY2025P02"]["netObligationsCents"])
+        self.assertTrue(points["FY2025P11"]["held"])
+        self.assertEqual(points["FY2025P10"]["netObligationsCents"],
+                         points["FY2025P11"]["netObligationsCents"])
+
     def test_dangling_not_reported_final_period_keeps_a_real_endpoint(self):
         # The most recent period is itself notReported with nothing after
         # it yet: the endpoint invariant must still hold, so it is shown at

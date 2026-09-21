@@ -1,7 +1,7 @@
 {
  "schemaVersion": 2,
  "kind": "obligations",
- "generated": "2026-09-20",
+ "generated": "2026-09-21",
  "node": {
   "level": "programActivity",
   "path": "obligations/usda/nass/agricultural-estimates",
@@ -1696,19 +1696,19 @@
   {
    "submissionPeriod": "FY2026P04",
    "month": "2026-01",
-   "status": "reported",
-   "netObligationsCents": 10086834,
-   "netObligations": 100868.34,
-   "awardLinkedObligationsCents": 0,
-   "awardLinkedObligations": 0.0,
-   "residualObligationsCents": 10086834,
-   "residualObligations": 100868.34,
-   "grossObligationsCents": 10086834,
-   "grossObligations": 100868.34,
-   "deobligationsCents": 0,
-   "deobligations": 0.0,
-   "distinctLinkedAwards": 0,
-   "fileCToNetRatio": 0.0
+   "status": "notReported",
+   "netObligationsCents": null,
+   "netObligations": null,
+   "awardLinkedObligationsCents": null,
+   "awardLinkedObligations": null,
+   "residualObligationsCents": null,
+   "residualObligations": null,
+   "grossObligationsCents": null,
+   "grossObligations": null,
+   "deobligationsCents": null,
+   "deobligations": null,
+   "distinctLinkedAwards": null,
+   "fileCToNetRatio": null
   },
   {
    "submissionPeriod": "FY2026P05",
@@ -1725,7 +1725,11 @@
    "deobligationsCents": 0,
    "deobligations": 0.0,
    "distinctLinkedAwards": 0,
-   "fileCToNetRatio": null
+   "fileCToNetRatio": null,
+   "coversPeriods": [
+    "FY2026P04",
+    "FY2026P05"
+   ]
   },
   {
    "submissionPeriod": "FY2026P06",
@@ -2819,19 +2823,20 @@
     {
      "d": 122,
      "submissionPeriod": "FY2026P04",
-     "status": "reported",
-     "netObligationsCents": 10086834,
-     "netObligations": 100868.34,
+     "status": "notReported",
+     "netObligationsCents": 0,
+     "netObligations": 0.0,
      "awardLinkedObligationsCents": 0,
      "awardLinkedObligations": 0.0,
-     "residualObligationsCents": 10086834,
-     "residualObligations": 100868.34,
-     "grossObligationsCents": 10086834,
-     "grossObligations": 100868.34,
+     "residualObligationsCents": 0,
+     "residualObligations": 0.0,
+     "grossObligationsCents": 0,
+     "grossObligations": 0.0,
      "deobligationsCents": 0,
      "deobligations": 0.0,
      "distinctLinkedAwards": 0,
-     "fileCToNetRatio": 0.0
+     "fileCToNetRatio": null,
+     "held": true
     },
     {
      "d": 150,
