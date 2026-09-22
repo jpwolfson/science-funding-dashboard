@@ -96,28 +96,53 @@ published, never silently absorbed:
   date, and reported the same way, rather than silently clamped to the
   fiscal year's start (the pre-2026-09-17 behavior);
 - moves (tracked-field overwrites) plus ledger returns, summed over one
-  pull for one institute, are checked against a churn threshold; above it
-  the pull fails closed, because that volume of churn is the
-  pagination/duplicate-displacement bug signature (CLAUDE.md data
-  integrity rule 4), not ordinary source revision.
-- **Initializing-pull exemption.** The threshold above is not enforced on
-  a unit's very first source-current pull, i.e. one for which
+  pull for one institute, are checked against two separate churn guards
+  (W15, 2026-09-22; see below), each of which fails the pull closed above
+  its own threshold.
+- **Displacement guard.** `date` moves plus exclusion-ledger returns are
+  checked against `max(20, 0.1% of store)`. Above it the pull fails
+  closed, because that volume of churn is the pagination/duplicate-
+  displacement bug signature (CLAUDE.md data integrity rule 4): a
+  repeated row silently displacing a missing one can only ever surface as
+  an id vanishing (a return) or a stable id's date jumping -- never as an
+  amount, title, or type change on a record that is otherwise present and
+  stably dated.
+- **Value-churn guard.** `amount`, `title`, and `type` moves (excluding
+  `date`) are checked separately against `max(100, 1% of store)`. Above
+  it the pull fails closed with a distinct "field-parse regression"
+  diagnosis, because that volume of non-date churn is more likely a
+  source schema change or an adapter parse regression than ordinary
+  revision. The guard is deliberately wider than the displacement guard:
+  NIH revises award amounts on stable, correctly-dated ids as routine
+  source behavior, and the 2026-09-21 NCI pull is the motivating case --
+  148 amount-only moves in one pull, zero date moves, zero returns, which
+  tripped the single combined threshold that existed before this split
+  even though it carried none of the displacement signature. The other 27
+  institutes that same day each had 1-17 amount moves (103 total),
+  consistent with ordinary source revision at a much smaller scale.
+  Below this guard, the pull still publishes; any non-date move is
+  disclosed in a `NOTICE` and a plain-language `dataQualityNotes` entry
+  ("N award record(s) had their amount, title, or type revised by NIH
+  since the previous pull; figures reflect the source as of the pull
+  date."), never silently absorbed.
+- **Initializing-pull exemption.** Neither guard above is enforced on a
+  unit's very first source-current pull, i.e. one for which
   `data/nih/<ic>/<ic>/changes.csv.gz` does not yet exist. Every store
   built under the pre-2026-09-17 adapter accumulated weeks of unrecorded
   field revisions, because that adapter never overwrote fields; measuring
-  that backlog against a threshold sized for one week's steady-state churn
+  that backlog against thresholds sized for one week's steady-state churn
   would misfire on every unit's first pull under this contract, not just
-  the ones with an actual pagination defect. On that first pull, every
-  move is appended to the ledger unconditionally -- which is what
-  initializes it -- and a `NOTICE` reports the move count and its
-  per-field breakdown. The exemption is self-limiting, not a bypass flag:
-  the committed ledger file this pull creates is itself the marker the
-  adapter checks, so a given unit can take this path at most once, ever.
-  From that unit's next pull onward, with the ledger already present, the
-  threshold applies exactly as described above. A pull that trips the
-  threshold (initializing or not) prints the per-field move counts and up
-  to ten sample moves (`id field: old -> new`) so the drift is diagnosable
-  from the CI log without a live reproduction.
+  the ones with an actual pagination defect or parse regression. On that
+  first pull, every move is appended to the ledger unconditionally --
+  which is what initializes it -- and a `NOTICE` reports the move count
+  and its per-field breakdown. The exemption is self-limiting, not a
+  bypass flag: the committed ledger file this pull creates is itself the
+  marker the adapter checks, so a given unit can take this path at most
+  once, ever. From that unit's next pull onward, with the ledger already
+  present, both guards apply exactly as described above. A pull that
+  trips either guard (initializing or not) prints the per-field move
+  counts and up to ten sample moves (`id field: old -> new`) so the drift
+  is diagnosable from the CI log without a live reproduction.
 
 Deterministic shard rewrites (`adapters.common.write_store`) also prevent a
 corrected date from leaving one ID in two fiscal-year files -- verified by
