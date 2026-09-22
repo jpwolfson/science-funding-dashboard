@@ -1,7 +1,7 @@
 {
  "schemaVersion": 2,
  "kind": "obligations",
- "generated": "2026-09-21",
+ "generated": "2026-09-22",
  "node": {
   "level": "programActivity",
   "path": "obligations/doe/sc/basic-energy-sciences",
@@ -492,6 +492,23 @@
    "fileCToNetRatio": 0.9903576774628085
   },
   {
+   "submissionPeriod": "FY2020P02",
+   "month": "2019-11",
+   "status": "notReported",
+   "netObligationsCents": null,
+   "netObligations": null,
+   "awardLinkedObligationsCents": null,
+   "awardLinkedObligations": null,
+   "residualObligationsCents": null,
+   "residualObligations": null,
+   "grossObligationsCents": null,
+   "grossObligations": null,
+   "deobligationsCents": null,
+   "deobligations": null,
+   "distinctLinkedAwards": null,
+   "fileCToNetRatio": null
+  },
+  {
    "submissionPeriod": "FY2020P03",
    "month": "2019-12",
    "status": "reported",
@@ -506,7 +523,11 @@
    "deobligationsCents": -576156524,
    "deobligations": -5761565.24,
    "distinctLinkedAwards": 40,
-   "fileCToNetRatio": 0.9968660362365157
+   "fileCToNetRatio": 0.9968660362365157,
+   "coversPeriods": [
+    "FY2020P02",
+    "FY2020P03"
+   ]
   },
   {
    "submissionPeriod": "FY2020P04",
@@ -3785,18 +3806,18 @@
      "distinctLinkedAwards": 16
     },
     {
-     "recipientUEI": "EXZVPWZBLUE8",
-     "recipient": "NORTHWESTERN UNIVERSITY",
-     "netObligationsCents": 936929529,
-     "netObligations": 9369295.29,
-     "distinctLinkedAwards": 14
-    },
-    {
      "recipientUEI": "G56PUALJ3KT5",
      "recipient": "CORNELL UNIVERSITY",
      "netObligationsCents": 915000000,
      "netObligations": 9150000.0,
      "distinctLinkedAwards": 12
+    },
+    {
+     "recipientUEI": "EXZVPWZBLUE8",
+     "recipient": "NORTHWESTERN UNIVERSITY",
+     "netObligationsCents": 898429529,
+     "netObligations": 8984295.29,
+     "distinctLinkedAwards": 13
     },
     {
      "recipientUEI": "KABJZBBJ4B54",
@@ -9109,9 +9130,11 @@
  "federalAccount": "089-0222",
  "programActivityCode": "0001",
  "freshness": {
-  "latestAcceptedAt": "2026-09-20T08:18:52+00:00",
+  "latestAcceptedAt": "2026-09-22T06:51:52+00:00",
   "maxAgeDays": 10,
   "refreshStatus": {
+   "lastAcceptedAt": "2026-09-22T06:51:52+00:00",
+   "lastRefreshAttemptAt": "2026-09-22T21:56:09.037526+00:00",
    "status": "fresh"
   }
  }
