@@ -10,6 +10,8 @@ from unittest.mock import patch
 from adapters.common import load_store, write_store
 from adapters.nih_reporter import (METHODOLOGY_NOTE, MOVE_RETURN_ABS_MIN,
                                    MOVE_RETURN_REL_FRACTION,
+                                   VALUE_CHURN_ABS_MIN,
+                                   VALUE_CHURN_REL_FRACTION,
                                    NihReporterPull, _award_kind,
                                    append_changes_ledger,
                                    changes_ledger_path, excluded_ids,
@@ -20,7 +22,7 @@ from adapters.nih_reporter import (METHODOLOGY_NOTE, MOVE_RETURN_ABS_MIN,
 
 
 def row(appl_id, agency="NIGMS", award_notice_date="2025-01-15T00:00:00",
-        fiscal_year_value=2025):
+        fiscal_year_value=2025, award_amount=123456):
     return {
         "appl_id": appl_id,
         "fiscal_year": fiscal_year_value,
@@ -28,7 +30,7 @@ def row(appl_id, agency="NIGMS", award_notice_date="2025-01-15T00:00:00",
         "award_notice_date": award_notice_date,
         "budget_start": "2025-02-01T00:00:00",
         "project_start_date": "2025-02-01T00:00:00",
-        "award_amount": 123456,
+        "award_amount": award_amount,
         "award_type": "5",
         "activity_code": "R01",
         "project_title": "Example project",
@@ -512,6 +514,164 @@ class ChurnThresholdTests(unittest.TestCase):
             self.assertIn("sample moves", message)
 
 
+class ValueChurnGuardTests(unittest.TestCase):
+    """The value-churn guard (amount/title/type moves) is separate from the
+    displacement guard (date moves + returns) -- see the 2026-09-21 NCI
+    case (148 amount-only moves, zero date moves, zero returns) that
+    motivated the split."""
+
+    def _store_of_size(self, store_path, n):
+        write_store(store_path, [
+            NihReporterPull("NIGMS", {}, store_path).normalize(row(i))[0]
+            for i in range(1, n + 1)
+        ])
+        # Pre-initialize the ledger so the store is in its steady-state
+        # (post-first-pull) form, where both guards are enforced.
+        append_changes_ledger(store_path, [])
+        self.assertTrue(changes_ledger_path(store_path).exists())
+
+    def test_amount_only_churn_above_displacement_but_below_value_churn_limit_publishes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            store_path = root / "data" / "nih" / "nigms" / "nigms" / "awards"
+            n = 1000
+            self._store_of_size(store_path, n)
+            displacement_limit = int(max(MOVE_RETURN_ABS_MIN,
+                                         MOVE_RETURN_REL_FRACTION * n))
+            value_churn_limit = int(max(VALUE_CHURN_ABS_MIN,
+                                        VALUE_CHURN_REL_FRACTION * n))
+            self.assertEqual(displacement_limit, 20)
+            self.assertEqual(value_churn_limit, 100)
+            churn_count = 50  # above the (irrelevant) displacement limit,
+                               # below the value-churn limit
+            changed_rows = {
+                i: row(i, award_amount=999)
+                for i in range(1, churn_count + 1)
+            }
+            puller = NihReporterPull(
+                "NIGMS", {"min_total": 0, "max_total": 10000, "max_monthly": 10000},
+                store_path,
+            )
+            all_rows = {i: row(i) for i in range(1, n + 1)}
+            all_rows.update(changed_rows)
+            with patch.object(puller, "fetch_year",
+                              side_effect=lambda fy: all_rows if fy == 2025 else {}):
+                buf = io.StringIO()
+                with patch("sys.stdout", buf):
+                    awards, warnings, notes = puller.pull(
+                        full=True, today=date(2026, 8, 17), repo_root=root)
+            self.assertEqual([], warnings)
+            printed = buf.getvalue()
+            self.assertIn(
+                f"NOTICE: {churn_count} award record(s) had NIH-revised "
+                "field value(s) since the previous pull (amount: "
+                f"{churn_count})", printed)
+            self.assertEqual(1, len(notes))
+            self.assertIn(f"{churn_count} award record(s) had their amount, "
+                          "title, or type revised by NIH since the previous "
+                          "pull", notes[0])
+            self.assertIn("figures reflect the source as of the pull date.",
+                          notes[0])
+
+    def test_date_churn_above_displacement_limit_still_fails_closed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            store_path = root / "data" / "nih" / "nigms" / "nigms" / "awards"
+            n = 1000
+            self._store_of_size(store_path, n)
+            displacement_limit = int(max(MOVE_RETURN_ABS_MIN,
+                                         MOVE_RETURN_REL_FRACTION * n))
+            over_limit = displacement_limit + 1
+            changed_rows = {
+                i: row(i, award_notice_date="2025-03-01T00:00:00")
+                for i in range(1, over_limit + 1)
+            }
+            # A handful of amount-only moves, comfortably below the
+            # value-churn limit, must not mask or alter the date-move
+            # failure below.
+            changed_rows[900] = row(900, award_amount=999)
+            puller = NihReporterPull(
+                "NIGMS", {"min_total": 0, "max_total": 10000, "max_monthly": 10000},
+                store_path,
+            )
+            all_rows = {i: row(i) for i in range(1, n + 1)}
+            all_rows.update(changed_rows)
+            with patch.object(puller, "fetch_year",
+                              side_effect=lambda fy: all_rows if fy == 2025 else {}):
+                with self.assertRaises(SystemExit) as cm:
+                    puller.pull(full=True, today=date(2026, 8, 17), repo_root=root)
+            message = str(cm.exception)
+            self.assertIn("pagination", message)
+            self.assertIn("duplicate-displacement", message)
+            self.assertIn(f"{over_limit} field move(s) + 0 return(s)", message)
+            self.assertNotIn("field-parse", message)
+
+    def test_amount_churn_above_value_churn_limit_fails_closed_with_parse_message(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            store_path = root / "data" / "nih" / "nigms" / "nigms" / "awards"
+            n = 1000
+            self._store_of_size(store_path, n)
+            value_churn_limit = int(max(VALUE_CHURN_ABS_MIN,
+                                        VALUE_CHURN_REL_FRACTION * n))
+            over_limit = value_churn_limit + 1
+            changed_rows = {
+                i: row(i, award_amount=999)
+                for i in range(1, over_limit + 1)
+            }
+            puller = NihReporterPull(
+                "NIGMS", {"min_total": 0, "max_total": 10000, "max_monthly": 10000},
+                store_path,
+            )
+            all_rows = {i: row(i) for i in range(1, n + 1)}
+            all_rows.update(changed_rows)
+            with patch.object(puller, "fetch_year",
+                              side_effect=lambda fy: all_rows if fy == 2025 else {}):
+                with self.assertRaises(SystemExit) as cm:
+                    puller.pull(full=True, today=date(2026, 8, 17), repo_root=root)
+            message = str(cm.exception)
+            self.assertIn("field-parse", message)
+            self.assertIn("source schema change or adapter parse regression",
+                          message)
+            self.assertIn(f"{over_limit} non-date field move(s)", message)
+            self.assertIn(f"amount: {over_limit}", message)
+            self.assertNotIn("pagination", message)
+            self.assertNotIn("duplicate-displacement", message)
+
+    def test_returns_count_toward_displacement_guard_only(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            store_path = root / "data" / "nih" / "nigms" / "nigms" / "awards"
+            n = 1000
+            displacement_limit = int(max(MOVE_RETURN_ABS_MIN,
+                                         MOVE_RETURN_REL_FRACTION * n))
+            over_limit = displacement_limit + 1
+            excluded_records = [
+                exclusion_record(f"nih:{i}") for i in range(1, over_limit + 1)
+            ]
+            write_exclusion_ledger(root, excluded_records)
+            write_store(store_path, [
+                NihReporterPull("NIGMS", {}, store_path).normalize(row(i))[0]
+                for i in range(1, n + 1)
+            ])
+            append_changes_ledger(store_path, [])
+            puller = NihReporterPull(
+                "NIGMS", {"min_total": 0, "max_total": 10000, "max_monthly": 10000},
+                store_path,
+            )
+            # These ids are back in the live source (a "return") but their
+            # fields are unchanged -- no amount/date moves at all, so only
+            # the return count can be driving the failure below.
+            all_rows = {i: row(i) for i in range(1, n + 1)}
+            with patch.object(puller, "fetch_year",
+                              side_effect=lambda fy: all_rows if fy == 2025 else {}):
+                with self.assertRaises(SystemExit) as cm:
+                    puller.pull(full=True, today=date(2026, 8, 17), repo_root=root)
+            message = str(cm.exception)
+            self.assertIn("pagination", message)
+            self.assertIn(f"0 field move(s) + {over_limit} return(s)", message)
+
+
 class FirstPullLedgerInitializationTests(unittest.TestCase):
     """The move+return churn threshold is not enforced on a unit's very
     first source-current pull (no committed changes.csv.gz yet): that
@@ -558,6 +718,40 @@ class FirstPullLedgerInitializationTests(unittest.TestCase):
             self.assertIn("applies from the next pull", printed)
             rows = load_changes_ledger(store_path)
             self.assertEqual(over_limit, len(rows))
+
+    def test_first_pull_exempt_from_both_displacement_and_value_churn_guards(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            store_path = root / "data" / "nih" / "nigms" / "nigms" / "awards"
+            n = 1000
+            self._store_of_size(store_path, n)
+            self.assertFalse(changes_ledger_path(store_path).exists())
+            displacement_limit = int(max(MOVE_RETURN_ABS_MIN,
+                                         MOVE_RETURN_REL_FRACTION * n))
+            value_churn_limit = int(max(VALUE_CHURN_ABS_MIN,
+                                        VALUE_CHURN_REL_FRACTION * n))
+            # Comfortably above BOTH guards' limits at once.
+            date_over = displacement_limit + 20
+            amount_over = value_churn_limit + 20
+            changed_rows = {
+                i: row(i, award_notice_date="2025-03-01T00:00:00")
+                for i in range(1, date_over + 1)
+            }
+            for i in range(500, 500 + amount_over):
+                changed_rows[i] = row(i, award_amount=999)
+            puller = NihReporterPull(
+                "NIGMS", {"min_total": 0, "max_total": 10000, "max_monthly": 10000},
+                store_path,
+            )
+            all_rows = {i: row(i) for i in range(1, n + 1)}
+            all_rows.update(changed_rows)
+            with patch.object(puller, "fetch_year",
+                              side_effect=lambda fy: all_rows if fy == 2025 else {}):
+                awards, warnings, notes = puller.pull(
+                    full=True, today=date(2026, 8, 17), repo_root=root)
+            self.assertEqual([], warnings)
+            self.assertEqual(n, len(awards))
+            self.assertTrue(changes_ledger_path(store_path).exists())
 
     def test_second_pull_after_initialization_enforces_threshold(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -640,7 +834,8 @@ class MethodologyAndDataQualityTests(unittest.TestCase):
                     repo_root=root)
         self.assertEqual(
             metadata["methodologyNote"],
-            "counts as of the pull date; NIH revises award notice dates.")
+            "counts as of the pull date; NIH revises award notice dates "
+            "and amounts.")
         self.assertEqual(metadata["methodologyNote"], METHODOLOGY_NOTE)
         self.assertIn("dataQualityNotes", metadata)
 
