@@ -87,7 +87,7 @@ class SiteContractTests(unittest.TestCase):
 
     def test_obligation_ledger_is_discoverable_from_award_root(self):
         for text in ("renderViewNav(obligationRoot, sentinelRoot)",
-                     "Appropriations obligation dashboards",
+                     "Open the appropriations obligation dashboards",
                      "data/obligations/dashboard.json",
                      "measures are not additive or directly comparable"):
             self.assertIn(text, self.html)
@@ -210,13 +210,11 @@ class SiteContractTests(unittest.TestCase):
         )
         self.assertIn(
             "`Obligations from ${fmtN(data.accountCount ?? 0)} registered "
-            "science-related federal accounts, including defense RDT&E.`",
-            self.html,
-        )
-        self.assertIn(
-            "Obligations from ${fmtN(obligationSummary.accountCount ?? 0)} "
-            "registered science-related federal accounts, including "
-            "defense RDT&E.",
+            "science-related federal accounts, including defense RDT&E. "
+            "They are separate from, and not additive to, the award "
+            "totals on the award dashboards. Negative entries can "
+            "include routine corrections or reductions; sign alone does "
+            "not establish a cancellation.`",
             self.html,
         )
         self.assertIn("function countLeaves(node) {", self.html)
@@ -239,7 +237,7 @@ class SiteContractTests(unittest.TestCase):
             "function renderMethodologyNote(text) {",
             "function renderDataQualityNotes(notes) {",
             "renderMethodologyNote(data.methodologyNote)",
-            "renderDataQualityNotes(data.dataQualityNotes)",
+            "renderDataQualityNotes([...(data.dataQualityNotes || []), ...dedupNotices(data.warnings)])",
             'id: "methodologyNote"',
             'id: "dataQualityNotes"',
         ):
@@ -250,15 +248,23 @@ class SiteContractTests(unittest.TestCase):
         )[1].split("function renderMethodologyNote", 1)[0]
         self.assertNotIn('class: "banner"', methodology_block)
 
-    def test_award_root_has_parallel_obligation_summary_tiles(self):
-        for text in ('heading: "Award activity"',
-                     'heading: `${obligationScope} obligations`',
-                     "obligationTiles(obligationSummary",
-                     "compact: true",
-                     "not additive to, the award totals above",
-                     "not new awards",
-                     "sign alone does not establish a cancellation"):
+    def test_award_root_carries_no_obligation_figures_only_a_link_card(self):
+        # Display-improvements batch item 3 (2026-09-23, owner-approved):
+        # each tab shows one kind of figure -- the award root no longer
+        # renders any obligation dollar figures, only a cross-link card.
+        for text in (
+            'heading: "Award activity"',
+            'const linkCard = el("div", { class: "card", id: "obligationLinkCard" });',
+            'text: "Appropriations obligations"',
+            "Account-level signed obligations are separate from award "
+            "totals because the measures are not additive or directly "
+            "comparable.",
+            "Open the appropriations obligation dashboards",
+            'href: "index.html?org=obligations"',
+        ):
             self.assertIn(text, self.html)
+        self.assertNotIn("obligationTiles(obligationSummary", self.html)
+        self.assertNotIn("obligationChildrenCard(obligationSummary", self.html)
 
     def test_obligation_reporting_periods_use_a_signed_line_chart(self):
         chart = self.html.split("function obligationPeriodsChart(data) {", 1)[1]
@@ -358,11 +364,44 @@ class SiteContractTests(unittest.TestCase):
         # observation episodes (no sourcedEvents) fall back to their
         # registry program-activity title.
         self.assertIn("function sourcedEpisodeHeading(episode) {", self.html)
-        self.assertIn("function episodeHeadingText(episode) {", self.html)
-        self.assertIn('el("h2", { text: episodeHeadingText(episode) })', self.html)
+        self.assertIn("function episodeHeadingText(episode, data) {", self.html)
+        self.assertIn('el("h2", { text: episodeHeadingText(episode, data) })', self.html)
         # The old pattern that rendered a raw episode.title as the card
         # heading must not reappear.
         self.assertNotIn('el("h2", { text: episode.title', self.html)
+
+    def test_sentinel_card_drops_the_unreviewed_age_counter(self):
+        # Display-improvements batch item 6 (2026-09-23, W17 reader review
+        # #8, owner sign-off norm): "unreviewed for N days" reads as an SLA
+        # the page's own text disclaims -- dropped entirely, never rendered.
+        self.assertNotIn("unreviewed for", self.html)
+        self.assertNotIn("unreviewedAgeDays", self.html)
+        self.assertIn(
+            'card.append(el("p", { class: "note", '
+            'text: `Observed ${observed || "date unavailable"}` }));',
+            self.html,
+        )
+
+    def test_financial_episode_headings_compose_account_and_fiscal_year(self):
+        # Display-improvements batch item 6 (2026-09-23, W17 reader review
+        # #4, owner sign-off norm): repeated identical program-activity
+        # titles across episodes invite double-counting -- a
+        # financial-observation episode's heading (no sourcedEvents) now
+        # adds the account abbreviation and fiscal year it covers, both
+        # derived from structured fields only.
+        self.assertIn("function financialEpisodeHeading(episode, data) {", self.html)
+        heading_fn = self.html.split("function financialEpisodeHeading(episode, data) {", 1)[1]
+        heading_fn = heading_fn.split("function episodeHeadingText(episode, data) {", 1)[0]
+        self.assertIn("data?.coverage?.financialAccounts", heading_fn)
+        self.assertIn(".join(\", \")", heading_fn)
+        self.assertIn("`FY${fys[0]}–FY${fys.at(-1)}`", heading_fn)
+        self.assertIn('.filter(Boolean).join(" · ")', heading_fn)
+        self.assertIn(
+            "return (episode.sourcedEvents || []).length\n"
+            "    ? sourcedEpisodeHeading(episode)\n"
+            "    : financialEpisodeHeading(episode, data);",
+            self.html,
+        )
 
     def test_not_reported_period_renders_a_hollow_marker_and_table_text(self):
         # Owner decision 2 (2026-09-17, Phase 3.2d remediation): the period
@@ -464,6 +503,25 @@ class SiteContractTests(unittest.TestCase):
             # Internal curator text (run ids, cents) must never appear here.
             for n in notes:
                 self.assertNotIn("run 3", n["note"])
+
+    def test_cisa_decline_caption_is_a_curated_source_figure_note(self):
+        # Stage 2 item 8 (owner-approved 2026-09-23): the DHS CISA R&D
+        # decline gets a source-figure statement with no cause attribution,
+        # carried by the existing periodNotes mechanism (baseline publicNote
+        # -> scripts/rollup_obligations.py -> account dashboard.json), never
+        # by an agency-conditional code path in the site.
+        caption = ("The source reports $3.31 million for this account in "
+                   "FY2024 and $98 in FY2025. Source figures alone do not "
+                   "show whether the activity ended or moved to another "
+                   "account.")
+        baseline = json.loads(
+            (REPO / "reference" / "dhs_cisa_rd_obligation_baseline.json").read_text())
+        notes = baseline["fiscalYears"]["2025"]["periodNotes"]
+        self.assertIn(caption, [n.get("publicNote") for n in notes])
+        dashboard = json.loads(
+            (REPO / "data" / "obligations" / "dhs" / "cisa-rd" / "dashboard.json").read_text())
+        self.assertIn({"fy": 2025, "period": 12, "note": caption}, dashboard["periodNotes"])
+        self.assertNotIn("cisa", self.html.lower())
 
     def test_sentinel_publishes_limits_costs_and_source_staleness(self):
         for text in ("Coverage and interpretation limits",
@@ -712,6 +770,104 @@ class SiteContractTests(unittest.TestCase):
         tiles_fn = self.html.split("function tiles(data, options = {}) {", 1)[1]
         tiles_fn = tiles_fn.split("// The as-of date of an award dashboard", 1)[0]
         self.assertIn("data.refreshStatus?.unit", tiles_fn)
+
+    def test_warnings_banner_glosses_raw_validator_text(self):
+        # Display-improvements batch item 10 (2026-09-23, W17 reader review
+        # round 2, owner sign-off on public-claim wording): a raw validator
+        # string reads to a policy audience as awards being cancelled, not
+        # as the pipeline diagnostic it is. One shared helper classifies
+        # every warning and renders plain-language glosses, with the raw
+        # text kept verbatim behind a <details> for anyone who wants it.
+        self.assertIn(
+            "function renderWarnings(warnings) {",
+            self.html,
+        )
+        # The dedup routing regex: a "N awards appear in more than one
+        # division" notice is not a warning at all.
+        self.assertIn(
+            '["dedup", /appears? in more than one division; counted once '
+            "in this rollup/],",
+            self.html,
+        )
+        # The four gloss strings, verbatim.
+        for text in (
+            "The stored award count went down since the previous pull. "
+            "Stored awards are never deleted, so this flags a pipeline "
+            "problem, not cancelled awards.",
+            "Some awards already on record were not returned by the "
+            "latest pull; they are kept, not removed.",
+            "A month's count came in below an independently verified "
+            "tally; that month may be incomplete.",
+            "An automated consistency check flagged this pull; technical "
+            "detail below.",
+            "Technical detail",
+        ):
+            self.assertIn(text, self.html)
+        # Both banner sites go through the one helper; the old inline
+        # banner-building code is gone from both call sites.
+        self.assertIn("renderWarnings(data.warnings);", self.html)
+        # Dedup notices join the neutral notes list in ONE call (never a
+        # second notes block), and the banner never sees them.
+        self.assertIn(
+            "renderDataQualityNotes([...(data.dataQualityNotes || []), "
+            "...dedupNotices(data.warnings)]);",
+            self.html,
+        )
+        self.assertEqual(1, self.html.count("renderDataQualityNotes(["))
+
+    def test_award_rollup_stamp_gets_a_stale_unit_qualifier(self):
+        # Display-improvements batch item 9/12 (2026-09-23, W17 reader
+        # review round 2): a multi-leaf rollup (no single stale unit's own
+        # page) whose own refreshStatus is stale gets a stamp qualifier
+        # naming how many units and since when, so a reader who never
+        # scrolls to the landing table or tiles still sees the disclosure.
+        self.assertIn("function formatStaleDateRange(dates) {", self.html)
+        self.assertIn(
+            'if (data.refreshStatus?.status === "stale" && '
+            "!data.refreshStatus.unit) {",
+            self.html,
+        )
+        self.assertIn(
+            "document.getElementById(\"stamp\").textContent +=\n"
+            '      ` · includes ${k} ${k === 1 ? "unit" : "units"} last '
+            "refreshed ${dates} †`;",
+            self.html,
+        )
+        # The pinned single-stale-unit lines are untouched.
+        self.assertIn(
+            'const unitStale = data.refreshStatus?.status === "stale" && '
+            'data.refreshStatus.unit && data.refreshStatus.staleSince;',
+            self.html,
+        )
+        self.assertIn(
+            "const lastUpdated = unitStale ? "
+            'new Date(data.refreshStatus.staleSince + "T12:00:00") : gen;',
+            self.html,
+        )
+        self.assertIn("last updated ${lastUpdated.toLocaleDateString(", self.html)
+
+    def test_obligation_rollup_stamp_gets_a_stale_account_qualifier(self):
+        # Display-improvements batch item 9/12: the obligation-side
+        # analogue, root or agency level only (an account's own page
+        # already carries the "Not refreshed since" header note).
+        self.assertIn(
+            'if ((node.level === "root" || node.level === "agency")\n'
+            "        && (data.children || []).some(c => "
+            'c.refreshStatus?.status === "stale")) {',
+            self.html,
+        )
+        self.assertIn(
+            "const k = typeof data.staleAccountCount === \"number\" && "
+            "data.staleAccountCount > 0\n"
+            "        ? data.staleAccountCount : staleChildren.length;",
+            self.html,
+        )
+        self.assertIn(
+            "document.getElementById(\"stamp\").textContent +=\n"
+            '        ` · includes ${k} ${k === 1 ? "account" : "accounts"} '
+            "last refreshed ${dates} †`;",
+            self.html,
+        )
 
 
 if __name__ == "__main__":

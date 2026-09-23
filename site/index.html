@@ -811,6 +811,20 @@ function tiles(data, options = {}) {
 const awardAsOfDate = data => (data.refreshStatus?.status === "stale"
   && data.refreshStatus.unit && data.refreshStatus.staleSince) || data.generated || "";
 
+// Display-improvements batch item 9/12 (W17 reader review round 2,
+// owner-approved wording): formats one or more `refreshStatus.staleSince`
+// ("YYYY-MM-DD") values the same way the header stamps already format a
+// single such date, so a multi-leaf rollup's stamp can name a stale
+// unit/account's last-refreshed date too. One distinct date renders as
+// that date; several render as an en-dash range, earliest to latest.
+function formatStaleDateRange(dates) {
+  const distinct = [...new Set((dates || []).filter(Boolean))].sort();
+  if (!distinct.length) return "";
+  const fmt = d => new Date(d + "T12:00:00").toLocaleDateString("en-US",
+    { month: "long", day: "numeric", year: "numeric" });
+  return distinct.length > 1 ? `${fmt(distinct[0])} – ${fmt(distinct.at(-1))}` : fmt(distinct[0]);
+}
+
 // ---------- chart 1: monthly line ----------
 function monthlyChart(data) {
   const pts = data.monthly || [];
@@ -1687,6 +1701,54 @@ function renderMethodologyNote(text) {
   $app.append(el("p", { class: "sub", id: "methodologyNote", text }));
 }
 
+// ---------- validator-warning banner (Display-improvements batch item 10,
+// W17 reader review round 2) ----------
+// A raw validator string ("invariant violated: award id count shrank from
+// 2 to 1") reads to a policy audience as awards being cancelled, not as the
+// pipeline diagnostic it is. Every warning renders through this one shared
+// classifier so the register is plain language everywhere, with the raw
+// text kept, verbatim, behind a <details> for anyone who wants it. A
+// dedup notice ("N awards appear in more than one division...") is not a
+// warning at all -- it never reaches the banner; award pages fold it into
+// the neutral "Data quality notes" list via dedupNotices() (obligation
+// pages never emit this class).
+const WARNING_GLOSSES = [
+  ["dedup", /appears? in more than one division; counted once in this rollup/],
+  ["shrink", /invariant violated: award id count shrank from/],
+  ["retained", /stored awards not returned by this full re-pull; retained from the store/],
+  ["baseline", /pulled \d+ awards vs verified baseline/],
+];
+const WARNING_GLOSS_TEXT = {
+  shrink: "The stored award count went down since the previous pull. Stored awards are never deleted, so this flags a pipeline problem, not cancelled awards.",
+  retained: "Some awards already on record were not returned by the latest pull; they are kept, not removed.",
+  baseline: "A month's count came in below an independently verified tally; that month may be incomplete.",
+  other: "An automated consistency check flagged this pull; technical detail below.",
+};
+const WARNING_GLOSS_ORDER = ["shrink", "retained", "baseline", "other"];
+
+function classifyWarning(warning) {
+  for (const [key, test] of WARNING_GLOSSES) if (test.test(warning)) return key;
+  return "other";
+}
+
+const dedupNotices = warnings => (warnings || []).filter(w => classifyWarning(w) === "dedup");
+
+function renderWarnings(warnings) {
+  const rest = (warnings || []).filter(w => classifyWarning(w) !== "dedup");
+  if (!rest.length) return;
+  const present = WARNING_GLOSS_ORDER.filter(key => rest.some(w => classifyWarning(w) === key));
+  const b = el("div", { class: "banner" });
+  b.append(el("strong", { text: "Data quality warnings from the last pull: " }));
+  present.forEach(key => b.append(el("p", { text: WARNING_GLOSS_TEXT[key] })));
+  const details = el("details");
+  details.append(el("summary", { text: "Technical detail" }));
+  const ul = el("ul");
+  rest.forEach(w => ul.append(el("li", { text: w })));
+  details.append(ul);
+  b.append(details);
+  $app.append(b);
+}
+
 // Curated, reader-facing source-figure statements for specific fiscal-
 // year periods (Phase 3.2d remediation W16, docs/obligation-ledger.md
 // "periodNotes"). Presence-driven exactly like interpretationNote: an
@@ -1777,10 +1839,31 @@ function sourcedEpisodeHeading(episode) {
   return `${agency} ${typeLabel}${dateLabel ? ` — ${dateLabel}` : ""}`;
 }
 
-function episodeHeadingText(episode) {
+// Display-improvements batch item 6 (2026-09-23, W17 reader review #4):
+// repeated identical program-activity titles across episodes invite
+// double-counting, so a financial-observation episode's heading (no
+// sourcedEvents -- those keep sourcedEpisodeHeading's mechanical heading
+// above) adds the account and fiscal year it actually covers. Both are
+// derived from structured fields only, never from source language.
+function financialEpisodeHeading(episode, data) {
+  const registry = data?.coverage?.financialAccounts || [];
+  const accountAbbrev = (episode.federalAccounts || [])
+    .map(fa => registry.find(a => a.federalAccount === fa)?.abbrev)
+    .filter(Boolean)
+    .join(", ");
+  const fys = [...new Set((episode.financialObservations || [])
+    .map(o => (String(o.submissionPeriod || "").match(/^FY(\d{4})/) || [])[1])
+    .filter(Boolean))].sort();
+  const fyLabel = fys.length > 1 ? `FY${fys[0]}–FY${fys.at(-1)}`
+    : fys.length === 1 ? `FY${fys[0]}` : "";
+  return [episode.title || "Funding-action episode", accountAbbrev, fyLabel]
+    .filter(Boolean).join(" · ");
+}
+
+function episodeHeadingText(episode, data) {
   return (episode.sourcedEvents || []).length
     ? sourcedEpisodeHeading(episode)
-    : (episode.title || "Funding-action episode");
+    : financialEpisodeHeading(episode, data);
 }
 
 // Citation for a sourced event's attributed strings: the registered source's
@@ -1942,7 +2025,7 @@ function renderSentinelSourcedEvents(episode, card, data) {
 // overdue/not-overdue characterization -- age alone.
 function sentinelEpisodeCard(episode, data, container = $app) {
   const card = el("article", { class: "card" });
-  const heading = el("h2", { text: episodeHeadingText(episode) });
+  const heading = el("h2", { text: episodeHeadingText(episode, data) });
   const grossNegative = Number(episode.grossNegativeCents || 0);
   const netActivity = Number(episode.netActivityCents || 0);
   heading.append(el("span", { class: "sentinel-header-figures" },
@@ -1954,9 +2037,10 @@ function sentinelEpisodeCard(episode, data, container = $app) {
   card.append(heading);
   const observed = episode.firstObserved === episode.lastObserved
     ? episode.firstObserved : `${episode.firstObserved} through ${episode.lastObserved}`;
-  const age = episode.state === "unreviewed-signal"
-    ? ` · unreviewed for ${fmtN(episode.unreviewedAgeDays || 0)} days` : "";
-  card.append(el("p", { class: "note", text: `Observed ${observed || "date unavailable"}${age}` }));
+  // Display-improvements batch item 6 (W17 reader review #8): "unreviewed
+  // for N days" read as an SLA the page's own text disclaims (an
+  // unreviewed state is durable and carries no deadline) -- dropped.
+  card.append(el("p", { class: "note", text: `Observed ${observed || "date unavailable"}` }));
   if (netActivity > 0) {
     card.append(el("p", { class: "note",
       text: "State: net activity in this period was positive." }));
@@ -2177,10 +2261,30 @@ async function boot() {
     })();
     document.getElementById("stamp").textContent =
       `${fmtSignedMoney(totalNet)} net obligations across ${fmtN(data.distinctLinkedAwards || 0)} distinct linked awards${fyRange ? `, ${fyRange}` : ""} · through ${submissionPeriodDisplay(asOf)} · last updated ${gen.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}`;
+    // Display-improvements batch item 9/12 (W17 reader review round 2): a
+    // root or agency obligation rollup with a stale account underneath
+    // gets the award-side stamp qualifier's obligation analogue (an
+    // account's own page already carries the "Not refreshed since" header
+    // note via renderStaleNote above, so this never doubles up with it).
+    if ((node.level === "root" || node.level === "agency")
+        && (data.children || []).some(c => c.refreshStatus?.status === "stale")) {
+      const staleChildren = (data.children || []).filter(c => c.refreshStatus?.status === "stale");
+      const k = typeof data.staleAccountCount === "number" && data.staleAccountCount > 0
+        ? data.staleAccountCount : staleChildren.length;
+      const dates = formatStaleDateRange(staleChildren.map(c => c.refreshStatus.staleSince));
+      document.getElementById("stamp").textContent +=
+        ` · includes ${k} ${k === 1 ? "account" : "accounts"} last refreshed ${dates} †`;
+    }
     if (node.level === "root") {
       // Phase 3.2d remediation decision 4 (fixed wording; count derived).
+      // Display-improvements batch item 3 (2026-09-23, owner-approved
+      // 2026-09-23): the award root no longer shows obligation figures at
+      // all (see the award branch below), so this landing subtitle now
+      // carries the not-additive disclosure itself, in place of the note
+      // that used to sit beside the award root's (now-removed) compact
+      // obligation tiles.
       $app.append(el("p", { class: "sub", id: "obligationsSubtitle",
-        text: `Obligations from ${fmtN(data.accountCount ?? 0)} registered science-related federal accounts, including defense RDT&E.` }));
+        text: `Obligations from ${fmtN(data.accountCount ?? 0)} registered science-related federal accounts, including defense RDT&E. They are separate from, and not additive to, the award totals on the award dashboards. Negative entries can include routine corrections or reductions; sign alone does not establish a cancellation.` }));
     }
     // Phase 3.2d remediation decision 3: an agency-neutral registry field is
     // the only switch -- present on every DoD account/PA dashboard, absent
@@ -2192,12 +2296,7 @@ async function boot() {
     // obligationChildrenCard), which is the only place a reader browsing
     // above the account level would otherwise miss the disclosure.
     if (node.level === "account") renderStaleNote(data.freshness);
-    if (data.warnings?.length) {
-      const b = el("div", { class: "banner" });
-      b.append(el("strong", { text: "Data quality warnings from the last pull: " }),
-        document.createTextNode(data.warnings.join(" · ")));
-      $app.append(b);
-    }
+    renderWarnings(data.warnings);
     renderObligationNotes(data);
     if (data.dataComplete === false && !data.reportingPeriods?.length) {
       document.getElementById("stamp").textContent = "Initial obligation-ledger pull pending";
@@ -2244,16 +2343,29 @@ async function boot() {
   const lastUpdated = unitStale ? new Date(data.refreshStatus.staleSince + "T12:00:00") : gen;
   document.getElementById("stamp").textContent =
     `${fmtN(data.totalAwards)} award${data.totalAwards === 1 ? "" : "s"} since Oct 2014 · last updated ${lastUpdated.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })} · refreshes weekly`;
+  // Display-improvements batch item 9/12 (W17 reader review round 2): a
+  // multi-leaf rollup (refreshStatus.status "stale" but no `.unit` -- the
+  // single-stale-unit case above already names its own snapshot date)
+  // gets a stamp qualifier naming how many units and since when, so a
+  // reader who never scrolls to the landing table or tiles still sees it.
+  if (data.refreshStatus?.status === "stale" && !data.refreshStatus.unit) {
+    const staleChildren = (data.children || []).filter(c => c.refreshStatus?.status === "stale");
+    const k = data.refreshStatus.staleUnits?.length ?? staleChildren.length;
+    const dates = formatStaleDateRange(staleChildren.length
+      ? staleChildren.map(c => c.refreshStatus.staleSince)
+      : [data.refreshStatus.staleSince]);
+    document.getElementById("stamp").textContent +=
+      ` · includes ${k} ${k === 1 ? "unit" : "units"} last refreshed ${dates} †`;
+  }
   // W1's award-ledger methodology line and data-quality notes render near
   // the header, whenever present, unchanged from the dashboard's own text.
   renderMethodologyNote(data.methodologyNote);
-  renderDataQualityNotes(data.dataQualityNotes);
+  // Item 10: a dedup notice ("N awards appear in more than one division;
+  // counted once in this rollup") is not a warning -- it joins the neutral
+  // "Data quality notes" list, rendered once, and never reaches the banner.
+  renderDataQualityNotes([...(data.dataQualityNotes || []), ...dedupNotices(data.warnings)]);
   renderUnitStaleNote(data.refreshStatus);
-  if (data.warnings?.length) {
-    const b = el("div", { class: "banner" });
-    b.append(el("strong", { text: "Data quality warnings from the last pull: " }), document.createTextNode(data.warnings.join(" · ")));
-    $app.append(b);
-  }
+  renderWarnings(data.warnings);
   if (data.dataComplete === false && data.totalAwards === 0) {
     document.getElementById("stamp").textContent =
       "Initial data pull pending · refreshes weekly";
@@ -2278,30 +2390,24 @@ async function boot() {
     $app.append(el("p", { class: "sub", id: "coverageLine",
       text: `Award ledger: NIH and NSF, ${fmtN(unitCount)} units. Obligation ledger: ${fmtN(accountCount)} registered federal accounts across ${fmtN(agencyCount)} agencies.` }));
   }
+  // Display-improvements batch item 3 (2026-09-23, owner-approved): each
+  // tab shows one kind of figure. The award root used to also show a
+  // compact obligation tile group and an obligation account table below
+  // the award data -- both removed; a link card (no figures) takes the
+  // table's place so the obligation ledger stays discoverable.
   tiles(data, node.level === "root" ? {
     id: "award-summary-heading",
     heading: "Award activity",
   } : {});
-  if (obligationSummary?.kind === "obligations") {
-    const obligationGenerated = new Date(obligationSummary.generated + "T12:00:00");
-    const obligationAsOf = obligationSummary.asOfPeriod || "latest available period";
-    const obligationScope = obligationSummary.children?.length === 1
-      ? obligationSummary.children[0].name : "Appropriations";
-    obligationTiles(obligationSummary, {
-      id: "obligation-summary-heading",
-      heading: `${obligationScope} obligations`,
-      // Phase 3.2d remediation decision 4: the fixed subtitle sentence
-      // (count derived) leads the root obligation tile's note.
-      note: `Obligations from ${fmtN(obligationSummary.accountCount ?? 0)} registered science-related federal accounts, including defense RDT&E. Signed account-ledger measures through ${submissionPeriodDisplay(obligationAsOf)}; updated ${obligationGenerated.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}. They are separate from, and not additive to, the award totals above. Negative entries can include routine corrections or reductions; sign alone does not establish a cancellation.`,
-      compact: true,
-    });
-  }
   if (indexData) childrenCard(data);
   if (obligationSummary?.kind === "obligations") {
-    const obligationGenerated = new Date(obligationSummary.generated + "T12:00:00");
-    const obligationAsOf = obligationSummary.asOfPeriod || "latest available period";
-    obligationChildrenCard(obligationSummary, "Appropriations obligation dashboards",
-      `Account-level signed obligations are separate from award totals because the measures are not additive or directly comparable. Data through ${submissionPeriodDisplay(obligationAsOf)}; updated ${obligationGenerated.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}.`);
+    const linkCard = el("div", { class: "card", id: "obligationLinkCard" });
+    linkCard.append(el("h2", { text: "Appropriations obligations" }));
+    linkCard.append(el("p", { class: "note",
+      text: "Account-level signed obligations are separate from award totals because the measures are not additive or directly comparable." }));
+    linkCard.append(el("p", {},
+      el("a", { href: "index.html?org=obligations", text: "Open the appropriations obligation dashboards" })));
+    $app.append(linkCard);
   }
   const renders = [];
   // Sparse/dormant units: skip both cumulative cards entirely rather than
