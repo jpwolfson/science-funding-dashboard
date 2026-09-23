@@ -2,51 +2,51 @@
  "schemaVersion": 1,
  "tier": "fast",
  "account": null,
- "generatedAt": "2026-09-23T22:54:07.560567+00:00",
- "durationSeconds": 595.463,
+ "generatedAt": "2026-09-23T23:46:12.694336+00:00",
+ "durationSeconds": 560.844,
  "passed": true,
  "checks": [
   {
    "name": "unit-tests",
    "passed": true,
    "evidence": "OK (skipped=1)",
-   "seconds": 206.835
+   "seconds": 181.0
   },
   {
    "name": "validate-obligations",
    "passed": true,
    "evidence": "Obligation ledger validation passed (empty stores allowed)",
-   "seconds": 318.468
+   "seconds": 310.993
   },
   {
    "name": "validate-nih",
    "passed": true,
    "evidence": "NIH validation passed: 28 units, 723486 unique awards",
-   "seconds": 9.609
+   "seconds": 7.451
   },
   {
    "name": "validate-usaspending-calibration",
    "passed": true,
    "evidence": "USAspending calibration gate passed (status: ready)",
-   "seconds": 0.027
+   "seconds": 0.079
   },
   {
    "name": "validate-funding-sentinel",
    "passed": true,
    "evidence": "Funding-action sentinel validation passed",
-   "seconds": 59.178
+   "seconds": 60.129
   },
   {
    "name": "verify-dms-baseline",
    "passed": true,
    "evidence": "DMS baseline verification PASSED: 141 months exact, 2 trailing months >= baseline, 11620 awards in store.",
-   "seconds": 0.19
+   "seconds": 0.084
   },
   {
    "name": "validate-award-invariants",
    "passed": true,
    "evidence": "Award invariant validation passed (132 award-ledger dashboard(s): totalAwards == sum(fiscalYears) == sum(monthly); fyCumulative endpoints exact; root == sum(children))",
-   "seconds": 1.156
+   "seconds": 1.107
   }
  ],
  "footprint": {
@@ -57,23 +57,23 @@
    "README.md": 7063,
    "adapters": 190512,
    "config": 174939,
-   "data": 680158493,
-   "docs": 22466410,
-   "reference": 631148,
-   "scripts": 386152,
-   "site": 141590,
-   "tests": 643878
+   "data": 680158978,
+   "docs": 31103524,
+   "reference": 632353,
+   "scripts": 386670,
+   "site": 142607,
+   "tests": 644631
   },
-  "totalTrackedBytes": 704867074,
+  "totalTrackedBytes": 713508166,
   "gzippedStoreBytes": 369805227,
   "pagesArtifact": {
    "fileCount": 1887,
-   "totalBytes": 346755097,
+   "totalBytes": 346756599,
    "status": "ok",
    "warningThresholdBytes": 850000000,
    "stopThresholdBytes": 950000000,
    "pagesLimitBytes": 1000000000,
-   "headroomBytes": 653244903,
+   "headroomBytes": 653243401,
    "excludedFromArtifact": "data/obligations/**/events/*.csv.gz"
   },
   "trajectory": {
@@ -82,9 +82,9 @@
    "firstDataCommit": "6e9ef91e07b89b717d6762e513ee38d4e0c5b932",
    "firstDataCommitDate": "2026-09-21T16:08:54+00:00",
    "weeksElapsed": 1.0,
-   "currentDataTreeBytes": 680158493,
-   "weeklyGrowthBytesUpperBound": 227755,
-   "projected52WeekBytesUpperBound": 692001753,
+   "currentDataTreeBytes": 680158978,
+   "weeklyGrowthBytesUpperBound": 228240,
+   "projected52WeekBytesUpperBound": 692027458,
    "thresholdBytes": 966367641,
    "approachesOneGigabyte": false
   }
