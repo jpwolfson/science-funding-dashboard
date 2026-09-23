@@ -859,6 +859,15 @@ function formatStaleDateRange(dates) {
 }
 
 // ---------- chart 1: monthly line ----------
+// Stage 2b item 19 (owner-approved 2026-09-23): an external fact stated
+// beside the award charts, not attributed as the cause of the low counts.
+// Dates verified against CRS R48765 (P.L. 119-37, signed November 12, 2025,
+// ended the lapse "from October 1, 2025, through November 11, 2025").
+const APPROPRIATIONS_LAPSE_NOTE = "October 1 – November 11, 2025 was a lapse in federal appropriations; award counts in those months are low.";
+const monthlyCoversLapse = data => (data.monthly || []).some(p => p.month === "2025-10");
+const cumulativeCoversLapse = data => (data.fyCumulative || []).some(s => s.fy === 2026);
+const withLapseNote = (note, covers) => covers ? `${note} ${APPROPRIATIONS_LAPSE_NOTE}` : note;
+
 function monthlyChart(data) {
   const pts = data.monthly || [];
   // Stage 2 item 11 (W17 reader review): the series ends on the still-accruing current month.
@@ -873,7 +882,8 @@ function monthlyChart(data) {
   const note = anyInProgress
     ? "Every month since October 2014. Months with zero awards are shown as zero. The last point is the current month to date — a partial count, drawn dashed with an open marker."
     : "Every month since October 2014. Months with zero awards are shown as zero.";
-  const { card, plot, tip } = makeCard(`${awardCountNoun(data)} per month`, note);
+  const { card, plot, tip } = makeCard(`${awardCountNoun(data)} per month`,
+    withLapseNote(note, monthlyCoversLapse(data)));
   function render() {
     plot.querySelector("svg")?.remove();
     const f = frame(plot, 300, 46, 14);
@@ -2549,10 +2559,10 @@ async function boot() {
   if (cumHasData) {
     renders.push(
       cumulativeChart(data, "awards", `Cumulative ${awardCountNoun(data).toLowerCase()} through the fiscal year`,
-        "Running FY-to-date total, October through September, one line per year. Read the endpoint of the year in progress against the other lines at the same point in the year — no visual integration needed. Minor ticks are weeks.",
+        withLapseNote("Running FY-to-date total, October through September, one line per year. Read the endpoint of the year in progress against the other lines at the same point in the year — no visual integration needed. Minor ticks are weeks.", cumulativeCoversLapse(data)),
         fmtN, fmtN),
       cumulativeChart(data, "dollars", "Cumulative award dollars through the fiscal year",
-        "Running FY-to-date award dollars on the same axes. Institute-scale outlier awards arrive as visible steps. Minor ticks are weeks.",
+        withLapseNote("Running FY-to-date award dollars on the same axes. Institute-scale outlier awards arrive as visible steps. Minor ticks are weeks.", cumulativeCoversLapse(data)),
         fmtAxisM, fmtM));
   }
   renders.push(monthlyChart(data), fyAwardsChart(data, windowDone), mechanismChart(data), dollarsChart(data));

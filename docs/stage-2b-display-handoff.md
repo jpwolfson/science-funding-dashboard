@@ -35,7 +35,7 @@ ledger. Item 13 (NIH disclosure) shipped in PR #94 and belongs to Phase 3.2e
 | 16 | Source-only sentinel cards | Implement as approved. |
 | 17 | Sentinel vs ledger "net" | Implement as approved. |
 | 18 | Source descriptions shown as titles | Implement: flow-table descriptions rendered as quoted, cited "source description". |
-| 19 | Oct–Nov 2025 low award counts | **Held for owner memo** — primary-source check disagrees with the approved dates (see "Item 19"). |
+| 19 | Oct–Nov 2025 low award counts | Implement with the CRS-verified end date (owner approved the memo's recommendation 2026-09-23): "October 1 – November 11, 2025 was a lapse in federal appropriations; award counts in those months are low." Beside the monthly and both cumulative award charts. |
 | 20 | Root tile heading | Implement: "Award activity (NIH and NSF)". |
 | 21 | Sentinel source status / process text | Implement as approved. |
 | 22 | Supplemental / one-time money | **No change** (owner-approved ★: any tag would attribute cause). |
@@ -74,3 +74,4 @@ the brief nothing is published and the owner gets a memo.
 | 2026-09-23 22:40 | Item 19 check: CRS gives Oct 1–Nov 11; held for owner memo. Items 12, 16, 17, 18, 20, 21 handed to one Sonnet worker. |
 | 2026-09-23 22:58 | Worker committed items 12, 16, 17, 18, 20, 21 (`7340bbe`): contract tests 59/59, fast 7/7, registry 382/382; rendered 3/4 because `scripts/smoke_sentinel_page.py` pinned the pre-item-17 state line. |
 | 2026-09-23 23:10 | Coordinator: smoke markers updated to the approved 16/17 wording (and the retired "eight weeks" line added to its retired list — a sentinel-display test, so Stage 2b's, not a 3.2e pipeline script); `humanDateOnly` pinned to UTC so a check near midnight UTC can't show the previous day. Rendered 4/4. |
+| 2026-09-23 23:20 | Owner approved the item-19 memo recommendation (Nov 11). Implemented beside the award monthly and cumulative charts; contract test added; before/after captures `item19_*`. |

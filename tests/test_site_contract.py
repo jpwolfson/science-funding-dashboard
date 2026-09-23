@@ -1075,6 +1075,18 @@ class SiteContractTests(unittest.TestCase):
         # cover far more agencies than the award ledger does).
         self.assertIn('heading: "Award activity (NIH and NSF)"', self.html)
 
+    def test_award_charts_state_the_appropriations_lapse_beside_the_data(self):
+        # Stage 2b item 19 (2026-09-23, owner-approved with the CRS-verified
+        # end date): an external fact beside the monthly and cumulative
+        # award charts, never phrased as the cause of the low counts.
+        self.assertIn(
+            'const APPROPRIATIONS_LAPSE_NOTE = "October 1 – November 11, 2025 '
+            'was a lapse in federal appropriations; award counts in those '
+            'months are low.";', self.html)
+        self.assertIn("withLapseNote(note, monthlyCoversLapse(data))", self.html)
+        self.assertEqual(self.html.count("cumulativeCoversLapse(data))"), 2)
+        self.assertNotIn("November 12, 2025 was a lapse", self.html)
+
     def test_sentinel_source_card_shows_dates_not_raw_status_or_timestamps(self):
         # Stage 2b item 21a (2026-09-23, owner-approved): the Status cell
         # reads as human dates ("source list dated …; checked …"), a
