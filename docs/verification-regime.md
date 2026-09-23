@@ -240,33 +240,46 @@ shrink" exception with source-current semantics and id-level invariants.
 Full contract: `docs/nih-data-validation.md`; constants live in
 `adapters/nih_reporter.py` and are exercised by `scripts/validate_nih.py`.
 
+Since W15 (2026-09-22) the move+return churn check is split into two
+independent guards over the same per-pull move set, because the
+displacement bug signature and ordinary NIH source revision are
+distinguishable by which fields move: displacement can only ever surface
+as an id vanishing (a return) or a stable id's date jumping, never as an
+amount/title/type change on an otherwise-present, stably-dated record.
+The 2026-09-21 NCI pull motivated the split: 148 amount-only moves, zero
+date moves, zero returns, tripped the pre-split combined threshold even
+though it carried none of the displacement signature.
+
 | Constant | Value | Meaning |
 |---|---|---|
-| `MOVE_RETURN_ABS_MIN` | 20 | Absolute floor for the per-unit, per-pull churn threshold. |
-| `MOVE_RETURN_REL_FRACTION` | 0.001 (0.1%) | Relative component of the same threshold, applied to the unit's stored id count. |
-| (threshold) | `max(MOVE_RETURN_ABS_MIN, MOVE_RETURN_REL_FRACTION * store_size)` | Moves (tracked-field overwrites: date/amount/title/type) plus ledger returns, summed over one pull for one institute. Above this, the pull fails closed — CLAUDE.md data integrity rule 4 names this volume of churn the pagination/duplicate-displacement bug signature, not ordinary source revision. |
+| `MOVE_RETURN_ABS_MIN` | 20 | Absolute floor for the displacement guard. |
+| `MOVE_RETURN_REL_FRACTION` | 0.001 (0.1%) | Relative component of the same guard, applied to the unit's stored id count. |
+| (displacement guard) | `max(MOVE_RETURN_ABS_MIN, MOVE_RETURN_REL_FRACTION * store_size)` | `date` moves plus ledger returns, summed over one pull for one institute. Above this, the pull fails closed — CLAUDE.md data integrity rule 4 names this volume of churn the pagination/duplicate-displacement bug signature, not ordinary source revision. |
+| `VALUE_CHURN_ABS_MIN` | 100 | Absolute floor for the value-churn guard. |
+| `VALUE_CHURN_REL_FRACTION` | 0.01 (1%) | Relative component of the same guard, applied to the unit's stored id count. |
+| (value-churn guard) | `max(VALUE_CHURN_ABS_MIN, VALUE_CHURN_REL_FRACTION * store_size)` | `amount`/`title`/`type` moves (excluding `date`), summed over one pull for one institute. Above this, the pull fails closed with a distinct "field-parse regression" diagnosis, because a source schema change or adapter parse regression is the more likely cause at that volume. Sized wider than the displacement guard because NIH revises award amounts on stable, correctly-dated ids as routine business; below the guard the pull still publishes, with a `NOTICE` and a `dataQualityNotes` entry disclosing the revision count. |
 | `LIVE_GAP_ABS_MIN` | 3 | Absolute floor for the `--live` reconciliation gap tolerance. |
 | `LIVE_GAP_REL_FRACTION` | 0.0001 (0.01%) | Relative component of the same tolerance, applied to the unit's stored id count. |
 | (live tolerance) | `max(LIVE_GAP_ABS_MIN, LIVE_GAP_REL_FRACTION * store_size)` | `--live` bound on `\|meta.total − (store − excluded − retainedMissing)\|` per institute. Equality is not required; the decomposition is always printed. |
 
-**Initializing-pull exemption on the move+return threshold.** The
-threshold row above is not enforced on a unit's first source-current pull
--- the one for which `data/nih/<ic>/<ic>/changes.csv.gz` does not yet
-exist (`adapters.nih_reporter.changes_ledger_path(...).exists()`, checked
+**Initializing-pull exemption on both churn guards.** Neither guard above
+is enforced on a unit's first source-current pull -- the one for which
+`data/nih/<ic>/<ic>/changes.csv.gz` does not yet exist
+(`adapters.nih_reporter.changes_ledger_path(...).exists()`, checked
 before that pull appends to it). Every NIH store predates this contract
 and was built by an adapter that never overwrote fields, so a unit's first
 pull under source-current semantics is measuring weeks of accumulated
-drift, not one pull's steady-state churn; enforcing the threshold there
+drift, not one pull's steady-state churn; enforcing either guard there
 would fail closed on every unit, not just a real pagination/duplicate-
-displacement defect. On that one pull every move is appended
-unconditionally, which is what creates (initializes) the ledger, and a
-`NOTICE` reports the move count and its per-field (`date`/`amount`/
+displacement defect or parse regression. On that one pull every move is
+appended unconditionally, which is what creates (initializes) the ledger,
+and a `NOTICE` reports the move count and its per-field (`date`/`amount`/
 `title`/`type`) breakdown instead of a `FATAL`. This is deliberately not a
 general bypass: the ledger file the exempted pull creates is the same
 marker the check reads, so it can fire at most once per unit, ever --
-every subsequent pull for that unit sees the ledger present and the
-threshold applies exactly as tabulated above. Both the initializing
-`NOTICE` and a threshold `FATAL` print the per-field move counts and up to
+every subsequent pull for that unit sees the ledger present and both
+guards apply exactly as tabulated above. A `FATAL` from either guard
+(or the initializing `NOTICE`) prints the per-field move counts and up to
 ten sample moves (`id field: old -> new`) so a trip is diagnosable from
 the CI log alone.
 
