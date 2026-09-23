@@ -170,6 +170,20 @@ class SiteContractTests(unittest.TestCase):
             self.html,
         )
 
+    def test_stale_unit_page_stamp_names_the_snapshot_date(self):
+        # W17 reader review (2026-09-23): on a single stale unit's page the
+        # "last updated" stamp must name the last accepted snapshot's date
+        # (refreshStatus.staleSince), not the rollup rebuild date, or the
+        # stamp contradicts the "Not refreshed since" note beside it.
+        for text in (
+            'const unitStale = data.refreshStatus?.status === "stale" && '
+            'data.refreshStatus.unit && data.refreshStatus.staleSince;',
+            "const lastUpdated = unitStale ? "
+            'new Date(data.refreshStatus.staleSince + "T12:00:00") : gen;',
+            "last updated ${lastUpdated.toLocaleDateString(",
+        ):
+            self.assertIn(text, self.html)
+
     def test_award_landing_table_carries_a_dagger_marker_for_stale_rows(self):
         # Phase 3.2d remediation W17: the award childrenCard's dagger +
         # footnote pattern, exactly parallel to obligationChildrenCard's

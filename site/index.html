@@ -2099,8 +2099,14 @@ async function boot() {
   );
 
   const gen = new Date(data.generated + "T12:00:00");
+  // W17 reader review: on a single stale unit's page, "last updated" names
+  // the date of the last accepted snapshot (the note's staleSince), not the
+  // date this page was rebuilt around it -- otherwise the stamp and the
+  // "Not refreshed since" note contradict each other.
+  const unitStale = data.refreshStatus?.status === "stale" && data.refreshStatus.unit && data.refreshStatus.staleSince;
+  const lastUpdated = unitStale ? new Date(data.refreshStatus.staleSince + "T12:00:00") : gen;
   document.getElementById("stamp").textContent =
-    `${fmtN(data.totalAwards)} award${data.totalAwards === 1 ? "" : "s"} since Oct 2014 · last updated ${gen.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })} · refreshes weekly`;
+    `${fmtN(data.totalAwards)} award${data.totalAwards === 1 ? "" : "s"} since Oct 2014 · last updated ${lastUpdated.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })} · refreshes weekly`;
   // W1's award-ledger methodology line and data-quality notes render near
   // the header, whenever present, unchanged from the dashboard's own text.
   renderMethodologyNote(data.methodologyNote);
