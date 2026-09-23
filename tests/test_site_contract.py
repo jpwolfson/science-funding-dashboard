@@ -494,6 +494,79 @@ class SiteContractTests(unittest.TestCase):
         self.assertIn('fill: css("--surface")', chart)
         self.assertIn("(to date)", chart)
 
+    def test_obligation_cadence_caption_appears_on_both_step_charts(self):
+        # Display-improvements batch item 1: the reporting-cadence caveat is
+        # a shared constant rendered on both obligation step charts, never a
+        # copy-pasted string.
+        self.assertIn(
+            'const OBLIGATION_CADENCE_CAPTION = "obligations are reported '
+            'in monthly agency submission periods; steps reflect reporting '
+            'cadence, not action dates.";',
+            self.html,
+        )
+        cumulative = self.html.split("function obligationCumulativeChart(data) {", 1)[1]
+        cumulative = cumulative.split("function obligationPeriodsChart(data) {", 1)[0]
+        self.assertIn("OBLIGATION_CADENCE_CAPTION", cumulative)
+        periods = self.html.split("function obligationPeriodsChart(data) {", 1)[1]
+        periods = periods.split("function obligationFYChart(data) {", 1)[0]
+        self.assertIn("OBLIGATION_CADENCE_CAPTION", periods)
+
+    def test_obligation_periods_chart_is_a_step_chart(self):
+        # Display-improvements batch item 1: explicit step geometry (owner
+        # request) -- flat steps in equal-width slots joined by vertical
+        # risers, never a sloped point-to-point line.
+        periods = self.html.split("function obligationPeriodsChart(data) {", 1)[1]
+        periods = periods.split("function obligationFYChart(data) {", 1)[0]
+        self.assertIn('makeCard("Net obligations by reporting period",', periods)
+        self.assertIn(
+            "Each step is signed activity in one agency submission period; "
+            "the line is not cumulative. The first P02 step covers the "
+            "first reporting window; quarterly reporters appear only at "
+            "quarter end. A period not reported at pull is omitted from "
+            "the chart and shown in the table below.",
+            periods,
+        )
+        self.assertIn("V${", periods)
+        self.assertIn("H${", periods)
+        self.assertIn(", periodLabel(r), tipRows)", periods)
+
+    def test_obligation_periods_chart_notes_curated_periods_without_correction_language(self):
+        # Display-improvements batch item 5: inline callouts for curated
+        # source-figure notes (dhs/cisa-rd FY2023P04, commerce/nist-its
+        # FY2025P11 today), never described as a "correction".
+        periods = self.html.split("function obligationPeriodsChart(data) {", 1)[1]
+        periods = periods.split("function obligationFYChart(data) {", 1)[0]
+        self.assertIn("notedPeriods", periods)
+        self.assertIn('"see note"', periods)
+        self.assertIn('" (see note)"', periods)
+        self.assertIn('"stroke-dasharray": "3 3"', periods)
+        self.assertNotIn("correction", periods.lower())
+
+    def test_award_side_labels_use_count_noun_and_dollar_labels(self):
+        # Metric-identity audit item 2: award-count chart titles reuse the
+        # tiles' provider-aware count noun, and dollar-valued columns/legend
+        # entries say so.
+        self.assertIn(
+            'const awardCountNoun = data => data.provider === "nih" ? '
+            '"Award records" : data.provider === "nsf" ? "New awards" : '
+            '"Awards";',
+            self.html,
+        )
+        top_awards = self.html.split("function topAwards(data) {", 1)[1]
+        top_awards = top_awards.split("function signedDomain(values) {", 1)[0]
+        self.assertIn('"FY", "Award", "Institution", "Award $"', top_awards)
+        dollars = self.html.split("function dollarsChart(data) {", 1)[1]
+        dollars = dollars.split("function cumulativeChart(data, key, title, note, fmtVal, fmtEnd) {", 1)[0]
+        self.assertIn('{ label: "All other awards ($)"', dollars)
+        self.assertIn('{ label: "Top 3 awards ($)"', dollars)
+        self.assertIn("`${awardCountNoun(data)} per month`", self.html)
+        self.assertIn("`${awardCountNoun(data)} by fiscal year (Oct–Jul)`", self.html)
+        self.assertIn("`${awardCountNoun(data)} by mechanism (Oct–Jul)`", self.html)
+        self.assertIn(
+            '`Cumulative ${awardCountNoun(data).toLowerCase()} through the fiscal year`',
+            self.html,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

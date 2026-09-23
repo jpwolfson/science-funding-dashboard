@@ -145,7 +145,7 @@
   .attribution a { color: var(--s1); }
   a { color: var(--s1); }
   .axis-text { fill: var(--muted); font-size: 11.5px; }
-  .dlabel { fill: var(--ink-2); font-size: 12px; font-weight: 550; }
+  .dlabel { fill: var(--ink-2); font-size: 12px; font-weight: 550; paint-order: stroke; stroke: var(--surface); stroke-width: 3px; stroke-linejoin: round; }
 </style>
 </head>
 <body>
@@ -744,6 +744,8 @@ function appendTileGroup(row, { id = "", heading = "", note = "" } = {}) {
   $app.append(section);
 }
 
+const awardCountNoun = data => data.provider === "nih" ? "Award records" : data.provider === "nsf" ? "New awards" : "Awards";
+
 function tiles(data, options = {}) {
   // Units with no current-FY awards (dormant offices) still get the tile
   // row, showing zeros rather than silently omitting the summary.
@@ -755,7 +757,7 @@ function tiles(data, options = {}) {
   const windowDone = gen >= new Date(data.currentFY, 7, 1); // Oct-Jul window complete once Aug arrives
   const suffix = windowDone ? "" : " to date";
   const mechanisms = mechanismLabels(data);
-  const countLabel = data.provider === "nih" ? "Award records" : data.provider === "nsf" ? "New awards" : "Awards";
+  const countLabel = awardCountNoun(data);
   const dollarLabel = data.provider === "nsf" ? "Intended $" : "Award $";
   const row = el("div", { class: "tiles" });
   const specs = [
@@ -802,7 +804,7 @@ function monthlyChart(data) {
   const note = anyInProgress
     ? "Every month since October 2014. Months with zero awards are shown as zero. The last point is the current month to date — a partial count, drawn dashed with an open marker."
     : "Every month since October 2014. Months with zero awards are shown as zero.";
-  const { card, plot, tip } = makeCard("Awards per month", note);
+  const { card, plot, tip } = makeCard(`${awardCountNoun(data)} per month`, note);
   function render() {
     plot.querySelector("svg")?.remove();
     const f = frame(plot, 300, 46, 14);
@@ -865,7 +867,7 @@ function monthlyChart(data) {
 
 // ---------- chart 2: FY awards columns ----------
 function fyAwardsChart(data, windowDone) {
-  const { card, plot, tip } = makeCard("Awards by fiscal year (Oct–Jul)",
+  const { card, plot, tip } = makeCard(`${awardCountNoun(data)} by fiscal year (Oct–Jul)`,
     "October through July of each fiscal year, so the current year compares like-for-like. Hairline: FY15–24 average.");
   const rows = data.fiscalYears || [];
   const base = rows.filter(r => r.fy >= BASE_FROM && r.fy <= BASE_TO);
@@ -922,7 +924,7 @@ function fyAwardsChart(data, windowDone) {
 // ---------- chart 3: mechanism lines ----------
 function mechanismChart(data) {
   const labels = mechanismLabels(data);
-  const { card, plot, tip } = makeCard("Awards by mechanism (Oct–Jul)",
+  const { card, plot, tip } = makeCard(`${awardCountNoun(data)} by mechanism (Oct–Jul)`,
     `${labels.std}, ${labels.cont}, and ${labels.fell.toLowerCase()}, Oct–Jul of each fiscal year. Mechanism changes can move counts without reflecting the same change in funding — see notes.`);
   const rows = data.fiscalYears || [];
   const series = [
@@ -1018,7 +1020,7 @@ function dollarsChart(data) {
     });
   }
   render();
-  legend(card, [{ label: "All other awards", color: css("--s1") }, { label: "Top 3 awards", color: css("--s2") }], "swatch");
+  legend(card, [{ label: "All other awards ($)", color: css("--s1") }, { label: "Top 3 awards ($)", color: css("--s2") }], "swatch");
   addTable(card, ["Fiscal year", "Total award $", "Top 3 awards", "All other", "Median award"],
     rows.map(r => [`FY${r.fy}${r.partial ? " (to date)" : ""}`, fmtM(r.dollars),
       fmtM(r.dollars - r.exTop3Dollars), fmtM(r.exTop3Dollars), fmtMoney(r.median)]));
@@ -1135,7 +1137,7 @@ function topAwards(data) {
   card.append(el("p", { class: "note", text: "The outliers behind the dollars chart. Award titles link to the source record." }));
   const t = el("table");
   const trh = el("tr");
-  ["FY", "Award", "Institution", ""].forEach((h, i) => trh.append(el("th", { class: i === 3 ? "num" : "", text: h })));
+  ["FY", "Award", "Institution", "Award $"].forEach((h, i) => trh.append(el("th", { class: i === 3 ? "num" : "", text: h })));
   t.append(trh);
   for (const r of recent) for (const a of (r.top3 || [])) {
     const tr = el("tr");
@@ -1211,6 +1213,7 @@ function obligationTiles(data, options = {}) {
 }
 
 const NOT_REPORTED_AT_PULL = "not reported at pull";
+const OBLIGATION_CADENCE_CAPTION = "obligations are reported in monthly agency submission periods; steps reflect reporting cadence, not action dates.";
 const svgTitle = text => {
   const node = document.createElementNS("http://www.w3.org/2000/svg", "title");
   node.textContent = text;
@@ -1220,6 +1223,7 @@ const svgTitle = text => {
 function obligationCumulativeChart(data) {
   const { card, plot, tip } = makeCard("Cumulative net obligations through the fiscal year",
     "Signed File B obligations reported through each submission period. File C supplies award-financial detail; the residual is the signed File B − File C difference. A hollow point marks a period whose File B snapshot was not reported at pull; the line holds the last reported value there.");
+  card.querySelector("p.note").after(el("p", { class: "note", text: OBLIGATION_CADENCE_CAPTION }));
   const series = (data.fyCumulative || []).slice().sort((a, b) => b.fy - a.fy)
     .map((s, i) => ({ ...s, v: ["--s1", "--s2", "--s3", "--s4", "--s5"][i] }));
   function render() {
@@ -1312,73 +1316,15 @@ function obligationCumulativeChart(data) {
 }
 
 function obligationPeriodsChart(data) {
-  const { card, plot, tip } = makeCard("Obligations by reporting period",
-    "Each point is signed activity in one agency submission period; the line is not cumulative. The first P02 point covers the first reporting window; quarterly reporters appear only at quarter end. A period not reported at pull is omitted from the chart and shown in the table below.");
+  const { card, plot, tip } = makeCard("Net obligations by reporting period",
+    "Each step is signed activity in one agency submission period; the line is not cumulative. The first P02 step covers the first reporting window; quarterly reporters appear only at quarter end. A period not reported at pull is omitted from the chart and shown in the table below.");
+  card.querySelector("p.note").after(el("p", { class: "note", text: OBLIGATION_CADENCE_CAPTION }));
   const allRows = (data.reportingPeriods || []).slice(-48);
   // The chart itself omits notReported periods entirely (owner decision 2):
   // there is no derived activity to plot for one, so it is neither a zero
   // nor a gap-worthy point, just absent. The table below still lists every
   // period, including notReported ones.
   const rows = allRows.filter(r => (r.status || "reported") !== "notReported");
-  function render() {
-    plot.querySelector("svg")?.remove();
-    const f = frame(plot, 310, 62, 14);
-    const domain = signedDomain(rows.map(r => Number(r.netObligations || 0)));
-    const y = signedYAxis(f.svg, f, domain, fmtSignedAxisMoney);
-    if (rows.length) {
-      const last = rows.length - 1;
-      const x = i => f.L + (rows.length > 1 ? i / last : 0.5) * (f.R - f.L);
-      const targetLabels = (plot.clientWidth || f.W) < 520 ? 5 : 10;
-      const labelStep = Math.max(1, Math.ceil(rows.length / targetLabels));
-      rows.forEach((r, i) => {
-        if (i === last || (i % labelStep === 0 && last - i >= labelStep))
-          f.svg.append(el("text", { class: "axis-text", x: x(i), y: f.B + 18,
-            "text-anchor": i === last ? "end" : "middle",
-            text: String(r.submissionPeriod || "").replace("FY", "") }));
-      });
-      const line = rows.map((r, i) =>
-        `${i ? "L" : "M"}${x(i).toFixed(1)},${y(r.netObligations || 0).toFixed(1)}`).join("");
-      f.svg.append(el("path", { d: line, fill: "none", stroke: css("--s1"),
-        "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
-      const end = rows[last], endY = y(end.netObligations || 0);
-      f.svg.append(el("circle", { cx: x(last), cy: endY, r: 4.5,
-        fill: (end.netObligations || 0) < 0 ? css("--s2") : css("--s1"),
-        stroke: css("--surface"), "stroke-width": 2 }));
-      f.svg.append(el("text", { class: "dlabel", x: x(last) - 7,
-        y: Math.max(f.T + 12, Math.min(f.B - 8, endY - 10)), "text-anchor": "end",
-        text: fmtSignedMoney(end.netObligations || 0) }));
-      const cross = el("line", { y1: f.T, y2: f.B, stroke: css("--axis"),
-        "stroke-width": 1, visibility: "hidden" });
-      const dot = el("circle", { r: 4.5, stroke: css("--surface"),
-        "stroke-width": 2, visibility: "hidden" });
-      f.svg.append(cross, dot);
-      const scale = () => plot.clientWidth / f.W;
-      f.svg.addEventListener("pointermove", e => {
-        const bounds = f.svg.getBoundingClientRect();
-        const vx = (e.clientX - bounds.left) / scale();
-        const i = rows.length > 1
-          ? Math.max(0, Math.min(last, Math.round((vx - f.L) / (f.R - f.L) * last))) : 0;
-        const r = rows[i], value = r.netObligations || 0, yy = y(value);
-        cross.setAttribute("x1", x(i)); cross.setAttribute("x2", x(i));
-        cross.setAttribute("visibility", "visible");
-        dot.setAttribute("cx", x(i)); dot.setAttribute("cy", yy);
-        dot.setAttribute("fill", value < 0 ? css("--s2") : css("--s1"));
-        dot.setAttribute("visibility", "visible");
-        showTip(tip, plot, x(i) * scale(), yy * scale(), r.submissionPeriod, [
-          { val: fmtSignedMoney(r.netObligations || 0), lab: "net obligations" },
-          { val: fmtSignedMoney(r.awardLinkedObligations || 0), lab: "File C portion" },
-          { val: fmtSignedMoney(r.residualObligations || 0), lab: "File B − File C residual" },
-          { val: fmtN(r.distinctLinkedAwards || 0), lab: "distinct linked awards" },
-        ]);
-      });
-      f.svg.addEventListener("pointerleave", () => {
-        tip.style.display = "none";
-        cross.setAttribute("visibility", "hidden");
-        dot.setAttribute("visibility", "hidden");
-      });
-    }
-  }
-  render();
   // The next reported row after one or more notReported periods notes the
   // span its activity covers, e.g. "P12 (covers P11-P12)" -- the delta was
   // measured against the last reported snapshot, not the immediately
@@ -1390,10 +1336,99 @@ function obligationPeriodsChart(data) {
       ? `${r.submissionPeriod} (covers ${short(r.coversPeriods[0])}-${short(r.coversPeriods.at(-1))})`
       : r.submissionPeriod;
   };
+  // Curated, reader-facing source-figure callouts (docs/obligation-ledger.md
+  // "periodNotes"): a charted row whose submission period is noted gets a
+  // dashed guide in the plot and a "(see note)" suffix in the table, instead
+  // of silently plotting a figure the source itself flagged against the
+  // fiscal-year-end total.
+  const notedPeriods = new Map((data.periodNotes || []).map(n => [`FY${n.fy}P${String(n.period).padStart(2, "0")}`, n]));
+  function render() {
+    plot.querySelector("svg")?.remove();
+    const f = frame(plot, 310, 62, 14);
+    const domain = signedDomain(rows.map(r => Number(r.netObligations || 0)));
+    const y = signedYAxis(f.svg, f, domain, fmtSignedAxisMoney);
+    if (rows.length) {
+      const last = rows.length - 1;
+      // Equal-width slots, one per reported submission: the step's width is
+      // never scaled by how many periods it covers (owner request -- the
+      // step shape says only what the source resolution supports).
+      const slot = (f.R - f.L) / rows.length;
+      const xc = i => f.L + slot * (i + 0.5);
+      const targetLabels = (plot.clientWidth || f.W) < 520 ? 5 : 10;
+      const labelStep = Math.max(1, Math.ceil(rows.length / targetLabels));
+      rows.forEach((r, i) => {
+        if (i === last || (i % labelStep === 0 && last - i >= labelStep))
+          f.svg.append(el("text", { class: "axis-text", x: xc(i), y: f.B + 18,
+            "text-anchor": i === last ? "end" : "middle",
+            text: String(r.submissionPeriod || "").replace("FY", "") }));
+      });
+      // Note guides draw before the step path so the line sits on top.
+      rows.forEach((r, i) => {
+        const note = notedPeriods.get(r.submissionPeriod);
+        if (!note) return;
+        f.svg.append(el("line", { x1: xc(i), x2: xc(i), y1: f.T, y2: f.B,
+          stroke: css("--axis"), "stroke-width": 1, "stroke-dasharray": "3 3" }));
+        const label = el("text", { class: "axis-text", x: xc(i), y: f.T + 10,
+          "text-anchor": "middle", text: "see note" });
+        label.append(svgTitle(note.note));
+        f.svg.append(label);
+      });
+      // Each period occupies its own equal-width slot [f.L + slot*i, f.L +
+      // slot*(i+1)]: a flat step at that period's value, joined to the next
+      // step by a vertical riser at the slot boundary. A sloped line between
+      // submissions would depict timing the source does not contain.
+      const line = rows.map((r, i) => {
+        const start = f.L + slot * i, end = f.L + slot * (i + 1), yy = y(r.netObligations || 0);
+        return i ? `V${yy.toFixed(1)}H${end.toFixed(1)}` : `M${start.toFixed(1)},${yy.toFixed(1)}H${end.toFixed(1)}`;
+      }).join("");
+      f.svg.append(el("path", { d: line, fill: "none", stroke: css("--s1"),
+        "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+      const end = rows[last], endY = y(end.netObligations || 0);
+      f.svg.append(el("circle", { cx: xc(last), cy: endY, r: 4.5,
+        fill: (end.netObligations || 0) < 0 ? css("--s2") : css("--s1"),
+        stroke: css("--surface"), "stroke-width": 2 }));
+      f.svg.append(el("text", { class: "dlabel", x: xc(last) - 7,
+        y: Math.max(f.T + 12, Math.min(f.B - 8, endY - 10)), "text-anchor": "end",
+        text: fmtSignedMoney(end.netObligations || 0) }));
+      const cross = el("line", { y1: f.T, y2: f.B, stroke: css("--axis"),
+        "stroke-width": 1, visibility: "hidden" });
+      const dot = el("circle", { r: 4.5, stroke: css("--surface"),
+        "stroke-width": 2, visibility: "hidden" });
+      f.svg.append(cross, dot);
+      const scale = () => plot.clientWidth / f.W;
+      f.svg.addEventListener("pointermove", e => {
+        const bounds = f.svg.getBoundingClientRect();
+        const vx = (e.clientX - bounds.left) / scale();
+        const i = Math.max(0, Math.min(last, Math.floor((vx - f.L) / slot)));
+        const r = rows[i], value = r.netObligations || 0, yy = y(value);
+        cross.setAttribute("x1", xc(i)); cross.setAttribute("x2", xc(i));
+        cross.setAttribute("visibility", "visible");
+        dot.setAttribute("cx", xc(i)); dot.setAttribute("cy", yy);
+        dot.setAttribute("fill", value < 0 ? css("--s2") : css("--s1"));
+        dot.setAttribute("visibility", "visible");
+        const tipRows = [
+          { val: fmtSignedMoney(r.netObligations || 0), lab: "net obligations" },
+          { val: fmtSignedMoney(r.awardLinkedObligations || 0), lab: "File C portion" },
+          { val: fmtSignedMoney(r.residualObligations || 0), lab: "File B − File C residual" },
+          { val: fmtN(r.distinctLinkedAwards || 0), lab: "distinct linked awards" },
+        ];
+        if (notedPeriods.has(r.submissionPeriod))
+          tipRows.push({ val: "see note", lab: "Notes on source figures below" });
+        showTip(tip, plot, xc(i) * scale(), yy * scale(), periodLabel(r), tipRows);
+      });
+      f.svg.addEventListener("pointerleave", () => {
+        tip.style.display = "none";
+        cross.setAttribute("visibility", "hidden");
+        dot.setAttribute("visibility", "hidden");
+      });
+    }
+  }
+  render();
   addTable(card, ["Reporting period", "Net obligations", "File C portion", "Residual", "Positive entries", "Negative entries", "Distinct linked awards"],
     allRows.map(r => r.status === "notReported"
       ? [periodLabel(r), NOT_REPORTED_AT_PULL, "—", "—", "—", "—", "—"]
-      : [periodLabel(r), fmtSignedMoney(r.netObligations || 0),
+      : [notedPeriods.has(r.submissionPeriod) ? periodLabel(r) + " (see note)" : periodLabel(r),
+        fmtSignedMoney(r.netObligations || 0),
         fmtSignedMoney(r.awardLinkedObligations || 0), fmtSignedMoney(r.residualObligations || 0),
         fmtSignedMoney(r.grossObligations || 0), fmtSignedMoney(r.deobligations || 0),
         fmtN(r.distinctLinkedAwards || 0)]));
@@ -2209,7 +2244,7 @@ async function boot() {
   });
   if (cumHasData) {
     renders.push(
-      cumulativeChart(data, "awards", "Cumulative awards through the fiscal year",
+      cumulativeChart(data, "awards", `Cumulative ${awardCountNoun(data).toLowerCase()} through the fiscal year`,
         "Running FY-to-date total, October through September, one line per year. Read the endpoint of the year in progress against the other lines at the same point in the year — no visual integration needed. Minor ticks are weeks.",
         fmtN, fmtN),
       cumulativeChart(data, "dollars", "Cumulative award dollars through the fiscal year",
