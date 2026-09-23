@@ -217,15 +217,14 @@ Full completed-phase history, evidence, and discovery narratives live in
       independent operating process, not a phase-completion gate. Detailed
       evidence: `docs/phase-history.md`; DoD provenance:
       `docs/phase-3.2d-dod-handoff.md`.
-- [ ] Phase 3.2d remediation (owner-approved 2026-09-17, in progress): the
-      independent review `docs/reviews/2026-09-15-phase-3.2d-independent-review.md`
-      found five severity-high defects in the operating state (fast tier red
-      on main, no scheduled run green since the DoD merge, retry hatches
-      permanent, DoD disclosure unpublished, empty File B snapshots published
-      as multi-billion swings). Owner decisions and workstreams are in
-      `docs/phase-3.2d-remediation-brief.md`; run it as one coordinator
-      session. Stage 2 below stays held until its release bar is met.
-- [ ] Display-improvements batch — AFTER 3.2d remediation: execute
-      `docs/display-improvements-ledger.md` as one reader-review-gated
-      batch. Ledger is append-only while 3.2d workers are in flight
-      (site/** is contract-forbidden to them).
+- [x] Phase 3.2d remediation (completed 2026-09-23): the independent
+      review's HIGH-1..5 all closed with evidence; NIH source-current
+      ledger, publication gates, File B snapshot acceptance, DoD/framing/
+      sentinel language, and run resilience (per-account and per-award-unit
+      published staleness) landed across PRs #63–#85; three-ledger soak
+      green (award ledger on the post-W15 dispatched run). Detail:
+      `docs/phase-history.md` ("Post-completion review and remediation");
+      full run log: `docs/phase-3.2d-remediation-handoff.md`.
+- [ ] Display-improvements batch — released: 3.2d remediation closed
+      2026-09-23. Execute `docs/display-improvements-ledger.md` as one
+      reader-review-gated batch.
