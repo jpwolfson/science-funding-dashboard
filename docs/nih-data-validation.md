@@ -228,6 +228,14 @@ stale state* instead of a run-wide failure:
   `reason`. The one hard failure is every planned unit coming up with no
   marker at all -- that run refuses to publish rather than mark every unit
   silently stale. Shared logic lives in `adapters/award_refresh.py`.
+- **Seed (2026-09-23).** `data/refresh_status.json` was committed with
+  W17 carrying every unit's true last accepted pull: the `completed_at` of
+  its last green pull job (59 NSF units: run 35621987484, 2026-09-21; 28
+  NIH units: run 35802597549, 2026-09-23). Without the seed, a unit failing
+  in the first W17 run would fall back to its dashboard's `generated` date,
+  which an offline reaggregation can advance past the data's real pull
+  date (W15 did so on 2026-09-23). The fallback remains only for a unit
+  added to `config/orgs.json` later that fails before its first success.
 - **Stale unit reason text (owner-approved, verbatim; the W12 sentence
   with "account" -> "unit", nothing else changed):** "Not refreshed since
   `<staleSince>`: the most recent scheduled pull for this unit did not
