@@ -43,7 +43,7 @@ the session scratchpad. Every item still reproduces, except as noted.
 | 6 | Sentinel identity and age wording | Yes. 159 of 176 episodes share 36 titles; the headings omit the account and fiscal year. | Owner |
 | 7 | All-years vs FY-to-date on the landing page | Yes: "$2703.529B net obligations across 502,002 distinct linked awards" with no horizon. | Agent |
 | 8 | DHS CISA R&D decline | Data question answered (see memo) | Owner (caption) |
-| 9 | Staleness marker reaches the numbers | Yes (structural; no unit is stale on `main`, so it is verified on a staged scenario) | Agent; stamp qualifier to the owner |
+| 9 | Staleness marker reaches the numbers | Yes (structural; no unit is stale on `main`, so it is verified on a staged scenario). Done in `ff9a962` | Agent; stamp qualifier to the owner |
 | 10 | Raw validator text in the warnings banner | Yes, and live now. The root, NSF, BIO, and CSE pages show a red "Data quality warnings" banner whose only content is the rollup's de-duplication notice. | Owner |
 | 11 | Partial current month in "Awards per month" | Yes. DMS 175 → 6, and September is normally NSF's heaviest month. | Agent |
 
@@ -116,3 +116,12 @@ the owner replies.
 | 2026-09-23 17:20 | Item 11 committed (`43356d2`): dashed segment and open marker for the in-progress month; the screens tier gains award sub-pages. Fast 7/7, rendered 4/4. Item 2 audit committed (`2024359`): 3 label findings, plus 1 coordinator finding (count nouns). PR #89 opened into `claude/stage2-display`. |
 | 2026-09-23 17:33 | Items 1, 5, and 2's fixes committed (`5b796c2`): step geometry, the owner's cadence caption verbatim on both obligation period charts, "see note" guides on the two curated periodNotes periods, "Net" in the title, the "Award $" header, "($)" in the legend, provider count nouns in chart titles, and a label halo. Pushed to PR #89. Fast and rendered re-running on `5b796c2` in a scratch worktree. |
 | 2026-09-23 17:50 | Items 4 and 7 committed locally (`03da1f8`): "No File C rows linked to public awards in FY…" placeholders (the "shown first" sentence is dropped when it would promise missing rows), and "…, FY2017–FY2026 combined" on the all-years stamp. Item 9 worker started against the pipeline-generated stale scenario (scratch worktree: `nsf/mps/dms` stale since 09-21, `doe/sc` since 09-15). |
+| 2026-09-23 18:20 | Item 9 committed (`ff9a962`): † on a stale row's numeric cells, and † on tile values with the grouped reason footnote directly below the tiles (award tiles, obligation tiles, and the award root's compact obligation tiles). A single stale unit's own page is exempt (header note). No new wording; one shared footnote helper. Real-data page text is byte-identical. PR #89 now carries every agent-owned item (11, 1, 5, 2, 4, 7, 9). CI green on every completed run. Fast and rendered running on `ff9a962` in the scratch worktree. |
+
+## Where things stand (cold-start pointer)
+
+- Agent-owned items 1, 2, 4, 5, 7, 9, and 11 are done on `claude/sweet-heisenberg-7u5lhz` (PR #89 → `claude/stage2-display`).
+- Waiting on the owner memo (items 3, 6, 8, 10, and the rollup stamp qualifier). Implement per the decisions, as one more item PR.
+- Waiting on data fix #88 (separate session). Run the final reader review only after it merges to `main` and `main` is merged into `claude/stage2-display`.
+- Then: the full screens pack on the integration branch, then a fresh-agent reader review (screens pack plus the CLAUDE.md rule-5 questions only), then dispositions, then all tiers on the integration head, then the final PR to `main`, outside the Mon 10:37 → Tue ~23:00 UTC reconcile window. Then the CLAUDE.md status bullet and the phase-history entry.
+- Scratch state that a cold start will NOT have: the stale-scenario worktree. Rebuild it by editing `data/refresh_status.json` (`nsf/mps/dms` stale, `staleSince` 2026-09-21, reason from `adapters.award_refresh.unit_stale_reason`) and `data/obligations/refresh_status.json` (`doe/sc` stale), then running `scripts/rollup.py` and `scripts/rollup_obligations.py` in a detached worktree (~12 min total). Never do this in the real checkout.
