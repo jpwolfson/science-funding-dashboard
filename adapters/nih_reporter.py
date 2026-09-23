@@ -66,12 +66,34 @@ SOURCE_EXCLUSION_CLASSIFICATIONS = {
     "reporter-record-retraction-or-supersession",
     "confirmed-bilateral-termination",
 }
-METHODOLOGY_NOTE = "counts as of the pull date; NIH revises award notice dates."
+METHODOLOGY_NOTE = ("counts as of the pull date; NIH revises award notice "
+                     "dates and amounts.")
 
 # Invariant constants (docs/verification-regime.md "NIH award-ledger
 # invariants" carries the authoritative copy of these numbers).
+#
+# Two independent churn guards run over the same per-pull move set
+# (docs/nih-data-validation.md "Store and aggregation contract"):
+#
+# - The displacement guard (date moves + exclusion-ledger returns) detects
+#   the pagination/duplicate-displacement bug signature (CLAUDE.md data
+#   integrity rule 4): a repeated row silently displacing a missing one.
+#   That signature can only show up as an id vanishing (a return) or an
+#   id's date jumping, never as a same-id, same-date amount revision, so
+#   date and non-date churn are counted -- and gated -- separately.
+# - The value-churn guard (amount, title, and type moves) catches a
+#   source schema change or an adapter parse regression corrupting a
+#   field on records that are otherwise present and stably dated. NIH
+#   also revises award amounts at the source on stable ids as ordinary
+#   business (2026-09-21: NCI alone had 148 amount-only moves in one
+#   pull, zero date moves, zero returns -- a real revision, not
+#   displacement), so this guard is sized wider than the displacement
+#   guard to accommodate that steady-state revision volume while still
+#   catching a genuine regression.
 MOVE_RETURN_ABS_MIN = 20
 MOVE_RETURN_REL_FRACTION = 0.001  # 0.1%
+VALUE_CHURN_ABS_MIN = 100
+VALUE_CHURN_REL_FRACTION = 0.01  # 1%
 LIVE_GAP_ABS_MIN = 3
 LIVE_GAP_REL_FRACTION = 0.0001  # 0.01%
 
@@ -601,26 +623,47 @@ class NihReporterPull:
         # the exemption below can only ever see a unit's true first pull.
         ledger_initialized = changes_ledger_path(self.store_path).exists()
 
-        move_return_count = len(moves) + len(returned_ids)
-        limit = max(MOVE_RETURN_ABS_MIN, MOVE_RETURN_REL_FRACTION * len(stored))
+        # Displacement guard: date moves + exclusion-ledger returns only.
+        # Value-churn guard: amount/title/type moves. See the constants'
+        # comments above for why the pagination/duplicate-displacement bug
+        # signature can only ever appear as a date move or a return, never
+        # as an amount/title/type change on a record that is otherwise
+        # returned with a stable id and date.
+        date_moves = [move for move in moves if move["field"] == "date"]
+        non_date_moves = [move for move in moves if move["field"] != "date"]
+        displacement_count = len(date_moves) + len(returned_ids)
+        displacement_limit = max(MOVE_RETURN_ABS_MIN,
+                                  MOVE_RETURN_REL_FRACTION * len(stored))
+        value_churn_count = len(non_date_moves)
+        value_churn_limit = max(VALUE_CHURN_ABS_MIN,
+                                 VALUE_CHURN_REL_FRACTION * len(stored))
         field_counts = _move_field_breakdown(moves)
         field_breakdown = _move_breakdown_str(field_counts)
         sample_lines = _move_sample_lines(moves)
+        diagnostics = f"  field breakdown: {field_breakdown}"
+        if sample_lines:
+            diagnostics += "\n  sample moves (up to " \
+                f"{MOVE_SAMPLE_LIMIT}):\n" + "\n".join(sample_lines)
 
         if ledger_initialized:
-            if move_return_count > limit:
-                diagnostics = f"  field breakdown: {field_breakdown}"
-                if sample_lines:
-                    diagnostics += "\n  sample moves (up to " \
-                        f"{MOVE_SAMPLE_LIMIT}):\n" + "\n".join(sample_lines)
+            if displacement_count > displacement_limit:
                 raise SystemExit(
-                    f"FATAL: {self.agency} pull has {len(moves)} field "
+                    f"FATAL: {self.agency} pull has {len(date_moves)} field "
                     f"move(s) + {len(returned_ids)} return(s) = "
-                    f"{move_return_count}, above the max(20, 0.1% of "
-                    f"store) = {limit:.1f} threshold for a {len(stored)}-"
-                    "award store; this is the pagination/duplicate-"
-                    "displacement bug signature (CLAUDE.md data integrity "
-                    "rule 4) -- refusing to publish\n" + diagnostics
+                    f"{displacement_count}, above the max(20, 0.1% of "
+                    f"store) = {displacement_limit:.1f} threshold for a "
+                    f"{len(stored)}-award store; this is the pagination/"
+                    "duplicate-displacement bug signature (CLAUDE.md data "
+                    "integrity rule 4) -- refusing to publish\n" + diagnostics
+                )
+            if value_churn_count > value_churn_limit:
+                raise SystemExit(
+                    f"FATAL: {self.agency} pull has {value_churn_count} "
+                    "non-date field move(s), above the max(100, 1% of "
+                    f"store) = {value_churn_limit:.1f} field-parse "
+                    f"regression guard for a {len(stored)}-award store; a "
+                    "source schema change or adapter parse regression is "
+                    "the likely cause -- refusing to publish\n" + diagnostics
                 )
         else:
             # First source-current pull for this unit: the old adapter
@@ -642,6 +685,26 @@ class NihReporterPull:
             if sample_lines:
                 print(f"  sample moves (up to {MOVE_SAMPLE_LIMIT}):\n"
                       + "\n".join(sample_lines))
+
+        # Below both guards (or exempted): publish, but disclose any
+        # non-date revision as a plain-language data-quality note -- this
+        # is source-current NIH revision, not a pipeline defect, and the
+        # steady-state case (see the exemption branch above for the
+        # initializing-pull case, which prints its own combined notice).
+        if ledger_initialized and non_date_moves:
+            value_churn_ids = sorted({move["id"] for move in non_date_moves})
+            non_date_breakdown = _move_breakdown_str(
+                _move_field_breakdown(non_date_moves))
+            print(
+                f"NOTICE: {len(value_churn_ids)} award record(s) had "
+                "NIH-revised field value(s) since the previous pull "
+                f"({non_date_breakdown})"
+            )
+            data_quality_notes.append(
+                f"{len(value_churn_ids)} award record(s) had their amount, "
+                "title, or type revised by NIH since the previous pull; "
+                "figures reflect the source as of the pull date."
+            )
 
         append_changes_ledger(self.store_path, moves)
 
