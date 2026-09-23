@@ -122,6 +122,29 @@ def account_availability(repo, account):
     }
 
 
+def account_public_period_notes(repo, account):
+    """Reader-facing ``periodNotes`` for one account's dashboard.json.
+
+    Curated ``publicNote`` values live alongside the internal (never
+    reader-facing) ``note`` text in the account's baseline file
+    (docs/obligation-ledger.md "periodNotes"). This copies every entry that
+    carries a ``publicNote`` into the account-level dashboard as
+    ``{"fy": int, "period": int, "note": <publicNote text>}``, sorted by fy
+    then period. Returns [] when none exist -- the caller omits the key
+    entirely rather than publish an empty list.
+    """
+    baseline_path = account.get("baseline")
+    baseline = json.loads((repo / baseline_path).read_text())
+    notes = []
+    for fy, row in baseline["fiscalYears"].items():
+        for entry in row.get("periodNotes") or []:
+            public_note = entry.get("publicNote")
+            if public_note:
+                notes.append({"fy": int(fy), "period": entry["period"], "note": public_note})
+    notes.sort(key=lambda n: (n["fy"], n["period"]))
+    return notes
+
+
 def build(repo=REPO):
     repo = Path(repo)
     config = json.loads((repo / "config" / "obligation_accounts.json").read_text())
@@ -209,6 +232,9 @@ def build(repo=REPO):
                             "freshness": freshness}
         if interpretation_note:
             account_metadata["interpretationNote"] = interpretation_note
+        public_period_notes = account_public_period_notes(repo, account)
+        if public_period_notes:
+            account_metadata["periodNotes"] = public_period_notes
         write_dashboard(base, {"level": "account", "path": account_path,
             "name": account["name"], "abbrev": account["abbrev"]},
             "USAspending File B and File C", events, children=pa_children,

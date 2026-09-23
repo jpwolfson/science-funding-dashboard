@@ -257,6 +257,18 @@ class ObligationStoreTests(unittest.TestCase):
             "periodNotes": [{"period": 11, "note": "  "}]}))  # blank note
         self.assertTrue(baseline_period_notes_problems({
             "periodNotes": "not a list"}))
+        # publicNote is optional; when present it must be a non-empty string.
+        self.assertEqual([], baseline_period_notes_problems({
+            "status": "complete", "obligationsCents": 100,
+            "periodNotes": [{"period": 11, "note": "Provisional note.",
+                              "publicNote": "Reader-facing statement."}],
+        }))
+        self.assertTrue(baseline_period_notes_problems({
+            "periodNotes": [{"period": 11, "note": "x", "publicNote": ""}]}))
+        self.assertTrue(baseline_period_notes_problems({
+            "periodNotes": [{"period": 11, "note": "x", "publicNote": "   "}]}))
+        self.assertTrue(baseline_period_notes_problems({
+            "periodNotes": [{"period": 11, "note": "x", "publicNote": 7}]}))
         # Reaches the shared registry-tier lint through baseline_pin_problems.
         self.assertTrue(any(
             "periodNotes" in problem for problem in baseline_pin_problems({

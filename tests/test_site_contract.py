@@ -355,6 +355,57 @@ class SiteContractTests(unittest.TestCase):
         # a null one -- unchanged, keyed only on `p.held`.
         self.assertIn("rows.push(p.held", cumulative)
 
+    def test_period_notes_render_below_the_fy_chart_as_source_figure_statements(self):
+        # Phase 3.2d remediation W16: curated `periodNotes.publicNote`
+        # values render as a small reader-facing block, without cause
+        # attribution, directly below the fiscal-year period table /
+        # cumulative chart -- same presence-driven pattern as
+        # interpretationNote, no agency check.
+        for text in (
+            "function renderPeriodNotes(notes, container = $app)",
+            "Notes on source figures",
+            'id: "periodNotes"',
+            "renderPeriodNotes(data.periodNotes)",
+        ):
+            self.assertIn(text, self.html)
+        call_site = self.html.split("if (data.fiscalYears?.length) renders.push(obligationFYChart(data));", 1)[1]
+        call_site = call_site.split("obligationFlowTables(data);", 1)[0]
+        self.assertIn("renderPeriodNotes(data.periodNotes)", call_site)
+        self.assertIn(
+            'text: `FY${n.fy}, period ${n.period}: ${n.note}`', self.html
+        )
+
+    def test_period_notes_appear_in_the_two_curated_account_dashboards(self):
+        # The two accounts with a curated publicNote (docs/obligation-ledger.md
+        # "periodNotes") must carry the exact reader-facing text in their
+        # rolled-up account dashboard.json after scripts/rollup_obligations.py.
+        cases = [
+            (
+                REPO / "data" / "obligations" / "commerce" / "nist-its" / "dashboard.json",
+                "In fiscal year 2025, period 11, the source reports a net "
+                "deobligation of $5.03 billion, taking cumulative net "
+                "obligations for the year from $5.73 billion after period "
+                "10 to $0.70 billion. The fiscal-year-end total (GTAS/File "
+                "A) reconciles to the post-deobligation figure.",
+            ),
+            (
+                REPO / "data" / "obligations" / "dhs" / "cisa-rd" / "dashboard.json",
+                "In fiscal year 2023, the source's period 3 snapshot "
+                "reported cumulative net obligations of $12.90 million, "
+                "above the fiscal-year-end total of $9.85 million. From "
+                "period 4 (cumulative $1.00 million) onward, the source's "
+                "figures are consistent with the year-end total.",
+            ),
+        ]
+        for path, public_note in cases:
+            dashboard = json.loads(path.read_text())
+            notes = dashboard.get("periodNotes")
+            self.assertTrue(notes, f"{path} missing periodNotes")
+            self.assertIn(public_note, [n["note"] for n in notes])
+            # Internal curator text (run ids, cents) must never appear here.
+            for n in notes:
+                self.assertNotIn("run 3", n["note"])
+
     def test_sentinel_publishes_limits_costs_and_source_staleness(self):
         for text in ("Coverage and interpretation limits",
                      "Current automated financial coverage",
