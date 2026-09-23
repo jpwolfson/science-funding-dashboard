@@ -36,7 +36,7 @@ the session scratchpad. Every item still reproduces, except as noted.
 | # | Item | Still reproduces? | Owner |
 |---|---|---|---|
 | 1 | Step rendering and cadence caption | Partly. The cumulative chart is already stepped (H/V path). The per-period chart still draws sloped lines between submissions. No cadence caption exists. | Agent |
-| 2 | Metric-identity audit | Audit run from the pack (Sonnet worker); findings table below | Agent |
+| 2 | Metric-identity audit | Done: `docs/reviews/evidence-2026-09-23/stage2/item2-metric-identity-audit.md`. Three label findings, plus one coordinator finding; none needs the owner | Agent |
 | 3 | Tab purity | Yes. The award root carries obligation tiles and the obligation-account table. | Owner (conflicts with the decision-4 placement) |
 | 4 | Empty File C placeholder | Yes, and wider than reviewed. 118 obligation pages show an empty current-FY table with only a "Show N more" toggle. 260 omit both sections entirely. | Agent |
 | 5 | Correction-pair callouts | Changed. The Navy and Commerce "pairs" are the data defect below (#88), not source corrections. The CISA FY2023 P3/P4 pair is real and has a curated note. | Agent (display), data fix separate |
@@ -113,3 +113,6 @@ the owner replies.
 | When (UTC) | Event |
 |---|---|
 | 2026-09-23 | Integration branch `claude/stage2-display` cut from `main` `c356a78` and pushed. Screens pack captured on `main`; every item checked. Issue #88 filed. Owner memo sent. Item 11 (Sonnet worker) and the item 2 audit (Sonnet, read-only) started. |
+| 2026-09-23 17:20 | Item 11 committed (`43356d2`): dashed segment and open marker for the in-progress month; the screens tier gains award sub-pages. Fast 7/7, rendered 4/4. Item 2 audit committed (`2024359`): 3 label findings, plus 1 coordinator finding (count nouns). PR #89 opened into `claude/stage2-display`. |
+| 2026-09-23 17:33 | Items 1, 5, and 2's fixes committed (`5b796c2`): step geometry, the owner's cadence caption verbatim on both obligation period charts, "see note" guides on the two curated periodNotes periods, "Net" in the title, the "Award $" header, "($)" in the legend, provider count nouns in chart titles, and a label halo. Pushed to PR #89. Fast and rendered re-running on `5b796c2` in a scratch worktree. |
+| 2026-09-23 17:50 | Items 4 and 7 committed locally (`03da1f8`): "No File C rows linked to public awards in FY…" placeholders (the "shown first" sentence is dropped when it would promise missing rows), and "…, FY2017–FY2026 combined" on the all-years stamp. Item 9 worker started against the pipeline-generated stale scenario (scratch worktree: `nsf/mps/dms` stale since 09-21, `doe/sc` since 09-15). |
