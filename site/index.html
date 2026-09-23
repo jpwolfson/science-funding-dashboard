@@ -1471,6 +1471,14 @@ function obligationFYChart(data) {
   return render;
 }
 
+// Item 4 (display-improvements batch): a shown fiscal year with zero File C
+// rows linked to public awards gets an inline placeholder instead of a
+// header-only empty table (current FY empty, other shown years have rows)
+// or a silently absent card (no shown year has rows) -- see
+// obligationFlowTables below.
+const emptyFileCRowsNote = label =>
+  el("p", { class: "note empty-section", text: `No File C rows linked to public awards in ${label}.` });
+
 function obligationFlowTables(data) {
   const years = (data.fiscalYears || []).slice(-3).reverse();
   const yearRange = years.length > 1
@@ -1494,18 +1502,29 @@ function obligationFlowTables(data) {
     });
     return t;
   };
-  if (recipients.length) {
+  if (years.length) {
     const card = el("div", { class: "card" });
-    card.append(el("h2", { text: "Top recipients of award-attributed obligations" }),
-      el("p", { class: "note", text: `The ten leading recipients for FY${years[0].fy} are shown first. Rankings use linked File C only and exclude the File B − File C residual.` }));
+    card.append(el("h2", { text: "Top recipients of award-attributed obligations" }));
     const primary = recipients.filter(row => row.primary);
     const overflow = recipients.filter(row => !row.primary);
-    card.append(recipientTable(primary));
-    if (overflow.length) {
-      const details = el("details", { class: "detail-table" });
-      details.append(el("summary", { text: `Show ${overflow.length} more recipient rows (${yearRange})` }),
-        recipientTable(overflow));
-      card.append(details);
+    if (!recipients.length) {
+      // No File C rows linked to public awards in any of the shown years:
+      // the existing "shown first" note would promise rows that don't
+      // exist, so it is replaced outright by the placeholder.
+      card.append(emptyFileCRowsNote(yearRange));
+    } else {
+      // With no current-FY rows, drop the "shown first" sentence, which
+      // would promise rows the placeholder below says do not exist.
+      card.append(el("p", { class: "note", text: primary.length
+        ? `The ten leading recipients for FY${years[0].fy} are shown first. Rankings use linked File C only and exclude the File B − File C residual.`
+        : "Rankings use linked File C only and exclude the File B − File C residual." }));
+      card.append(primary.length ? recipientTable(primary) : emptyFileCRowsNote(`FY${years[0].fy}`));
+      if (overflow.length) {
+        const details = el("details", { class: "detail-table" });
+        details.append(el("summary", { text: `Show ${overflow.length} more recipient rows (${yearRange})` }),
+          recipientTable(overflow));
+        card.append(details);
+      }
     }
     $app.append(card);
   }
@@ -1518,10 +1537,18 @@ function obligationFlowTables(data) {
       flows.push({ fy: fy.fy, flow, direction: "Negative entry",
         primary: yearIndex === 0 && rank < 5 }));
   });
-  if (!flows.length) return;
+  if (!years.length) return;
   const card = el("div", { class: "card" });
-  card.append(el("h2", { text: "Largest award-attributed gross flows" }),
-    el("p", { class: "note", text: `The five largest positive and negative linked File C entries for FY${years[0].fy} are shown first, before same-award entries are netted within a reporting period. A negative entry may be a de-obligation or another downward adjustment; sign alone does not establish cancellation.` }));
+  card.append(el("h2", { text: "Largest award-attributed gross flows" }));
+  const hasCurrentFlows = flows.some(row => row.primary);
+  if (flows.length) {
+    card.append(el("p", { class: "note", text: hasCurrentFlows
+      ? `The five largest positive and negative linked File C entries for FY${years[0].fy} are shown first, before same-award entries are netted within a reporting period. A negative entry may be a de-obligation or another downward adjustment; sign alone does not establish cancellation.`
+      : "A negative entry may be a de-obligation or another downward adjustment; sign alone does not establish cancellation." }));
+  } else {
+    // No File C rows linked to public awards in any of the shown years.
+    card.append(emptyFileCRowsNote(yearRange));
+  }
   const flowTable = entries => {
     const t = el("table"), h = el("tr");
     ["FY / period", "Award", "Recipient", "Direction", "Amount"].forEach((x, i) =>
@@ -1545,12 +1572,14 @@ function obligationFlowTables(data) {
     return t;
   };
   const primary = flows.filter(row => row.primary), overflow = flows.filter(row => !row.primary);
-  card.append(flowTable(primary));
-  if (overflow.length) {
-    const details = el("details", { class: "detail-table" });
-    details.append(el("summary", { text: `Show ${overflow.length} more flow rows (${yearRange})` }),
-      flowTable(overflow));
-    card.append(details);
+  if (flows.length) {
+    card.append(primary.length ? flowTable(primary) : emptyFileCRowsNote(`FY${years[0].fy}`));
+    if (overflow.length) {
+      const details = el("details", { class: "detail-table" });
+      details.append(el("summary", { text: `Show ${overflow.length} more flow rows (${yearRange})` }),
+        flowTable(overflow));
+      card.append(details);
+    }
   }
   $app.append(card);
 }
@@ -2106,8 +2135,17 @@ async function boot() {
     const gen = new Date(data.generated + "T12:00:00");
     const asOf = data.asOfPeriod || data.reportingPeriods?.at(-1)?.submissionPeriod || "latest available period";
     const totalNet = data.totalNetObligations ?? data.netObligations ?? 0;
+    // Item 7 (display-improvements batch): the stamp's all-years total sits
+    // directly above a current-FY tile with no horizon of its own -- label
+    // the fiscal-year span the total actually sums over.
+    const fyRange = (() => {
+      const fys = (data.fiscalYears || []).map(f => f.fy);
+      if (!fys.length) return "";
+      const a = Math.min(...fys), b = Math.max(...fys);
+      return a === b ? `FY${a}` : `FY${a}–FY${b} combined`;
+    })();
     document.getElementById("stamp").textContent =
-      `${fmtSignedMoney(totalNet)} net obligations across ${fmtN(data.distinctLinkedAwards || 0)} distinct linked awards · through ${submissionPeriodDisplay(asOf)} · last updated ${gen.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}`;
+      `${fmtSignedMoney(totalNet)} net obligations across ${fmtN(data.distinctLinkedAwards || 0)} distinct linked awards${fyRange ? `, ${fyRange}` : ""} · through ${submissionPeriodDisplay(asOf)} · last updated ${gen.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}`;
     if (node.level === "root") {
       // Phase 3.2d remediation decision 4 (fixed wording; count derived).
       $app.append(el("p", { class: "sub", id: "obligationsSubtitle",

@@ -567,6 +567,68 @@ class SiteContractTests(unittest.TestCase):
             self.html,
         )
 
+    def test_empty_file_c_sections_get_an_inline_placeholder(self):
+        # Display-improvements batch item 4 (reader review #5): a shown
+        # fiscal year with zero File C rows linked to public awards gets an
+        # inline placeholder instead of a header-only empty table or a
+        # silently absent card.
+        self.assertIn(
+            'const emptyFileCRowsNote = label =>\n'
+            '  el("p", { class: "note empty-section", '
+            'text: `No File C rows linked to public awards in ${label}.` });',
+            self.html,
+        )
+        flow_tables = self.html.split("function obligationFlowTables(data) {", 1)[1]
+        # Both cards now gate on `years.length`, not on having any rows, so
+        # a shown year with no rows still renders the card with a
+        # placeholder rather than disappearing or leaving a header-only
+        # empty table.
+        self.assertIn("if (years.length) {", flow_tables)
+        self.assertIn("if (!years.length) return;", flow_tables)
+        self.assertIn("emptyFileCRowsNote(yearRange)", flow_tables)
+        self.assertIn("emptyFileCRowsNote(`FY${years[0].fy}`)", flow_tables)
+        self.assertIn(
+            "card.append(primary.length ? recipientTable(primary) : "
+            "emptyFileCRowsNote(`FY${years[0].fy}`));",
+            flow_tables,
+        )
+        self.assertIn(
+            "card.append(primary.length ? flowTable(primary) : "
+            "emptyFileCRowsNote(`FY${years[0].fy}`));",
+            flow_tables,
+        )
+
+    def test_obligation_stamp_labels_the_all_years_total_horizon(self):
+        # Display-improvements batch item 7 (reader review #10): the
+        # all-years total sits directly above a current-FY tile with no
+        # horizon of its own -- label the fiscal-year span it sums over.
+        boot = self.html.split('if (kind === "obligations") {', 1)[1]
+        boot = boot.split('if (kind !== "awards")', 1)[0]
+        self.assertIn(
+            "const fyRange = (() => {\n"
+            "      const fys = (data.fiscalYears || []).map(f => f.fy);\n"
+            "      if (!fys.length) return \"\";\n"
+            "      const a = Math.min(...fys), b = Math.max(...fys);\n"
+            "      return a === b ? `FY${a}` : `FY${a}–FY${b} combined`;\n"
+            "    })();",
+            boot,
+        )
+        self.assertIn(
+            "`${fmtSignedMoney(totalNet)} net obligations across "
+            "${fmtN(data.distinctLinkedAwards || 0)} distinct linked awards"
+            "${fyRange ? `, ${fyRange}` : \"\"} · through "
+            "${submissionPeriodDisplay(asOf)} · last updated "
+            "${gen.toLocaleDateString(\"en-US\", { month: \"long\", "
+            "day: \"numeric\", year: \"numeric\" })}`",
+            boot,
+        )
+        # The pending-pull path overwrites the stamp afterward and must stay
+        # untouched by this change.
+        self.assertIn(
+            '"Initial obligation-ledger pull pending"',
+            boot,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
