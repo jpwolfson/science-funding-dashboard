@@ -18,6 +18,9 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
+from adapters.award_refresh import (  # noqa: E402
+    aggregate_refresh_status, load_refresh_status, stamp_leaf_refresh_status,
+)
 from adapters.common import load_store, store_exists, write_dashboard  # noqa: E402
 from adapters.nih_reporter import METHODOLOGY_NOTE, excluded_ids  # noqa: E402
 
@@ -73,11 +76,19 @@ def child_summary(child_cfg, child_path):
         avg_dollars = sum(f["octJul"]["dollars"] for f in base) / len(base)
     else:
         avg_awards = avg_dollars = None
-    return {**entry, "hasData": True, "totalAwards": d["totalAwards"],
-            "currentFY": d["currentFY"],
-            "octJulAwards": cur["octJul"]["awards"] if cur else 0,
-            "octJulDollars": cur["octJul"]["dollars"] if cur else 0,
-            "avgOctJulAwards": avg_awards, "avgOctJulDollars": avg_dollars}
+    summary = {**entry, "hasData": True, "totalAwards": d["totalAwards"],
+               "currentFY": d["currentFY"],
+               "octJulAwards": cur["octJul"]["awards"] if cur else 0,
+               "octJulDollars": cur["octJul"]["dollars"] if cur else 0,
+               "avgOctJulAwards": avg_awards, "avgOctJulDollars": avg_dollars}
+    # Published staleness (Phase 3.2d remediation W17): copied verbatim from
+    # the child's own dashboard.json when present -- a fresh child carries
+    # no `refreshStatus` field at all, so this row note is purely
+    # field-driven, exactly like scripts/rollup_obligations.py's
+    # child_summary (W12).
+    if d.get("refreshStatus"):
+        summary["refreshStatus"] = d["refreshStatus"]
+    return summary
 
 
 def child_warnings(child_cfg, child_path):
@@ -97,7 +108,7 @@ def child_data_quality_notes(child_cfg, child_path):
 
 
 def rollup_node(node_cfg, path, level, leaf_list, children_cfg, today,
-                nih_excluded_ids):
+                nih_excluded_ids, refresh_status):
     warnings = []
     data_quality_notes = []
     for c in children_cfg:
@@ -151,6 +162,15 @@ def rollup_node(node_cfg, path, level, leaf_list, children_cfg, today,
     if providers == {"nih"} or level == "root":
         metadata["methodologyNote"] = METHODOLOGY_NOTE
     metadata["dataQualityNotes"] = data_quality_notes
+    # Published staleness (Phase 3.2d remediation W17): a node that
+    # aggregates exactly one leaf (an NIH passthrough directorate) carries
+    # that leaf's own entry so its own page gets the single-unit header
+    # note; a node aggregating several leaves gets a non-uniform aggregate
+    # reason. Absent entirely when nothing under this node is stale. See
+    # adapters/award_refresh.py, aggregate_refresh_status.
+    node_refresh_status = aggregate_refresh_status(leaf_list, refresh_status, level)
+    if node_refresh_status:
+        metadata["refreshStatus"] = node_refresh_status
     write_dashboard(DATA / path if path else DATA, node, source, awards,
                     warnings, today, children=children, metadata=metadata,
                     store_id_count=len(raw_awards))
@@ -168,6 +188,18 @@ def main():
     cfg = json.loads((REPO_ROOT / "config" / "orgs.json").read_text())
     today = date.today()
     nih_excluded = excluded_ids(REPO_ROOT)
+    # Published staleness (Phase 3.2d remediation W17): data/refresh_status.json,
+    # written by scripts/award_refresh_status.py before this script runs.
+    # Every configured leaf's own dashboard.json is stamped (or unstamped)
+    # first, so every rollup_node call below that reads a leaf's/child's
+    # dashboard.json (child_summary) sees the current disclosure.
+    refresh_status = load_refresh_status(REPO_ROOT)
+    for ag in cfg["agencies"]:
+        for dr in ag["directorates"]:
+            for dv in dr["divisions"]:
+                leaf_path = f"{ag['slug']}/{dr['slug']}/{dv['slug']}"
+                stamp_leaf_refresh_status(
+                    DATA / leaf_path, refresh_status.get(leaf_path), leaf_path)
 
     nav_agencies = []
     all_leaves = []
@@ -182,18 +214,18 @@ def main():
             visible_divisions = [] if passthrough else dr["divisions"]
             ag_leaves.extend(leaves)
             rollup_node(dr, dr_path, "directorate", leaves, visible_divisions,
-                        today, nih_excluded)
+                        today, nih_excluded, refresh_status)
             nav_dirs.append(nav_node(dr, dr_path, [
                 nav_node(dv, f"{dr_path}/{dv['slug']}", [])
                 for dv in visible_divisions]))
         rollup_node(ag, ag["slug"], "agency", ag_leaves, ag["directorates"],
-                    today, nih_excluded)
+                    today, nih_excluded, refresh_status)
         nav_agencies.append(nav_node(ag, ag["slug"], nav_dirs))
         all_leaves.extend(ag_leaves)
 
     root_cfg = {"name": "Federal science funding", "abbrev": ""}
     rollup_node(root_cfg, "", "root", all_leaves, cfg["agencies"], today,
-                nih_excluded)
+                nih_excluded, refresh_status)
 
     index = {"generated": today.isoformat(),
              "root": {**nav_node(root_cfg, "", nav_agencies)}}
