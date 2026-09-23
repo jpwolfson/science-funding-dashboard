@@ -369,7 +369,54 @@ only change). Acceptance: a deliberately failed leaf in a dispatched test
 run on a `claude/**` branch leaves the other units refreshed, the rollup
 rebuilt, the unit marked stale on its page and in the NIH rollup, the
 live check warning (not erroring) for that unit, and the deploy green.
-Not started.
+**Done 2026-09-23: PR #85 merged (`81905a08`); acceptance run 35824669422
+(see CI-runs table).** Deploy green on a branch is evidenced by the
+rollup job's dry-run site assembly (the `deploy` job is `main`-only).
+
+**Post-soak closeout session (started 2026-09-23 ~05:00 UTC; branch
+`claude/phase-3.2d-closeout-6y3xnz` carries this file's in-flight record).**
+Order: (1) W17 on `claude/w17-award-atomicity`, acceptance run on a separate
+`claude/**` test branch that is never merged; (2) finalize PR #79 with
+W15–W18 (+W17, W19); (3) one CLAUDE.md-only PR (status bullet + Stage 2
+release); (4) **W19** — `cumulative_cents` into the pull path's
+`classify_file_b_periods`, branch `claude/w19-pull-path-dollar-rule`, merged
+before the Mon 2026-09-28 10:37 UTC obligation cron; (5) read the
+2026-09-28/29 cron firings as confirmation.
+
+W19 design (coordinator, data-integrity reasoning): event construction keeps
+the **row-rule** classification. The rebuild derives cumulative dollars from
+stored events and assumes they were built that way; building events with the
+dollar-reclassified status would store a transient period with File C only,
+its events-derived cumulative would no longer spike, the rebuild would call it
+`reported` with no residual rows, and `validate_obligations.py` would fail
+(the W10 error class). The dollar-inclusive classification (cumulative from
+the same helper `account_period_status` uses) governs only pin advancement and
+logging. Since the dollar rule never reclassifies the FY's final period or its
+last reported period, the pin is provably unchanged; W19 is consistency plus a
+pull-time log line, with stored bytes unchanged.
+
+Transient reds explained (not defects): `Test` runs 35803616733 (W18 merge
+`e4920935`) and 35803626418 (W16 merge `9b18fc4e`) and `Deploy Pages` run
+35803626546 failed `validate-nih` (`nih dashboard totalAwards=722978 but leaf
+union has 723486`) because they ran at 00:48 UTC between run 35802597549's NCI
+leaf commit (`a2f331a`) and its rollup commit (`a0db930`). The run's own
+deploy published `a0db930`, which contains W16. This mid-run window is inherent
+to per-leaf commits and is what `Verify main` (post-refresh) exists for.
+
+**Closeout state (2026-09-23 ~07:30 UTC) — what a cold start needs.**
+Merged today: W19 #84, W17 #85, phase history #79. Open: CLAUDE.md-only
+PR #86 (status bullet checked, Stage 2 hold released), and this branch's
+PR (handoff record + display-ledger items 9–11). Stage 2 is released but
+NOT started. The only remaining step is **confirmation, not a gate**:
+read the Mon 2026-09-28 cron firings — `Update data` (09:13 UTC; first
+scheduled run under W17; expect `data/refresh_status.json` updated for all
+87 units, any failed leaf `stale` with the unit note, rollup + deploy
+green), `Update obligation ledger` (10:37 UTC, ~29 h; first weekly pass
+under W19; check reconcile logs for any `DOLLAR-TRANSIENT` line), the Tue
+2026-09-29 12:17 UTC sentinel run, and `Verify main` after each (its run
+conclusion is meaningful since W18). Any red: diagnose and fix under the
+same regime. `claude/w17-acceptance` is a test branch kept as evidence;
+never merge it.
 
 Standing facts the new agent needs:
 - Environment has no egress to federal APIs or to `github.io`; all pulls
@@ -448,6 +495,13 @@ Standing facts the new agent needs:
 | 2026-09-23 00:33–00:59 UTC | `Update data` run 35802597549 dispatched on `main` (units=nih, incremental) | Award-ledger soak after W15: 28/28 ICs green, NCI published 148 amount revisions with the NOTICE + dataQualityNotes, rollup `--live` green (723,486), deploy green | **green** |
 | 2026-09-23 00:47–00:48 UTC | PR #82 merged (`e4920935`); PR #81 merged (`9b18fc4e`) | W18 verify-main conclusion reflects the tier; W16 periodNotes rendered ("Notes on source figures") with `publicNote`, rendered 4/4, before/after in `docs/reviews/evidence-2026-09-22/w16/` | merged |
 | 2026-09-23 00:59–01:07 UTC | `Verify main` run 35804388539 (workflow_run after the NIH refresh) | First run under W18: verify step **green**, issue step skipped; issue #69 closed on this evidence | green |
+| 2026-09-23 05:40–06:00 UTC | PR #84 merged (`1122a7d6`) | W19: pull-path pin advancement and logging use the dollar-inclusive classification (shared `fy_cumulative_cents` helper); event construction keeps the row rule, stored bytes unchanged. PR CI green (runs 35823393601, 35823468449); 401 unit tests; `validate_obligations.py` identical on branch and `main`. No obligation run in flight at merge | merged |
+| 2026-09-23 05:58–06:23 UTC | W17 acceptance run 35824669422 on `claude/w17-acceptance` (never merged; branch = W17 head + a test-only commit that restores `data/nih/nci/nci` to `512bc7c0`, the refused 95,928-award state, and fails `pull-nih (nih/nci/nci)` before pulling; trigger `units=nih`, incremental) | Replay of the 2026-09-21 failure under W17 | **accepted**: 27/28 `pull-nih` green with 27 `pull-ok-*` markers; `STALE (pull failed): nih/nci/nci`; rollup rebuilt (NIH 722,978 = leaf union with NCI held at 95,928); `validate_nih.py --live`: `WARNING: nih/nci/nci: stale since 2026-09-23 (pull did not complete); live gap 508 vs tolerance 9.59 not enforced`, then `NIH validation passed`; rollup commit `057cdf0` (with `data/refresh_status.json`); dry-run assemble 1,887 files, footprint ok; `deploy` skipped by its `main`-only guard (run conclusion `failure` only from the injected NCI job) |
+| 2026-09-23 07:00 UTC | W17 branch commit `cc89c979` | Acceptance exposed a public-claim inaccuracy: with no prior entry, `staleSince` falls back to the leaf dashboard's `generated`, which W15's offline reaggregation advanced to 2026-09-23 for every unit (an NSF unit last pulled 09-21 would have read "Not refreshed since 2026-09-23"). Fix: seed `data/refresh_status.json` with each unit's true last accepted pull (`completed_at` of its last green pull job: 59 NSF from run 35621987484, 28 NIH from run 35802597549) | pushed |
+| 2026-09-23 ~06:30–07:00 UTC | W17 reader review, two rounds (fresh Sonnet agents, screenshots only); record `docs/reviews/evidence-2026-09-23/w17/reader-review.md` on the W17 branch | Release-bar rule 5 | Round 1 (acceptance pages): High — stale note "since 2026-09-23" beside "last updated September 23" ⇒ **fixed before merge** (seed `cc89c979` + stale-unit stamp shows `staleSince`, `4f196300`); High — raw "award id count shrank" warning = artifact of the test branch's rolled-back store (never in production) ⇒ ledger item 10 for the banner's register; Medium † on names only ⇒ ledger item 9. Round 2 (realistic scenario, `nsf/mps/dms` stale since 2026-09-21, stores untouched): DMS stamp and note consistent; **no High attributable to W17**; pre-existing High — uncaptioned partial current month in "Awards per month" ⇒ ledger item 11 (top Stage 2 candidate) |
+| 2026-09-23 07:17 UTC | PR #85 merged (`81905a08`) | W17 award-pipeline atomicity: pull-ok markers, seeded `data/refresh_status.json` (87 fresh), rollup stamping, stale-aware live check, consistency gate, unit stale note + stamp date, † footnotes, dry-run assembly on branches. PR CI green on `4f196300` and `ba86d1a1`; no `Update data` run in flight | merged |
+| 2026-09-23 ~07:20 UTC | PR #79 merged (`9b87e6f2`) | Phase-history entry finalized (HIGH-2 filled, three reconciliations, three draft errors corrected, W14–W19 added) | merged |
+| 2026-09-23 ~07:25 UTC | PR #86 opened | CLAUDE.md-only: remediation bullet checked, display batch released | open |
 
 ## Finding closure evidence (filled at closeout)
 

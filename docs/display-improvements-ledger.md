@@ -82,3 +82,33 @@ the reader review meaningful).
    reporting artifact. Data question first (registry/crosswalk check),
    then a caption if real.
 
+
+9. **Staleness marker reaches the numbers, not only the name** (2026-09-23,
+   W17 reader review). On award and obligation listing tables the †
+   marks the unit/agency name; the numeric cells and the landing tiles
+   that include a stale unit's last snapshot carry no marker, so a reader
+   scanning figures can miss the disclosure. Candidate: mark the affected
+   cells/tiles and point to the footnote. Applies to the W12 obligation
+   pattern too; the † wording itself is owner-approved and unchanged.
+
+10. **Raw validator warning text in the public warnings banner**
+    (2026-09-23, W17 reader review). The "Data quality warnings from the
+    last pull" banner renders validator strings verbatim (e.g. "invariant
+    violated: award id count shrank from … to …"), which a policy reader
+    can take as awards being cancelled. The instance seen was an artifact
+    of the W17 acceptance branch (a deliberately rolled-back store; stores
+    never shrink in production), but the banner's register is the issue:
+    gloss each warning class in plain language. Public-claim wording:
+    owner sign-off.
+
+11. **Partial current month in "Awards per month"** (2026-09-23, W17
+    reader review round 2; rated **High** by the reviewer, pre-existing,
+    every award page). The rightmost monthly point is the still-accruing
+    current month and renders as an uncaptioned cliff (DMS 6 vs a typical
+    100–250; MPS 14 vs ~600), which a first-time reader can take as
+    funding collapsing. Candidate: distinguish the partial month (open
+    marker or "current month, partial" label). Chart geometry ⇒ rendered
+    tier + before/after screenshots. Also from round 2 (Medium): on
+    rollup pages the "last updated" rebuild date sits beside a child's
+    "not refreshed since" date with no reconciling qualifier (fold into
+    item 9; any new stamp wording is owner sign-off).
