@@ -2,16 +2,19 @@ import gzip
 import json
 import tempfile
 import unittest
+from datetime import date
 from pathlib import Path
 from unittest.mock import patch
 
-from adapters.common import write_store
-from adapters.nih_reporter import (CHANGES_HEADER, append_changes_ledger,
+from adapters.award_refresh import unit_stale_reason, write_refresh_status
+from adapters.common import write_dashboard, write_store
+from adapters.nih_reporter import (CHANGES_HEADER, METHODOLOGY_NOTE,
+                                   append_changes_ledger,
                                    changes_ledger_path, encode_trans_type)
 from scripts.validate_nih import (_check_changes_ledger, in_data_book_scope,
                                   live_mechanism_partition,
                                   reconcile_live_total, read_store,
-                                  within_relative)
+                                  validate, within_relative)
 
 
 def award(award_id="nih:1", day="2024-09-30", activity="R01",
@@ -156,6 +159,134 @@ class NihValidationTests(unittest.TestCase):
             errors = _check_changes_ledger(leaf)
             self.assertEqual(1, len(errors))
             self.assertIn("unexpected columns", errors[0])
+
+
+class NihValidationLiveStalenessTests(unittest.TestCase):
+    """Phase 3.2d remediation W17: a unit disclosed as stale in
+    data/refresh_status.json gets a live-gap WARNING instead of an ERROR;
+    the identical non-stale unit still errors. All non-live checks stay
+    unaffected either way."""
+
+    def _build_repo(self, root):
+        """Two NIH units ("aaa", "bbb"), each with 100 awards on the same
+        day so every offline check passes cleanly and only the live-gap
+        behavior differs between them."""
+        (root / "config").mkdir(parents=True)
+        (root / "reference").mkdir(parents=True)
+        cfg = {
+            "defaults": {"min_total": 0, "max_total": 100000, "max_monthly": 100000},
+            "agencies": [{
+                "slug": "nih",
+                "directorates": [
+                    {"slug": "aaa", "divisions": [
+                        {"slug": "aaa", "params": {"reporter_agency": "AAA"}},
+                    ]},
+                    {"slug": "bbb", "divisions": [
+                        {"slug": "bbb", "params": {"reporter_agency": "BBB"}},
+                    ]},
+                ],
+            }],
+        }
+        (root / "config" / "orgs.json").write_text(json.dumps(cfg))
+        (root / "reference" / "nih_databook_baseline.json").write_text(json.dumps({
+            "comparison": {"countRelativeTolerance": 0.02, "dollarRelativeTolerance": 0.02},
+            "fiscalYears": {},
+        }))
+
+        all_awards = []
+        for unit_slug in ("aaa", "bbb"):
+            leaf = root / "data" / "nih" / unit_slug / unit_slug
+            awards = [award(f"nih:{unit_slug}:{i}") for i in range(100)]
+            write_store(leaf / "awards", awards)
+            write_dashboard(
+                leaf, {"name": unit_slug, "abbrev": unit_slug.upper(),
+                       "path": f"nih/{unit_slug}/{unit_slug}", "level": "leaf"},
+                "test source", awards, [], date(2026, 9, 21),
+                metadata={"methodologyNote": METHODOLOGY_NOTE, "dataComplete": True})
+            all_awards.extend(awards)
+
+        write_dashboard(
+            root / "data" / "nih", {"name": "NIH", "path": "nih", "level": "agency"},
+            "test source", all_awards, [], date(2026, 9, 21),
+            metadata={"methodologyNote": METHODOLOGY_NOTE, "dataComplete": True})
+        write_dashboard(
+            root / "data", {"name": "Federal science funding", "path": "", "level": "root"},
+            "test source", all_awards, [], date(2026, 9, 21),
+            metadata={"methodologyNote": METHODOLOGY_NOTE})
+
+    def test_stale_unit_out_of_tolerance_warns_identical_fresh_unit_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._build_repo(root)
+            write_refresh_status(root, {
+                "nih/aaa/aaa": {
+                    "status": "stale", "staleSince": "2026-09-01",
+                    "lastAcceptedAt": None,
+                    "reason": unit_stale_reason("2026-09-01"),
+                },
+            }, "2026-09-21T09:13:00Z")
+
+            # Both units store 100 awards -> tolerance = max(3, 0.01%) = 3.
+            # A live total of 89 leaves a gap of 11, above tolerance, for
+            # BOTH units -- only the disclosed-stale one is spared an error.
+            def fake_live_total(agency, first_fy, last_fy):
+                return 89
+
+            with patch("scripts.validate_nih.live_reporter_total",
+                       side_effect=fake_live_total), \
+                    patch("scripts.validate_nih.live_mechanism_partition",
+                         return_value={"unfiltered": 0, "extramural": 0, "intramural": 0}):
+                summary = validate(repo_root=root, live=True)
+
+            self.assertTrue(any(
+                "nih/bbb/bbb" in e and "live RePORTER total" in e
+                for e in summary["errors"]
+            ), summary["errors"])
+            self.assertFalse(any(
+                "nih/aaa/aaa" in e and "live RePORTER total" in e
+                for e in summary["errors"]
+            ), summary["errors"])
+            self.assertTrue(any(
+                w.startswith("WARNING: nih/aaa/aaa: stale since 2026-09-01")
+                and "not enforced" in w
+                for w in summary["warnings"]
+            ), summary["warnings"])
+            self.assertEqual(["nih/aaa/aaa"], summary["staleUnits"])
+
+    def test_stale_unit_within_tolerance_still_gets_a_stale_notice(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._build_repo(root)
+            write_refresh_status(root, {
+                "nih/aaa/aaa": {
+                    "status": "stale", "staleSince": "2026-09-01",
+                    "lastAcceptedAt": None,
+                    "reason": unit_stale_reason("2026-09-01"),
+                },
+            }, "2026-09-21T09:13:00Z")
+
+            def fake_live_total(agency, first_fy, last_fy):
+                return 100  # gap = 0, well within tolerance for either unit
+
+            with patch("scripts.validate_nih.live_reporter_total",
+                       side_effect=fake_live_total), \
+                    patch("scripts.validate_nih.live_mechanism_partition",
+                         return_value={"unfiltered": 0, "extramural": 0, "intramural": 0}):
+                summary = validate(repo_root=root, live=True)
+
+            self.assertEqual([], summary["errors"])
+            self.assertEqual([], summary["warnings"])
+            self.assertEqual(["nih/aaa/aaa"], summary["staleUnits"])
+            # The normal decomposition note is still present, plus a
+            # distinct stale notice.
+            self.assertTrue(any(
+                n.startswith("nih/aaa/aaa: live decomposition")
+                for n in summary["notes"]
+            ), summary["notes"])
+            self.assertTrue(any(
+                "nih/aaa/aaa: stale since 2026-09-01" in n
+                for n in summary["notes"]
+            ), summary["notes"])
 
 
 if __name__ == "__main__":

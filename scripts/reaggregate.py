@@ -18,6 +18,12 @@ recomputed fresh, since the retired month-shrink regime's warnings no
 longer apply under the id-count invariant (adapters.common.write_dashboard).
 Finishes by running scripts/rollup.py's build so directorate/agency/root
 dashboards and data/index.json stay consistent with the rewritten leaves.
+Each leaf's write_dashboard() call above does not carry forward a
+previously stamped `refreshStatus` (Phase 3.2d remediation W17) -- but
+rollup.main()'s own leaf-stamping pass (driven by the untouched
+data/refresh_status.json, which this script never reads or writes) restamps
+every configured leaf unconditionally before building any rollup, so an
+offline rebuild never erases a published staleness disclosure.
 
 This script only loads award stores read-only -- the stores are untouched.
 

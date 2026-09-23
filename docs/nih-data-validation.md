@@ -196,6 +196,107 @@ Sources:
 - <https://report.nih.gov/exporter-data-dictionary>
 - <https://grants.nih.gov/funding/activity-codes>
 
+## Award refresh, freshness, and publication (W17)
+
+Phase 3.2d remediation W17 is the award-ledger analogue of the obligation
+ledger's per-account atomicity contract (`docs/obligation-ledger.md`,
+"Refresh, freshness, and publication", W12). Before W17, one refused unit
+in `update-data.yml`'s `pull-nsf`/`pull-nih` matrix (a pull refused by the
+source, a timeout, a lost push, or the runner itself failing) made
+`validate_nih.py --live` error on that unit's now-stale live gap, which
+failed the `rollup` job before it committed and skipped `deploy` -- leaving
+`main` with some units freshly refreshed under a stale rollup and no
+disclosure of which unit had not actually refreshed (2026-09-21, run
+35621987484). W17 makes a failed unit's pull a *published, disclosed
+stale state* instead of a run-wide failure:
+
+- **Success markers.** After a `pull-nsf`/`pull-nih` matrix job's
+  commit/push step succeeds (a "No data changes" run still counts -- it
+  succeeded, it just had nothing new to commit), it writes
+  `_pull_ok/<slug>.json` (`{"unit": "<unit path>", "completedAt": "<UTC
+  ISO timestamp>"}`, `slug` = the unit path with `/` replaced by `__`) and
+  uploads it as a short-retention `pull-ok-<slug>` artifact. A job that
+  fails at any earlier step uploads nothing.
+- **`data/refresh_status.json`** (schema 1; the award-tree analogue of
+  `data/obligations/refresh_status.json`) is built by
+  `scripts/award_refresh_status.py` in the `rollup` job, from this run's
+  planned units (`nsf_matrix` + `nih_matrix`) and its downloaded
+  `pull-ok-*` markers, BEFORE `scripts/rollup.py` runs. A unit this run
+  did not plan keeps its prior entry unchanged; a planned unit with a
+  marker is `fresh`; a planned unit with no marker is `stale`, carrying a
+  `staleSince` date (preserved unchanged across repeated failures) and a
+  `reason`. The one hard failure is every planned unit coming up with no
+  marker at all -- that run refuses to publish rather than mark every unit
+  silently stale. Shared logic lives in `adapters/award_refresh.py`.
+- **Seed (2026-09-23).** `data/refresh_status.json` was committed with
+  W17 carrying every unit's true last accepted pull: the `completed_at` of
+  its last green pull job (59 NSF units: run 35621987484, 2026-09-21; 28
+  NIH units: run 35802597549, 2026-09-23). Without the seed, a unit failing
+  in the first W17 run would fall back to its dashboard's `generated` date,
+  which an offline reaggregation can advance past the data's real pull
+  date (W15 did so on 2026-09-23). The fallback remains only for a unit
+  added to `config/orgs.json` later that fails before its first success.
+- **Stale unit reason text (owner-approved, verbatim; the W12 sentence
+  with "account" -> "unit", nothing else changed):** "Not refreshed since
+  `<staleSince>`: the most recent scheduled pull for this unit did not
+  complete; figures are the last accepted snapshot." This is both the
+  unit's own `refresh_status.json` `reason` and the header note rendered
+  on that unit's page.
+- **Rollup stamping** (`scripts/rollup.py`, and `scripts/reaggregate.py`
+  via its call into `rollup.main()` at the end, so an offline rebuild
+  never erases the disclosure): a stale leaf's own `dashboard.json` gets a
+  top-level `refreshStatus` (its entry plus `"unit": "<path>"`); a fresh
+  leaf carries no such field. A rollup node (directorate/agency/root) that
+  aggregates exactly one leaf (an NIH passthrough directorate, e.g.
+  `nih/fic` over `nih/fic/fic`) republishes that leaf's own entry,
+  `unit` included, so the unit's one visible page gets the header note. A
+  node aggregating several leaves with `k` of `n` stale instead gets a
+  non-uniform aggregate: "`k` of `n` unit(s) in this directorate/agency
+  were not refreshed in the most recent scheduled pull; see the
+  directorate/agency page for which unit." (root drops "in this
+  dashboard" and always points to "the agency page"). A `child_summary`
+  row copies its child's own `refreshStatus` verbatim, so every landing
+  table shows which of its children are affected. Totals, `dataComplete`,
+  warnings, and every other invariant are unaffected -- a stale leaf still
+  has its last accepted store.
+- **`validate_nih.py --live`** downgrades an out-of-tolerance live gap
+  from an error to a `WARNING: <unit>: stale since <date> (pull did not
+  complete); live gap <gap> vs tolerance <tol> not enforced` line for a
+  properly disclosed stale unit (one whose `refresh_status.json` entry has
+  both a `staleSince` and a `reason`; a bare `status: "stale"` does not
+  count). A stale unit within tolerance still gets its normal
+  decomposition note plus a distinct stale notice. Every non-live check,
+  and every non-stale unit's live check, stays exactly as strict as
+  before.
+- **`validate_award_invariants.py`** (fast tier, every PR and every push
+  to `main`) fails closed on `data/refresh_status.json` itself: schema 1,
+  every stale entry has a well-formed `staleSince` and a non-empty
+  `reason`, every unit key is a configured leaf, every dashboard's own
+  `refreshStatus` field matches what the status file and the org registry
+  say it should be (present iff at least one aggregated leaf is stale),
+  and every child-row `refreshStatus` matches that child's own dashboard.
+- **Workflow order** (`update-data.yml`): `pull-nsf`/`pull-nih` each
+  upload their unit's marker right after their commit step; `rollup`
+  downloads every `pull-ok-*` artifact (zero is tolerated --
+  `award_refresh_status.py` decides whether that is publishable), builds
+  `data/refresh_status.json`, builds the rollups, runs
+  `validate_nih.py --live`, and commits -- exactly the existing order plus
+  the two new steps in front of the rollup build. `deploy` still requires
+  `rollup` to succeed and still only runs on `main`. A non-`main` branch
+  run additionally does a dry-run `assemble_pages_site.py` +
+  `check_pages_footprint.py` at the end of the `rollup` job, so a branch
+  proves the deploy job's own build steps still succeed on a
+  post-failure, partly-stale tree without actually deploying.
+- **Site** (`site/index.html`, award pages only): `renderUnitStaleNote`
+  renders the header note when `data.refreshStatus.status === "stale"`
+  and `data.refreshStatus.unit` is present (true for a stale leaf's own
+  page and for a single-leaf rollup node's own page; a multi-leaf
+  rollup's aggregate carries no `unit`, so it never renders there).
+  `childrenCard` gives a stale row a " †" suffix and a `staleFootnotes`
+  paragraph below the table, grouped by identical `reason` text -- the
+  same pattern `obligationChildrenCard` uses for accounts (W12). Neither
+  is gated by agency or unit name.
+
 ## Commands
 
 ```bash
