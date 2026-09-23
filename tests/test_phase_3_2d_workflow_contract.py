@@ -170,6 +170,16 @@ class PublicationGateDecouplingTests(unittest.TestCase):
         self.assertIn("verify --tier fast failed on main", workflow)
         self.assertIn("concurrency:", workflow)
 
+    def test_verify_main_run_conclusion_reflects_the_fast_tier(self):
+        # 2026-09-23: with `continue-on-error` on the verify step every run
+        # concluded `success` and five red fast-tier runs after the
+        # 2026-09-21 scheduled refresh were misread as passes. The step
+        # must be allowed to fail the job; the issue step still runs.
+        workflow = (REPO / ".github/workflows/verify-main.yml").read_text()
+        verify_step = workflow[workflow.index("id: verify"):workflow.index("Upload verify --tier fast JSON")]
+        self.assertNotIn("continue-on-error", verify_step)
+        self.assertIn("if: ${{ failure() && steps.verify.outcome == 'failure' }}", workflow)
+
     def test_verify_main_workflow_never_gates_a_deploy(self):
         workflow = (REPO / ".github/workflows/verify-main.yml").read_text()
         self.assertNotIn("needs:", workflow)
