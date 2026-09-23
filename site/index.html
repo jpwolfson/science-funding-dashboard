@@ -119,6 +119,7 @@
   th { text-align: left; color: var(--ink-2); font-weight: 550; }
   th, td { padding: 4px 12px 4px 0; border-bottom: 1px solid var(--grid); }
   td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  td.num, th.num { white-space: nowrap; }
   .notes { margin-top: 28px; color: var(--ink-2); font-size: 13.5px; max-width: 82ch; }
   .notes h2 { font-size: 15px; color: var(--ink); margin-bottom: 6px; }
   .notes li { margin: 6px 0 6px 18px; }
@@ -572,11 +573,7 @@ function obligationChildrenCard(data, title = null, note = null) {
     "Dollar columns add to the parent. Distinct linked-award counts do not. File C / net is a signed ratio and can fall outside 0–100% when File C and residual activity offset." }));
   const sorted = kids.slice().sort((a, b) =>
     (b.currentFYNetObligations || 0) - (a.currentFYNetObligations || 0));
-  const t = el("table"), trh = el("tr");
-  ["Unit", `Net obligations FY${data.currentFY} to date`, "File C / net", "Distinct linked awards"]
-    .forEach((h, i) => trh.append(el("th", { class: i > 0 ? "num" : "", text: h })));
-  trh.append(el("th", { class: "chev" }));
-  t.append(trh);
+  const headerCells = ["Unit", `Net obligations FY${data.currentFY} to date`, "File C / net", "Distinct linked awards"];
   // Rows whose registry entry carries an interpretationNote (Phase 3.2d
   // remediation decision 3, e.g. the DoD low-File-C disclosure) get a
   // footnote marker here and the full text listed once below the table --
@@ -587,7 +584,11 @@ function obligationChildrenCard(data, title = null, note = null) {
   // a separate dagger marker + footnote, purely field-driven the same way
   // -- a fresh row carries no `refreshStatus` at all.
   const staleRows = [];
-  for (const c of sorted) {
+  // Row and table builders, shared by the main table and (account level
+  // only) the collapsed $0-net-obligations table below it, so the two
+  // never drift out of sync on columns, dagger/asterisk markers, or the
+  // row-as-link affordance.
+  const buildRow = c => {
     const tr = el("tr"), tdUnit = el("td");
     const path = String(c.path || "").startsWith("obligations") ? c.path : `obligations/${c.path}`;
     const hasNote = Boolean(c.interpretationNote);
@@ -611,9 +612,37 @@ function obligationChildrenCard(data, title = null, note = null) {
       el("td", { class: "num", text: fmtN(c.distinctLinkedAwards || 0) + daggerSuffix }));
     }
     navRow(tr, path);
-    t.append(tr);
+    return tr;
+  };
+  const buildTable = rows => {
+    const t = el("table"), trh = el("tr");
+    headerCells.forEach((h, i) => trh.append(el("th", { class: i > 0 ? "num" : "", text: h })));
+    trh.append(el("th", { class: "chev" }));
+    t.append(trh);
+    rows.forEach(c => t.append(buildRow(c)));
+    return t;
+  };
+  // Display-improvements batch item (reader review): an account's
+  // program-activity table listed dozens of $0-current-FY rows interleaved
+  // with active ones, reading as those named programs having been
+  // eliminated. Split them into a collapsed <details> directly after the
+  // main table -- account level only, and only when at least one row does
+  // NOT qualify (an all-zero page keeps one ordinary table rather than
+  // collapsing everything behind a click).
+  const zeroRows = data.node?.level === "account"
+    ? sorted.filter(c => c.hasData && (c.currentFYNetObligations || 0) === 0)
+    : [];
+  const splitZeroRows = zeroRows.length > 0 && zeroRows.length < sorted.length;
+  const mainRows = splitZeroRows ? sorted.filter(c => !zeroRows.includes(c)) : sorted;
+  card.append(buildTable(mainRows));
+  if (splitZeroRows) {
+    const n = zeroRows.length;
+    const details = el("details", { class: "detail-table" });
+    details.append(el("summary", {
+      text: `Show ${n} program ${n === 1 ? "activity" : "activities"} with $0 net obligations in FY${data.currentFY}` }));
+    details.append(buildTable(zeroRows));
+    card.append(details);
   }
-  card.append(t);
   if (annotated.length) {
     // Rows that carry the identical note text (e.g. every DoD account row
     // shares the same disclosure) group into one line rather than repeating
@@ -875,7 +904,15 @@ function monthlyChart(data) {
       const lastLabel = anyInProgress
         ? `${fmtN(pts[last].awards)} · ${monthName(pts[last].month)} to date`
         : fmtN(pts[last].awards);
-      f.svg.append(el("text", { class: "dlabel", x: x(last) - 6, y: y(pts[last].awards) - 10, "text-anchor": "end", text: lastLabel }));
+      // Stage 2 item (reader review): the in-progress end label used to sit
+      // at y(last) - 10 and, anchored "end", ran left across the
+      // dashed/solid line it was labeling. Placed above the higher of the
+      // last complete point and the (often lower, partial) last point
+      // instead, so it never overlaps either segment.
+      const lastLabelY = (anyInProgress && lastComplete >= 0)
+        ? Math.max(f.T + 12, Math.min(y(pts[lastComplete].awards), y(pts[last].awards)) - 10)
+        : y(pts[last].awards) - 10;
+      f.svg.append(el("text", { class: "dlabel", x: x(last) - 6, y: lastLabelY, "text-anchor": "end", text: lastLabel }));
       const cross = el("line", { y1: f.T, y2: f.B, stroke: css("--axis"), "stroke-width": 1, visibility: "hidden" });
       const dot = el("circle", { r: 4.5, fill: css("--s1"), stroke: css("--surface"), "stroke-width": 2, visibility: "hidden" });
       f.svg.append(cross, dot);
@@ -970,7 +1007,7 @@ function mechanismChart(data) {
   ];
   function render() {
     plot.querySelector("svg")?.remove();
-    const f = frame(plot, 300, 46, 118);
+    const f = frame(plot, 300, 46, 150);
     const max = chartMax(rows, r => Math.max(r.octJul.std, r.octJul.cont, r.octJul.fell));
     yAxis(f.svg, f, max, fmtN);
     if (rows.length) {
@@ -990,7 +1027,7 @@ function mechanismChart(data) {
           while (endYs.some(v => Math.abs(v - ly) < 14)) ly -= 14;
         }
         endYs.push(ly);
-        f.svg.append(el("text", { class: "dlabel", x: x(rows.length - 1) + 10, y: ly, text: `${last} ${s.label.split(" ")[0].toLowerCase()}` }));
+        f.svg.append(el("text", { class: "dlabel", x: x(rows.length - 1) + 10, y: ly, text: `${fmtN(last)} ${s.label.split(" ")[0].toLowerCase()}` }));
       }
       const cross = el("line", { y1: f.T, y2: f.B, stroke: css("--axis"), "stroke-width": 1, visibility: "hidden" });
       f.svg.append(cross);
@@ -1375,12 +1412,10 @@ function obligationPeriodsChart(data) {
   // measured against the last reported snapshot, not the immediately
   // preceding period (see docs/obligation-ledger.md "Snapshot acceptance
   // and not-reported periods").
-  const periodLabel = r => {
-    const short = period => String(period).replace(/^FY\d+/, "");
-    return (r.status !== "notReported" && r.coversPeriods && r.coversPeriods.length > 1)
-      ? `${r.submissionPeriod} (covers ${short(r.coversPeriods[0])}-${short(r.coversPeriods.at(-1))})`
-      : r.submissionPeriod;
-  };
+  const short = period => String(period).replace(/^FY\d+/, "");
+  const periodLabel = r => (r.status !== "notReported" && r.coversPeriods && r.coversPeriods.length > 1)
+    ? `${r.submissionPeriod} (covers ${short(r.coversPeriods[0])}-${short(r.coversPeriods.at(-1))})`
+    : r.submissionPeriod;
   // Curated, reader-facing source-figure callouts (docs/obligation-ledger.md
   // "periodNotes"): a charted row whose submission period is noted gets a
   // dashed guide in the plot and a "(see note)" suffix in the table, instead
@@ -1428,6 +1463,31 @@ function obligationPeriodsChart(data) {
       }).join("");
       f.svg.append(el("path", { d: line, fill: "none", stroke: css("--s1"),
         "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+      // Display-improvements batch item (reader review): a covering row
+      // (coversPeriods.length > 1) absorbs several not-reported periods into
+      // one step, but drawn plainly it reads as an ordinary single-period
+      // move. A small "covers Pxx–Pxx" span label at the step, drawn after
+      // (on top of) the step path, discloses the absorbed span in the chart
+      // itself, not only in the table's periodLabel text below.
+      // Adjacent span labels would overprint each other, so a label whose
+      // box overlaps one already placed moves up (or down, below the step)
+      // in 13px increments until it clears.
+      const placedSpans = [];
+      rows.forEach((r, i) => {
+        if (r.status === "notReported" || !r.coversPeriods || r.coversPeriods.length <= 1) return;
+        const value = r.netObligations || 0;
+        const text = `covers ${short(r.coversPeriods[0])}–${short(r.coversPeriods.at(-1))}`;
+        const halfW = text.length * 3.4;
+        const rawY = value >= 0 ? y(value) - 6 : y(value) + 14;
+        let spanY = Math.max(f.T + 10, Math.min(f.B - 4, rawY));
+        const step = value >= 0 ? -13 : 13;
+        const clashes = yy => placedSpans.some(b => Math.abs(b.x - xc(i)) < b.halfW + halfW && Math.abs(b.y - yy) < 12);
+        for (let tries = 0; tries < 6 && clashes(spanY); tries++)
+          spanY = Math.max(f.T + 10, Math.min(f.B - 4, spanY + step));
+        placedSpans.push({ x: xc(i), y: spanY, halfW });
+        f.svg.append(el("text", { class: "axis-text", x: xc(i), y: spanY,
+          "text-anchor": "middle", text }));
+      });
       const end = rows[last], endY = y(end.netObligations || 0);
       f.svg.append(el("circle", { cx: xc(last), cy: endY, r: 4.5,
         fill: (end.netObligations || 0) < 0 ? css("--s2") : css("--s1"),

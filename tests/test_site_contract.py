@@ -869,6 +869,131 @@ class SiteContractTests(unittest.TestCase):
             self.html,
         )
 
+    def test_obligation_periods_chart_labels_covering_steps_with_a_span(self):
+        # Display-improvements batch (reader review): a covering row
+        # (coversPeriods.length > 1) absorbs several not-reported periods
+        # into one step, but drawn plainly it reads as an ordinary
+        # single-period move -- a small "covers Pxx–Pxx" span label at the
+        # step, drawn after (so on top of) the step path, discloses the
+        # absorbed span directly in the chart, not only in the table.
+        periods = self.html.split("function obligationPeriodsChart(data) {", 1)[1]
+        periods = periods.split("function obligationFYChart(data) {", 1)[0]
+        self.assertIn(
+            'if (r.status === "notReported" || !r.coversPeriods || '
+            "r.coversPeriods.length <= 1) return;",
+            periods,
+        )
+        self.assertIn(
+            "const rawY = value >= 0 ? y(value) - 6 : y(value) + 14;",
+            periods,
+        )
+        self.assertIn(
+            "let spanY = Math.max(f.T + 10, Math.min(f.B - 4, rawY));",
+            periods,
+        )
+        self.assertIn(
+            "const text = `covers ${short(r.coversPeriods[0])}"
+            "–${short(r.coversPeriods.at(-1))}`;",
+            periods,
+        )
+        # Adjacent span labels never overprint: a clashing label moves off.
+        self.assertIn("const placedSpans = [];", periods)
+        self.assertIn("clashes(spanY)", periods)
+        # Drawn after the step path is appended, not before, so the span
+        # labels sit on top of the line rather than under it.
+        path_pos = periods.index('f.svg.append(el("path", { d: line,')
+        span_pos = periods.index("const text = `covers ${short(r.coversPeriods[0])}")
+        self.assertLess(path_pos, span_pos)
+        # The table's own periodLabel wording (hyphen, not en dash) is
+        # untouched by this change.
+        self.assertIn(
+            "`${r.submissionPeriod} (covers ${short(r.coversPeriods[0])}-"
+            "${short(r.coversPeriods.at(-1))})`",
+            periods,
+        )
+
+    def test_monthly_chart_end_label_clears_the_line_when_in_progress(self):
+        # Display-improvements batch (reader review): the in-progress end
+        # label used to sit at y(last) - 10 and run left across the line it
+        # was labeling. Placed above the higher of the last complete point
+        # and the last point instead, clamped to stay on the plot.
+        chart = self.html.split("function monthlyChart(data) {", 1)[1]
+        chart = chart.split("function fyAwardsChart(data, windowDone) {", 1)[0]
+        self.assertIn(
+            "const lastLabelY = (anyInProgress && lastComplete >= 0)\n"
+            "        ? Math.max(f.T + 12, Math.min(y(pts[lastComplete].awards), "
+            "y(pts[last].awards)) - 10)\n"
+            "        : y(pts[last].awards) - 10;",
+            chart,
+        )
+        self.assertIn(
+            'f.svg.append(el("text", { class: "dlabel", x: x(last) - 6, '
+            'y: lastLabelY, "text-anchor": "end", text: lastLabel }));',
+            chart,
+        )
+
+    def test_numeric_table_cells_never_wrap(self):
+        # Display-improvements batch (reader review): a minus sign wrapping
+        # onto its own line in a numeric table cell reads as stray
+        # punctuation next to the wrapped figure below it.
+        self.assertIn("td.num, th.num { white-space: nowrap; }", self.html)
+
+    def test_mechanism_chart_end_labels_use_fmtN_and_clear_the_frame(self):
+        # Display-improvements batch (reader review): "28776 continuin" --
+        # the unformatted number plus a right padding of 118 clipped the end
+        # label ("28,776 continuing") off the plot at common widths.
+        mechanism = self.html.split("function mechanismChart(data) {", 1)[1]
+        mechanism = mechanism.split("function dollarsChart(data) {", 1)[0]
+        self.assertIn("const f = frame(plot, 300, 46, 150);", mechanism)
+        self.assertIn(
+            'text: `${fmtN(last)} ${s.label.split(" ")[0].toLowerCase()}` }));',
+            mechanism,
+        )
+
+    def test_zero_net_obligation_program_activities_collapse_on_account_pages(self):
+        # Display-improvements batch (reader review): an account's
+        # program-activity table listed dozens of $0-current-FY rows
+        # interleaved with active ones, reading as those named programs
+        # having been eliminated. Split into a collapsed <details> directly
+        # after the main table, account level only, reusing the same row
+        # builder so columns and stale/interpretation-note markers never
+        # drift between the two tables.
+        children_card = self.html.split(
+            "function obligationChildrenCard(data, title = null, note = null) {", 1
+        )[1]
+        children_card = children_card.split("function childrenCardFromIndex(", 1)[0]
+        self.assertIn("const buildRow = c => {", children_card)
+        self.assertIn("const buildTable = rows => {", children_card)
+        self.assertIn(
+            'const zeroRows = data.node?.level === "account"\n'
+            "    ? sorted.filter(c => c.hasData && "
+            "(c.currentFYNetObligations || 0) === 0)\n"
+            "    : [];",
+            children_card,
+        )
+        self.assertIn(
+            "const splitZeroRows = zeroRows.length > 0 && "
+            "zeroRows.length < sorted.length;",
+            children_card,
+        )
+        self.assertIn(
+            "const mainRows = splitZeroRows ? "
+            "sorted.filter(c => !zeroRows.includes(c)) : sorted;",
+            children_card,
+        )
+        self.assertIn(
+            '`Show ${n} program ${n === 1 ? "activity" : "activities"} '
+            "with $0 net obligations in FY${data.currentFY}`",
+            children_card,
+        )
+        self.assertIn('el("details", { class: "detail-table" });', children_card)
+        # The split happens after the main table is appended and only the
+        # main table is appended unconditionally -- the details block is
+        # gated on splitZeroRows.
+        main_pos = children_card.index("card.append(buildTable(mainRows));")
+        details_pos = children_card.index("if (splitZeroRows) {")
+        self.assertLess(main_pos, details_pos)
+
 
 if __name__ == "__main__":
     unittest.main()
