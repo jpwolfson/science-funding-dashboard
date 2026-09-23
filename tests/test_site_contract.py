@@ -214,7 +214,9 @@ class SiteContractTests(unittest.TestCase):
             "They are separate from, and not additive to, the award "
             "totals on the award dashboards. Negative entries can "
             "include routine corrections or reductions; sign alone does "
-            "not establish a cancellation. NIH accounts are not included "
+            "not establish a cancellation. Accounts are included whole, so "
+            "some totals also cover operations, procurement, or weapons "
+            "activities alongside research. NIH accounts are not included "
             "here; NIH awards are on the award dashboards.`",
             self.html,
         )
@@ -257,7 +259,7 @@ class SiteContractTests(unittest.TestCase):
         # each tab shows one kind of figure -- the award root no longer
         # renders any obligation dollar figures, only a cross-link card.
         for text in (
-            'heading: "Award activity"',
+            'heading: "Award activity (NIH and NSF)"',
             'const linkCard = el("div", { class: "card", id: "obligationLinkCard" });',
             'text: "Appropriations obligations"',
             "Account-level signed obligations are separate from award "
@@ -291,7 +293,7 @@ class SiteContractTests(unittest.TestCase):
         for text in ("A signal is not a cancellation",
                      "Unreviewed signal", "Source-confirmed event",
                      "Reviewed finding", "Superseded", "Restored",
-                     "gross negative activity",
+                     "File C gross negative",
                      "net activity", "Attributed source headline",
                      "Optional review finding"):
             self.assertIn(text, self.html)
@@ -301,15 +303,33 @@ class SiteContractTests(unittest.TestCase):
         # language): "affected award IDs" -> "award IDs with negative
         # entries"; "(not overdue)" dropped, age shown alone; a state line
         # when net activity in a period was positive; gross negative and
-        # net shown side by side in the card header.
+        # net shown side by side in the card header. Stage 2b items 16/17
+        # (2026-09-23, owner-approved) scope the figures to File C and give
+        # source-only episodes their own "no linked ledger activity" text.
         for text in (
             "award IDs with negative entries",
-            "net activity in this period was positive",
+            "File C net activity in this observation window was positive",
             "sentinel-header-figures",
         ):
             self.assertIn(text, self.html)
         for retired in ("affected award IDs", "(not overdue)"):
             self.assertNotIn(retired, self.html)
+
+    def test_sentinel_source_only_episodes_show_no_ledger_activity(self):
+        # Stage 2b item 16 (2026-09-23, owner-approved): a source-only
+        # episode (no financialObservations) has no ledger figures to show;
+        # "$0 gross negative · $0 net" read as a measured zero rather than
+        # "not applicable" for these episodes.
+        episode_card = self.html.split(
+            "function sentinelEpisodeCard(episode, data, container = $app) {", 1
+        )[1].split("function renderSentinelNotes(data) {", 1)[0]
+        for text in (
+            "const hasFinancial = (episode.financialObservations || []).length > 0;",
+            'figures.append(document.createTextNode("no linked ledger activity"));',
+            'document.createTextNode("no linked ledger activity")',
+            "award IDs listed by the source",
+        ):
+            self.assertIn(text, episode_card)
 
     def test_sentinel_surfaces_source_confirmed_episodes_and_bounds_page_height(self):
         # Independent-review finding: 2 source-confirmed episodes were
@@ -533,10 +553,14 @@ class SiteContractTests(unittest.TestCase):
                      "Current authoritative-source coverage",
                      "Absence from this page is not evidence that no funding action occurred",
                      "Estimated pilot burden",
-                     "Replace them with measured figures after eight weeks",
+                     "These are planning ranges.",
                      "retains its last accepted records",
                      "Other dashboards and deployments continue independently"):
             self.assertIn(text, self.html)
+        # Stage 2b item 21b (2026-09-23, owner-approved): the eight-weeks
+        # follow-up sentence is dropped from the public stamp; "These are
+        # planning ranges." stays.
+        self.assertNotIn("Replace them with measured figures after eight weeks", self.html)
 
     def test_monthly_chart_marks_the_in_progress_month_distinct(self):
         # Reader review (High): the still-accruing current month must never
@@ -997,6 +1021,77 @@ class SiteContractTests(unittest.TestCase):
         main_pos = children_card.index("card.append(buildTable(mainRows));")
         details_pos = children_card.index("if (splitZeroRows) {")
         self.assertLess(main_pos, details_pos)
+
+    def test_obligation_subtitle_discloses_whole_account_scope(self):
+        # Stage 2b item 12 (2026-09-23, owner-approved): an account is
+        # included whole, so its total can cover operations, procurement,
+        # or weapons activities alongside research -- disclosed immediately
+        # before the (unrelated, and must stay last) NIH-not-included
+        # sentence.
+        self.assertIn(
+            "Negative entries can include routine corrections or "
+            "reductions; sign alone does not establish a cancellation. "
+            "Accounts are included whole, so some totals also cover "
+            "operations, procurement, or weapons activities alongside "
+            "research. NIH accounts are not included here; NIH awards "
+            "are on the award dashboards.",
+            self.html,
+        )
+
+    def test_flow_table_attributes_source_description_titles(self):
+        # Stage 2b item 18 (2026-09-23, owner-approved): flow.title is File
+        # C's own prime_award_base_transaction_description field, rendered
+        # by provenance -- quoted through the shared attributedText() rule
+        # and marked "source description", with one citation per card
+        # (never per row). An empty title falls back to the unquoted,
+        # unmarked award ID.
+        flow_tables = self.html.split("function obligationFlowTables(data) {", 1)[1]
+        for text in (
+            'const flowSource = { name: "USAspending File C (award financial)", '
+            'url: "https://www.usaspending.gov/" };',
+            "if (flow.title) {",
+            "const label = compactLabel(flow.title);",
+            "attributedText(label, null, { omitCitation: true })",
+            'el("span", { class: "source-tag", text: "source description" })',
+            'const fullLabel = flow.awardId || "Unlinked flow", label = compactLabel(fullLabel);',
+            "if (flows.some(row => row.flow.title))",
+            "card.append(el(\"p\", { class: \"note\" }, attributedText(null, flowSource)));",
+        ):
+            self.assertIn(text, flow_tables)
+        # The direction/amount cells are separate <td>s from the quoted
+        # award description, so a source disclaimer in the description can
+        # never read as the reason for a row's direction or amount.
+        self.assertIn(
+            'el("td", { text: direction }), el("td", {\n'
+            '          class: `num ${amount < 0 ? "negative" : ""}`.trim(), '
+            "text: fmtSignedMoney(amount),",
+            flow_tables,
+        )
+
+    def test_award_root_tile_names_the_two_award_sources(self):
+        # Stage 2b item 20 (2026-09-23, owner-approved): the award root's
+        # "Award activity" tile group heading names its two sources so it
+        # is never read as covering every agency on the site (obligations
+        # cover far more agencies than the award ledger does).
+        self.assertIn('heading: "Award activity (NIH and NSF)"', self.html)
+
+    def test_sentinel_source_card_shows_dates_not_raw_status_or_timestamps(self):
+        # Stage 2b item 21a (2026-09-23, owner-approved): the Status cell
+        # reads as human dates ("source list dated …; checked …"), a
+        # non-"current" source keeps its status word as a prefix, and the
+        # raw ISO-timestamp columns are dropped entirely.
+        self.assertIn("function humanDateOnly(value) {", self.html)
+        source_card = self.html.split("function sentinelSourceCard(data) {", 1)[1]
+        source_card = source_card.split("function renderSentinelSourcedEvent(", 1)[0]
+        for text in (
+            '["Source", "Status", "Records"].forEach(text =>',
+            '`source list dated ${humanDateOnly(source.sourceAsOf)}` : "source list date not stated"',
+            '`checked ${humanDateOnly(source.lastAttemptAt)}` : "checked (not attempted)"',
+            'source.status !== "current" ? `${source.status}: ${statusText}` : statusText',
+        ):
+            self.assertIn(text, source_card)
+        for retired in ("Source as of", "Last accepted", "Last attempt"):
+            self.assertNotIn(retired, source_card)
 
 
 if __name__ == "__main__":
