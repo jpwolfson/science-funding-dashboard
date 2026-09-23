@@ -493,10 +493,17 @@ function childrenCard(data) {
     .forEach((h, i) => trh.append(el("th", { class: i > 0 ? "num" : "", text: h })));
   trh.append(el("th", { class: "chev" }));
   t.append(trh);
+  // Rows carrying a stale `refreshStatus` (Phase 3.2d remediation W17) get
+  // a dagger marker + footnote below the table, grouped by identical
+  // reason, purely field-driven -- exactly the obligationChildrenCard
+  // pattern (W12): a fresh row carries no `refreshStatus` field at all.
+  const staleRows = [];
   for (const c of sorted) {
     const tr = el("tr");
     const tdUnit = el("td");
-    tdUnit.append(el("a", { href: `index.html?org=${c.path}`, text: unitLabel(c) }));
+    const isStale = c.refreshStatus?.status === "stale";
+    if (isStale) staleRows.push(c);
+    tdUnit.append(el("a", { href: `index.html?org=${c.path}`, text: unitLabel(c) + (isStale ? " †" : "") }));
     tr.append(tdUnit);
     if (!c.hasData) {
       tr.append(
@@ -520,6 +527,25 @@ function childrenCard(data) {
     t.append(tr);
   }
   card.append(t);
+  if (staleRows.length) {
+    // Rows sharing the identical staleness text (e.g. the same
+    // multi-unit-aggregate reason) group into one line, same pattern as
+    // obligationChildrenCard's stale footnote.
+    const groups = new Map();
+    for (const c of staleRows) {
+      const text = c.refreshStatus.reason;
+      if (!groups.has(text)) groups.set(text, []);
+      groups.get(text).push(unitLabel(c));
+    }
+    const p = el("p", { class: "note", id: "staleFootnotes" });
+    let firstGroup = true;
+    for (const [text, names] of groups) {
+      if (!firstGroup) p.append(document.createTextNode(" "));
+      firstGroup = false;
+      p.append(el("strong", { text: `† ${names.join(", ")}: ` }), document.createTextNode(text));
+    }
+    card.append(p);
+  }
   $app.append(card);
 }
 
@@ -1490,6 +1516,27 @@ function renderStaleNote(freshness, container = $app) {
   container.append(box);
 }
 
+// Published staleness (Phase 3.2d remediation W17, the award-ledger
+// analogue of W12 above): data/refresh_status.json, stamped by
+// scripts/rollup.py directly onto a stale leaf's own dashboard.json as a
+// top-level `refreshStatus`, and onto a rollup node's dashboard.json too
+// when that node aggregates exactly one leaf (an NIH passthrough
+// directorate) -- the `unit` field is present in exactly those two cases,
+// which is what gates this header note (a multi-leaf rollup's own
+// aggregate refreshStatus has no `unit` and instead surfaces per row in
+// childrenCard's dagger footnote below). The wording is the same
+// owner-approved verbatim sentence as the obligation note above, with
+// "account" -> "unit" (Phase 3.2d remediation brief); only the date varies.
+const staleUnitNoteText = staleSince =>
+  `Not refreshed since ${staleSince}: the most recent scheduled pull for this unit did not complete; figures are the last accepted snapshot.`;
+
+function renderUnitStaleNote(refreshStatus, container = $app) {
+  if (!refreshStatus || refreshStatus.status !== "stale" || !refreshStatus.unit) return;
+  const box = el("div", { class: "interpretation-note", id: "staleNote" });
+  box.append(document.createTextNode(staleUnitNoteText(refreshStatus.staleSince)));
+  container.append(box);
+}
+
 // W1's dashboard-level data-quality notes (plain, non-blocking observations
 // such as a stored id not returned by the latest full re-pull) render in a
 // dedicated notes block, deliberately separate from the red `.banner`
@@ -2058,6 +2105,7 @@ async function boot() {
   // the header, whenever present, unchanged from the dashboard's own text.
   renderMethodologyNote(data.methodologyNote);
   renderDataQualityNotes(data.dataQualityNotes);
+  renderUnitStaleNote(data.refreshStatus);
   if (data.warnings?.length) {
     const b = el("div", { class: "banner" });
     b.append(el("strong", { text: "Data quality warnings from the last pull: " }), document.createTextNode(data.warnings.join(" · ")));
