@@ -2,33 +2,33 @@
  "schemaVersion": 1,
  "tier": "rendered",
  "account": null,
- "generatedAt": "2026-09-23T22:56:47.334934+00:00",
- "durationSeconds": 146.487,
- "passed": false,
+ "generatedAt": "2026-09-23T23:01:42.101543+00:00",
+ "durationSeconds": 148.353,
+ "passed": true,
  "checks": [
   {
    "name": "smoke-obligation-pages",
    "passed": true,
    "evidence": "Rendered obligation page matrix passed (5 cases)",
-   "seconds": 4.693
+   "seconds": 5.08
   },
   {
    "name": "smoke-obligation-pages-all-accounts",
    "passed": true,
    "evidence": "Rendered all-accounts obligation page matrix passed (212 cases)",
-   "seconds": 107.01
+   "seconds": 107.078
   },
   {
    "name": "smoke-pages-public-links",
    "passed": true,
    "evidence": "Rendered assembled-artifact public-link matrix passed (59 cases)",
-   "seconds": 30.692
+   "seconds": 31.432
   },
   {
    "name": "smoke-sentinel-page",
-   "passed": false,
-   "evidence": "PASS sentinel-layout-1100px (doc height 13362px, under the 16000px bound; 22 visible card(s))\nTraceback (most recent call last):\nFile \"/home/user/science-funding-dashboard/scripts/smoke_sentinel_page.py\", line 334, in <module>\nmain()\nFile \"/home/user/science-funding-dashboard/scripts/smoke_sentinel_page.py\", line 329, in main\ncount = run(chrome=args.chrome)\n^^^^^^^^^^^^^^^^^^^^^^^\nFile \"/home/user/science-funding-dashboard/scripts/smoke_sentinel_page.py\", line 321, in run\nraise AssertionError(\"\\n\".join(failures))\nAssertionError: wide-light: missing visible marker: net activity in this period was positive\nnarrow-dark: missing visible marker: net activity in this period was positive",
-   "seconds": 4.091
+   "passed": true,
+   "evidence": "Rendered funding-action sentinel passed (2 cases)",
+   "seconds": 4.762
   }
  ],
  "footprint": {
@@ -40,13 +40,13 @@
    "adapters": 190512,
    "config": 174939,
    "data": 680158493,
-   "docs": 22466410,
+   "docs": 29889301,
    "reference": 631148,
-   "scripts": 386152,
+   "scripts": 386670,
    "site": 141590,
    "tests": 643878
   },
-  "totalTrackedBytes": 704867074,
+  "totalTrackedBytes": 712290483,
   "gzippedStoreBytes": 369805227,
   "pagesArtifact": {
    "fileCount": 1887,

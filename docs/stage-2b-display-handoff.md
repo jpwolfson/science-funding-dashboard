@@ -72,3 +72,5 @@ the brief nothing is published and the owner gets a memo.
 |---|---|
 | 2026-09-23 22:30 | Integration branch cut from `main` `10f3974`. Item 15 re-pull pushed (run 35928876011). |
 | 2026-09-23 22:40 | Item 19 check: CRS gives Oct 1–Nov 11; held for owner memo. Items 12, 16, 17, 18, 20, 21 handed to one Sonnet worker. |
+| 2026-09-23 22:58 | Worker committed items 12, 16, 17, 18, 20, 21 (`7340bbe`): contract tests 59/59, fast 7/7, registry 382/382; rendered 3/4 because `scripts/smoke_sentinel_page.py` pinned the pre-item-17 state line. |
+| 2026-09-23 23:10 | Coordinator: smoke markers updated to the approved 16/17 wording (and the retired "eight weeks" line added to its retired list — a sentinel-display test, so Stage 2b's, not a 3.2e pipeline script); `humanDateOnly` pinned to UTC so a check near midnight UTC can't show the previous day. Rendered 4/4. |

@@ -233,7 +233,14 @@ def run(repo=REPO, chrome=None):
                 # episode's age is shown without an "(not overdue)" claim.
                 "award IDs with negative entries",
                 "gross negative", "net activity",
-                "net activity in this period was positive",
+                # Stage 2b items 16/17 (owner-approved 2026-09-23): sentinel
+                # figures are labeled as File C measures, and source-only
+                # episodes say they have no linked ledger activity.
+                "File C gross negative",
+                "File C net activity (observation window)",
+                "File C net activity in this observation window was positive",
+                "no linked ledger activity",
+                "award IDs listed by the source",
                 "Source-confirmed episodes",
                 "approximately $7.56 billion", "321 awards", "223 projects",
                 "Office of Clean Energy Demonstrations (OCED)",
@@ -245,7 +252,8 @@ def run(repo=REPO, chrome=None):
             ):
                 if marker not in visible:
                     case_errors.append(f"missing visible marker: {marker}")
-            for retired in ("not overdue", "affected award IDs"):
+            for retired in ("not overdue", "affected award IDs",
+                            "Replace them with measured figures after eight weeks"):
                 if retired in visible:
                     case_errors.append(f"retired sentinel-language marker still present: {retired}")
             # Phase 3.2d remediation: the source-confirmed episodes must be
