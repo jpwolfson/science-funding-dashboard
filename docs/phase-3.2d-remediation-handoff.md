@@ -371,6 +371,36 @@ rebuilt, the unit marked stale on its page and in the NIH rollup, the
 live check warning (not erroring) for that unit, and the deploy green.
 Not started.
 
+**Post-soak closeout session (started 2026-09-23 ~08:00 UTC; branch
+`claude/phase-3.2d-closeout-6y3xnz` carries this file's in-flight record).**
+Order: (1) W17 on `claude/w17-award-atomicity`, acceptance run on a separate
+`claude/**` test branch that is never merged; (2) finalize PR #79 with
+W15–W18 (+W17, W19); (3) one CLAUDE.md-only PR (status bullet + Stage 2
+release); (4) **W19** — `cumulative_cents` into the pull path's
+`classify_file_b_periods`, branch `claude/w19-pull-path-dollar-rule`, merged
+before the Mon 2026-09-28 10:37 UTC obligation cron; (5) read the
+2026-09-28/29 cron firings as confirmation.
+
+W19 design (coordinator, data-integrity reasoning): event construction keeps
+the **row-rule** classification. The rebuild derives cumulative dollars from
+stored events and assumes they were built that way; building events with the
+dollar-reclassified status would store a transient period with File C only,
+its events-derived cumulative would no longer spike, the rebuild would call it
+`reported` with no residual rows, and `validate_obligations.py` would fail
+(the W10 error class). The dollar-inclusive classification (cumulative from
+the same helper `account_period_status` uses) governs only pin advancement and
+logging. Since the dollar rule never reclassifies the FY's final period or its
+last reported period, the pin is provably unchanged; W19 is consistency plus a
+pull-time log line, with stored bytes unchanged.
+
+Transient reds explained (not defects): `Test` runs 35803616733 (W18 merge
+`e4920935`) and 35803626418 (W16 merge `9b18fc4e`) and `Deploy Pages` run
+35803626546 failed `validate-nih` (`nih dashboard totalAwards=722978 but leaf
+union has 723486`) because they ran at 00:48 UTC between run 35802597549's NCI
+leaf commit (`a2f331a`) and its rollup commit (`a0db930`). The run's own
+deploy published `a0db930`, which contains W16. This mid-run window is inherent
+to per-leaf commits and is what `Verify main` (post-refresh) exists for.
+
 Standing facts the new agent needs:
 - Environment has no egress to federal APIs or to `github.io`; all pulls
   run on Actions. `list_workflow_jobs` results exceed the tool's output
