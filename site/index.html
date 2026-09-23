@@ -476,6 +476,29 @@ function navRow(tr, path) {
 
 const DRILL_NOTE = "Each row links to that unit's own dashboard.";
 
+// W17 item 9 (reader review): the grouped "† <names>: <reason>" footnote
+// paragraph shared by both landing tables (childrenCard,
+// obligationChildrenCard) and both tile groups (tiles, obligationTiles) --
+// factored once so the identical-reason grouping and literal text can never
+// drift between the four call sites. `id` is supplied by the caller so each
+// rendered instance keeps a unique element id on a page.
+function staleFootnote(staleRows, { id } = {}) {
+  const groups = new Map();
+  for (const c of staleRows) {
+    const text = c.refreshStatus.reason;
+    if (!groups.has(text)) groups.set(text, []);
+    groups.get(text).push(unitLabel(c));
+  }
+  const p = el("p", { class: "note", id });
+  let firstGroup = true;
+  for (const [text, names] of groups) {
+    if (!firstGroup) p.append(document.createTextNode(" "));
+    firstGroup = false;
+    p.append(el("strong", { text: `† ${names.join(", ")}: ` }), document.createTextNode(text));
+  }
+  return p;
+}
+
 function childrenCard(data) {
   const kids = data.children || [];
   if (!kids.length) return;
@@ -513,14 +536,18 @@ function childrenCard(data) {
         el("td", { class: "num", text: "—" }),
       );
     } else {
+      // W17 item 9 (reader review): a stale row's numeric cells carry the
+      // same dagger as its name cell -- a reader scanning figures, not
+      // names, must not miss the disclosure.
+      const daggerSuffix = isStale ? " †" : "";
       const hasBase = c.avgOctJulAwards != null && c.avgOctJulAwards !== 0;
       const pctTxt = hasBase ? fmtPct((c.octJulAwards - c.avgOctJulAwards) / c.avgOctJulAwards) : "—";
       const pctClass = hasBase ? (c.octJulAwards >= c.avgOctJulAwards ? "up" : "down") : "";
       tr.append(
-        el("td", { class: "num", text: fmtN(c.octJulAwards) }),
-        el("td", { class: `num ${pctClass}`.trim(), text: pctTxt }),
-        el("td", { class: "num", text: fmtMoney(c.octJulDollars) }),
-        el("td", { class: "num", text: fmtN(c.totalAwards) }),
+        el("td", { class: "num", text: fmtN(c.octJulAwards) + daggerSuffix }),
+        el("td", { class: `num ${pctClass}`.trim(), text: pctTxt + daggerSuffix }),
+        el("td", { class: "num", text: fmtMoney(c.octJulDollars) + daggerSuffix }),
+        el("td", { class: "num", text: fmtN(c.totalAwards) + daggerSuffix }),
       );
     }
     navRow(tr, c.path);
@@ -531,20 +558,7 @@ function childrenCard(data) {
     // Rows sharing the identical staleness text (e.g. the same
     // multi-unit-aggregate reason) group into one line, same pattern as
     // obligationChildrenCard's stale footnote.
-    const groups = new Map();
-    for (const c of staleRows) {
-      const text = c.refreshStatus.reason;
-      if (!groups.has(text)) groups.set(text, []);
-      groups.get(text).push(unitLabel(c));
-    }
-    const p = el("p", { class: "note", id: "staleFootnotes" });
-    let firstGroup = true;
-    for (const [text, names] of groups) {
-      if (!firstGroup) p.append(document.createTextNode(" "));
-      firstGroup = false;
-      p.append(el("strong", { text: `† ${names.join(", ")}: ` }), document.createTextNode(text));
-    }
-    card.append(p);
+    card.append(staleFootnote(staleRows, { id: "staleFootnotes" }));
   }
   $app.append(card);
 }
@@ -587,11 +601,14 @@ function obligationChildrenCard(data, title = null, note = null) {
       tr.append(el("td", { class: "num", text: "no data yet" }),
         el("td", { class: "num", text: "—" }), el("td", { class: "num", text: "—" }));
     } else {
+      // W17 item 9 (reader review): a stale row's numeric cells carry the
+      // same dagger as its name cell.
+      const daggerSuffix = isStale ? " †" : "";
       const value = c.currentFYNetObligations || 0;
       tr.append(el("td", { class: `num ${value < 0 ? "negative" : ""}`.trim(),
-        text: fmtSignedMoney(value) }),
-      el("td", { class: "num", text: fmtCoverage(c.fileCToNetRatio) }),
-      el("td", { class: "num", text: fmtN(c.distinctLinkedAwards || 0) }));
+        text: fmtSignedMoney(value) + daggerSuffix }),
+      el("td", { class: "num", text: fmtCoverage(c.fileCToNetRatio) + daggerSuffix }),
+      el("td", { class: "num", text: fmtN(c.distinctLinkedAwards || 0) + daggerSuffix }));
     }
     navRow(tr, path);
     t.append(tr);
@@ -618,28 +635,14 @@ function obligationChildrenCard(data, title = null, note = null) {
   if (staleRows.length) {
     // Rows sharing the identical staleness text (same staleSince date)
     // group into one line, same pattern as the interpretationNote footnote
-    // above.
-    const groups = new Map();
-    for (const c of staleRows) {
-      // The agency-level aggregate row's reason names how many of its
-      // accounts are stale (never "this account" -- it is not one); a
-      // single account row's own reason is specific to it. Either way this
-      // is the plain-language `reason` scripts/reconcile_obligation_
-      // artifacts.py / scripts/rollup_obligations.py wrote, not the
-      // header's fixed "Not refreshed since" wording, which only makes
-      // sense naming exactly one account.
-      const text = c.refreshStatus.reason;
-      if (!groups.has(text)) groups.set(text, []);
-      groups.get(text).push(unitLabel(c));
-    }
-    const p = el("p", { class: "note", id: "staleFootnotes" });
-    let firstGroup = true;
-    for (const [text, names] of groups) {
-      if (!firstGroup) p.append(document.createTextNode(" "));
-      firstGroup = false;
-      p.append(el("strong", { text: `† ${names.join(", ")}: ` }), document.createTextNode(text));
-    }
-    card.append(p);
+    // above. The agency-level aggregate row's reason names how many of its
+    // accounts are stale (never "this account" -- it is not one); a single
+    // account row's own reason is specific to it. Either way this is the
+    // plain-language `reason` scripts/reconcile_obligation_artifacts.py /
+    // scripts/rollup_obligations.py wrote, not the header's fixed "Not
+    // refreshed since" wording, which only makes sense naming exactly one
+    // account.
+    card.append(staleFootnote(staleRows, { id: "staleFootnotes" }));
   }
   $app.append(card);
 }
@@ -730,9 +733,15 @@ function renderCsvNote(level, path, data) {
 }
 
 // ---------- tiles ----------
-function appendTileGroup(row, { id = "", heading = "", note = "" } = {}) {
+// `footnote` (W17 item 9, reader review): an optional element -- the same
+// grouped stale-footnote paragraph the landing tables use -- appended
+// directly after the tile row, in whichever container the row itself lands
+// in (bare into $app, or inside the headed section), so it always sits
+// immediately below the tiles it explains.
+function appendTileGroup(row, { id = "", heading = "", note = "", footnote = null } = {}) {
   if (!heading) {
     $app.append(row);
+    if (footnote) $app.append(footnote);
     return;
   }
   const section = el("section", { class: "summary-group" });
@@ -741,6 +750,7 @@ function appendTileGroup(row, { id = "", heading = "", note = "" } = {}) {
   section.append(title);
   if (note) section.append(el("p", { class: "note", text: note }));
   section.append(row);
+  if (footnote) section.append(footnote);
   $app.append(section);
 }
 
@@ -766,11 +776,22 @@ function tiles(data, options = {}) {
     { label: `${mechanisms.std}, Oct–Jul${suffix}`, val: fmtN(cur.octJul.std), a: cur.octJul.std, key: "std" },
     { label: `${mechanisms.cont}, Oct–Jul${suffix}`, val: fmtN(cur.octJul.cont), a: cur.octJul.cont, key: "cont" },
   ];
+  // W17 item 9 (reader review): these tiles are this page's own aggregate,
+  // which already folds in any stale child's last-accepted snapshot -- mark
+  // every value the same way the landing table marks a stale row's numbers,
+  // with the same grouped footnote directly below the row. Skipped when
+  // this page's own header already carries the "Not refreshed since" note
+  // for a single stale unit (data.refreshStatus.unit): duplicating the
+  // disclosure there would be redundant, not additive.
+  const staleChildren = data.refreshStatus?.unit
+    ? []
+    : (data.children || []).filter(c => c.refreshStatus?.status === "stale");
+  const tileDagger = staleChildren.length ? " †" : "";
   for (const s of specs) {
     const b = avg(s.key);
     const hasBaseline = base.length > 0 && b !== 0;
     const tile = el("div", { class: "tile" });
-    tile.append(el("div", { class: "label", text: s.label }), el("div", { class: "value", text: s.val }));
+    tile.append(el("div", { class: "label", text: s.label }), el("div", { class: "value", text: s.val + tileDagger }));
     if (hasBaseline) {
       const pct = (s.a - b) / b;
       const d = el("div", { class: `delta ${pct >= 0 ? "up" : "down"}` });
@@ -781,7 +802,8 @@ function tiles(data, options = {}) {
     }
     row.append(tile);
   }
-  appendTileGroup(row, options);
+  appendTileGroup(row, { ...options,
+    footnote: staleChildren.length ? staleFootnote(staleChildren, { id: "tileStaleFootnotes" }) : null });
 }
 
 // The as-of date of an award dashboard's figures: a single stale unit's
@@ -1202,14 +1224,23 @@ function obligationTiles(data, options = {}) {
     [ `File B − File C residual, FY${data.currentFY} to date`, fmtSignedMoney(cur.residualObligations || 0) ],
   ];
   const specs = options.compact ? primarySpecs : [...primarySpecs, ...reconciliationSpecs];
+  // W17 item 9 (reader review): same pattern as tiles() above -- these
+  // tiles are `data`'s own aggregate, which already folds in any stale
+  // child's last-accepted snapshot. Used both for an obligation node's own
+  // tile row (data.children are its own child accounts/agencies) and for
+  // the compact obligation tile group on the award root (data is the
+  // obligations root dashboard, whose children are agencies).
+  const staleChildren = (data.children || []).filter(c => c.refreshStatus?.status === "stale");
+  const tileDagger = staleChildren.length ? " †" : "";
   const row = el("div", { class: "tiles" });
   for (const [label, value] of specs) {
     const tile = el("div", { class: "tile" });
     tile.append(el("div", { class: "label", text: label }),
-      el("div", { class: "value", text: value }));
+      el("div", { class: "value", text: value + tileDagger }));
     row.append(tile);
   }
-  appendTileGroup(row, options);
+  appendTileGroup(row, { ...options,
+    footnote: staleChildren.length ? staleFootnote(staleChildren, { id: "obligationTileStaleFootnotes" }) : null });
 }
 
 const NOT_REPORTED_AT_PULL = "not reported at pull";

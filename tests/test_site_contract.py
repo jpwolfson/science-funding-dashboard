@@ -629,6 +629,90 @@ class SiteContractTests(unittest.TestCase):
             boot,
         )
 
+    def test_stale_footnote_is_a_shared_helper(self):
+        # Display-improvements batch item 9 (W17 reader review): the grouped
+        # "† <names>: <reason>" footnote paragraph is built once and reused
+        # by both landing tables and both tile groups, so the literal text
+        # (pinned by the older per-table tests above) can never drift
+        # between call sites.
+        self.assertIn("function staleFootnote(staleRows, { id } = {}) {", self.html)
+        for text in (
+            "const text = c.refreshStatus.reason;",
+            'el("strong", { text: `† ${names.join(", ")}: ` })',
+            'const p = el("p", { class: "note", id });',
+        ):
+            self.assertIn(text, self.html)
+        # Both tables call the shared helper rather than rebuilding it.
+        self.assertIn(
+            'card.append(staleFootnote(staleRows, { id: "staleFootnotes" }));',
+            self.html,
+        )
+
+    def test_landing_table_numeric_cells_carry_the_dagger_on_stale_rows(self):
+        # Item 9: a stale row's numeric cells, not just its name cell, must
+        # carry the " †" disclosure -- a reader scanning figures rather than
+        # names must not miss it. A "no data yet" row is unaffected.
+        children_card = self.html.split("function childrenCard(data) {", 1)[1]
+        children_card = children_card.split("function obligationChildrenCard(", 1)[0]
+        self.assertIn('const daggerSuffix = isStale ? " †" : "";', children_card)
+        self.assertIn("fmtN(c.octJulAwards) + daggerSuffix", children_card)
+        self.assertIn("pctTxt + daggerSuffix", children_card)
+        self.assertIn("fmtMoney(c.octJulDollars) + daggerSuffix", children_card)
+        self.assertIn("fmtN(c.totalAwards) + daggerSuffix", children_card)
+        # The "no data yet" branch is untouched.
+        self.assertIn('el("td", { class: "num", text: "no data yet" })', children_card)
+
+        obligation_card = self.html.split("function obligationChildrenCard(data, title = null, note = null) {", 1)[1]
+        obligation_card = obligation_card.split("function childrenCardFromIndex(", 1)[0]
+        self.assertIn('const daggerSuffix = isStale ? " †" : "";', obligation_card)
+        self.assertIn("fmtSignedMoney(value) + daggerSuffix", obligation_card)
+        self.assertIn("fmtCoverage(c.fileCToNetRatio) + daggerSuffix", obligation_card)
+        self.assertIn("fmtN(c.distinctLinkedAwards || 0) + daggerSuffix", obligation_card)
+        self.assertIn('el("td", { class: "num", text: "no data yet" })', obligation_card)
+
+    def test_tile_groups_mark_values_and_render_a_footnote_for_stale_children(self):
+        # Item 9: the page's topline tiles carry the same disclosure when at
+        # least one of the page's own children is stale, with the same
+        # grouped footnote directly below the tile row -- distinct ids so
+        # they never collide with the table's "staleFootnotes" or with each
+        # other.
+        self.assertIn("function appendTileGroup(row, { id = \"\", heading = \"\", note = \"\", footnote = null } = {}) {", self.html)
+        self.assertIn("if (footnote) $app.append(footnote);", self.html)
+        self.assertIn("if (footnote) section.append(footnote);", self.html)
+
+        tiles_fn = self.html.split("function tiles(data, options = {}) {", 1)[1]
+        tiles_fn = tiles_fn.split("// The as-of date of an award dashboard", 1)[0]
+        self.assertIn(
+            "const staleChildren = data.refreshStatus?.unit\n"
+            "    ? []\n"
+            '    : (data.children || []).filter(c => c.refreshStatus?.status === "stale");',
+            tiles_fn,
+        )
+        self.assertIn('text: s.val + tileDagger', tiles_fn)
+        self.assertIn(
+            'staleFootnote(staleChildren, { id: "tileStaleFootnotes" })', tiles_fn)
+
+        obligation_tiles_fn = self.html.split("function obligationTiles(data, options = {}) {", 1)[1]
+        obligation_tiles_fn = obligation_tiles_fn.split("const NOT_REPORTED_AT_PULL", 1)[0]
+        self.assertIn(
+            'const staleChildren = (data.children || []).filter(c => c.refreshStatus?.status === "stale");',
+            obligation_tiles_fn,
+        )
+        self.assertIn('text: value + tileDagger', obligation_tiles_fn)
+        self.assertIn(
+            'staleFootnote(staleChildren, { id: "obligationTileStaleFootnotes" })',
+            obligation_tiles_fn,
+        )
+
+    def test_award_tiles_skip_the_dagger_on_a_single_stale_units_own_page(self):
+        # Item 9 exception: a single stale unit's own page (or a one-leaf
+        # passthrough rollup) already carries the "Not refreshed since"
+        # header note directly above the tiles (renderUnitStaleNote) --
+        # marking the tiles too would be redundant, not additive.
+        tiles_fn = self.html.split("function tiles(data, options = {}) {", 1)[1]
+        tiles_fn = tiles_fn.split("// The as-of date of an award dashboard", 1)[0]
+        self.assertIn("data.refreshStatus?.unit", tiles_fn)
+
 
 if __name__ == "__main__":
     unittest.main()
