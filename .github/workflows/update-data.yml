@@ -210,6 +210,10 @@ jobs:
           FLAG=""
           if [ "${{ needs.plan.outputs.full }}" = "true" ]; then FLAG="--full"; fi
           echo "mode flag: '$FLAG'"
+          if [ "${{ matrix.unit }}" = "nih/nci/nci" ]; then
+            echo "W17 ACCEPTANCE (test branch only): deliberate failure of nih/nci/nci, replaying the 2026-09-21 refusal"
+            exit 1
+          fi
           python scripts/pull_unit.py --unit "${{ matrix.unit }}" $FLAG
       - name: Commit this unit's data subtree and any exclusions-ledger returns
         # A pull that sees a ledgered "excluded" id back on the live source
