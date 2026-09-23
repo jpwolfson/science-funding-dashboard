@@ -60,11 +60,16 @@ def baseline_period_notes_problems(pin):
     """Validate the curated ``periodNotes`` list on one baseline FY pin.
 
     ``periodNotes`` (optional) is a list of ``{"period": int 2-12, "note":
-    non-empty str}`` -- the hand-curated explanation for an accepted period
-    whose cumulative File B drop the large-drop validator check would
-    otherwise flag (see docs/obligation-ledger.md "Snapshot acceptance and
-    not-reported periods"). It lives in the curated baseline file, never in
-    generated provenance.
+    non-empty str, "publicNote": optional non-empty str}`` -- the
+    hand-curated explanation for an accepted period whose cumulative File B
+    drop the large-drop validator check would otherwise flag (see
+    docs/obligation-ledger.md "Snapshot acceptance and not-reported
+    periods"). ``note`` is internal curator text (run ids, cents, etc.) and
+    is never shown to readers. ``publicNote``, when present, is a
+    reader-facing source-figure statement -- rendered on the account page,
+    with no cause attribution -- that ``scripts/rollup_obligations.py``
+    copies into that account's ``dashboard.json``. It lives in the curated
+    baseline file, never in generated provenance.
     """
     notes = pin.get("periodNotes")
     if notes is None:
@@ -82,6 +87,10 @@ def baseline_period_notes_problems(pin):
         note = entry.get("note")
         if not isinstance(note, str) or not note.strip():
             problems.append("periodNotes note must be a non-empty string")
+        if "publicNote" in entry:
+            public_note = entry.get("publicNote")
+            if not isinstance(public_note, str) or not public_note.strip():
+                problems.append("periodNotes publicNote must be a non-empty string when present")
     return problems
 
 

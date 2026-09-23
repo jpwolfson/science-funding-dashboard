@@ -1505,10 +1505,29 @@ function renderDataQualityNotes(notes) {
 }
 
 // W1's award-ledger methodology line ("counts as of the pull date; NIH
-// revises award notice dates."), rendered verbatim near the page header.
+// revises award notice dates and amounts."), rendered verbatim near the
+// page header.
 function renderMethodologyNote(text) {
   if (!text) return;
   $app.append(el("p", { class: "sub", id: "methodologyNote", text }));
+}
+
+// Curated, reader-facing source-figure statements for specific fiscal-
+// year periods (Phase 3.2d remediation W16, docs/obligation-ledger.md
+// "periodNotes"). Presence-driven exactly like interpretationNote: an
+// account dashboard with no `periodNotes` field renders nothing. These
+// describe what the source reported for that period -- never why -- so
+// they carry no cause attribution.
+function renderPeriodNotes(notes, container = $app) {
+  if (!notes || !notes.length) return;
+  const box = el("div", { class: "interpretation-note", id: "periodNotes" });
+  box.append(el("strong", { text: "Notes on source figures" }));
+  const list = el("ul");
+  notes.forEach(n => list.append(el("li", {
+    text: `FY${n.fy}, period ${n.period}: ${n.note}`,
+  })));
+  box.append(list);
+  container.append(box);
 }
 
 function renderObligationNotes(data) {
@@ -2008,6 +2027,10 @@ async function boot() {
       renders.push(obligationCumulativeChart(data));
     if (data.reportingPeriods?.length) renders.push(obligationPeriodsChart(data));
     if (data.fiscalYears?.length) renders.push(obligationFYChart(data));
+    // Directly below the fiscal-year period table / cumulative chart above
+    // (Phase 3.2d remediation W16): presence-driven on `periodNotes`, which
+    // only an account-level dashboard carries.
+    renderPeriodNotes(data.periodNotes);
     obligationFlowTables(data);
     const foot = el("p", { class: "stamp", text: "* partial fiscal year (source history or year in progress) · values are reported by submission period" });
     $app.append(foot);

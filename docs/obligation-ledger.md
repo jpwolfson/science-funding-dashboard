@@ -348,6 +348,22 @@ silently stay stale) on the next re-pull. A `periodNotes` entry that only
 says a CI re-pull is pending, until it lands, is still a legitimate note —
 it documents the account's status, not a final explanation.
 
+Each `periodNotes` entry may also carry an optional `publicNote`
+(non-empty string, `adapters.obligation_common.baseline_period_notes_problems`
+validates it). Unlike `note` — internal curator text (run ids, exact cents,
+which re-pull confirmed it) that is never shown to readers — `publicNote`
+is a reader-facing statement of what the source itself reported for that
+period, written with no cause attribution (no "this was a defect" / "this
+was a real deobligation" framing; owner decision 2026-09-21). When present,
+`scripts/rollup_obligations.py` copies it into that account's
+`dashboard.json` as `periodNotes: [{"fy", "period", "note": <publicNote
+text>}]`, sorted by fy then period, and omits the key entirely when no
+entry in that account's baseline carries one. This is account-level only —
+it does not propagate to Program Activity, agency, or root rollups. The
+site renders it, when present, as a "Notes on source figures" block
+directly below the fiscal-year period table / cumulative chart on that
+account's page (`site/index.html`'s `renderPeriodNotes`).
+
 **Baseline-pin advancement.** A partial fiscal year's baseline pin
 (`asOfPeriod`, `obligationsCents`) may only advance onto a period File B
 classifies `reported` — a `notReported` period never becomes the pin's
