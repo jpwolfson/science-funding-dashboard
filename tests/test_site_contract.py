@@ -476,6 +476,243 @@ class SiteContractTests(unittest.TestCase):
                      "Other dashboards and deployments continue independently"):
             self.assertIn(text, self.html)
 
+    def test_monthly_chart_marks_the_in_progress_month_distinct(self):
+        # Reader review (High): the still-accruing current month must never
+        # be drawn identically to a complete month -- it reads as a
+        # collapse in awards rather than a partial count. Item 11.
+        self.assertIn("const awardAsOfDate = data =>", self.html)
+        chart = self.html.split("function monthlyChart(data) {", 1)[1]
+        chart = chart.split("function fyAwardsChart(data, windowDone) {", 1)[0]
+        self.assertIn(
+            "Every month since October 2014. Months with zero awards are "
+            "shown as zero. The last point is the current month to date "
+            "— a partial count, drawn dashed with an open marker.",
+            chart,
+        )
+        self.assertIn('"stroke-dasharray"', chart)
+        self.assertIn(" to date`", chart)
+        self.assertIn('fill: css("--surface")', chart)
+        self.assertIn("(to date)", chart)
+
+    def test_obligation_cadence_caption_appears_on_both_step_charts(self):
+        # Display-improvements batch item 1: the reporting-cadence caveat is
+        # a shared constant rendered on both obligation step charts, never a
+        # copy-pasted string.
+        self.assertIn(
+            'const OBLIGATION_CADENCE_CAPTION = "obligations are reported '
+            'in monthly agency submission periods; steps reflect reporting '
+            'cadence, not action dates.";',
+            self.html,
+        )
+        cumulative = self.html.split("function obligationCumulativeChart(data) {", 1)[1]
+        cumulative = cumulative.split("function obligationPeriodsChart(data) {", 1)[0]
+        self.assertIn("OBLIGATION_CADENCE_CAPTION", cumulative)
+        periods = self.html.split("function obligationPeriodsChart(data) {", 1)[1]
+        periods = periods.split("function obligationFYChart(data) {", 1)[0]
+        self.assertIn("OBLIGATION_CADENCE_CAPTION", periods)
+
+    def test_obligation_periods_chart_is_a_step_chart(self):
+        # Display-improvements batch item 1: explicit step geometry (owner
+        # request) -- flat steps in equal-width slots joined by vertical
+        # risers, never a sloped point-to-point line.
+        periods = self.html.split("function obligationPeriodsChart(data) {", 1)[1]
+        periods = periods.split("function obligationFYChart(data) {", 1)[0]
+        self.assertIn('makeCard("Net obligations by reporting period",', periods)
+        self.assertIn(
+            "Each step is signed activity in one agency submission period; "
+            "the line is not cumulative. The first P02 step covers the "
+            "first reporting window; quarterly reporters appear only at "
+            "quarter end. A period not reported at pull is omitted from "
+            "the chart and shown in the table below.",
+            periods,
+        )
+        self.assertIn("V${", periods)
+        self.assertIn("H${", periods)
+        self.assertIn(", periodLabel(r), tipRows)", periods)
+
+    def test_obligation_periods_chart_notes_curated_periods_without_correction_language(self):
+        # Display-improvements batch item 5: inline callouts for curated
+        # source-figure notes (dhs/cisa-rd FY2023P04, commerce/nist-its
+        # FY2025P11 today), never described as a "correction".
+        periods = self.html.split("function obligationPeriodsChart(data) {", 1)[1]
+        periods = periods.split("function obligationFYChart(data) {", 1)[0]
+        self.assertIn("notedPeriods", periods)
+        self.assertIn('"see note"', periods)
+        self.assertIn('" (see note)"', periods)
+        self.assertIn('"stroke-dasharray": "3 3"', periods)
+        self.assertNotIn("correction", periods.lower())
+
+    def test_award_side_labels_use_count_noun_and_dollar_labels(self):
+        # Metric-identity audit item 2: award-count chart titles reuse the
+        # tiles' provider-aware count noun, and dollar-valued columns/legend
+        # entries say so.
+        self.assertIn(
+            'const awardCountNoun = data => data.provider === "nih" ? '
+            '"Award records" : data.provider === "nsf" ? "New awards" : '
+            '"Awards";',
+            self.html,
+        )
+        top_awards = self.html.split("function topAwards(data) {", 1)[1]
+        top_awards = top_awards.split("function signedDomain(values) {", 1)[0]
+        self.assertIn('"FY", "Award", "Institution", "Award $"', top_awards)
+        dollars = self.html.split("function dollarsChart(data) {", 1)[1]
+        dollars = dollars.split("function cumulativeChart(data, key, title, note, fmtVal, fmtEnd) {", 1)[0]
+        self.assertIn('{ label: "All other awards ($)"', dollars)
+        self.assertIn('{ label: "Top 3 awards ($)"', dollars)
+        self.assertIn("`${awardCountNoun(data)} per month`", self.html)
+        self.assertIn("`${awardCountNoun(data)} by fiscal year (Oct–Jul)`", self.html)
+        self.assertIn("`${awardCountNoun(data)} by mechanism (Oct–Jul)`", self.html)
+        self.assertIn(
+            '`Cumulative ${awardCountNoun(data).toLowerCase()} through the fiscal year`',
+            self.html,
+        )
+
+    def test_empty_file_c_sections_get_an_inline_placeholder(self):
+        # Display-improvements batch item 4 (reader review #5): a shown
+        # fiscal year with zero File C rows linked to public awards gets an
+        # inline placeholder instead of a header-only empty table or a
+        # silently absent card.
+        self.assertIn(
+            'const emptyFileCRowsNote = label =>\n'
+            '  el("p", { class: "note empty-section", '
+            'text: `No File C rows linked to public awards in ${label}.` });',
+            self.html,
+        )
+        flow_tables = self.html.split("function obligationFlowTables(data) {", 1)[1]
+        # Both cards now gate on `years.length`, not on having any rows, so
+        # a shown year with no rows still renders the card with a
+        # placeholder rather than disappearing or leaving a header-only
+        # empty table.
+        self.assertIn("if (years.length) {", flow_tables)
+        self.assertIn("if (!years.length) return;", flow_tables)
+        self.assertIn("emptyFileCRowsNote(yearRange)", flow_tables)
+        self.assertIn("emptyFileCRowsNote(`FY${years[0].fy}`)", flow_tables)
+        self.assertIn(
+            "card.append(primary.length ? recipientTable(primary) : "
+            "emptyFileCRowsNote(`FY${years[0].fy}`));",
+            flow_tables,
+        )
+        self.assertIn(
+            "card.append(primary.length ? flowTable(primary) : "
+            "emptyFileCRowsNote(`FY${years[0].fy}`));",
+            flow_tables,
+        )
+
+    def test_obligation_stamp_labels_the_all_years_total_horizon(self):
+        # Display-improvements batch item 7 (reader review #10): the
+        # all-years total sits directly above a current-FY tile with no
+        # horizon of its own -- label the fiscal-year span it sums over.
+        boot = self.html.split('if (kind === "obligations") {', 1)[1]
+        boot = boot.split('if (kind !== "awards")', 1)[0]
+        self.assertIn(
+            "const fyRange = (() => {\n"
+            "      const fys = (data.fiscalYears || []).map(f => f.fy);\n"
+            "      if (!fys.length) return \"\";\n"
+            "      const a = Math.min(...fys), b = Math.max(...fys);\n"
+            "      return a === b ? `FY${a}` : `FY${a}–FY${b} combined`;\n"
+            "    })();",
+            boot,
+        )
+        self.assertIn(
+            "`${fmtSignedMoney(totalNet)} net obligations across "
+            "${fmtN(data.distinctLinkedAwards || 0)} distinct linked awards"
+            "${fyRange ? `, ${fyRange}` : \"\"} · through "
+            "${submissionPeriodDisplay(asOf)} · last updated "
+            "${gen.toLocaleDateString(\"en-US\", { month: \"long\", "
+            "day: \"numeric\", year: \"numeric\" })}`",
+            boot,
+        )
+        # The pending-pull path overwrites the stamp afterward and must stay
+        # untouched by this change.
+        self.assertIn(
+            '"Initial obligation-ledger pull pending"',
+            boot,
+        )
+
+    def test_stale_footnote_is_a_shared_helper(self):
+        # Display-improvements batch item 9 (W17 reader review): the grouped
+        # "† <names>: <reason>" footnote paragraph is built once and reused
+        # by both landing tables and both tile groups, so the literal text
+        # (pinned by the older per-table tests above) can never drift
+        # between call sites.
+        self.assertIn("function staleFootnote(staleRows, { id } = {}) {", self.html)
+        for text in (
+            "const text = c.refreshStatus.reason;",
+            'el("strong", { text: `† ${names.join(", ")}: ` })',
+            'const p = el("p", { class: "note", id });',
+        ):
+            self.assertIn(text, self.html)
+        # Both tables call the shared helper rather than rebuilding it.
+        self.assertIn(
+            'card.append(staleFootnote(staleRows, { id: "staleFootnotes" }));',
+            self.html,
+        )
+
+    def test_landing_table_numeric_cells_carry_the_dagger_on_stale_rows(self):
+        # Item 9: a stale row's numeric cells, not just its name cell, must
+        # carry the " †" disclosure -- a reader scanning figures rather than
+        # names must not miss it. A "no data yet" row is unaffected.
+        children_card = self.html.split("function childrenCard(data) {", 1)[1]
+        children_card = children_card.split("function obligationChildrenCard(", 1)[0]
+        self.assertIn('const daggerSuffix = isStale ? " †" : "";', children_card)
+        self.assertIn("fmtN(c.octJulAwards) + daggerSuffix", children_card)
+        self.assertIn("pctTxt + daggerSuffix", children_card)
+        self.assertIn("fmtMoney(c.octJulDollars) + daggerSuffix", children_card)
+        self.assertIn("fmtN(c.totalAwards) + daggerSuffix", children_card)
+        # The "no data yet" branch is untouched.
+        self.assertIn('el("td", { class: "num", text: "no data yet" })', children_card)
+
+        obligation_card = self.html.split("function obligationChildrenCard(data, title = null, note = null) {", 1)[1]
+        obligation_card = obligation_card.split("function childrenCardFromIndex(", 1)[0]
+        self.assertIn('const daggerSuffix = isStale ? " †" : "";', obligation_card)
+        self.assertIn("fmtSignedMoney(value) + daggerSuffix", obligation_card)
+        self.assertIn("fmtCoverage(c.fileCToNetRatio) + daggerSuffix", obligation_card)
+        self.assertIn("fmtN(c.distinctLinkedAwards || 0) + daggerSuffix", obligation_card)
+        self.assertIn('el("td", { class: "num", text: "no data yet" })', obligation_card)
+
+    def test_tile_groups_mark_values_and_render_a_footnote_for_stale_children(self):
+        # Item 9: the page's topline tiles carry the same disclosure when at
+        # least one of the page's own children is stale, with the same
+        # grouped footnote directly below the tile row -- distinct ids so
+        # they never collide with the table's "staleFootnotes" or with each
+        # other.
+        self.assertIn("function appendTileGroup(row, { id = \"\", heading = \"\", note = \"\", footnote = null } = {}) {", self.html)
+        self.assertIn("if (footnote) $app.append(footnote);", self.html)
+        self.assertIn("if (footnote) section.append(footnote);", self.html)
+
+        tiles_fn = self.html.split("function tiles(data, options = {}) {", 1)[1]
+        tiles_fn = tiles_fn.split("// The as-of date of an award dashboard", 1)[0]
+        self.assertIn(
+            "const staleChildren = data.refreshStatus?.unit\n"
+            "    ? []\n"
+            '    : (data.children || []).filter(c => c.refreshStatus?.status === "stale");',
+            tiles_fn,
+        )
+        self.assertIn('text: s.val + tileDagger', tiles_fn)
+        self.assertIn(
+            'staleFootnote(staleChildren, { id: "tileStaleFootnotes" })', tiles_fn)
+
+        obligation_tiles_fn = self.html.split("function obligationTiles(data, options = {}) {", 1)[1]
+        obligation_tiles_fn = obligation_tiles_fn.split("const NOT_REPORTED_AT_PULL", 1)[0]
+        self.assertIn(
+            'const staleChildren = (data.children || []).filter(c => c.refreshStatus?.status === "stale");',
+            obligation_tiles_fn,
+        )
+        self.assertIn('text: value + tileDagger', obligation_tiles_fn)
+        self.assertIn(
+            'staleFootnote(staleChildren, { id: "obligationTileStaleFootnotes" })',
+            obligation_tiles_fn,
+        )
+
+    def test_award_tiles_skip_the_dagger_on_a_single_stale_units_own_page(self):
+        # Item 9 exception: a single stale unit's own page (or a one-leaf
+        # passthrough rollup) already carries the "Not refreshed since"
+        # header note directly above the tiles (renderUnitStaleNote) --
+        # marking the tiles too would be redundant, not additive.
+        tiles_fn = self.html.split("function tiles(data, options = {}) {", 1)[1]
+        tiles_fn = tiles_fn.split("// The as-of date of an award dashboard", 1)[0]
+        self.assertIn("data.refreshStatus?.unit", tiles_fn)
+
 
 if __name__ == "__main__":
     unittest.main()

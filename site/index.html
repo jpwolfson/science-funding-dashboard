@@ -145,7 +145,7 @@
   .attribution a { color: var(--s1); }
   a { color: var(--s1); }
   .axis-text { fill: var(--muted); font-size: 11.5px; }
-  .dlabel { fill: var(--ink-2); font-size: 12px; font-weight: 550; }
+  .dlabel { fill: var(--ink-2); font-size: 12px; font-weight: 550; paint-order: stroke; stroke: var(--surface); stroke-width: 3px; stroke-linejoin: round; }
 </style>
 </head>
 <body>
@@ -476,6 +476,29 @@ function navRow(tr, path) {
 
 const DRILL_NOTE = "Each row links to that unit's own dashboard.";
 
+// W17 item 9 (reader review): the grouped "† <names>: <reason>" footnote
+// paragraph shared by both landing tables (childrenCard,
+// obligationChildrenCard) and both tile groups (tiles, obligationTiles) --
+// factored once so the identical-reason grouping and literal text can never
+// drift between the four call sites. `id` is supplied by the caller so each
+// rendered instance keeps a unique element id on a page.
+function staleFootnote(staleRows, { id } = {}) {
+  const groups = new Map();
+  for (const c of staleRows) {
+    const text = c.refreshStatus.reason;
+    if (!groups.has(text)) groups.set(text, []);
+    groups.get(text).push(unitLabel(c));
+  }
+  const p = el("p", { class: "note", id });
+  let firstGroup = true;
+  for (const [text, names] of groups) {
+    if (!firstGroup) p.append(document.createTextNode(" "));
+    firstGroup = false;
+    p.append(el("strong", { text: `† ${names.join(", ")}: ` }), document.createTextNode(text));
+  }
+  return p;
+}
+
 function childrenCard(data) {
   const kids = data.children || [];
   if (!kids.length) return;
@@ -513,14 +536,18 @@ function childrenCard(data) {
         el("td", { class: "num", text: "—" }),
       );
     } else {
+      // W17 item 9 (reader review): a stale row's numeric cells carry the
+      // same dagger as its name cell -- a reader scanning figures, not
+      // names, must not miss the disclosure.
+      const daggerSuffix = isStale ? " †" : "";
       const hasBase = c.avgOctJulAwards != null && c.avgOctJulAwards !== 0;
       const pctTxt = hasBase ? fmtPct((c.octJulAwards - c.avgOctJulAwards) / c.avgOctJulAwards) : "—";
       const pctClass = hasBase ? (c.octJulAwards >= c.avgOctJulAwards ? "up" : "down") : "";
       tr.append(
-        el("td", { class: "num", text: fmtN(c.octJulAwards) }),
-        el("td", { class: `num ${pctClass}`.trim(), text: pctTxt }),
-        el("td", { class: "num", text: fmtMoney(c.octJulDollars) }),
-        el("td", { class: "num", text: fmtN(c.totalAwards) }),
+        el("td", { class: "num", text: fmtN(c.octJulAwards) + daggerSuffix }),
+        el("td", { class: `num ${pctClass}`.trim(), text: pctTxt + daggerSuffix }),
+        el("td", { class: "num", text: fmtMoney(c.octJulDollars) + daggerSuffix }),
+        el("td", { class: "num", text: fmtN(c.totalAwards) + daggerSuffix }),
       );
     }
     navRow(tr, c.path);
@@ -531,20 +558,7 @@ function childrenCard(data) {
     // Rows sharing the identical staleness text (e.g. the same
     // multi-unit-aggregate reason) group into one line, same pattern as
     // obligationChildrenCard's stale footnote.
-    const groups = new Map();
-    for (const c of staleRows) {
-      const text = c.refreshStatus.reason;
-      if (!groups.has(text)) groups.set(text, []);
-      groups.get(text).push(unitLabel(c));
-    }
-    const p = el("p", { class: "note", id: "staleFootnotes" });
-    let firstGroup = true;
-    for (const [text, names] of groups) {
-      if (!firstGroup) p.append(document.createTextNode(" "));
-      firstGroup = false;
-      p.append(el("strong", { text: `† ${names.join(", ")}: ` }), document.createTextNode(text));
-    }
-    card.append(p);
+    card.append(staleFootnote(staleRows, { id: "staleFootnotes" }));
   }
   $app.append(card);
 }
@@ -587,11 +601,14 @@ function obligationChildrenCard(data, title = null, note = null) {
       tr.append(el("td", { class: "num", text: "no data yet" }),
         el("td", { class: "num", text: "—" }), el("td", { class: "num", text: "—" }));
     } else {
+      // W17 item 9 (reader review): a stale row's numeric cells carry the
+      // same dagger as its name cell.
+      const daggerSuffix = isStale ? " †" : "";
       const value = c.currentFYNetObligations || 0;
       tr.append(el("td", { class: `num ${value < 0 ? "negative" : ""}`.trim(),
-        text: fmtSignedMoney(value) }),
-      el("td", { class: "num", text: fmtCoverage(c.fileCToNetRatio) }),
-      el("td", { class: "num", text: fmtN(c.distinctLinkedAwards || 0) }));
+        text: fmtSignedMoney(value) + daggerSuffix }),
+      el("td", { class: "num", text: fmtCoverage(c.fileCToNetRatio) + daggerSuffix }),
+      el("td", { class: "num", text: fmtN(c.distinctLinkedAwards || 0) + daggerSuffix }));
     }
     navRow(tr, path);
     t.append(tr);
@@ -618,28 +635,14 @@ function obligationChildrenCard(data, title = null, note = null) {
   if (staleRows.length) {
     // Rows sharing the identical staleness text (same staleSince date)
     // group into one line, same pattern as the interpretationNote footnote
-    // above.
-    const groups = new Map();
-    for (const c of staleRows) {
-      // The agency-level aggregate row's reason names how many of its
-      // accounts are stale (never "this account" -- it is not one); a
-      // single account row's own reason is specific to it. Either way this
-      // is the plain-language `reason` scripts/reconcile_obligation_
-      // artifacts.py / scripts/rollup_obligations.py wrote, not the
-      // header's fixed "Not refreshed since" wording, which only makes
-      // sense naming exactly one account.
-      const text = c.refreshStatus.reason;
-      if (!groups.has(text)) groups.set(text, []);
-      groups.get(text).push(unitLabel(c));
-    }
-    const p = el("p", { class: "note", id: "staleFootnotes" });
-    let firstGroup = true;
-    for (const [text, names] of groups) {
-      if (!firstGroup) p.append(document.createTextNode(" "));
-      firstGroup = false;
-      p.append(el("strong", { text: `† ${names.join(", ")}: ` }), document.createTextNode(text));
-    }
-    card.append(p);
+    // above. The agency-level aggregate row's reason names how many of its
+    // accounts are stale (never "this account" -- it is not one); a single
+    // account row's own reason is specific to it. Either way this is the
+    // plain-language `reason` scripts/reconcile_obligation_artifacts.py /
+    // scripts/rollup_obligations.py wrote, not the header's fixed "Not
+    // refreshed since" wording, which only makes sense naming exactly one
+    // account.
+    card.append(staleFootnote(staleRows, { id: "staleFootnotes" }));
   }
   $app.append(card);
 }
@@ -730,9 +733,15 @@ function renderCsvNote(level, path, data) {
 }
 
 // ---------- tiles ----------
-function appendTileGroup(row, { id = "", heading = "", note = "" } = {}) {
+// `footnote` (W17 item 9, reader review): an optional element -- the same
+// grouped stale-footnote paragraph the landing tables use -- appended
+// directly after the tile row, in whichever container the row itself lands
+// in (bare into $app, or inside the headed section), so it always sits
+// immediately below the tiles it explains.
+function appendTileGroup(row, { id = "", heading = "", note = "", footnote = null } = {}) {
   if (!heading) {
     $app.append(row);
+    if (footnote) $app.append(footnote);
     return;
   }
   const section = el("section", { class: "summary-group" });
@@ -741,8 +750,11 @@ function appendTileGroup(row, { id = "", heading = "", note = "" } = {}) {
   section.append(title);
   if (note) section.append(el("p", { class: "note", text: note }));
   section.append(row);
+  if (footnote) section.append(footnote);
   $app.append(section);
 }
+
+const awardCountNoun = data => data.provider === "nih" ? "Award records" : data.provider === "nsf" ? "New awards" : "Awards";
 
 function tiles(data, options = {}) {
   // Units with no current-FY awards (dormant offices) still get the tile
@@ -755,7 +767,7 @@ function tiles(data, options = {}) {
   const windowDone = gen >= new Date(data.currentFY, 7, 1); // Oct-Jul window complete once Aug arrives
   const suffix = windowDone ? "" : " to date";
   const mechanisms = mechanismLabels(data);
-  const countLabel = data.provider === "nih" ? "Award records" : data.provider === "nsf" ? "New awards" : "Awards";
+  const countLabel = awardCountNoun(data);
   const dollarLabel = data.provider === "nsf" ? "Intended $" : "Award $";
   const row = el("div", { class: "tiles" });
   const specs = [
@@ -764,11 +776,22 @@ function tiles(data, options = {}) {
     { label: `${mechanisms.std}, Oct–Jul${suffix}`, val: fmtN(cur.octJul.std), a: cur.octJul.std, key: "std" },
     { label: `${mechanisms.cont}, Oct–Jul${suffix}`, val: fmtN(cur.octJul.cont), a: cur.octJul.cont, key: "cont" },
   ];
+  // W17 item 9 (reader review): these tiles are this page's own aggregate,
+  // which already folds in any stale child's last-accepted snapshot -- mark
+  // every value the same way the landing table marks a stale row's numbers,
+  // with the same grouped footnote directly below the row. Skipped when
+  // this page's own header already carries the "Not refreshed since" note
+  // for a single stale unit (data.refreshStatus.unit): duplicating the
+  // disclosure there would be redundant, not additive.
+  const staleChildren = data.refreshStatus?.unit
+    ? []
+    : (data.children || []).filter(c => c.refreshStatus?.status === "stale");
+  const tileDagger = staleChildren.length ? " †" : "";
   for (const s of specs) {
     const b = avg(s.key);
     const hasBaseline = base.length > 0 && b !== 0;
     const tile = el("div", { class: "tile" });
-    tile.append(el("div", { class: "label", text: s.label }), el("div", { class: "value", text: s.val }));
+    tile.append(el("div", { class: "label", text: s.label }), el("div", { class: "value", text: s.val + tileDagger }));
     if (hasBaseline) {
       const pct = (s.a - b) / b;
       const d = el("div", { class: `delta ${pct >= 0 ? "up" : "down"}` });
@@ -779,14 +802,31 @@ function tiles(data, options = {}) {
     }
     row.append(tile);
   }
-  appendTileGroup(row, options);
+  appendTileGroup(row, { ...options,
+    footnote: staleChildren.length ? staleFootnote(staleChildren, { id: "tileStaleFootnotes" }) : null });
 }
+
+// The as-of date of an award dashboard's figures: a single stale unit's
+// last accepted snapshot (refreshStatus.staleSince), else the build date.
+const awardAsOfDate = data => (data.refreshStatus?.status === "stale"
+  && data.refreshStatus.unit && data.refreshStatus.staleSince) || data.generated || "";
 
 // ---------- chart 1: monthly line ----------
 function monthlyChart(data) {
-  const { card, plot, tip } = makeCard("Awards per month",
-    "Every month since October 2014. Months with zero awards are shown as zero.");
   const pts = data.monthly || [];
+  // Stage 2 item 11 (W17 reader review): the series ends on the still-accruing current month.
+  // Drawn identically to a complete month, a low current-month count reads
+  // as a collapse rather than a mid-month partial count. A month is "in
+  // progress" when it is on or after the dashboard's as-of month; such
+  // months are rendered dashed with an open marker, never as complete.
+  const asOfMonth = awardAsOfDate(data).slice(0, 7);
+  const firstInProgress = asOfMonth ? pts.findIndex(p => p.month >= asOfMonth) : -1;
+  const anyInProgress = firstInProgress !== -1;
+  const inProgress = i => anyInProgress && i >= firstInProgress;
+  const note = anyInProgress
+    ? "Every month since October 2014. Months with zero awards are shown as zero. The last point is the current month to date — a partial count, drawn dashed with an open marker."
+    : "Every month since October 2014. Months with zero awards are shown as zero.";
+  const { card, plot, tip } = makeCard(`${awardCountNoun(data)} per month`, note);
   function render() {
     plot.querySelector("svg")?.remove();
     const f = frame(plot, 300, 46, 14);
@@ -799,12 +839,29 @@ function monthlyChart(data) {
         if (p.month.endsWith("-01") && p.month.slice(0, 4) % 2 === 1)
           f.svg.append(el("text", { class: "axis-text", x: x(i), y: f.B + 18, "text-anchor": "middle", text: p.month.slice(0, 4) }));
       });
-      const line = pts.map((p, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(p.awards).toFixed(1)}`).join("");
-      f.svg.append(el("path", { d: `${line}L${x(pts.length - 1)},${f.B}L${x(0)},${f.B}Z`, fill: css("--s1"), opacity: .1 }));
-      f.svg.append(el("path", { d: line, fill: "none", stroke: css("--s1"), "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
       const last = pts.length - 1;
-      f.svg.append(el("circle", { cx: x(last), cy: y(pts[last].awards), r: 4.5, fill: css("--s1"), stroke: css("--surface"), "stroke-width": 2 }));
-      f.svg.append(el("text", { class: "dlabel", x: x(last) - 6, y: y(pts[last].awards) - 10, "text-anchor": "end", text: fmtN(pts[last].awards) }));
+      const lastComplete = anyInProgress ? firstInProgress - 1 : last;
+      if (lastComplete >= 0) {
+        const completeLine = pts.slice(0, lastComplete + 1)
+          .map((p, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(p.awards).toFixed(1)}`).join("");
+        f.svg.append(el("path", { d: `${completeLine}L${x(lastComplete)},${f.B}L${x(0)},${f.B}Z`, fill: css("--s1"), opacity: .1 }));
+        f.svg.append(el("path", { d: completeLine, fill: "none", stroke: css("--s1"), "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+      }
+      if (anyInProgress) {
+        const dashFrom = Math.max(lastComplete, 0);
+        const dashLine = pts.slice(dashFrom, last + 1)
+          .map((p, i) => `${i ? "L" : "M"}${x(dashFrom + i).toFixed(1)},${y(p.awards).toFixed(1)}`).join("");
+        f.svg.append(el("path", { d: dashLine, fill: "none", stroke: css("--s1"), "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round", "stroke-dasharray": "5 4" }));
+      }
+      if (anyInProgress) {
+        f.svg.append(el("circle", { cx: x(last), cy: y(pts[last].awards), r: 4.5, fill: css("--surface"), stroke: css("--s1"), "stroke-width": 2 }));
+      } else {
+        f.svg.append(el("circle", { cx: x(last), cy: y(pts[last].awards), r: 4.5, fill: css("--s1"), stroke: css("--surface"), "stroke-width": 2 }));
+      }
+      const lastLabel = anyInProgress
+        ? `${fmtN(pts[last].awards)} · ${monthName(pts[last].month)} to date`
+        : fmtN(pts[last].awards);
+      f.svg.append(el("text", { class: "dlabel", x: x(last) - 6, y: y(pts[last].awards) - 10, "text-anchor": "end", text: lastLabel }));
       const cross = el("line", { y1: f.T, y2: f.B, stroke: css("--axis"), "stroke-width": 1, visibility: "hidden" });
       const dot = el("circle", { r: 4.5, fill: css("--s1"), stroke: css("--surface"), "stroke-width": 2, visibility: "hidden" });
       f.svg.append(cross, dot);
@@ -816,7 +873,7 @@ function monthlyChart(data) {
         const p = pts[i];
         cross.setAttribute("x1", x(i)); cross.setAttribute("x2", x(i)); cross.setAttribute("visibility", "visible");
         dot.setAttribute("cx", x(i)); dot.setAttribute("cy", y(p.awards)); dot.setAttribute("visibility", "visible");
-        showTip(tip, plot, x(i) * scale(), y(p.awards) * scale(), monthName(p.month), [
+        showTip(tip, plot, x(i) * scale(), y(p.awards) * scale(), inProgress(i) ? `${monthName(p.month)} (to date)` : monthName(p.month), [
           { color: css("--s1"), val: fmtN(p.awards), lab: "awards" },
           { val: fmtMoney(p.dollars), lab: "award dollars" },
         ]);
@@ -826,13 +883,13 @@ function monthlyChart(data) {
   }
   render();
   addTable(card, ["Month", "Awards", "Award $"],
-    pts.map(p => [monthName(p.month), fmtN(p.awards), fmtMoney(p.dollars)]));
+    pts.map((p, i) => [inProgress(i) ? `${monthName(p.month)} (to date)` : monthName(p.month), fmtN(p.awards), fmtMoney(p.dollars)]));
   return render;
 }
 
 // ---------- chart 2: FY awards columns ----------
 function fyAwardsChart(data, windowDone) {
-  const { card, plot, tip } = makeCard("Awards by fiscal year (Oct–Jul)",
+  const { card, plot, tip } = makeCard(`${awardCountNoun(data)} by fiscal year (Oct–Jul)`,
     "October through July of each fiscal year, so the current year compares like-for-like. Hairline: FY15–24 average.");
   const rows = data.fiscalYears || [];
   const base = rows.filter(r => r.fy >= BASE_FROM && r.fy <= BASE_TO);
@@ -889,7 +946,7 @@ function fyAwardsChart(data, windowDone) {
 // ---------- chart 3: mechanism lines ----------
 function mechanismChart(data) {
   const labels = mechanismLabels(data);
-  const { card, plot, tip } = makeCard("Awards by mechanism (Oct–Jul)",
+  const { card, plot, tip } = makeCard(`${awardCountNoun(data)} by mechanism (Oct–Jul)`,
     `${labels.std}, ${labels.cont}, and ${labels.fell.toLowerCase()}, Oct–Jul of each fiscal year. Mechanism changes can move counts without reflecting the same change in funding — see notes.`);
   const rows = data.fiscalYears || [];
   const series = [
@@ -985,7 +1042,7 @@ function dollarsChart(data) {
     });
   }
   render();
-  legend(card, [{ label: "All other awards", color: css("--s1") }, { label: "Top 3 awards", color: css("--s2") }], "swatch");
+  legend(card, [{ label: "All other awards ($)", color: css("--s1") }, { label: "Top 3 awards ($)", color: css("--s2") }], "swatch");
   addTable(card, ["Fiscal year", "Total award $", "Top 3 awards", "All other", "Median award"],
     rows.map(r => [`FY${r.fy}${r.partial ? " (to date)" : ""}`, fmtM(r.dollars),
       fmtM(r.dollars - r.exTop3Dollars), fmtM(r.exTop3Dollars), fmtMoney(r.median)]));
@@ -1102,7 +1159,7 @@ function topAwards(data) {
   card.append(el("p", { class: "note", text: "The outliers behind the dollars chart. Award titles link to the source record." }));
   const t = el("table");
   const trh = el("tr");
-  ["FY", "Award", "Institution", ""].forEach((h, i) => trh.append(el("th", { class: i === 3 ? "num" : "", text: h })));
+  ["FY", "Award", "Institution", "Award $"].forEach((h, i) => trh.append(el("th", { class: i === 3 ? "num" : "", text: h })));
   t.append(trh);
   for (const r of recent) for (const a of (r.top3 || [])) {
     const tr = el("tr");
@@ -1167,17 +1224,27 @@ function obligationTiles(data, options = {}) {
     [ `File B − File C residual, FY${data.currentFY} to date`, fmtSignedMoney(cur.residualObligations || 0) ],
   ];
   const specs = options.compact ? primarySpecs : [...primarySpecs, ...reconciliationSpecs];
+  // W17 item 9 (reader review): same pattern as tiles() above -- these
+  // tiles are `data`'s own aggregate, which already folds in any stale
+  // child's last-accepted snapshot. Used both for an obligation node's own
+  // tile row (data.children are its own child accounts/agencies) and for
+  // the compact obligation tile group on the award root (data is the
+  // obligations root dashboard, whose children are agencies).
+  const staleChildren = (data.children || []).filter(c => c.refreshStatus?.status === "stale");
+  const tileDagger = staleChildren.length ? " †" : "";
   const row = el("div", { class: "tiles" });
   for (const [label, value] of specs) {
     const tile = el("div", { class: "tile" });
     tile.append(el("div", { class: "label", text: label }),
-      el("div", { class: "value", text: value }));
+      el("div", { class: "value", text: value + tileDagger }));
     row.append(tile);
   }
-  appendTileGroup(row, options);
+  appendTileGroup(row, { ...options,
+    footnote: staleChildren.length ? staleFootnote(staleChildren, { id: "obligationTileStaleFootnotes" }) : null });
 }
 
 const NOT_REPORTED_AT_PULL = "not reported at pull";
+const OBLIGATION_CADENCE_CAPTION = "obligations are reported in monthly agency submission periods; steps reflect reporting cadence, not action dates.";
 const svgTitle = text => {
   const node = document.createElementNS("http://www.w3.org/2000/svg", "title");
   node.textContent = text;
@@ -1187,6 +1254,7 @@ const svgTitle = text => {
 function obligationCumulativeChart(data) {
   const { card, plot, tip } = makeCard("Cumulative net obligations through the fiscal year",
     "Signed File B obligations reported through each submission period. File C supplies award-financial detail; the residual is the signed File B − File C difference. A hollow point marks a period whose File B snapshot was not reported at pull; the line holds the last reported value there.");
+  card.querySelector("p.note").after(el("p", { class: "note", text: OBLIGATION_CADENCE_CAPTION }));
   const series = (data.fyCumulative || []).slice().sort((a, b) => b.fy - a.fy)
     .map((s, i) => ({ ...s, v: ["--s1", "--s2", "--s3", "--s4", "--s5"][i] }));
   function render() {
@@ -1279,73 +1347,15 @@ function obligationCumulativeChart(data) {
 }
 
 function obligationPeriodsChart(data) {
-  const { card, plot, tip } = makeCard("Obligations by reporting period",
-    "Each point is signed activity in one agency submission period; the line is not cumulative. The first P02 point covers the first reporting window; quarterly reporters appear only at quarter end. A period not reported at pull is omitted from the chart and shown in the table below.");
+  const { card, plot, tip } = makeCard("Net obligations by reporting period",
+    "Each step is signed activity in one agency submission period; the line is not cumulative. The first P02 step covers the first reporting window; quarterly reporters appear only at quarter end. A period not reported at pull is omitted from the chart and shown in the table below.");
+  card.querySelector("p.note").after(el("p", { class: "note", text: OBLIGATION_CADENCE_CAPTION }));
   const allRows = (data.reportingPeriods || []).slice(-48);
   // The chart itself omits notReported periods entirely (owner decision 2):
   // there is no derived activity to plot for one, so it is neither a zero
   // nor a gap-worthy point, just absent. The table below still lists every
   // period, including notReported ones.
   const rows = allRows.filter(r => (r.status || "reported") !== "notReported");
-  function render() {
-    plot.querySelector("svg")?.remove();
-    const f = frame(plot, 310, 62, 14);
-    const domain = signedDomain(rows.map(r => Number(r.netObligations || 0)));
-    const y = signedYAxis(f.svg, f, domain, fmtSignedAxisMoney);
-    if (rows.length) {
-      const last = rows.length - 1;
-      const x = i => f.L + (rows.length > 1 ? i / last : 0.5) * (f.R - f.L);
-      const targetLabels = (plot.clientWidth || f.W) < 520 ? 5 : 10;
-      const labelStep = Math.max(1, Math.ceil(rows.length / targetLabels));
-      rows.forEach((r, i) => {
-        if (i === last || (i % labelStep === 0 && last - i >= labelStep))
-          f.svg.append(el("text", { class: "axis-text", x: x(i), y: f.B + 18,
-            "text-anchor": i === last ? "end" : "middle",
-            text: String(r.submissionPeriod || "").replace("FY", "") }));
-      });
-      const line = rows.map((r, i) =>
-        `${i ? "L" : "M"}${x(i).toFixed(1)},${y(r.netObligations || 0).toFixed(1)}`).join("");
-      f.svg.append(el("path", { d: line, fill: "none", stroke: css("--s1"),
-        "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
-      const end = rows[last], endY = y(end.netObligations || 0);
-      f.svg.append(el("circle", { cx: x(last), cy: endY, r: 4.5,
-        fill: (end.netObligations || 0) < 0 ? css("--s2") : css("--s1"),
-        stroke: css("--surface"), "stroke-width": 2 }));
-      f.svg.append(el("text", { class: "dlabel", x: x(last) - 7,
-        y: Math.max(f.T + 12, Math.min(f.B - 8, endY - 10)), "text-anchor": "end",
-        text: fmtSignedMoney(end.netObligations || 0) }));
-      const cross = el("line", { y1: f.T, y2: f.B, stroke: css("--axis"),
-        "stroke-width": 1, visibility: "hidden" });
-      const dot = el("circle", { r: 4.5, stroke: css("--surface"),
-        "stroke-width": 2, visibility: "hidden" });
-      f.svg.append(cross, dot);
-      const scale = () => plot.clientWidth / f.W;
-      f.svg.addEventListener("pointermove", e => {
-        const bounds = f.svg.getBoundingClientRect();
-        const vx = (e.clientX - bounds.left) / scale();
-        const i = rows.length > 1
-          ? Math.max(0, Math.min(last, Math.round((vx - f.L) / (f.R - f.L) * last))) : 0;
-        const r = rows[i], value = r.netObligations || 0, yy = y(value);
-        cross.setAttribute("x1", x(i)); cross.setAttribute("x2", x(i));
-        cross.setAttribute("visibility", "visible");
-        dot.setAttribute("cx", x(i)); dot.setAttribute("cy", yy);
-        dot.setAttribute("fill", value < 0 ? css("--s2") : css("--s1"));
-        dot.setAttribute("visibility", "visible");
-        showTip(tip, plot, x(i) * scale(), yy * scale(), r.submissionPeriod, [
-          { val: fmtSignedMoney(r.netObligations || 0), lab: "net obligations" },
-          { val: fmtSignedMoney(r.awardLinkedObligations || 0), lab: "File C portion" },
-          { val: fmtSignedMoney(r.residualObligations || 0), lab: "File B − File C residual" },
-          { val: fmtN(r.distinctLinkedAwards || 0), lab: "distinct linked awards" },
-        ]);
-      });
-      f.svg.addEventListener("pointerleave", () => {
-        tip.style.display = "none";
-        cross.setAttribute("visibility", "hidden");
-        dot.setAttribute("visibility", "hidden");
-      });
-    }
-  }
-  render();
   // The next reported row after one or more notReported periods notes the
   // span its activity covers, e.g. "P12 (covers P11-P12)" -- the delta was
   // measured against the last reported snapshot, not the immediately
@@ -1357,10 +1367,99 @@ function obligationPeriodsChart(data) {
       ? `${r.submissionPeriod} (covers ${short(r.coversPeriods[0])}-${short(r.coversPeriods.at(-1))})`
       : r.submissionPeriod;
   };
+  // Curated, reader-facing source-figure callouts (docs/obligation-ledger.md
+  // "periodNotes"): a charted row whose submission period is noted gets a
+  // dashed guide in the plot and a "(see note)" suffix in the table, instead
+  // of silently plotting a figure the source itself flagged against the
+  // fiscal-year-end total.
+  const notedPeriods = new Map((data.periodNotes || []).map(n => [`FY${n.fy}P${String(n.period).padStart(2, "0")}`, n]));
+  function render() {
+    plot.querySelector("svg")?.remove();
+    const f = frame(plot, 310, 62, 14);
+    const domain = signedDomain(rows.map(r => Number(r.netObligations || 0)));
+    const y = signedYAxis(f.svg, f, domain, fmtSignedAxisMoney);
+    if (rows.length) {
+      const last = rows.length - 1;
+      // Equal-width slots, one per reported submission: the step's width is
+      // never scaled by how many periods it covers (owner request -- the
+      // step shape says only what the source resolution supports).
+      const slot = (f.R - f.L) / rows.length;
+      const xc = i => f.L + slot * (i + 0.5);
+      const targetLabels = (plot.clientWidth || f.W) < 520 ? 5 : 10;
+      const labelStep = Math.max(1, Math.ceil(rows.length / targetLabels));
+      rows.forEach((r, i) => {
+        if (i === last || (i % labelStep === 0 && last - i >= labelStep))
+          f.svg.append(el("text", { class: "axis-text", x: xc(i), y: f.B + 18,
+            "text-anchor": i === last ? "end" : "middle",
+            text: String(r.submissionPeriod || "").replace("FY", "") }));
+      });
+      // Note guides draw before the step path so the line sits on top.
+      rows.forEach((r, i) => {
+        const note = notedPeriods.get(r.submissionPeriod);
+        if (!note) return;
+        f.svg.append(el("line", { x1: xc(i), x2: xc(i), y1: f.T, y2: f.B,
+          stroke: css("--axis"), "stroke-width": 1, "stroke-dasharray": "3 3" }));
+        const label = el("text", { class: "axis-text", x: xc(i), y: f.T + 10,
+          "text-anchor": "middle", text: "see note" });
+        label.append(svgTitle(note.note));
+        f.svg.append(label);
+      });
+      // Each period occupies its own equal-width slot [f.L + slot*i, f.L +
+      // slot*(i+1)]: a flat step at that period's value, joined to the next
+      // step by a vertical riser at the slot boundary. A sloped line between
+      // submissions would depict timing the source does not contain.
+      const line = rows.map((r, i) => {
+        const start = f.L + slot * i, end = f.L + slot * (i + 1), yy = y(r.netObligations || 0);
+        return i ? `V${yy.toFixed(1)}H${end.toFixed(1)}` : `M${start.toFixed(1)},${yy.toFixed(1)}H${end.toFixed(1)}`;
+      }).join("");
+      f.svg.append(el("path", { d: line, fill: "none", stroke: css("--s1"),
+        "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+      const end = rows[last], endY = y(end.netObligations || 0);
+      f.svg.append(el("circle", { cx: xc(last), cy: endY, r: 4.5,
+        fill: (end.netObligations || 0) < 0 ? css("--s2") : css("--s1"),
+        stroke: css("--surface"), "stroke-width": 2 }));
+      f.svg.append(el("text", { class: "dlabel", x: xc(last) - 7,
+        y: Math.max(f.T + 12, Math.min(f.B - 8, endY - 10)), "text-anchor": "end",
+        text: fmtSignedMoney(end.netObligations || 0) }));
+      const cross = el("line", { y1: f.T, y2: f.B, stroke: css("--axis"),
+        "stroke-width": 1, visibility: "hidden" });
+      const dot = el("circle", { r: 4.5, stroke: css("--surface"),
+        "stroke-width": 2, visibility: "hidden" });
+      f.svg.append(cross, dot);
+      const scale = () => plot.clientWidth / f.W;
+      f.svg.addEventListener("pointermove", e => {
+        const bounds = f.svg.getBoundingClientRect();
+        const vx = (e.clientX - bounds.left) / scale();
+        const i = Math.max(0, Math.min(last, Math.floor((vx - f.L) / slot)));
+        const r = rows[i], value = r.netObligations || 0, yy = y(value);
+        cross.setAttribute("x1", xc(i)); cross.setAttribute("x2", xc(i));
+        cross.setAttribute("visibility", "visible");
+        dot.setAttribute("cx", xc(i)); dot.setAttribute("cy", yy);
+        dot.setAttribute("fill", value < 0 ? css("--s2") : css("--s1"));
+        dot.setAttribute("visibility", "visible");
+        const tipRows = [
+          { val: fmtSignedMoney(r.netObligations || 0), lab: "net obligations" },
+          { val: fmtSignedMoney(r.awardLinkedObligations || 0), lab: "File C portion" },
+          { val: fmtSignedMoney(r.residualObligations || 0), lab: "File B − File C residual" },
+          { val: fmtN(r.distinctLinkedAwards || 0), lab: "distinct linked awards" },
+        ];
+        if (notedPeriods.has(r.submissionPeriod))
+          tipRows.push({ val: "see note", lab: "Notes on source figures below" });
+        showTip(tip, plot, xc(i) * scale(), yy * scale(), periodLabel(r), tipRows);
+      });
+      f.svg.addEventListener("pointerleave", () => {
+        tip.style.display = "none";
+        cross.setAttribute("visibility", "hidden");
+        dot.setAttribute("visibility", "hidden");
+      });
+    }
+  }
+  render();
   addTable(card, ["Reporting period", "Net obligations", "File C portion", "Residual", "Positive entries", "Negative entries", "Distinct linked awards"],
     allRows.map(r => r.status === "notReported"
       ? [periodLabel(r), NOT_REPORTED_AT_PULL, "—", "—", "—", "—", "—"]
-      : [periodLabel(r), fmtSignedMoney(r.netObligations || 0),
+      : [notedPeriods.has(r.submissionPeriod) ? periodLabel(r) + " (see note)" : periodLabel(r),
+        fmtSignedMoney(r.netObligations || 0),
         fmtSignedMoney(r.awardLinkedObligations || 0), fmtSignedMoney(r.residualObligations || 0),
         fmtSignedMoney(r.grossObligations || 0), fmtSignedMoney(r.deobligations || 0),
         fmtN(r.distinctLinkedAwards || 0)]));
@@ -1403,6 +1502,14 @@ function obligationFYChart(data) {
   return render;
 }
 
+// Item 4 (display-improvements batch): a shown fiscal year with zero File C
+// rows linked to public awards gets an inline placeholder instead of a
+// header-only empty table (current FY empty, other shown years have rows)
+// or a silently absent card (no shown year has rows) -- see
+// obligationFlowTables below.
+const emptyFileCRowsNote = label =>
+  el("p", { class: "note empty-section", text: `No File C rows linked to public awards in ${label}.` });
+
 function obligationFlowTables(data) {
   const years = (data.fiscalYears || []).slice(-3).reverse();
   const yearRange = years.length > 1
@@ -1426,18 +1533,29 @@ function obligationFlowTables(data) {
     });
     return t;
   };
-  if (recipients.length) {
+  if (years.length) {
     const card = el("div", { class: "card" });
-    card.append(el("h2", { text: "Top recipients of award-attributed obligations" }),
-      el("p", { class: "note", text: `The ten leading recipients for FY${years[0].fy} are shown first. Rankings use linked File C only and exclude the File B − File C residual.` }));
+    card.append(el("h2", { text: "Top recipients of award-attributed obligations" }));
     const primary = recipients.filter(row => row.primary);
     const overflow = recipients.filter(row => !row.primary);
-    card.append(recipientTable(primary));
-    if (overflow.length) {
-      const details = el("details", { class: "detail-table" });
-      details.append(el("summary", { text: `Show ${overflow.length} more recipient rows (${yearRange})` }),
-        recipientTable(overflow));
-      card.append(details);
+    if (!recipients.length) {
+      // No File C rows linked to public awards in any of the shown years:
+      // the existing "shown first" note would promise rows that don't
+      // exist, so it is replaced outright by the placeholder.
+      card.append(emptyFileCRowsNote(yearRange));
+    } else {
+      // With no current-FY rows, drop the "shown first" sentence, which
+      // would promise rows the placeholder below says do not exist.
+      card.append(el("p", { class: "note", text: primary.length
+        ? `The ten leading recipients for FY${years[0].fy} are shown first. Rankings use linked File C only and exclude the File B − File C residual.`
+        : "Rankings use linked File C only and exclude the File B − File C residual." }));
+      card.append(primary.length ? recipientTable(primary) : emptyFileCRowsNote(`FY${years[0].fy}`));
+      if (overflow.length) {
+        const details = el("details", { class: "detail-table" });
+        details.append(el("summary", { text: `Show ${overflow.length} more recipient rows (${yearRange})` }),
+          recipientTable(overflow));
+        card.append(details);
+      }
     }
     $app.append(card);
   }
@@ -1450,10 +1568,18 @@ function obligationFlowTables(data) {
       flows.push({ fy: fy.fy, flow, direction: "Negative entry",
         primary: yearIndex === 0 && rank < 5 }));
   });
-  if (!flows.length) return;
+  if (!years.length) return;
   const card = el("div", { class: "card" });
-  card.append(el("h2", { text: "Largest award-attributed gross flows" }),
-    el("p", { class: "note", text: `The five largest positive and negative linked File C entries for FY${years[0].fy} are shown first, before same-award entries are netted within a reporting period. A negative entry may be a de-obligation or another downward adjustment; sign alone does not establish cancellation.` }));
+  card.append(el("h2", { text: "Largest award-attributed gross flows" }));
+  const hasCurrentFlows = flows.some(row => row.primary);
+  if (flows.length) {
+    card.append(el("p", { class: "note", text: hasCurrentFlows
+      ? `The five largest positive and negative linked File C entries for FY${years[0].fy} are shown first, before same-award entries are netted within a reporting period. A negative entry may be a de-obligation or another downward adjustment; sign alone does not establish cancellation.`
+      : "A negative entry may be a de-obligation or another downward adjustment; sign alone does not establish cancellation." }));
+  } else {
+    // No File C rows linked to public awards in any of the shown years.
+    card.append(emptyFileCRowsNote(yearRange));
+  }
   const flowTable = entries => {
     const t = el("table"), h = el("tr");
     ["FY / period", "Award", "Recipient", "Direction", "Amount"].forEach((x, i) =>
@@ -1477,12 +1603,14 @@ function obligationFlowTables(data) {
     return t;
   };
   const primary = flows.filter(row => row.primary), overflow = flows.filter(row => !row.primary);
-  card.append(flowTable(primary));
-  if (overflow.length) {
-    const details = el("details", { class: "detail-table" });
-    details.append(el("summary", { text: `Show ${overflow.length} more flow rows (${yearRange})` }),
-      flowTable(overflow));
-    card.append(details);
+  if (flows.length) {
+    card.append(primary.length ? flowTable(primary) : emptyFileCRowsNote(`FY${years[0].fy}`));
+    if (overflow.length) {
+      const details = el("details", { class: "detail-table" });
+      details.append(el("summary", { text: `Show ${overflow.length} more flow rows (${yearRange})` }),
+        flowTable(overflow));
+      card.append(details);
+    }
   }
   $app.append(card);
 }
@@ -2038,8 +2166,17 @@ async function boot() {
     const gen = new Date(data.generated + "T12:00:00");
     const asOf = data.asOfPeriod || data.reportingPeriods?.at(-1)?.submissionPeriod || "latest available period";
     const totalNet = data.totalNetObligations ?? data.netObligations ?? 0;
+    // Item 7 (display-improvements batch): the stamp's all-years total sits
+    // directly above a current-FY tile with no horizon of its own -- label
+    // the fiscal-year span the total actually sums over.
+    const fyRange = (() => {
+      const fys = (data.fiscalYears || []).map(f => f.fy);
+      if (!fys.length) return "";
+      const a = Math.min(...fys), b = Math.max(...fys);
+      return a === b ? `FY${a}` : `FY${a}–FY${b} combined`;
+    })();
     document.getElementById("stamp").textContent =
-      `${fmtSignedMoney(totalNet)} net obligations across ${fmtN(data.distinctLinkedAwards || 0)} distinct linked awards · through ${submissionPeriodDisplay(asOf)} · last updated ${gen.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}`;
+      `${fmtSignedMoney(totalNet)} net obligations across ${fmtN(data.distinctLinkedAwards || 0)} distinct linked awards${fyRange ? `, ${fyRange}` : ""} · through ${submissionPeriodDisplay(asOf)} · last updated ${gen.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}`;
     if (node.level === "root") {
       // Phase 3.2d remediation decision 4 (fixed wording; count derived).
       $app.append(el("p", { class: "sub", id: "obligationsSubtitle",
@@ -2176,7 +2313,7 @@ async function boot() {
   });
   if (cumHasData) {
     renders.push(
-      cumulativeChart(data, "awards", "Cumulative awards through the fiscal year",
+      cumulativeChart(data, "awards", `Cumulative ${awardCountNoun(data).toLowerCase()} through the fiscal year`,
         "Running FY-to-date total, October through September, one line per year. Read the endpoint of the year in progress against the other lines at the same point in the year — no visual integration needed. Minor ticks are weeks.",
         fmtN, fmtN),
       cumulativeChart(data, "dollars", "Cumulative award dollars through the fiscal year",
