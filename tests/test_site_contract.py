@@ -140,6 +140,65 @@ class SiteContractTests(unittest.TestCase):
         ):
             self.assertIn(text, self.html)
 
+    def test_stale_unit_note_renders_exact_wording_on_award_pages(self):
+        # Phase 3.2d remediation W17 (award-pipeline atomicity, the
+        # award-ledger analogue of W12 above): the header note's wording is
+        # the same owner-approved verbatim text as the obligation account
+        # note, with "account" -> "unit" -- only the date varies. It gates
+        # on `refreshStatus.unit` (present on a stale leaf's own dashboard,
+        # and on a rollup node that aggregates exactly one leaf, e.g. an
+        # NIH passthrough directorate) rather than on node.level, since a
+        # multi-leaf rollup's own aggregate refreshStatus carries no `unit`.
+        for text in (
+            "function renderUnitStaleNote(refreshStatus, container = $app)",
+            'const staleUnitNoteText = staleSince =>',
+            "`Not refreshed since ${staleSince}: the most recent scheduled "
+            "pull for this unit did not complete; figures are the last "
+            "accepted snapshot.`",
+            'if (!refreshStatus || refreshStatus.status !== "stale" || '
+            '!refreshStatus.unit) return;',
+            "renderUnitStaleNote(data.refreshStatus);",
+            'id: "staleNote"',
+        ):
+            self.assertIn(text, self.html)
+        # Keep the obligation account note text byte-identical -- both
+        # sentences (account and unit) must still be present unchanged.
+        self.assertIn(
+            "`Not refreshed since ${staleSince}: the most recent scheduled "
+            "pull for this account did not complete; figures are the last "
+            "accepted snapshot.`",
+            self.html,
+        )
+
+    def test_stale_unit_page_stamp_names_the_snapshot_date(self):
+        # W17 reader review (2026-09-23): on a single stale unit's page the
+        # "last updated" stamp must name the last accepted snapshot's date
+        # (refreshStatus.staleSince), not the rollup rebuild date, or the
+        # stamp contradicts the "Not refreshed since" note beside it.
+        for text in (
+            'const unitStale = data.refreshStatus?.status === "stale" && '
+            'data.refreshStatus.unit && data.refreshStatus.staleSince;',
+            "const lastUpdated = unitStale ? "
+            'new Date(data.refreshStatus.staleSince + "T12:00:00") : gen;',
+            "last updated ${lastUpdated.toLocaleDateString(",
+        ):
+            self.assertIn(text, self.html)
+
+    def test_award_landing_table_carries_a_dagger_marker_for_stale_rows(self):
+        # Phase 3.2d remediation W17: the award childrenCard's dagger +
+        # footnote pattern, exactly parallel to obligationChildrenCard's
+        # (W12) -- a separate id-free row suffix (award rows have no
+        # interpretationNote asterisk to share with) grouped by identical
+        # `reason` text.
+        for text in (
+            'const isStale = c.refreshStatus?.status === "stale";',
+            'text: unitLabel(c) + (isStale ? " †" : "")',
+            'id: "staleFootnotes"',
+            'el("strong", { text: `† ${names.join(", ")}: ` })',
+            "const text = c.refreshStatus.reason;",
+        ):
+            self.assertIn(text, self.html)
+
     def test_award_root_coverage_line_and_obligation_subtitles_are_derived(self):
         # Phase 3.2d remediation decision 4 (fixed wording; counts derived
         # in the browser, never hardcoded).

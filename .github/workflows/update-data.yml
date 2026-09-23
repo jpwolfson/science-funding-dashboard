@@ -146,6 +146,40 @@ jobs:
             git pull --rebase -X theirs origin "$BRANCH" || { git rebase --abort; exit 1; }
           done
           exit 1
+      - name: Record a pull-ok marker for this unit
+        # Phase 3.2d remediation W17 (award-pipeline atomicity, the
+        # award-ledger analogue of W12): written only after the commit/push
+        # step above has succeeded (a "No data changes" run still reaches
+        # here -- it succeeded, it just had nothing new to commit). Any
+        # earlier failure in this job (pull refused, timeout, push failure,
+        # runner loss) never reaches this step, so no marker is uploaded and
+        # the rollup job's scripts/award_refresh_status.py publishes this
+        # unit as disclosed-stale instead of vetoing the whole rollup.
+        id: pull_ok
+        shell: python
+        run: |
+          import json
+          import os
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          unit = "${{ matrix.unit }}"
+          slug = unit.replace("/", "__")
+          out_dir = Path("_pull_ok")
+          out_dir.mkdir(parents=True, exist_ok=True)
+          (out_dir / f"{slug}.json").write_text(json.dumps({
+              "unit": unit,
+              "completedAt": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+          }))
+          with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
+              fh.write(f"slug={slug}\n")
+      - name: Upload pull-ok marker
+        uses: actions/upload-artifact@v4
+        with:
+          name: pull-ok-${{ steps.pull_ok.outputs.slug }}
+          path: _pull_ok
+          overwrite: true
+          retention-days: 7
 
   pull-nih:
     needs: plan
@@ -199,6 +233,35 @@ jobs:
             git pull --rebase -X theirs origin "$BRANCH" || { git rebase --abort; exit 1; }
           done
           exit 1
+      - name: Record a pull-ok marker for this unit
+        # Phase 3.2d remediation W17 (award-pipeline atomicity, the
+        # award-ledger analogue of W12): see pull-nsf's identical step for
+        # the full rationale.
+        id: pull_ok
+        shell: python
+        run: |
+          import json
+          import os
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          unit = "${{ matrix.unit }}"
+          slug = unit.replace("/", "__")
+          out_dir = Path("_pull_ok")
+          out_dir.mkdir(parents=True, exist_ok=True)
+          (out_dir / f"{slug}.json").write_text(json.dumps({
+              "unit": unit,
+              "completedAt": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+          }))
+          with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
+              fh.write(f"slug={slug}\n")
+      - name: Upload pull-ok marker
+        uses: actions/upload-artifact@v4
+        with:
+          name: pull-ok-${{ steps.pull_ok.outputs.slug }}
+          path: _pull_ok
+          overwrite: true
+          retention-days: 7
 
   rollup:
     # Publish what we have even if some pulls failed: failed units keep
@@ -217,9 +280,31 @@ jobs:
           python-version: "3.12"
       - name: Sync to branch tip
         run: git pull --ff-only origin "$BRANCH" || git reset --hard "origin/$BRANCH"
+      - name: Download this run's pull-ok markers
+        # Phase 3.2d remediation W17: a refused/timed-out/lost pull job
+        # uploads no pull-ok-* artifact for its unit (see pull-nsf/pull-nih's
+        # "Record a pull-ok marker" steps), so this run may legitimately
+        # produce zero markers -- continue-on-error keeps that from failing
+        # the job; scripts/award_refresh_status.py below is what actually
+        # decides whether the run is publishable.
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          pattern: pull-ok-*
+          path: _pull_ok
+          merge-multiple: true
+      - name: Build data/refresh_status.json from this run's pull-ok markers
+        env:
+          NSF_MATRIX: ${{ needs.plan.outputs.nsf_matrix }}
+          NIH_MATRIX: ${{ needs.plan.outputs.nih_matrix }}
+        run: python scripts/award_refresh_status.py --markers-dir _pull_ok
       - name: Build rollups and nav index
         run: python scripts/rollup.py
       - name: Validate NIH stores and reconcile live source totals
+        # Phase 3.2d remediation W17: a unit disclosed as stale in
+        # data/refresh_status.json (its pull job did not complete this run)
+        # warns instead of erroring on an out-of-tolerance live gap; every
+        # other check, and every non-stale unit, stays exactly as strict.
         if: needs.plan.outputs.nih_any == 'true'
         run: python scripts/validate_nih.py --live
       - name: Commit rollups
@@ -237,6 +322,18 @@ jobs:
             git pull --rebase -X theirs origin "$BRANCH" || { git rebase --abort; exit 1; }
           done
           exit 1
+      - name: Assemble site (dry run; deploy runs only on main)
+        # Phase 3.2d remediation W17 acceptance evidence: a claude/** branch
+        # run proves the deploy job's own build steps still succeed on the
+        # post-failure tree (a stale-stamped leaf/rollup), without actually
+        # deploying -- the deploy job itself stays main-only.
+        if: github.ref_name != 'main'
+        run: python scripts/assemble_pages_site.py --output _site
+      - name: Check GitHub Pages footprint (dry run)
+        if: github.ref_name != 'main'
+        run: >-
+          python scripts/check_pages_footprint.py
+          --site-root _site --json _pages-footprint.json
 
   verify-dms:
     needs: [plan, pull-nsf]

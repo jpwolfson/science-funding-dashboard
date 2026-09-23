@@ -15,8 +15,8 @@ sys.path.insert(0, str(REPO))
 
 from adapters.obligation_common import (
     baseline_file_b_cents, baseline_pin_problems, check_final_period_reported,
-    classify_file_b_periods, event_fingerprint, file_sha256, load_store,
-    partition_diff, period_info, write_store,
+    classify_file_b_periods, event_fingerprint, file_sha256, fy_cumulative_cents,
+    load_store, partition_diff, period_info, write_store,
 )
 from adapters.usaspending_obligations import (
     alias_map, archive_rows, combine_file_b_file_c, file_b_period_events,
@@ -316,6 +316,36 @@ def _download(repo, account, account_id, fy, period, kind, columns,
     )
 
 
+def _published_classification(account_path, fy, file_b_row_counts, events,
+                              row_classification):
+    """The dollar-rule-applied (published) File B classification (W19).
+
+    ``row_classification`` is this fiscal year's row-count-only result
+    (``classify_file_b_periods(file_b_row_counts)``) -- the one that
+    already built ``events``; see the comment at this function's call site
+    in ``pull()`` for why that stays unchanged. This computes the exact
+    same cumulative-cents input the rebuild/validator path
+    (``account_period_status``) derives from committed events
+    (``fy_cumulative_cents``) and reapplies ``classify_file_b_periods`` with
+    it, so the result is what a rebuild will actually report for this
+    fiscal year. Any period the row rule left ``reported`` that this
+    reclassifies ``notReported`` is printed, mirroring the
+    ``DOLLAR-TRANSIENT`` line ``scripts/rollup_obligations.py`` prints on
+    rebuild.
+    """
+    cumulative_cents = fy_cumulative_cents(events, file_b_row_counts)
+    published = classify_file_b_periods(file_b_row_counts, cumulative_cents)
+    for label in sorted(file_b_row_counts, key=lambda l: period_info(l)[1]):
+        if (row_classification[label] == "reported"
+                and published[label] == "notReported"):
+            print(
+                f"DOLLAR-TRANSIENT: {account_path} FY{fy} "
+                f"P{period_info(label)[1]:02d} reported -> notReported",
+                flush=True,
+            )
+    return published
+
+
 def _baseline_pin(repo, account, fy, last_period, file_b_total,
                   first_event_period=None, recovery=None):
     baseline = json.loads((repo / account["baseline"]).read_text())
@@ -603,12 +633,39 @@ def pull(account, years, current_period=12, repo=REPO, rollup=True,
         events = combine_file_b_file_c(
             file_b, file_c, account["federalAccount"], classification
         )
+        # Two File B classifications exist for this fiscal year (W19,
+        # Phase 3.2d remediation follow-up to W14/PR #80). `classification`
+        # (the row-count rule alone, computed above) built `file_b`/`events`
+        # and feeds `check_final_period_reported` above; it stays unchanged
+        # so a dollar-transient period is still stored with its own File B
+        # delta and File C residual, exactly like any other reported period
+        # -- the rebuild path (`account_period_status`) derives cumulative
+        # dollars straight from these stored events and depends on that
+        # (storing the dollar-reclassified status instead would silently
+        # erase the spike the rule needs to see, and validate_obligations.py
+        # would fail closed on rebuild -- the W10 error class).
+        # `published_classification` additionally applies the
+        # dollar-transient rule (rule 4) with the identical cumulative-cents
+        # formula the rebuild/validator path uses (`fy_cumulative_cents`,
+        # factored into adapters.obligation_common so the two derivations
+        # cannot drift); it is what a rebuild will actually report for this
+        # fiscal year, so pin advancement (`effective_last_period` below)
+        # and pull-time logging use it instead of `classification`.
+        # `check_final_period_reported` above intentionally still runs on
+        # `classification`: the dollar rule never reclassifies a fiscal
+        # year's own final period (see `apply_dollar_transient_rule`), so
+        # the two classifications always agree on whether it is
+        # notReported.
+        published_classification = _published_classification(
+            account["path"], fy, file_b_row_counts, events, classification
+        )
         # file_b already telescopes only across reported periods, so its
         # sum is the cumulative value as of the last *reported* period even
         # when the raw requested last_period came back notReported.
         file_b_total = sum(e["amountCents"] for e in file_b)
         reported_period_numbers = [
-            period_info(label)[1] for label, status in classification.items()
+            period_info(label)[1]
+            for label, status in published_classification.items()
             if status == "reported"
         ]
         # The baseline pin may only advance to a period whose File B

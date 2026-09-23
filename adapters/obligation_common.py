@@ -392,6 +392,30 @@ def file_b_row_counts_from_provenance(provenance):
     return counts
 
 
+def fy_cumulative_cents(fy_events, labels):
+    """Cumulative net obligation cents through each of ``labels``.
+
+    ``fy_events`` should already be scoped to one fiscal year (mixing
+    fiscal years would sum across year boundaries). For each period label,
+    sums ``amountCents`` over every event whose ``fiscalPeriod`` is at or
+    before that label's own period number -- exact regardless of any
+    period's own classification, since a ``notReported`` period's dollars
+    are always folded into whichever later reported period absorbs its
+    span, never dropped.
+
+    This is the single source of the cumulative-cents formula rule 4
+    (``apply_dollar_transient_rule``) needs. Both ``account_period_status``
+    (the rebuild/validator path) and ``scripts/pull_obligation_account.py``
+    (the pull path) call it, so the two derivations of rule 4's input
+    cannot drift apart (Phase 3.2d remediation W19).
+    """
+    return {
+        label: sum(event["amountCents"] for event in fy_events
+                  if event["fiscalPeriod"] <= period_info(label)[1])
+        for label in labels
+    }
+
+
 def account_period_status(store, events, partial_fys=(), dollar_transients=None):
     """Recompute an account's File B period classification from provenance.
 
@@ -413,14 +437,17 @@ def account_period_status(store, events, partial_fys=(), dollar_transients=None)
     The dollar-transient rule (rule 4) runs here too: for each fiscal
     year's row-rule result, the cumulative net obligation cents through
     every period already present in provenance is derived straight from
-    ``events`` (summing every event with ``fiscalPeriod`` at or before that
-    period's own number -- exact regardless of any period's own
-    classification, since a notReported period's dollars are always folded
-    into whichever later reported period absorbs its span) and handed to
-    ``apply_dollar_transient_rule``. Pass a list as ``dollar_transients`` to
-    have this function append the ``(fiscalYear, period_label)`` pairs it
-    reclassifies -- ``scripts/rollup_obligations.py`` uses this to print
-    what changed on each rebuild.
+    ``events`` via ``fy_cumulative_cents`` (exact regardless of any
+    period's own classification, since a notReported period's dollars are
+    always folded into whichever later reported period absorbs its span)
+    and handed to ``apply_dollar_transient_rule``.
+    ``scripts/pull_obligation_account.py`` calls the identical
+    ``fy_cumulative_cents`` helper so the pull-time and rebuild-time
+    derivations of rule 4's input cannot drift apart (W19). Pass a list as
+    ``dollar_transients`` to have this function append the
+    ``(fiscalYear, period_label)`` pairs it reclassifies --
+    ``scripts/rollup_obligations.py`` uses this to print what changed on
+    each rebuild.
     """
     partial_fys = set(partial_fys)
     merged = {}
@@ -433,11 +460,7 @@ def account_period_status(store, events, partial_fys=(), dollar_transients=None)
             continue
         row_status = classify_file_b_periods(row_counts)
         fy_events = [event for event in events if event["fiscalYear"] == fy]
-        cumulative_cents = {
-            label: sum(event["amountCents"] for event in fy_events
-                      if event["fiscalPeriod"] <= period_info(label)[1])
-            for label in row_counts
-        }
+        cumulative_cents = fy_cumulative_cents(fy_events, row_counts)
         status = apply_dollar_transient_rule(row_status, cumulative_cents)
         if dollar_transients is not None:
             dollar_transients.extend(
