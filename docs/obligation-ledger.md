@@ -232,7 +232,16 @@ residual is invented for it either way.
 "reported" | "notReported"`. A `notReported` row publishes no numeric
 activity at all (every metric field is `null`); the next `reported` row
 that absorbs one or more `notReported` periods carries `coversPeriods`, the
-ordered list of periods (itself last) its delta actually spans. Cumulative
+ordered list of periods (itself last) its delta actually spans. Its metrics
+are computed over every event in that span (File C and File B residual,
+including any a dollar-transient period still carries under its own label),
+so within each fiscal year every reported row equals `cumulative(this) −
+cumulative(last reported)`, keeps File C + residual = net, and — when the
+year's final row is reported — the reported rows sum to the FY total.
+`scripts/validate_obligations.py` checks all three cents-exact on every
+published dashboard (issue #88: covering rows once carried only their own
+period's events, e.g. `dod/navy-rdte` FY2024 P12 at −$25.05B instead of
++$4.15B). Cumulative
 (`fyCumulative`) points at a `notReported` period hold the last reported
 value and add `held: true`, except when it is also the fiscal year's final
 recorded point (nothing later to hold against yet) — that endpoint is
