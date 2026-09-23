@@ -251,7 +251,10 @@ live reconciliation for all 87 units. Recorded as follow-up **W17**
   issue step runs on failure as before. Contract-tested.
 - W16 (render curated `periodNotes`; owner decision 2026-09-21: render as
   source-figure statements without cause attribution) — branch
-  `claude/w16-render-period-notes`, PR #81. Adds `publicNote` to the
+  `claude/w16-render-period-notes`, PR #81, merged. **The two `publicNote`
+  texts are owner-approved verbatim (2026-09-23)** and are pinned by
+  `tests/test_site_contract.py`; any future edit to them is an owner
+  decision, not an agent one. Adds `publicNote` to the
   two baseline entries, copies it into the account `dashboard.json`, renders
   "Notes on source figures" below the period chart on those two account
   pages; contract-tested. Step 7 below is therefore closed.
@@ -336,7 +339,7 @@ end):
    owner with the three run IDs and the merged PR numbers.
 
 **What actually remains after 2026-09-23 (steps 1 and 7 are done; HIGH-2
-is closed above):** steps 2–6 and 8 — fill PR #79's `[SOAK: …]`
+is closed above):** W17 (approved, above) and steps 2–6 and 8 — fill PR #79's `[SOAK: …]`
 placeholder from the HIGH-2 row (run ids 35626367929, 35757359002,
 35621987484 failed → 35802597549 green, 35804388539), apply the three
 figure reconciliations, merge #79; the CLAUDE.md status bullet + Stage 2
@@ -344,8 +347,8 @@ release in one PR; wire `cumulative_cents` into the pull path; and read
 the Mon 2026-09-28 cron firings of all three workflows as confirmation
 (not a gate). Plus the owner's decision on W17 below, if given.
 
-**W17 — award-pipeline atomicity (owner scope decision; option memo sent
-2026-09-23).** Monday showed the award pipeline still has the failure
+**W17 — award-pipeline atomicity. Owner-approved 2026-09-23: build it
+(the W12 analogue for awards).** Monday showed the award pipeline still has the failure
 mode W12 removed from the obligation pipeline: one refused leaf blocks
 the rollup, the live reconciliation, and the deploy for all 87 units,
 and leaves `main` with refreshed leaves under a stale rollup (which is
@@ -354,8 +357,19 @@ rollup job runs when the matrix has failures, rebuilds from whatever
 leaves are committed, `validate_nih.py --live` treats a unit whose pull
 job failed this run as `stale` (warn, publish last-good with the W12-style
 "Not refreshed since <date>" note) instead of an error, and the deploy
-proceeds. Estimated one Sonnet worker, workflow + validator + site note +
-contract tests. Not started.
+proceeds. One Sonnet worker, workflow + validator + site note + contract tests;
+same regime as W12 (PR with fast + rendered JSON evidence, before/after
+screenshot of a stale unit page, serial merge, no in-session pulls; merge
+only when no `Update data` run is in flight, i.e. not Mondays
+09:00–17:00 UTC). Reuse W12's published-staleness contract and its exact
+site wording "Not refreshed since <YYYY-MM-DD>: the most recent scheduled
+pull for this unit did not complete; figures are the last accepted
+snapshot." (owner-approved for obligations; "account" → "unit" is the
+only change). Acceptance: a deliberately failed leaf in a dispatched test
+run on a `claude/**` branch leaves the other units refreshed, the rollup
+rebuilt, the unit marked stale on its page and in the NIH rollup, the
+live check warning (not erroring) for that unit, and the deploy green.
+Not started.
 
 Standing facts the new agent needs:
 - Environment has no egress to federal APIs or to `github.io`; all pulls
