@@ -7,7 +7,10 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from adapters.obligation_common import apply_dollar_transient_rule, classify_file_b_periods
+from adapters.obligation_common import (
+    account_period_status, apply_dollar_transient_rule, classify_file_b_periods,
+    fy_cumulative_cents, load_store, normalize_event, period_info,
+)
 from adapters.usaspending_obligations import (
     DOWNLOAD_STATUS_TIMEOUT_SECONDS,
     _bytes, _download_request_payload, _json, alias_map,
@@ -18,7 +21,7 @@ from adapters.usaspending_obligations import (
 from scripts.pull_obligation_account import (
     FILE_B_COLUMNS, _baseline_pin, _download,
     _load_resume_handoffs, _resume_handoff_matches_run, _resume_request,
-    _validate_account_total, _write_resume_handoff, run_identity_from_environ,
+    _validate_account_total, _write_resume_handoff, pull, run_identity_from_environ,
 )
 
 
@@ -966,6 +969,218 @@ class DollarTransientClassificationTests(unittest.TestCase):
                           "FY2024P12": "reported"}, row_only)
         with_dollar_rule = classify_file_b_periods(row_counts, cumulative_cents)
         self.assertEqual("notReported", with_dollar_rule["FY2024P11"])
+
+
+# Navy-FY2024-like cumulative File B snapshot, in dollars as the source CSV
+# would report it: full row counts every period, P10/P11/P12 the same real
+# dod/navy-rdte cents as DollarTransientClassificationTests above (P11 a
+# transient spike that P12 reverts from), P02-P09 a plain ramp so the rule
+# has real preceding/following reported periods to compare against.
+PULL_PATH_CUMULATIVE_DOLLARS = {
+    2: "1000000000.00", 3: "3000000000.00", 4: "6000000000.00",
+    5: "9000000000.00", 6: "12000000000.00", 7: "15000000000.00",
+    8: "18000000000.00", 9: "21000000000.00",
+    10: "25409148481.34", 11: "54608316654.22", 12: "29562853987.10",
+}
+PULL_PATH_ROW_COUNT = 200  # identical every period: the row rule alone
+                           # never flags anything here.
+
+
+def _pull_path_fake_download(cumulative_dollars, row_count):
+    """Stand-in for scripts.pull_obligation_account._download.
+
+    Returns the same (members, download-audit) shape ``_finish`` builds
+    from a real accepted download, so ``file_b_row_counts_from_provenance``
+    (used by ``account_period_status`` on the committed provenance) reads
+    back exactly the row counts the pull saw.
+    """
+    def fake(repo, account, account_id, fy, period, kind, columns,
+             raw_archive_dir=None, recovery=None, resume_handoffs=None,
+             run_identity=None):
+        if kind == "object_class_program_activity":
+            members = {"ob_pa.csv": [{
+                "federal_account_symbol": account["federalAccount"],
+                "program_activity_code": "0001",
+                "program_activity_name": "RDTE",
+                "obligations_incurred": cumulative_dollars[period],
+            }]}
+            download = {
+                "statusRowCount": row_count,
+                "acceptedRequestScope": {
+                    "download_types": ["object_class_program_activity"],
+                    "filters": {"fy": fy, "period": period},
+                },
+            }
+            return members, download
+        assert kind == "award_financial", kind
+        members = {"assistance.csv": [], "contract.csv": [], "unlinked.csv": []}
+        download = {
+            "statusRowCount": 0,
+            "acceptedRequestScope": {
+                "download_types": ["award_financial"],
+                "filters": {"fy": fy, "period": period},
+            },
+        }
+        return members, download
+    return fake
+
+
+class PullPathDollarTransientClassificationTests(unittest.TestCase):
+    """W19 (Phase 3.2d remediation follow-up to W14/PR #80):
+    scripts/pull_obligation_account.py's pull() must classify File B
+    periods for pin advancement and logging with the dollar-transient rule
+    applied (``published_classification``), using the identical
+    cumulative-cents formula (``fy_cumulative_cents``) the rebuild/
+    validator path (``account_period_status``) uses -- while event
+    construction stays on the row-rule-only classification so stored bytes
+    do not change. See the W19 comment in pull_obligation_account.py's
+    ``pull()`` for the full rationale."""
+
+    def _account(self, repo):
+        (repo / "reference").mkdir(parents=True, exist_ok=True)
+        baseline_path = repo / "reference" / "pull_path_test_baseline.json"
+        baseline_path.write_text(json.dumps({
+            "schemaVersion": 2, "federalAccount": "017-1319", "fiscalYears": {},
+        }))
+        return {
+            "path": "dod/navy-rdte-w19-test",
+            "name": "Test Navy RDTE",
+            "federalAccount": "017-1319",
+            "baseline": "reference/pull_path_test_baseline.json",
+            "availability": {"firstFiscalYear": 2024, "firstFiscalYearPeriod": 2,
+                             "regularFirstPeriod": 2},
+            "programActivities": [{"slug": "rdte", "code": "0001", "name": "RDTE"}],
+        }
+
+    def _pull(self, repo):
+        account = self._account(repo)
+        fake_download = _pull_path_fake_download(
+            PULL_PATH_CUMULATIVE_DOLLARS, PULL_PATH_ROW_COUNT
+        )
+        with patch("scripts.pull_obligation_account.resolve_account",
+                   return_value=("12345", {})), \
+             patch("scripts.pull_obligation_account._download",
+                   side_effect=fake_download):
+            pull(account, [2024], repo=repo, rollup=False)
+        return account
+
+    def test_pin_advancement_matches_rebuild_classification(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            account = self._pull(repo)
+            store = repo / "data" / "obligations" / account["path"] / "events"
+            events = load_store(store)
+            provenance = json.loads(
+                (store / "FY2024.provenance.json").read_text())
+            pin_period = provenance["baselinePin"]["asOfPeriod"]
+            rebuild_status = account_period_status(
+                store, events, partial_fys=set())
+            self.assertEqual("notReported", rebuild_status["FY2024P11"])
+            self.assertEqual("reported", rebuild_status["FY2024P10"])
+            self.assertEqual("reported", rebuild_status["FY2024P12"])
+            reported_periods = [
+                period_info(label)[1]
+                for label, status in rebuild_status.items()
+                if status == "reported"
+            ]
+            # (a) the classification used for pin advancement equals
+            # account_period_status computed on the resulting events.
+            self.assertEqual(max(reported_periods), pin_period)
+            # (c) effective_last_period is unchanged: the dollar rule never
+            # reclassifies a fiscal year's own final period, so P12 (the
+            # highest-numbered reported period either way) still pins it.
+            self.assertEqual(12, pin_period)
+
+    def test_stored_events_are_row_rule_only_no_storage_change(self):
+        # (b) stored events equal those the row-rule-only classification
+        # would produce -- P11 must NOT be folded away by the dollar rule
+        # at storage time, or account_period_status's cumulative-from-
+        # events derivation would never see the spike to reclassify.
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            account = self._pull(repo)
+            store = repo / "data" / "obligations" / account["path"] / "events"
+            stored_events = [e for e in load_store(store)
+                             if e["fiscalYear"] == 2024]
+
+            aliases = alias_map(account)
+            file_b_row_counts = {
+                f"FY2024P{p:02d}": PULL_PATH_ROW_COUNT for p in range(2, 13)
+            }
+            row_classification = classify_file_b_periods(file_b_row_counts)
+            self.assertTrue(
+                all(status == "reported"
+                    for status in row_classification.values()),
+                row_classification,
+            )
+            snapshots = {}
+            for period in range(2, 13):
+                label = f"FY2024P{period:02d}"
+                rows = [{
+                    "federal_account_symbol": account["federalAccount"],
+                    "program_activity_code": "0001",
+                    "program_activity_name": "RDTE",
+                    "obligations_incurred": PULL_PATH_CUMULATIVE_DOLLARS[period],
+                }]
+                snapshots[label] = parse_file_b_snapshot(
+                    rows, account["federalAccount"], aliases)
+            expected_file_b = file_b_period_events(
+                snapshots, account["federalAccount"], row_classification)
+            expected_events = [
+                normalize_event(e) for e in combine_file_b_file_c(
+                    expected_file_b, [], account["federalAccount"],
+                    row_classification,
+                )
+            ]
+            self.assertEqual(
+                sorted(e["id"] for e in expected_events),
+                sorted(e["id"] for e in stored_events),
+            )
+            expected_by_id = {e["id"]: e for e in expected_events}
+            for stored in stored_events:
+                self.assertEqual(
+                    expected_by_id[stored["id"]]["amountCents"],
+                    stored["amountCents"],
+                    stored["id"],
+                )
+            # P11's own delta is really stored, not skipped/folded away.
+            p11_amount = sum(e["amountCents"] for e in stored_events
+                             if e["submissionPeriod"] == "FY2024P11")
+            self.assertNotEqual(0, p11_amount)
+
+    def test_dollar_transient_reclassifications_are_logged(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            with patch("builtins.print") as fake_print:
+                self._pull(repo)
+            lines = [call.args[0] for call in fake_print.call_args_list
+                    if call.args]
+            transient_lines = [line for line in lines
+                               if line.startswith("DOLLAR-TRANSIENT:")]
+            self.assertEqual(
+                ["DOLLAR-TRANSIENT: dod/navy-rdte-w19-test FY2024 P11 "
+                 "reported -> notReported"],
+                transient_lines,
+            )
+
+    def test_events_derived_cumulative_reconstructs_the_navy_cents(self):
+        # The stored events -- built from the row-rule-only classification,
+        # per (b) above -- must still telescope back to the real Navy
+        # cumulative cents through fy_cumulative_cents, the same formula
+        # both the pull path and account_period_status call. This is what
+        # lets the rebuild path rediscover the P11 spike from committed
+        # events alone, with no network pull.
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            account = self._pull(repo)
+            store = repo / "data" / "obligations" / account["path"] / "events"
+            events = load_store(store)
+            fy_events = [e for e in events if e["fiscalYear"] == 2024]
+            labels = [f"FY2024P{p:02d}" for p in range(2, 13)]
+            cumulative = fy_cumulative_cents(fy_events, labels)
+            self.assertEqual(2_540_914_848_134, cumulative["FY2024P10"])
+            self.assertEqual(5_460_831_665_422, cumulative["FY2024P11"])
+            self.assertEqual(2_956_285_398_710, cumulative["FY2024P12"])
 
 
 if __name__ == "__main__":

@@ -11,6 +11,7 @@ from adapters.obligation_common import (
     classify_file_b_periods,
     covers_and_effective,
     file_b_row_counts_from_provenance,
+    fy_cumulative_cents,
     load_store,
     merge_period_status,
     normalize_award_url,
@@ -243,6 +244,65 @@ class ObligationStoreTests(unittest.TestCase):
             self.assertEqual("notReported", status["FY2020P12"])
             with self.assertRaisesRegex(ValueError, "FY2020P12 is notReported"):
                 check_final_period_reported(status, fy_complete=True)
+
+    def test_fy_cumulative_cents_telescopes_through_each_label(self):
+        # W19: this is the single formula account_period_status (rebuild/
+        # validator) and the pull path (scripts/pull_obligation_account.py)
+        # both call, so their two derivations of rule 4's input cannot
+        # drift apart.
+        events = [
+            event(event_id="p2", amount=1_000, period="FY2024P02"),
+            event(event_id="p3", amount=2_000, period="FY2024P03"),
+            event(event_id="p5a", amount=250, period="FY2024P05"),
+            event(event_id="p5b", amount=250, period="FY2024P05"),
+        ]
+        result = fy_cumulative_cents(
+            events, ["FY2024P02", "FY2024P03", "FY2024P05"]
+        )
+        self.assertEqual({
+            "FY2024P02": 1_000, "FY2024P03": 3_000, "FY2024P05": 3_500,
+        }, result)
+        # A label with no events at or before it sums to zero, not KeyError.
+        self.assertEqual(
+            {"FY2024P02": 0},
+            fy_cumulative_cents([], ["FY2024P02"]),
+        )
+
+    def test_account_period_status_dollar_transient_regression_pin(self):
+        # Regression pin for the W19 refactor (account_period_status now
+        # calls the extracted fy_cumulative_cents helper instead of an
+        # inline cumulative-sum comprehension): must still derive the
+        # identical rule-4 result it did before the refactor on the real
+        # dod/navy-rdte FY2024 P10/P11/P12 cents (same figures as
+        # DollarTransientClassificationTests in test_usaspending_obligations.py).
+        with tempfile.TemporaryDirectory() as tmp:
+            store = Path(tmp) / "events"
+            store.mkdir()
+            rows = [
+                event(event_id="p10", amount=2_540_914_848_134, period="FY2024P10"),
+                event(event_id="p11",
+                     amount=5_460_831_665_422 - 2_540_914_848_134,
+                     period="FY2024P11"),
+                event(event_id="p12",
+                     amount=2_956_285_398_710 - 5_460_831_665_422,
+                     period="FY2024P12"),
+            ]
+            write_store(store, rows)
+            write_partition_provenance(store, 2024, {
+                "collectionStatus": "accepted",
+                "downloads": [
+                    {"acceptedRequestScope": {
+                        "download_types": ["object_class_program_activity"],
+                        "filters": {"fy": 2024, "period": p}},
+                     "statusRowCount": 200}
+                    for p in (10, 11, 12)
+                ],
+            })
+            status = account_period_status(store, load_store(store), partial_fys=set())
+            self.assertEqual({
+                "FY2024P10": "reported", "FY2024P11": "notReported",
+                "FY2024P12": "reported",
+            }, status)
 
     def test_period_notes_schema_is_a_list_of_period_and_note(self):
         self.assertEqual([], baseline_period_notes_problems({"status": "complete"}))
