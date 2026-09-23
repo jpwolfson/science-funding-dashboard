@@ -1,6 +1,7 @@
 import unittest
 
 from adapters.obligation_common import aggregate, normalize_event
+from scripts.validate_obligations import reporting_period_problems
 
 
 def ev(i, amount, period, pa="0001", award="A1", source="file_c", recipient="Lab"):
@@ -161,6 +162,60 @@ class ObligationAggregationTests(unittest.TestCase):
         self.assertNotIn("held", points["FY2025P11"])
         self.assertEqual(out["fiscalYears"][0]["netObligationsCents"],
                          points["FY2025P11"]["netObligationsCents"])
+
+    def _covering_row_case(self):
+        # dod/navy-rdte FY2024 P11/P12 shape (issue #88): the transient
+        # period P11 is notReported but still carries its own File B
+        # residual (+) and File C (+) events; P12 carries a large reversal.
+        rows = [ev("p10", 10000, "FY2025P10"),
+                ev("p11c", 700, "FY2025P11", award="A2"),
+                ev("p11r", 29200, "FY2025P11", source="file_b_residual", award=""),
+                ev("p12c", -300, "FY2025P12", award="A3"),
+                ev("p12r", -25050, "FY2025P12", source="file_b_residual", award="")]
+        period_status = {"FY2025P10": "reported", "FY2025P11": "notReported",
+                         "FY2025P12": "reported"}
+        return aggregate(rows, current_fy=2025,
+                         covered_periods={"FY2025P10", "FY2025P11", "FY2025P12"},
+                         partial_fys=set(), period_status=period_status)
+
+    def test_covering_row_spans_every_covered_period(self):
+        out = self._covering_row_case()
+        by_period = {row["submissionPeriod"]: row for row in out["reportingPeriods"]}
+        points = {p["submissionPeriod"]: p for p in out["fyCumulative"][0]["points"]}
+        p12 = by_period["FY2025P12"]
+        self.assertEqual(points["FY2025P12"]["netObligationsCents"]
+                         - points["FY2025P10"]["netObligationsCents"],
+                         p12["netObligationsCents"])
+        self.assertEqual(700 - 300, p12["awardLinkedObligationsCents"])
+        self.assertEqual(29200 - 25050, p12["residualObligationsCents"])
+        # File C + residual = File B stays exact on the covering row.
+        self.assertEqual(p12["netObligationsCents"],
+                         p12["awardLinkedObligationsCents"]
+                         + p12["residualObligationsCents"])
+        self.assertEqual(700 + 29200, p12["grossObligationsCents"])
+        self.assertEqual(-300 - 25050, p12["deobligationsCents"])
+        self.assertEqual(2, p12["distinctLinkedAwards"])
+
+    def test_reported_rows_sum_to_fiscal_year_endpoint(self):
+        out = self._covering_row_case()
+        reported = [row["netObligationsCents"] for row in out["reportingPeriods"]
+                    if row["status"] == "reported"]
+        self.assertEqual(out["fiscalYears"][0]["netObligationsCents"], sum(reported))
+
+
+    def test_validator_flags_a_covering_row_that_drops_absorbed_periods(self):
+        out = self._covering_row_case()
+        self.assertEqual([], reporting_period_problems(out))
+        p12 = next(r for r in out["reportingPeriods"]
+                   if r["submissionPeriod"] == "FY2025P12")
+        # The pre-fix shape: the covering row carried only P12's own events.
+        p12.update(netObligationsCents=-25350, awardLinkedObligationsCents=-300,
+                   residualObligationsCents=-25050)
+        problems = reporting_period_problems(out)
+        self.assertTrue(any("FY2025P12: row -25350 != cumulative difference 4550"
+                            in p for p in problems), problems)
+        self.assertTrue(any(p.startswith("FY2025: reported rows sum to")
+                            for p in problems), problems)
 
 
 if __name__ == "__main__":

@@ -22,6 +22,62 @@ from scripts.obligation_retry_recovery import RecoveryError, RetryRecovery
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 
 
+def reporting_period_problems(page):
+    """Check a dashboard's per-period rows against its own cumulative.
+
+    Contract (docs/obligation-ledger.md, "Dashboard shape"): within a fiscal
+    year each reported row -- including a covering row that absorbs a run of
+    notReported periods -- equals cumulative(this) - cumulative(last
+    reported), so the reported rows telescope to the cumulative endpoint;
+    every reported row keeps File C + residual = net; and when the fiscal
+    year's final row is reported, the reported rows sum to the fiscal-year
+    total. All cents-exact. (A dangling notReported tail on an in-progress
+    year has no covering row yet, so only the difference check applies.)
+    Issue #88: covering rows once dropped the absorbed periods' events.
+    """
+    problems = []
+    cumulative = {
+        point["submissionPeriod"]: point.get("netObligationsCents")
+        for series in page.get("fyCumulative") or []
+        for point in series.get("points") or []
+    }
+    fy_totals = {row["fy"]: row.get("netObligationsCents")
+                 for row in page.get("fiscalYears") or []}
+    by_fy = defaultdict(list)
+    for row in page.get("reportingPeriods") or []:
+        by_fy[period_info(row["submissionPeriod"])[0]].append(row)
+    for fy, rows in sorted(by_fy.items()):
+        last, total = 0, 0
+        for row in rows:
+            if row.get("status", "reported") != "reported":
+                continue
+            label = row["submissionPeriod"]
+            net = row.get("netObligationsCents")
+            if not isinstance(net, int):
+                problems.append(f"{label}: reported row has no net obligation")
+                continue
+            if net != (row.get("awardLinkedObligationsCents") or 0) + (
+                    row.get("residualObligationsCents") or 0):
+                problems.append(f"{label}: File C + residual != net")
+            total += net
+            through = cumulative.get(label)
+            if through is not None:
+                if net != through - last:
+                    problems.append(
+                        f"{label}: row {net} != cumulative difference "
+                        f"{through - last} cents"
+                        + (f" (covers {'-'.join(row['coversPeriods'])})"
+                           if row.get("coversPeriods") else ""))
+                last = through
+            elif through is None and label in cumulative:
+                problems.append(f"{label}: reported row has a null cumulative point")
+        if (rows and rows[-1].get("status", "reported") == "reported"
+                and fy in fy_totals and total != fy_totals[fy]):
+            problems.append(f"FY{fy}: reported rows sum to {total}, "
+                            f"fiscal-year total is {fy_totals[fy]} cents")
+    return problems
+
+
 def _load_pending_retry_contract(repo, errors):
     """Load the exact recovery manifest without reading preserved evidence."""
     path = repo / "reference" / "obligation_retry_recovery.json"
@@ -305,6 +361,8 @@ def validate(repo=REPO, require_data=True, check_freshness=False,
         freshness = page.get("freshness") or {}
         if not isinstance(freshness.get("maxAgeDays"), int) or freshness.get("maxAgeDays", 0) <= 0:
             errors.append(f"{path.relative_to(repo)}: freshness SLA metadata is missing")
+        for problem in reporting_period_problems(page):
+            errors.append(f"{path.relative_to(repo)}: {problem}")
     index_path = data_root / "index.json"
     if index_path.exists() and json.loads(index_path.read_text()).get("schemaVersion") != 2:
         errors.append("data/obligations/index.json: schema must be v2")

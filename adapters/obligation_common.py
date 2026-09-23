@@ -825,10 +825,17 @@ def aggregate(events, current_fy=None, covered_periods=None, partial_fys=None,
             # potentially misleading File-C-only total that would otherwise
             # land in this bucket.
             row.update({key: None for key in _metrics(period_events)})
+        elif label in covers:
+            # A covering row reports the whole span it absorbs, so it equals
+            # cumulative(this) - cumulative(last reported). The absorbed
+            # periods' own events (File C, and -- for a W14 dollar-transient
+            # period -- File B residual too) are never dropped, only folded
+            # here (issue #88).
+            span_events = [e for member in covers[label] for e in by_period[member]]
+            row.update(_metrics(span_events))
+            row["coversPeriods"] = covers[label]
         else:
             row.update(_metrics(period_events))
-            if label in covers:
-                row["coversPeriods"] = covers[label]
         periods.append(row)
 
     fiscal_years, cumulative = [], []
