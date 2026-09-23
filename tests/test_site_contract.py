@@ -476,6 +476,24 @@ class SiteContractTests(unittest.TestCase):
                      "Other dashboards and deployments continue independently"):
             self.assertIn(text, self.html)
 
+    def test_monthly_chart_marks_the_in_progress_month_distinct(self):
+        # Reader review (High): the still-accruing current month must never
+        # be drawn identically to a complete month -- it reads as a
+        # collapse in awards rather than a partial count. Item 11.
+        self.assertIn("const awardAsOfDate = data =>", self.html)
+        chart = self.html.split("function monthlyChart(data) {", 1)[1]
+        chart = chart.split("function fyAwardsChart(data, windowDone) {", 1)[0]
+        self.assertIn(
+            "Every month since October 2014. Months with zero awards are "
+            "shown as zero. The last point is the current month to date "
+            "— a partial count, drawn dashed with an open marker.",
+            chart,
+        )
+        self.assertIn('"stroke-dasharray"', chart)
+        self.assertIn(" to date`", chart)
+        self.assertIn('fill: css("--surface")', chart)
+        self.assertIn("(to date)", chart)
+
 
 if __name__ == "__main__":
     unittest.main()
