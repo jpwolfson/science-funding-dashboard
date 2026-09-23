@@ -2344,7 +2344,7 @@ async function boot() {
       // that used to sit beside the award root's (now-removed) compact
       // obligation tiles.
       $app.append(el("p", { class: "sub", id: "obligationsSubtitle",
-        text: `Obligations from ${fmtN(data.accountCount ?? 0)} registered science-related federal accounts, including defense RDT&E. They are separate from, and not additive to, the award totals on the award dashboards. Negative entries can include routine corrections or reductions; sign alone does not establish a cancellation.` }));
+        text: `Obligations from ${fmtN(data.accountCount ?? 0)} registered science-related federal accounts, including defense RDT&E. They are separate from, and not additive to, the award totals on the award dashboards. Negative entries can include routine corrections or reductions; sign alone does not establish a cancellation. NIH accounts are not included here; NIH awards are on the award dashboards.` }));
     }
     // Phase 3.2d remediation decision 3: an agency-neutral registry field is
     // the only switch -- present on every DoD account/PA dashboard, absent

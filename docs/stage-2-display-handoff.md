@@ -193,3 +193,19 @@ code path is agency-conditional.
   `data/obligations/refresh_status.json` (`doe/sc` stale), then running
   `scripts/rollup.py` and `scripts/rollup_obligations.py` in a detached
   worktree (~12 min total). Never do this in the real checkout.
+
+## After release (2026-09-23)
+
+- NIH is absent from the obligations tab. It was scoped out in Phase 3.2d
+  (roadmap note; the owner's 2026-08-12 amendment kept NIH out while
+  bringing NSF in), and the page did not disclose it. The owner chose
+  option A: the disclosure ships now (PR #94); Phase 3.2e onboards the 27
+  NIH accounts in session `session_018jr4gow6x6QP3Fqj5BEoq7` and removes
+  the disclosure in its final PR.
+- The owner approved Stage 2b items 12 and 14–22 as recommended; item 13
+  is handled as above. Stage 2b runs as its own session after #94 merges.
+  It owns `site/index.html` and `tests/test_site_contract.py`, and Phase
+  3.2e owns the registry, data, adapters, and workflows. Shared points are
+  the 53/13 count pin (3.2e) and removing the NIH disclosure (3.2e, after
+  merging `main`).
+

@@ -214,9 +214,13 @@ class SiteContractTests(unittest.TestCase):
             "They are separate from, and not additive to, the award "
             "totals on the award dashboards. Negative entries can "
             "include routine corrections or reductions; sign alone does "
-            "not establish a cancellation.`",
+            "not establish a cancellation. NIH accounts are not included "
+            "here; NIH awards are on the award dashboards.`",
             self.html,
         )
+        # Temporary disclosure (owner decision 2026-09-23, option A): it is
+        # removed by Phase 3.2e's final PR once NIH obligation accounts are
+        # registered.
         self.assertIn("function countLeaves(node) {", self.html)
         # No number in the fixed wording is a hardcoded literal.
         self.assertNotIn("NIH and NSF, 87 units", self.html)
