@@ -168,10 +168,28 @@ code path is agency-conditional.
 | 2026-09-23 17:50 | Items 4 and 7 committed locally (`03da1f8`): "No File C rows linked to public awards in FY…" placeholders (the "shown first" sentence is dropped when it would promise missing rows), and "…, FY2017–FY2026 combined" on the all-years stamp. Item 9 worker started against the pipeline-generated stale scenario (scratch worktree: `nsf/mps/dms` stale since 09-21, `doe/sc` since 09-15). |
 | 2026-09-23 18:20 | Item 9 committed (`ff9a962`): † on a stale row's numeric cells, and † on tile values with the grouped reason footnote directly below the tiles (award tiles, obligation tiles, and the award root's compact obligation tiles). A single stale unit's own page is exempt (header note). No new wording; one shared footnote helper. Real-data page text is byte-identical. PR #89 now carries every agent-owned item (11, 1, 5, 2, 4, 7, 9). CI green on every completed run. Fast and rendered running on `ff9a962` in the scratch worktree. |
 
+| 2026-09-23 18:15 | Owner decisions received (see "Decisions"). #89 merged into `claude/stage2-display` (`8576654`). #88 data fix started as its own session. |
+| 2026-09-23 18:45 | Owner-approved items 3, 6, 8, 10 and the stamp committed (`34233ff`). A worker had reverted the coordinator's item 8 data edits, mistaking them for a test side effect; they were re-applied. The worker's double notes-block call was fixed to a single call. PR #90. Registry 380/380, fast 7/7, rendered 4/4. |
+| 2026-09-23 18:50 | Owner: "You are authorized to merge PRs that are fully greenlit." #90 merged (`0c02fb2`). |
+| 2026-09-23 19:55 | #88 fix PR #91 independently verified: 368/368 covering rows consistent; only `reportingPeriods` changed (102 files); validator and CI green. Merged to `main` (`48c10bf`), then `main` merged into the integration branch (`a826fc3`). |
+| 2026-09-23 20:05 | Release pack captured (74 pages); all four tiers green on `a826fc3`. Fresh-agent reader review: 7 High, none introduced by Stage 2. Dispositions are in `docs/reviews/evidence-2026-09-23/stage2/reader-review.md`; the Stage 2b queue is ledger items 12–22. |
+| 2026-09-23 20:45 | Reader-review fixes committed (`c63f6b3`): covering-step span labels with collision avoidance, $0 program activities folded into a group, three nits. CLAUDE.md status bullet and phase-history entry written. Next: PR #92 into integration, tiers on its head, then the final PR to `main`. |
+
 ## Where things stand (cold-start pointer)
 
-- Agent-owned items 1, 2, 4, 5, 7, 9, and 11 are done on `claude/sweet-heisenberg-7u5lhz` (PR #89 → `claude/stage2-display`).
-- Waiting on the owner memo (items 3, 6, 8, 10, and the rollup stamp qualifier). Implement per the decisions, as one more item PR.
-- Waiting on data fix #88 (separate session). Run the final reader review only after it merges to `main` and `main` is merged into `claude/stage2-display`.
-- Then: the full screens pack on the integration branch, then a fresh-agent reader review (screens pack plus the CLAUDE.md rule-5 questions only), then dispositions, then all tiers on the integration head, then the final PR to `main`, outside the Mon 10:37 → Tue ~23:00 UTC reconcile window. Then the CLAUDE.md status bullet and the phase-history entry.
-- Scratch state that a cold start will NOT have: the stale-scenario worktree. Rebuild it by editing `data/refresh_status.json` (`nsf/mps/dms` stale, `staleSince` 2026-09-21, reason from `adapters.award_refresh.unit_stale_reason`) and `data/obligations/refresh_status.json` (`doe/sc` stale), then running `scripts/rollup.py` and `scripts/rollup_obligations.py` in a detached worktree (~12 min total). Never do this in the real checkout.
+- Items 1–11 are all implemented and in `claude/stage2-display`, together
+  with the #88 data fix (via `main`). The release reader review is done and
+  every finding has a disposition.
+- Remaining: #92 (reader-review fixes and closeout docs) into the
+  integration branch, then tiers on the integration head, then the final
+  PR `claude/stage2-display` → `main`, merged by the coordinator under the
+  owner's authorization, outside Mon 10:37 → Tue ~23:00 UTC.
+- After release: the Stage 2b queue (ledger items 12–22) awaits the owner's
+  decisions. Stage 2b is a new phase; start it in a fresh session.
+- Scratch state that a cold start will NOT have: the stale-scenario
+  worktree. Rebuild it by editing `data/refresh_status.json` (`nsf/mps/dms`
+  stale, `staleSince` 2026-09-21, reason from
+  `adapters.award_refresh.unit_stale_reason`) and
+  `data/obligations/refresh_status.json` (`doe/sc` stale), then running
+  `scripts/rollup.py` and `scripts/rollup_obligations.py` in a detached
+  worktree (~12 min total). Never do this in the real checkout.

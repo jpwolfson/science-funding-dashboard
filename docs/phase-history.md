@@ -471,3 +471,66 @@ running record, wave plan, CI-run log, and per-finding evidence are in
   (a stale unit's "last updated" stamp now names its snapshot date) and
   appended ledger items 9–10 (staleness marker on figures; plain-language
   warnings banner).
+
+## Display-improvements batch: Stage 2 (2026-09-23)
+
+`docs/display-improvements-ledger.md` items 1–11 shipped as one
+reader-review-gated release. Scope was display only: no data, store, or
+measure-semantics change. The one exception is item 8's curated note,
+carried by the existing `periodNotes` mechanism. Work went through the
+integration branch `claude/stage2-display` (cut from `main` `c356a78`), with
+item PRs #89 (items 11, 1, 5, 2, 4, 7, 9), #90 (the owner-approved items),
+and #92 (reader-review fixes and closeout docs), then one PR to `main`. The
+running record is `docs/stage-2-display-handoff.md`; evidence is in
+`docs/reviews/evidence-2026-09-23/stage2/`.
+
+**Agent-owned items:**
+- 11: the in-progress month in the monthly award chart draws as a dashed
+  segment to an open marker, labelled "… to date". This was the W17 High.
+- 1: obligation period charts draw explicit steps and carry the owner's
+  cadence caption verbatim.
+- 5: curated source-figure notes get "see note" guides on the period chart.
+- 2: metric-identity audit (three label fixes, plus provider-aware
+  count-chart titles).
+- 4: inline "No File C rows linked to public awards in FY…" placeholders.
+- 7: "…, FY2017–FY2026 combined" on the all-years total.
+- 9: stale markers on figures and tiles.
+
+**Owner-decided items (2026-09-23):**
+- 3: the award tab carries no obligation figures; a link card replaces
+  them, and the note moved onto the obligations landing.
+- 6: the sentinel drops its age counter; financial-episode headings add
+  the account and FY.
+- 8: the DHS CISA R&D decline caption, carried as a baseline `publicNote`.
+- 10: de-duplication notices go to the neutral notes block; real warnings
+  get plain-language glosses with the raw text behind "Technical detail".
+- Stamp qualifier: "· includes N unit(s)/account(s) last refreshed <date> †".
+
+Afterwards the owner authorized the coordinator to merge fully green PRs
+without further sign-off.
+
+**Data defect #88** (found while checking item 5, fixed out of scope in
+its own session, PR #91): 88 covering `reportingPeriods` rows omitted their
+absorbed periods' activity. The worst was Navy RDT&E FY2024 P12, published
+as −$25.05B where the true value is +$4.15B. The "correction pairs" the
+2026-09-20 review saw on Navy and the Commerce accounts were this defect.
+`aggregate()` now folds the span, and `validate_obligations.py` checks
+covering rows and the FY sums cents-exact. 123 rows in 102 dashboards were
+corrected, and only `reportingPeriods` changed.
+
+**Release reader review** (fresh agent, screens pack only, 74 pages on the
+integration head `a826fc3`): 7 High, 11 Med, and 10 Low findings. None of
+the Highs was introduced by Stage 2; each is live on `main` `c356a78`. The
+agent-owned parts were fixed before release: covering-step span labels,
+$0 program activities folded into a group, and three nits. The
+owner-layer findings (obligation scope, NIH absence, sentinel figure
+wording, source award descriptions, the Army RDT&E FY2022 path, the
+Oct–Nov 2025 lapse, the root title, and sentinel source status) are the
+Stage 2b queue, ledger items 12–22. Tiers: registry 380/380, fast 7/7,
+rendered 4/4, screens 74/74 on `a826fc3`, re-run on the final head before
+the PR to `main`.
+
+**Tooling added:** `scripts/capture_cards.py` (per-card before/after
+captures, `--data` for staged scenarios). The screens tier now also
+captures award sub-pages discovered from `data/index.json`.
+
