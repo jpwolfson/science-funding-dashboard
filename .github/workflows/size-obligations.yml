@@ -25,6 +25,9 @@ jobs:
     outputs:
       matrix: ${{ steps.plan.outputs.matrix }}
       timeout: ${{ steps.plan.outputs.timeout }}
+      discover: ${{ steps.plan.outputs.discover }}
+      size_jobs: ${{ steps.plan.outputs.size_jobs }}
+      discover_jobs: ${{ steps.plan.outputs.discover_jobs }}
     steps:
       - uses: actions/checkout@v4
       - id: plan
@@ -35,9 +38,14 @@ jobs:
           with open(os.environ["GITHUB_OUTPUT"], "a") as output:
               output.write("matrix=" + json.dumps({"include": spec["jobs"]}) + "\n")
               output.write(f"timeout={spec.get('timeout_hours', 5.5)}\n")
+              output.write(f"size_jobs={len(spec['jobs'])}\n")
+              chunks = spec.get("discover") or []
+              output.write(f"discover_jobs={len(chunks)}\n")
+              output.write("discover=" + json.dumps({"include": chunks}) + "\n")
 
   size:
     needs: plan
+    if: ${{ needs.plan.outputs.size_jobs != '0' }}
     runs-on: ubuntu-latest
     timeout-minutes: 355
     strategy:
@@ -80,6 +88,59 @@ jobs:
           git add "$REPORT"
           git diff --cached --quiet && exit 0
           git commit -m "Sizing report $(basename "$REPORT") [skip ci]"
+          for attempt in 1 2 3 4 5; do
+            git push origin "HEAD:$BRANCH" && exit 0
+            git pull --rebase origin "$BRANCH"
+          done
+          exit 1
+
+  discover:
+    # Registry inputs for onboarding: File B Program Activity identities per
+    # account-year, File A account snapshots, first non-empty period, and the
+    # official PARK list (scripts/discover_obligation_program_activities.py).
+    needs: plan
+    if: ${{ needs.plan.outputs.discover_jobs != '0' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.plan.outputs.discover) }}
+    env:
+      PYTHONUNBUFFERED: "1"
+      BRANCH: ${{ github.ref_name }}
+      REPORT: ${{ matrix.report }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Discover Program Activities and account snapshots
+        run: |
+          python scripts/discover_obligation_program_activities.py \
+            --accounts "${{ matrix.accounts }}" \
+            --from-fy "${{ matrix.from_fy }}" \
+            --to-fy "${{ matrix.to_fy }}" \
+            --current-period "${{ matrix.current_period }}" \
+            --report "$REPORT"
+      - name: Retain the report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: discovery-${{ strategy.job-index }}
+          path: ${{ env.REPORT }}
+          if-no-files-found: warn
+      - name: Commit the report to the branch
+        if: always()
+        run: |
+          [ -f "$REPORT" ] || exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$REPORT"
+          git diff --cached --quiet && exit 0
+          git commit -m "Discovery report $(basename "$REPORT") [skip ci]"
           for attempt in 1 2 3 4 5; do
             git push origin "HEAD:$BRANCH" && exit 0
             git pull --rebase origin "$BRANCH"

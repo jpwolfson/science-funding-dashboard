@@ -1,8 +1,28 @@
 {
-  "reason": "Phase 3.2e sizing: NCI 075-0849, one full FY and the current-FY period",
+  "reason": "Phase 3.2e registry discovery: 27 NIH accounts, FY2017-FY2026 P10",
   "timeout_hours": 5.5,
-  "jobs": [
-    {"account": "075-0849", "fy": 2025, "period": 12},
-    {"account": "075-0849", "fy": 2026, "period": 10}
+  "jobs": [],
+  "discover": [
+    {
+      "accounts": "075-0807,075-0838,075-0846,075-0862,075-0875,075-0886,075-0889,075-0892,075-0896",
+      "from_fy": 2017,
+      "to_fy": 2026,
+      "current_period": 10,
+      "report": "reference/sizing/nih_registry_discovery_1.json"
+    },
+    {
+      "accounts": "075-0819,075-0843,075-0849,075-0872,075-0884,075-0887,075-0890,075-0893,075-0897",
+      "from_fy": 2017,
+      "to_fy": 2026,
+      "current_period": 10,
+      "report": "reference/sizing/nih_registry_discovery_2.json"
+    },
+    {
+      "accounts": "075-0837,075-0844,075-0851,075-0873,075-0885,075-0888,075-0891,075-0894,075-0898",
+      "from_fy": 2017,
+      "to_fy": 2026,
+      "current_period": 10,
+      "report": "reference/sizing/nih_registry_discovery_3.json"
+    }
   ]
 }

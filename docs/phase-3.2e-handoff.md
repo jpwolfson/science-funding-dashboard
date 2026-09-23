@@ -73,16 +73,62 @@ Tue ~23:00 UTC merge-quiet window. That holds only if NCI sizing confirms
 NIH File C generation stays inside the flat regime.
 
 Result: run
-[`35925926839`](https://github.com/jpwolfson/science-funding-dashboard/actions/runs/35925926839)
-pending.
+[`35925926839`](https://github.com/jpwolfson/science-funding-dashboard/actions/runs/35925926839),
+both jobs green (reports: `reference/sizing/075-0849-FY2025P12.json`,
+`reference/sizing/075-0849-FY2026P10.json`):
+
+| NCI `075-0849` | FY2025 P12 | FY2026 P10 |
+|---|---:|---:|
+| File C generate + retrieve | 328 s | 279 s |
+| File C ZIP | 72.2 MB | 57.4 MB |
+| File C rows (assistance / contracts / unlinked) | 130,115 (112,280 / 17,294 / 541) | 90,479 (80,848 / 9,039 / 592) |
+| Nonzero File C rows | 12,981 | 7,898 |
+| Distinct awards / normalized events (est.) | 10,189 / 12,904 | 6,667 / 7,840 |
+| Peak RSS (parse + shape) | 554 MB | 437 MB |
+| File B P-final rows / generate | 58 / 21 s | 48 / 16 s |
+| File B total (net obligations) | $7,423,092,042.18 | $4,644,703,508.38 |
+| File C total | $5,593,663,121.91 (75.4% of B) | $3,060,834,916.60 (65.9% of B) |
+
+Program Activities: FY2025 PAC/PAN `0001` "NATIONAL CANCER INSTITUTE
+(0849)", `0801` "NIH REIMBURSABLE - OTHER", `0000` UNKNOWN/OTHER (zero
+cents); FY2026 PARK-only, `5ZC7KSR3EPF` plus the `0000` zero row.
+
+**Decision (engineering, recorded):** NIH's largest account is ~¼ of the
+File C rows already handled routinely (NSF R&RA FY2023 520,830; USDA ARS
+FY2024 537,177) and generates in ~5 min, far inside the adapter's 2 h cap.
+The earlier cap hits (NIFA FY2019, IES FY2018) were source-queue stalls on
+small accounts, not volume; W11/W13 already cover them. Therefore:
+no File C partitioning, no special rotation, and the standard weekly plan
+(current FY + one rotating historical FY per account). Cost: +54 serialized
+jobs × ~16 min ≈ +14–15 h, taking the weekly run from ~30 h to ~44–45 h
+(Mon 10:37 → ~Wed 07:00 UTC). Actions minutes on this public repo are not
+billed, so this is not recurring spend. The operational effect is a longer
+merge-quiet window; that is recorded in `CLAUDE.md` at closeout. Reconcile
+(23.5 min today, 60 min timeout) grows with account count; its timeout is
+raised in the registration PR.
+
+## Step 2 — registry discovery (27 accounts)
+
+`scripts/discover_obligation_program_activities.py` (same workflow, three
+serial chunks) records per account × FY2017–FY2026: File B PA identities at
+the final period, the federal-account record (incl.
+`total_obligated_amount`, the pull's File A check), the first non-empty
+period of the first active FY, and the official per-account PARK list.
+Output: `reference/sizing/nih_registry_discovery_{1,2,3}.json`. These feed
+registry entries and baseline scaffolds (NSF precedent: replaceable
+`partial` rows without `obligationsCents`; the backfill pins them). The
+backfill remains the fail-closed alias-drift gate.
 
 ## Log
 
 | When (UTC) | Event | Result |
 |---|---|---|
-| 2026-09-23 | Sizing probe committed and triggered | pending |
+| 2026-09-23 22:01 | Sizing run 35925926839 | green; NCI small (above) |
+| 2026-09-23 22:01 | Test run 35925926684 on probe commit | green (fast tier 9.5 min on CI) |
+| 2026-09-23 | Discovery run (27 accounts) triggered | pending |
 
 ## Next action
 
-Wait for the sizing run; read `reference/sizing/075-0849-*.json`; decide the
-partition and rotation plan.
+Wait for the discovery run; read `reference/sizing/nih_registry_discovery_*.json`;
+brief a Sonnet worker to author 27 registry entries + scaffold baselines +
+`tests/test_obligations_nih.py` on `claude/phase-3.2e-nih-registry`.
