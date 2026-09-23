@@ -371,7 +371,7 @@ rebuilt, the unit marked stale on its page and in the NIH rollup, the
 live check warning (not erroring) for that unit, and the deploy green.
 Not started.
 
-**Post-soak closeout session (started 2026-09-23 ~08:00 UTC; branch
+**Post-soak closeout session (started 2026-09-23 ~05:00 UTC; branch
 `claude/phase-3.2d-closeout-6y3xnz` carries this file's in-flight record).**
 Order: (1) W17 on `claude/w17-award-atomicity`, acceptance run on a separate
 `claude/**` test branch that is never merged; (2) finalize PR #79 with
@@ -478,6 +478,7 @@ Standing facts the new agent needs:
 | 2026-09-23 00:33–00:59 UTC | `Update data` run 35802597549 dispatched on `main` (units=nih, incremental) | Award-ledger soak after W15: 28/28 ICs green, NCI published 148 amount revisions with the NOTICE + dataQualityNotes, rollup `--live` green (723,486), deploy green | **green** |
 | 2026-09-23 00:47–00:48 UTC | PR #82 merged (`e4920935`); PR #81 merged (`9b18fc4e`) | W18 verify-main conclusion reflects the tier; W16 periodNotes rendered ("Notes on source figures") with `publicNote`, rendered 4/4, before/after in `docs/reviews/evidence-2026-09-22/w16/` | merged |
 | 2026-09-23 00:59–01:07 UTC | `Verify main` run 35804388539 (workflow_run after the NIH refresh) | First run under W18: verify step **green**, issue step skipped; issue #69 closed on this evidence | green |
+| 2026-09-23 05:40–06:00 UTC | PR #84 merged (`1122a7d6`) | W19: pull-path pin advancement and logging use the dollar-inclusive classification (shared `fy_cumulative_cents` helper); event construction keeps the row rule, stored bytes unchanged. PR CI green (runs 35823393601, 35823468449); 401 unit tests; `validate_obligations.py` identical on branch and `main`. No obligation run in flight at merge | merged |
 
 ## Finding closure evidence (filled at closeout)
 
