@@ -61,7 +61,20 @@ It issues the production File B and File C requests (same columns as
 Comparison point: the largest File C downloads already handled are USDA ARS
 FY2024 (537,177 rows) and NSF R&RA FY2023 (520,830 rows).
 
-Result: pending.
+Capacity baseline (scheduled weekly run 35626367929, 53 accounts): 106
+serialized pull jobs, all green; median 16.7 min, p90 18.3, max 26.8 (DoD
+Air Force FY2020); pulls sum 29.2 h; reconcile 23.5 min; wall clock 29.7 h
+(Mon 16:33 → Tue 22:17 UTC). Job time is nearly flat across accounts of very
+different size, so it is dominated by the fixed per-request cost (up to 11
+File B period requests + 1 File C, each with a 20 s cooldown and a
+generator queue wait), not by File C volume. Naive extrapolation: 27 NIH
+accounts × 2 jobs × ~17 min ≈ +15 h/week, so ~45 h wall clock — past the
+Tue ~23:00 UTC merge-quiet window. That holds only if NCI sizing confirms
+NIH File C generation stays inside the flat regime.
+
+Result: run
+[`35925926839`](https://github.com/jpwolfson/science-funding-dashboard/actions/runs/35925926839)
+pending.
 
 ## Log
 
