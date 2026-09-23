@@ -373,3 +373,117 @@ class AutomaticResumeWorkflowContractTests(unittest.TestCase):
         )
         pull_command = self.pull_job[pull_step:next_step]
         self.assertNotIn("--resume-from", pull_command)
+
+
+class W17AwardPipelineAtomicityWorkflowTests(unittest.TestCase):
+    """Phase 3.2d remediation W17 (award-pipeline atomicity, the
+    award-ledger analogue of W12): a refused/timed-out/lost pull-nsf or
+    pull-nih matrix job must not veto the rollup, the live check, or the
+    deploy for every other unit; see update-data.yml and
+    docs/nih-data-validation.md, "Award refresh, freshness, and
+    publication (W17)"."""
+
+    def setUp(self):
+        self.workflow = (
+            REPO / ".github/workflows/update-data.yml"
+        ).read_text()
+
+    def _job(self, name, next_name):
+        start = self.workflow.index(f"\n  {name}:")
+        end = self.workflow.index(f"\n  {next_name}:")
+        return self.workflow[start:end]
+
+    def test_pull_nsf_uploads_a_pull_ok_marker_after_its_commit_step(self):
+        pull_nsf = self._job("pull-nsf", "pull-nih")
+        commit_step = pull_nsf.index("name: Commit this unit's data subtree")
+        marker_step = pull_nsf.index("name: Record a pull-ok marker for this unit")
+        upload_step = pull_nsf.index("name: Upload pull-ok marker")
+        self.assertLess(commit_step, marker_step)
+        self.assertLess(marker_step, upload_step)
+        upload_block = pull_nsf[upload_step:]
+        self.assertIn("uses: actions/upload-artifact@v4", upload_block)
+        self.assertIn("name: pull-ok-${{ steps.pull_ok.outputs.slug }}", upload_block)
+        self.assertIn("path: _pull_ok", upload_block)
+        self.assertIn("overwrite: true", upload_block)
+        self.assertIn("retention-days: 7", upload_block)
+
+    def test_pull_nih_uploads_a_pull_ok_marker_after_its_commit_step(self):
+        pull_nih = self._job("pull-nih", "rollup")
+        commit_step = pull_nih.index(
+            "name: Commit this unit's data subtree and any exclusions-ledger returns"
+        )
+        marker_step = pull_nih.index("name: Record a pull-ok marker for this unit")
+        upload_step = pull_nih.index("name: Upload pull-ok marker")
+        self.assertLess(commit_step, marker_step)
+        self.assertLess(marker_step, upload_step)
+        upload_block = pull_nih[upload_step:]
+        self.assertIn("uses: actions/upload-artifact@v4", upload_block)
+        self.assertIn("name: pull-ok-${{ steps.pull_ok.outputs.slug }}", upload_block)
+
+    def test_pull_ok_marker_carries_unit_and_completedat(self):
+        for job_name, next_name in (("pull-nsf", "pull-nih"), ("pull-nih", "rollup")):
+            with self.subTest(job=job_name):
+                job = self._job(job_name, next_name)
+                marker_step = job.index("name: Record a pull-ok marker for this unit")
+                upload_step = job.index("name: Upload pull-ok marker")
+                marker_block = job[marker_step:upload_step]
+                self.assertIn('"unit": unit', marker_block)
+                self.assertIn('"completedAt":', marker_block)
+                self.assertIn('slug = unit.replace("/", "__")', marker_block)
+
+    def test_rollup_downloads_markers_before_building_refresh_status_before_rollup(self):
+        rollup_job = self._job("rollup", "verify-dms")
+        download_step = rollup_job.index("name: Download this run's pull-ok markers")
+        status_step = rollup_job.index(
+            "name: Build data/refresh_status.json from this run's pull-ok markers"
+        )
+        rollup_step = rollup_job.index("name: Build rollups and nav index")
+        live_step = rollup_job.index(
+            "name: Validate NIH stores and reconcile live source totals"
+        )
+        self.assertLess(download_step, status_step)
+        self.assertLess(status_step, rollup_step)
+        self.assertLess(rollup_step, live_step)
+
+        download_block = rollup_job[download_step:status_step]
+        self.assertIn("continue-on-error: true", download_block)
+        self.assertIn("uses: actions/download-artifact@v4", download_block)
+        self.assertIn("pattern: pull-ok-*", download_block)
+        self.assertIn("path: _pull_ok", download_block)
+        self.assertIn("merge-multiple: true", download_block)
+
+        status_block = rollup_job[status_step:rollup_step]
+        self.assertIn("NSF_MATRIX: ${{ needs.plan.outputs.nsf_matrix }}", status_block)
+        self.assertIn("NIH_MATRIX: ${{ needs.plan.outputs.nih_matrix }}", status_block)
+        self.assertIn(
+            "python scripts/award_refresh_status.py --markers-dir _pull_ok",
+            status_block,
+        )
+
+    def test_rollup_still_runs_validate_nih_live_after_rollup_py(self):
+        rollup_job = self._job("rollup", "verify-dms")
+        self.assertIn("python scripts/validate_nih.py --live", rollup_job)
+
+    def test_rollup_has_a_non_main_dry_run_assemble_and_footprint_step(self):
+        rollup_job = self._job("rollup", "verify-dms")
+        assemble_step = rollup_job.index(
+            "name: Assemble site (dry run; deploy runs only on main)"
+        )
+        footprint_step = rollup_job.index("name: Check GitHub Pages footprint (dry run)")
+        assemble_block = rollup_job[assemble_step:footprint_step]
+        self.assertIn("if: github.ref_name != 'main'", assemble_block)
+        self.assertIn(
+            "python scripts/assemble_pages_site.py --output _site", assemble_block)
+        footprint_block = rollup_job[footprint_step:]
+        self.assertIn("if: github.ref_name != 'main'", footprint_block)
+        self.assertIn("python scripts/check_pages_footprint.py", footprint_block)
+
+    def test_deploy_condition_is_unchanged(self):
+        deploy_start = self.workflow.index("\n  deploy:")
+        deploy_job = self.workflow[deploy_start:]
+        self.assertIn("needs: rollup", deploy_job)
+        self.assertIn(
+            "if: ${{ !cancelled() && needs.rollup.result == 'success' && "
+            "github.ref_name == 'main' }}",
+            deploy_job,
+        )
