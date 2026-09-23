@@ -112,3 +112,56 @@ the reader review meaningful).
     rollup pages the "last updated" rebuild date sits beside a child's
     "not refreshed since" date with no reconciling qualifier (fold into
     item 9; any new stamp wording is owner sign-off).
+
+## Stage 2b queue (2026-09-23, Stage 2 release reader review)
+
+These come from the fresh-agent reader review of the Stage 2 release pack
+(`docs/reviews/evidence-2026-09-23/stage2/reader-review.md`, with the
+coordinator's dispositions). Every item is pre-existing on `main`
+(`c356a78`), and none blocks the Stage 2 release. Each needs an owner
+decision under decision layers a/b/c, so each carries the coordinator's
+recommendation (★).
+
+12. **Obligation scope disclosure** (review H1). Registered accounts are
+    included whole, so some totals also cover non-research lines: DoD
+    Defense Health Program O&M, NNSA Weapons Activities, and ASPR
+    procurement. ★ Append to the landing subtitle: "Accounts are included
+    whole, so some totals also cover operations, procurement, or weapons
+    activities alongside research." Alternatives: retitle the page; a
+    research-only subtotal (a measure change, large); no change.
+13. **NIH absence on the obligations tab** (H2). ★ Add "NIH accounts are
+    not included here; NIH awards are on the award dashboards." to the
+    landing subtitle and to the HHS row's footnote.
+14. **Wording for $0 program activities** (H3). Stage 2 ships a neutral
+    collapsed group. ★ No explanatory claim. The alternative is "(program
+    activity codes can be retired or renamed between years)".
+15. **Army RDT&E FY2022 path** (H4). The FY totals match the GTAS pins. The
+    path is P06 $31.0B → P07 $74.0B → P09 $81.7B → P10 $49.9B, and no
+    acceptance rule fires. ★ A CI re-pull of FY2022 P06–P10 (data session),
+    then a source-figure note with owner-approved text if the re-pull
+    confirms it.
+16. **Source-only sentinel cards** (H5). ★ Where an episode has no linked
+    ledger activity, replace "$0 gross negative · $0 net" with "no linked
+    ledger activity". For source-listed IDs, replace "award IDs with
+    negative entries" with "award IDs listed by the source".
+17. **Sentinel "net" vs ledger "net"** (H6). ★ Label the sentinel figures
+    "File C gross negative" and "File C net activity (observation
+    window)".
+18. **Source award descriptions shown as titles** (H7; e.g. the USDA NIFA
+    "AWARDS ISSUED PRIOR TO JANUARY 20, 2025…" text). ★ Render every
+    source award description in the flow tables as attributed source text,
+    quoted and marked "source description", per the render-by-provenance
+    rule.
+19. **October–November 2025 low award counts** (M8). ★ "October 1 –
+    November 12, 2025 was a lapse in federal appropriations; award counts
+    in those months are low." This is an external fact stated beside the
+    data, not attributed as the cause. Alternatives: a statement with no
+    context; no change.
+20. **Root title vs coverage** (M9). ★ Change the tile heading to "Award
+    activity (NIH and NSF)".
+21. **Sentinel source status and process text** (M17, M28). ★ Show source
+    status as dates ("source list dated …; checked …"). Remove "Replace them
+    with measured figures after eight weeks…" from the public page; it
+    stays in the docs.
+22. **Supplemental or one-time money** (M18). ★ No change now: any tag
+    would attribute cause.
