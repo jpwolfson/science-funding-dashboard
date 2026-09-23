@@ -20,6 +20,9 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
+from adapters.award_refresh import (  # noqa: E402
+    default_entry, is_marked_stale, load_refresh_status,
+)
 from adapters.common import SERIES_START, fiscal_year  # noqa: E402
 from adapters.nih_reporter import (  # noqa: E402
     CHANGES_HEADER, FUNDING_MECHANISMS, INCLUDE_FIELDS, LIVE_GAP_ABS_MIN,
@@ -253,6 +256,19 @@ def validate(repo_root=REPO_ROOT, live=False, allow_warnings=False):
     cfg = json.loads(CONFIG.read_text())
     baseline = json.loads(DATA_BOOK_BASELINE.read_text())
     errors, notes = [], []
+    # Separate from `warnings`, a per-unit local reused below for a
+    # dashboard's own published data-quality warnings -- this is the
+    # module-level live-gap-tolerance warning list (Phase 3.2d remediation
+    # W17): a unit disclosed as stale in data/refresh_status.json (its pull
+    # job did not complete this run) is expected to lag the live RePORTER
+    # source, so the live-gap check below downgrades from error to warning
+    # for exactly this unit instead of failing the whole rollup on a
+    # known, already-disclosed gap. All non-live checks stay exactly as
+    # strict as for any other unit. See docs/nih-data-validation.md,
+    # "Award refresh, freshness, and publication (W17)".
+    live_warnings = []
+    stale_units = []
+    refresh_status = load_refresh_status(repo_root)
     global_ids = {}
     aggregated_global_ids = set()
     fy_counts, fy_dollars = Counter(), Counter()
@@ -270,6 +286,8 @@ def validate(repo_root=REPO_ROOT, live=False, allow_warnings=False):
 
     units = list(nih_units(cfg))
     for unit in units:
+        unit_refresh = default_entry(refresh_status.get(unit["path"]))
+        unit_stale = is_marked_stale(unit_refresh)
         leaf = DATA / unit["path"]
         rows, row_errors = read_store(leaf)
         errors.extend(row_errors)
@@ -356,12 +374,36 @@ def validate(repo_root=REPO_ROOT, live=False, allow_warnings=False):
                 f"expected={result['expected']} sourceTotal={result['sourceTotal']} "
                 f"gap={result['gap']} tolerance={result['tolerance']:.2f}")
             if not result["withinTolerance"]:
-                errors.append(
-                    f"{unit['path']}: live RePORTER total {source_total} vs "
-                    f"expected {result['expected']} (store {len(rows)} - "
-                    f"excluded {unit_excluded} - retainedMissing "
-                    f"{retained_missing}) differs by {result['gap']}, above "
-                    f"tolerance {result['tolerance']:.2f}")
+                if unit_stale:
+                    # Published staleness (Phase 3.2d remediation W17): an
+                    # out-of-tolerance live gap for a disclosed-stale unit is
+                    # not an error -- the store simply has not caught up to
+                    # the live source since the pull job that would have
+                    # refreshed it did not complete. The gap is disclosed,
+                    # not silent.
+                    stale_units.append(unit["path"])
+                    live_warnings.append(
+                        f"WARNING: {unit['path']}: stale since "
+                        f"{unit_refresh.get('staleSince')} (pull did not "
+                        f"complete); live gap {result['gap']} vs tolerance "
+                        f"{result['tolerance']:.2f} not enforced")
+                else:
+                    errors.append(
+                        f"{unit['path']}: live RePORTER total {source_total} vs "
+                        f"expected {result['expected']} (store {len(rows)} - "
+                        f"excluded {unit_excluded} - retainedMissing "
+                        f"{retained_missing}) differs by {result['gap']}, above "
+                        f"tolerance {result['tolerance']:.2f}")
+            elif unit_stale:
+                # A stale unit within tolerance still gets its normal
+                # decomposition note above, plus this stale notice -- the
+                # staleness is disclosed regardless of whether the gap
+                # happens to be small this week.
+                stale_units.append(unit["path"])
+                notes.append(
+                    f"{unit['path']}: stale since "
+                    f"{unit_refresh.get('staleSince')} (pull did not "
+                    "complete); live gap within tolerance")
 
     # Exclusions-ledger cross-checks: an "excluded" id must never contribute
     # to an aggregated total, and a "returned" id present in the store must
@@ -459,6 +501,8 @@ def validate(repo_root=REPO_ROOT, live=False, allow_warnings=False):
         },
         "errors": errors,
         "notes": notes,
+        "warnings": live_warnings,
+        "staleUnits": sorted(set(stale_units)),
     }
     return summary
 
@@ -482,6 +526,8 @@ def main():
         args.report.write_text(json.dumps(summary, indent=1) + "\n")
     for note in summary["notes"]:
         print(f"OK: {note}")
+    for warning in summary.get("warnings", []):
+        print(warning)
     for error in summary["errors"]:
         print(f"ERROR: {error}", file=sys.stderr)
     if summary["errors"]:
