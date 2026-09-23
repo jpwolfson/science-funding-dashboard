@@ -75,3 +75,13 @@ the brief nothing is published and the owner gets a memo.
 | 2026-09-23 22:58 | Worker committed items 12, 16, 17, 18, 20, 21 (`7340bbe`): contract tests 59/59, fast 7/7, registry 382/382; rendered 3/4 because `scripts/smoke_sentinel_page.py` pinned the pre-item-17 state line. |
 | 2026-09-23 23:10 | Coordinator: smoke markers updated to the approved 16/17 wording (and the retired "eight weeks" line added to its retired list — a sentinel-display test, so Stage 2b's, not a 3.2e pipeline script); `humanDateOnly` pinned to UTC so a check near midnight UTC can't show the previous day. Rendered 4/4. |
 | 2026-09-23 23:20 | Owner approved the item-19 memo recommendation (Nov 11). Implemented beside the award monthly and cumulative charts; contract test added; before/after captures `item19_*`. |
+| 2026-09-23 23:25 | Item 15 re-pull result (run 35928876011, snapshot `65adafb0` on the re-pull branch): **source unchanged.** File B row counts identical in every period (P02..P12 = 219, 218, 288, 220, 216, 218, 292, 293, 296, 317, 318); cumulative identical to the cent (P06 3,096,319,772,499; P07 7,404,846,499,060; P09 8,174,199,975,491; P10 4,985,904,807,706; P12 5,252,715,920,406 = GTAS pin). Diff: 0 added, 0 removed, 5 changed, net $0 — all five are FY2022 P12 File C text fields (recipient name normalization, two award descriptions). Not a data defect; the re-pull branch is evidence only and is not merged. Draft publicNote sent to the owner for sign-off (below). |
+| 2026-09-23 23:25 | Coordinator slip, contained: `scripts/rollup_obligations.py --help` (the script takes no arguments) started a full rollup in the checkout; killed within ~2 min, `data/` restored with `git checkout`/`git clean`; nothing committed. |
+
+### Item 15 draft publicNote (awaiting owner sign-off)
+
+Anchored at `reference/dod_army_rdte_obligation_baseline.json` FY2022
+`periodNotes` period 10 (renders as "FY2022, period 10: …", with item 5's
+"see note" guide at P10):
+
+> In fiscal year 2022, the source reports cumulative net obligations for this account of $30.96 billion after period 6, $74.05 billion after period 7, and $81.74 billion after period 9, then $49.86 billion after period 10. The fiscal-year-end total (GTAS/File A), $52.53 billion, matches the ledger exactly. Source figures alone do not show why the cumulative total rose above the year-end figure and then fell.
