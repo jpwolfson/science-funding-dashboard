@@ -234,10 +234,18 @@ live reconciliation for all 87 units. Recorded as follow-up **W17**
 (option memo in the coordinator's closing report; owner decides scope).
 
 **Actions taken 2026-09-22 (this session, after the soak):**
-- W15 (churn-gate split) — branch `claude/w15-nih-churn-gate-split`, PR
-  #[W15-PR]. After merge: dispatch `Update data` on `main` with
-  `units=nih/nci/nci` (incremental) so NCI publishes, the rollup rebuilds,
-  `validate_nih.py --live` runs for all 28 ICs, and Pages redeploys.
+- W15 (churn-gate split + offline rebuild of all award dashboards so the
+  rollups equal the leaf union again) — PR #83, merged 2026-09-23 00:33 UTC.
+  Then `Update data` dispatched on `main` with `units=nih` (incremental, all
+  28 ICs): run **35802597549**, **success** (31 jobs green, 2 skipped by
+  plan). NCI published under the split gate: `NOTICE: 148 award record(s)
+  had NIH-revised field value(s) since the previous pull (amount: 148)`,
+  96,436 awards, 0 warnings. Rollup `validate_nih.py --live`: `NIH
+  validation passed: 28 units, 723486 unique awards` (= 722,978 + the 508
+  NCI awards Monday's run could not publish; every IC gap 0–2 within
+  tolerance). Deploy green. `Verify main` run 35804388539 on the resulting
+  tree: verify step green, issue step skipped (first run under W18, so the
+  conclusion is meaningful). Issue #69 closed on that evidence.
 - W18 (PR #82): `verify-main.yml` no longer runs its verify step with
   `continue-on-error`, so the run conclusion reflects the fast tier; the
   issue step runs on failure as before. Contract-tested.
@@ -248,12 +256,16 @@ live reconciliation for all 87 units. Recorded as follow-up **W17**
   "Notes on source figures" below the period chart on those two account
   pages; contract-tested. Step 7 below is therefore closed.
 
-**Soak verdict for HIGH-2.** Obligation ledger: scheduled weekly run green
-end-to-end — soak passed. Sentinel: scheduled run green — soak passed.
-Award ledger: the scheduled run failed in code merged during this
-remediation (W1's churn gate), so per step 1's rule the re-dispatched green
-run after W15 counts as the award soak; the post-soak agent records its run
-id. HIGH-2 is not closed until that run is green.
+**Soak verdict for HIGH-2 — closed 2026-09-23.** Obligation ledger:
+scheduled weekly run 35626367929 green end-to-end. Sentinel: scheduled run
+35757359002 green. Award ledger: the scheduled run 35621987484 failed in
+code merged during this remediation (W1's churn gate); per step 1's rule
+the re-dispatched run 35802597549 after W15 is the award soak, and it is
+green (28/28 ICs, live reconciliation, deploy). `Verify main` 35804388539
+green on the final tree. Caveat stated plainly: the award-ledger evidence
+is a dispatched run, not a cron-fired one; the next cron firing is Mon
+2026-09-28 09:13 UTC and the post-soak agent should read it, but nothing is
+held on it.
 
 ## Post-soak handoff (for a fresh agent, written 2026-09-20 23:00 UTC)
 
@@ -322,6 +334,28 @@ end):
    here for the agent.
 8. Do not start Stage 2 work in that session. Report completion to the
    owner with the three run IDs and the merged PR numbers.
+
+**What actually remains after 2026-09-23 (steps 1 and 7 are done; HIGH-2
+is closed above):** steps 2–6 and 8 — fill PR #79's `[SOAK: …]`
+placeholder from the HIGH-2 row (run ids 35626367929, 35757359002,
+35621987484 failed → 35802597549 green, 35804388539), apply the three
+figure reconciliations, merge #79; the CLAUDE.md status bullet + Stage 2
+release in one PR; wire `cumulative_cents` into the pull path; and read
+the Mon 2026-09-28 cron firings of all three workflows as confirmation
+(not a gate). Plus the owner's decision on W17 below, if given.
+
+**W17 — award-pipeline atomicity (owner scope decision; option memo sent
+2026-09-23).** Monday showed the award pipeline still has the failure
+mode W12 removed from the obligation pipeline: one refused leaf blocks
+the rollup, the live reconciliation, and the deploy for all 87 units,
+and leaves `main` with refreshed leaves under a stale rollup (which is
+what turned `validate-nih` red). Recommended shape if approved: the
+rollup job runs when the matrix has failures, rebuilds from whatever
+leaves are committed, `validate_nih.py --live` treats a unit whose pull
+job failed this run as `stale` (warn, publish last-good with the W12-style
+"Not refreshed since <date>" note) instead of an error, and the deploy
+proceeds. Estimated one Sonnet worker, workflow + validator + site note +
+contract tests. Not started.
 
 Standing facts the new agent needs:
 - Environment has no egress to federal APIs or to `github.io`; all pulls
@@ -396,13 +430,17 @@ Standing facts the new agent needs:
 | 2026-09-21 16:33 – 09-22 22:17 UTC | scheduled `Update obligation ledger` run 35626367929 (weekly) | Soak, obligation ledger | **success**: 106/106 pulls, reconcile/validate/tests/rendered green, atomic commit `8b317e82`, deploy; 53/53 `fresh` | 
 | 2026-09-22 16:55–17:01 UTC | scheduled `Update funding-action sentinel` run 35757359002 | Soak, sentinel | **success**; snapshot `43c3d6c8` |
 | 2026-09-21/22 | `Verify main` runs 35625099096, 35642634576, 35757926880, 35763930912, 35791555248 | fast tier on `main` after each refresh | **fast tier FAIL ×5** (`validate-nih` rollup/leaf mismatch), each posted to issue #69; run conclusions read `success` because of `continue-on-error` — corrected reading, see "Soak reading" |
+| 2026-09-23 00:19–00:33 UTC | PR #83 merged (`512bc7c0`) | W15: churn gate split (displacement vs value-churn guards), methodology note "…dates and amounts.", offline reaggregation of all 133 award dashboards (NIH rollup 722,978 = leaf union); PR CI green; local fast 7/7 | merged |
+| 2026-09-23 00:33–00:59 UTC | `Update data` run 35802597549 dispatched on `main` (units=nih, incremental) | Award-ledger soak after W15: 28/28 ICs green, NCI published 148 amount revisions with the NOTICE + dataQualityNotes, rollup `--live` green (723,486), deploy green | **green** |
+| 2026-09-23 00:47–00:48 UTC | PR #82 merged (`e4920935`); PR #81 merged (`9b18fc4e`) | W18 verify-main conclusion reflects the tier; W16 periodNotes rendered ("Notes on source figures") with `publicNote`, rendered 4/4, before/after in `docs/reviews/evidence-2026-09-22/w16/` | merged |
+| 2026-09-23 00:59–01:07 UTC | `Verify main` run 35804388539 (workflow_run after the NIH refresh) | First run under W18: verify step **green**, issue step skipped; issue #69 closed on this evidence | green |
 
 ## Finding closure evidence (filled at closeout)
 
 | Finding | Closed by | Evidence |
 |---|---|---|
 | HIGH-1 | W1 (#65), W7 (#67), W8 (#70) | `verify.py --tier fast` passes on `main` in CI: Verify-main run 35259203139 (2026-09-17 18:30 UTC, after the full NIH pull landed) on the committed data tree, and on every PR since. (Correction 2026-09-23: run 35253809178 at 17:37 UTC did *not* pass — issue #69 carries its "still failing" comment; it ran before the NIH pull finished. The fast tier went red again on 2026-09-21 for the reason in "Soak reading" and is restored by W15.) NIH ledger rebuilt by a full source-current pull (run 35250546983): root `totalAwards` 860,636 = `storeIdCount`, NIH 721,062 = leaf union, zero NIH warnings, `validate_nih.py --live` green with per-IC gaps 0–3 within tolerance; the exact-evidence tests are retired and the month-shrink rule replaced by id-level invariants (`docs/verification-regime.md`). |
-| HIGH-2 | W2, W5, W15 | Partial (2026-09-22): scheduled `Update obligation ledger` run 35626367929 green end-to-end (106/106 pulls, atomic commit, deploy; 53/53 accounts `fresh`); scheduled `Update funding-action sentinel` run 35757359002 green; `Verify main` green ×5 on the resulting tree. Scheduled `Update data` run 35621987484 **failed** on the W1 churn gate (NCI amount revisions; see "Soak reading"); W15 fixes the gate and rebuilds the NIH rollups offline. `Verify main` fast tier has been red on `main` since that run (rollup ≠ leaf union), masked by the workflow's always-green conclusion (W18, PR #82). **Open until** the post-W15 `Update data` dispatch on `main` is green (post-soak agent fills the run id here and in PR #79). |
+| HIGH-2 | W2, W5, W15 (#83), W18 (#82) | Scheduled `Update obligation ledger` run 35626367929 green end-to-end (106/106 pulls, atomic commit, deploy; 53/53 accounts `fresh`). Scheduled `Update funding-action sentinel` run 35757359002 green. Scheduled `Update data` run 35621987484 **failed** on the W1 churn gate (NCI amount revisions, not displacement; "Soak reading"); W15 split the gate and rebuilt the rollups; the re-dispatched `Update data` run 35802597549 (all 28 ICs, incremental) is green with `validate_nih.py --live` passing at 723,486 awards and Pages deployed. `Verify main` run 35804388539 green on the final tree under W18 (conclusion now meaningful); issue #69 closed on it. Residual: the award-ledger evidence is a dispatched run; next cron firing Mon 2026-09-28. |
 | HIGH-3 | W3, closeout #76 | Hatches retired by landing: the weekly-mode P10 pull (run 35481780814) gave every account a P10 partition and the `dhs/cwmd-rd` pin its store; the six placeholder identities validate on store data since the W3 rebuild; manifest deleted in #76 and `validate_obligations.py` passes with zero errors and no hatch (`tests/test_obligation_retry_recovery.py` asserts the manifest is absent). |
 | HIGH-4 | W4 (#66) | The owner-approved DoD text is a registry field (`interpretationNote`) on the six DoD accounts, copied by `rollup_obligations.py` into every DoD account and Program Activity dashboard and the DoD row of the landing table, rendered by the site with no agency conditional, and pinned verbatim by `tests/test_site_contract.py`. Deployed to Pages 2026-09-17 18:30 UTC (run 35250546983) and again with every obligation snapshot since. Before/after screenshots: `docs/reviews/evidence-2026-09-17-w4/`. |
 | HIGH-5 | W3 (#68), W10 (#72), custom re-pulls | Universal File B snapshot-acceptance rule (`classify_file_b_periods`), span reconciliation, pin-advancement guard; 165 account-years classified, 24 material. Re-pull evidence: FY2025 (run 35520419335) shows the source still returns a 1-row P11 File B snapshot for all six DoD accounts, so `notReported` with the held cumulative and hollow marker is the permanent public state, not a workaround; `commerce/nist-its` P11 is a confirmed real deobligation (full row counts, GTAS-reconciled; baseline `periodNotes`). Before/after chart screenshots: `docs/reviews/evidence-2026-09-17-w3/`. All 12 re-pulled 2026-09-20 with no source change (CI-runs rows). W14 (#80) closed the residual reader-review finding: transient over-reported snapshots at full row counts (Navy FY2024 P11 $54.6B between $25.4B and $29.6B) and the $0 hold before a first reported period (NOAA ORF FY2024). |
