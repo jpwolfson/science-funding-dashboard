@@ -144,6 +144,13 @@ text):**
   clause is not moved, because the landing stamp already states the period
   and date.
 
+**Owner message, 2026-09-23 ~18:50 UTC:** "You are authorized to merge PRs
+that are fully greenlit. I do not need to be in the loop at this stage."
+The coordinator takes this as (a) authority to merge item PRs, the #88
+data-fix PR, and the final Stage 2 PR to `main` once each is fully green
+(and outside the reconcile window for `main`), and (b) the go-ahead on
+item 3's confirmed text above.
+
 **Item 8 mechanism:** the caption is carried as a curated `publicNote` on
 the `dhs/cisa-rd` baseline's FY2025 period-12 `periodNotes` entry, which is
 the W16 mechanism (baseline → `rollup_obligations.py` → account
