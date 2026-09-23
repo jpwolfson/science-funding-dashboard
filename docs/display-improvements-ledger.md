@@ -115,6 +115,12 @@ the reader review meaningful).
 
 ## Stage 2b queue (2026-09-23, Stage 2 release reader review)
 
+**Owner decision, 2026-09-23 ~22:00 UTC:** "Approve all stage 2b recs,
+minus the NIH obligations one we just discussed." Items 12 and 14–22 are
+approved as recommended (★). Item 13 was superseded by owner option A: the
+disclosure ships now (PR #94), NIH's 27 obligation accounts are onboarded as
+Phase 3.2e (its own session), and 3.2e removes the disclosure.
+
 These come from the fresh-agent reader review of the Stage 2 release pack
 (`docs/reviews/evidence-2026-09-23/stage2/reader-review.md`, with the
 coordinator's dispositions). Every item is pre-existing on `main`
