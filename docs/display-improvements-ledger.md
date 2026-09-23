@@ -100,3 +100,15 @@ the reader review meaningful).
     never shrink in production), but the banner's register is the issue:
     gloss each warning class in plain language. Public-claim wording:
     owner sign-off.
+
+11. **Partial current month in "Awards per month"** (2026-09-23, W17
+    reader review round 2; rated **High** by the reviewer, pre-existing,
+    every award page). The rightmost monthly point is the still-accruing
+    current month and renders as an uncaptioned cliff (DMS 6 vs a typical
+    100–250; MPS 14 vs ~600), which a first-time reader can take as
+    funding collapsing. Candidate: distinguish the partial month (open
+    marker or "current month, partial" label). Chart geometry ⇒ rendered
+    tier + before/after screenshots. Also from round 2 (Medium): on
+    rollup pages the "last updated" rebuild date sits beside a child's
+    "not refreshed since" date with no reconciling qualifier (fold into
+    item 9; any new stamp wording is owner sign-off).
