@@ -225,6 +225,10 @@ Full completed-phase history, evidence, and discovery narratives live in
       green (award ledger on the post-W15 dispatched run). Detail:
       `docs/phase-history.md` ("Post-completion review and remediation");
       full run log: `docs/phase-3.2d-remediation-handoff.md`.
-- [ ] Display-improvements batch — released: 3.2d remediation closed
-      2026-09-23. Execute `docs/display-improvements-ledger.md` as one
-      reader-review-gated batch.
+- [x] Display-improvements batch, Stage 2 (completed 2026-09-23): ledger
+      items 1–11 shipped as one reader-review-gated release (item PRs #89,
+      #90, #92 into `claude/stage2-display`, then one PR to `main`). Found
+      and fixed obligation data defect #88 (PR #91). The release reader
+      review's pre-existing findings are dispositioned. Stage 2b queue
+      (ledger items 12–22) awaits owner decisions. Detail:
+      `docs/phase-history.md`; record: `docs/stage-2-display-handoff.md`.

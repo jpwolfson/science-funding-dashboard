@@ -365,6 +365,39 @@ def tier_rendered(repo=REPO, chrome=None):
 # Tier: screens -- reader-review screenshot pack. Never pass/fail.
 # --------------------------------------------------------------------------
 
+def _award_screens_targets(repo):
+    """Award sub-pages for the reader-review pack, discovered from
+    data/index.json (never hardcoded): for each top-level agency node
+    under root.children, in file order, its agency page, its first child
+    (directorate) page, and that directorate's first child
+    (division/institute) page if they exist. Item 11: the award-root page
+    alone under-covers the monthly chart's in-progress-month rendering,
+    which only some sub-pages' data exercises."""
+    index_path = Path(repo) / "data" / "index.json"
+    if not index_path.exists():
+        return []
+    root = json.loads(index_path.read_text()).get("root") or {}
+    targets = []
+    for agency in root.get("children") or []:
+        agency_path = agency.get("path") or ""
+        if not agency_path:
+            continue
+        targets.append((f"award-{agency_path.replace('/', '-')}", agency_path))
+        directorates = agency.get("children") or []
+        if not directorates:
+            continue
+        directorate = directorates[0]
+        directorate_path = directorate.get("path") or ""
+        if directorate_path:
+            targets.append((f"award-{directorate_path.replace('/', '-')}", directorate_path))
+        divisions = directorate.get("children") or []
+        if divisions:
+            division_path = divisions[0].get("path") or ""
+            if division_path:
+                targets.append((f"award-{division_path.replace('/', '-')}", division_path))
+    return targets
+
+
 def _screens_targets(repo):
     """Every page the reader-review release-bar item (working-regime #5 /
     3.2d cross-cutting gates) asks for, discovered from the registry --
@@ -372,6 +405,7 @@ def _screens_targets(repo):
     accounts = account_registry(repo)
     targets = [
         ("award-root", ""),
+        *_award_screens_targets(repo),
         ("obligations-landing", "obligations"),
     ]
     for account in accounts:

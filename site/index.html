@@ -119,6 +119,7 @@
   th { text-align: left; color: var(--ink-2); font-weight: 550; }
   th, td { padding: 4px 12px 4px 0; border-bottom: 1px solid var(--grid); }
   td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  td.num, th.num { white-space: nowrap; }
   .notes { margin-top: 28px; color: var(--ink-2); font-size: 13.5px; max-width: 82ch; }
   .notes h2 { font-size: 15px; color: var(--ink); margin-bottom: 6px; }
   .notes li { margin: 6px 0 6px 18px; }
@@ -145,7 +146,7 @@
   .attribution a { color: var(--s1); }
   a { color: var(--s1); }
   .axis-text { fill: var(--muted); font-size: 11.5px; }
-  .dlabel { fill: var(--ink-2); font-size: 12px; font-weight: 550; }
+  .dlabel { fill: var(--ink-2); font-size: 12px; font-weight: 550; paint-order: stroke; stroke: var(--surface); stroke-width: 3px; stroke-linejoin: round; }
 </style>
 </head>
 <body>
@@ -476,6 +477,29 @@ function navRow(tr, path) {
 
 const DRILL_NOTE = "Each row links to that unit's own dashboard.";
 
+// W17 item 9 (reader review): the grouped "† <names>: <reason>" footnote
+// paragraph shared by both landing tables (childrenCard,
+// obligationChildrenCard) and both tile groups (tiles, obligationTiles) --
+// factored once so the identical-reason grouping and literal text can never
+// drift between the four call sites. `id` is supplied by the caller so each
+// rendered instance keeps a unique element id on a page.
+function staleFootnote(staleRows, { id } = {}) {
+  const groups = new Map();
+  for (const c of staleRows) {
+    const text = c.refreshStatus.reason;
+    if (!groups.has(text)) groups.set(text, []);
+    groups.get(text).push(unitLabel(c));
+  }
+  const p = el("p", { class: "note", id });
+  let firstGroup = true;
+  for (const [text, names] of groups) {
+    if (!firstGroup) p.append(document.createTextNode(" "));
+    firstGroup = false;
+    p.append(el("strong", { text: `† ${names.join(", ")}: ` }), document.createTextNode(text));
+  }
+  return p;
+}
+
 function childrenCard(data) {
   const kids = data.children || [];
   if (!kids.length) return;
@@ -513,14 +537,18 @@ function childrenCard(data) {
         el("td", { class: "num", text: "—" }),
       );
     } else {
+      // W17 item 9 (reader review): a stale row's numeric cells carry the
+      // same dagger as its name cell -- a reader scanning figures, not
+      // names, must not miss the disclosure.
+      const daggerSuffix = isStale ? " †" : "";
       const hasBase = c.avgOctJulAwards != null && c.avgOctJulAwards !== 0;
       const pctTxt = hasBase ? fmtPct((c.octJulAwards - c.avgOctJulAwards) / c.avgOctJulAwards) : "—";
       const pctClass = hasBase ? (c.octJulAwards >= c.avgOctJulAwards ? "up" : "down") : "";
       tr.append(
-        el("td", { class: "num", text: fmtN(c.octJulAwards) }),
-        el("td", { class: `num ${pctClass}`.trim(), text: pctTxt }),
-        el("td", { class: "num", text: fmtMoney(c.octJulDollars) }),
-        el("td", { class: "num", text: fmtN(c.totalAwards) }),
+        el("td", { class: "num", text: fmtN(c.octJulAwards) + daggerSuffix }),
+        el("td", { class: `num ${pctClass}`.trim(), text: pctTxt + daggerSuffix }),
+        el("td", { class: "num", text: fmtMoney(c.octJulDollars) + daggerSuffix }),
+        el("td", { class: "num", text: fmtN(c.totalAwards) + daggerSuffix }),
       );
     }
     navRow(tr, c.path);
@@ -531,20 +559,7 @@ function childrenCard(data) {
     // Rows sharing the identical staleness text (e.g. the same
     // multi-unit-aggregate reason) group into one line, same pattern as
     // obligationChildrenCard's stale footnote.
-    const groups = new Map();
-    for (const c of staleRows) {
-      const text = c.refreshStatus.reason;
-      if (!groups.has(text)) groups.set(text, []);
-      groups.get(text).push(unitLabel(c));
-    }
-    const p = el("p", { class: "note", id: "staleFootnotes" });
-    let firstGroup = true;
-    for (const [text, names] of groups) {
-      if (!firstGroup) p.append(document.createTextNode(" "));
-      firstGroup = false;
-      p.append(el("strong", { text: `† ${names.join(", ")}: ` }), document.createTextNode(text));
-    }
-    card.append(p);
+    card.append(staleFootnote(staleRows, { id: "staleFootnotes" }));
   }
   $app.append(card);
 }
@@ -558,11 +573,7 @@ function obligationChildrenCard(data, title = null, note = null) {
     "Dollar columns add to the parent. Distinct linked-award counts do not. File C / net is a signed ratio and can fall outside 0–100% when File C and residual activity offset." }));
   const sorted = kids.slice().sort((a, b) =>
     (b.currentFYNetObligations || 0) - (a.currentFYNetObligations || 0));
-  const t = el("table"), trh = el("tr");
-  ["Unit", `Net obligations FY${data.currentFY} to date`, "File C / net", "Distinct linked awards"]
-    .forEach((h, i) => trh.append(el("th", { class: i > 0 ? "num" : "", text: h })));
-  trh.append(el("th", { class: "chev" }));
-  t.append(trh);
+  const headerCells = ["Unit", `Net obligations FY${data.currentFY} to date`, "File C / net", "Distinct linked awards"];
   // Rows whose registry entry carries an interpretationNote (Phase 3.2d
   // remediation decision 3, e.g. the DoD low-File-C disclosure) get a
   // footnote marker here and the full text listed once below the table --
@@ -573,7 +584,11 @@ function obligationChildrenCard(data, title = null, note = null) {
   // a separate dagger marker + footnote, purely field-driven the same way
   // -- a fresh row carries no `refreshStatus` at all.
   const staleRows = [];
-  for (const c of sorted) {
+  // Row and table builders, shared by the main table and (account level
+  // only) the collapsed $0-net-obligations table below it, so the two
+  // never drift out of sync on columns, dagger/asterisk markers, or the
+  // row-as-link affordance.
+  const buildRow = c => {
     const tr = el("tr"), tdUnit = el("td");
     const path = String(c.path || "").startsWith("obligations") ? c.path : `obligations/${c.path}`;
     const hasNote = Boolean(c.interpretationNote);
@@ -587,16 +602,47 @@ function obligationChildrenCard(data, title = null, note = null) {
       tr.append(el("td", { class: "num", text: "no data yet" }),
         el("td", { class: "num", text: "—" }), el("td", { class: "num", text: "—" }));
     } else {
+      // W17 item 9 (reader review): a stale row's numeric cells carry the
+      // same dagger as its name cell.
+      const daggerSuffix = isStale ? " †" : "";
       const value = c.currentFYNetObligations || 0;
       tr.append(el("td", { class: `num ${value < 0 ? "negative" : ""}`.trim(),
-        text: fmtSignedMoney(value) }),
-      el("td", { class: "num", text: fmtCoverage(c.fileCToNetRatio) }),
-      el("td", { class: "num", text: fmtN(c.distinctLinkedAwards || 0) }));
+        text: fmtSignedMoney(value) + daggerSuffix }),
+      el("td", { class: "num", text: fmtCoverage(c.fileCToNetRatio) + daggerSuffix }),
+      el("td", { class: "num", text: fmtN(c.distinctLinkedAwards || 0) + daggerSuffix }));
     }
     navRow(tr, path);
-    t.append(tr);
+    return tr;
+  };
+  const buildTable = rows => {
+    const t = el("table"), trh = el("tr");
+    headerCells.forEach((h, i) => trh.append(el("th", { class: i > 0 ? "num" : "", text: h })));
+    trh.append(el("th", { class: "chev" }));
+    t.append(trh);
+    rows.forEach(c => t.append(buildRow(c)));
+    return t;
+  };
+  // Display-improvements batch item (reader review): an account's
+  // program-activity table listed dozens of $0-current-FY rows interleaved
+  // with active ones, reading as those named programs having been
+  // eliminated. Split them into a collapsed <details> directly after the
+  // main table -- account level only, and only when at least one row does
+  // NOT qualify (an all-zero page keeps one ordinary table rather than
+  // collapsing everything behind a click).
+  const zeroRows = data.node?.level === "account"
+    ? sorted.filter(c => c.hasData && (c.currentFYNetObligations || 0) === 0)
+    : [];
+  const splitZeroRows = zeroRows.length > 0 && zeroRows.length < sorted.length;
+  const mainRows = splitZeroRows ? sorted.filter(c => !zeroRows.includes(c)) : sorted;
+  card.append(buildTable(mainRows));
+  if (splitZeroRows) {
+    const n = zeroRows.length;
+    const details = el("details", { class: "detail-table" });
+    details.append(el("summary", {
+      text: `Show ${n} program ${n === 1 ? "activity" : "activities"} with $0 net obligations in FY${data.currentFY}` }));
+    details.append(buildTable(zeroRows));
+    card.append(details);
   }
-  card.append(t);
   if (annotated.length) {
     // Rows that carry the identical note text (e.g. every DoD account row
     // shares the same disclosure) group into one line rather than repeating
@@ -618,28 +664,14 @@ function obligationChildrenCard(data, title = null, note = null) {
   if (staleRows.length) {
     // Rows sharing the identical staleness text (same staleSince date)
     // group into one line, same pattern as the interpretationNote footnote
-    // above.
-    const groups = new Map();
-    for (const c of staleRows) {
-      // The agency-level aggregate row's reason names how many of its
-      // accounts are stale (never "this account" -- it is not one); a
-      // single account row's own reason is specific to it. Either way this
-      // is the plain-language `reason` scripts/reconcile_obligation_
-      // artifacts.py / scripts/rollup_obligations.py wrote, not the
-      // header's fixed "Not refreshed since" wording, which only makes
-      // sense naming exactly one account.
-      const text = c.refreshStatus.reason;
-      if (!groups.has(text)) groups.set(text, []);
-      groups.get(text).push(unitLabel(c));
-    }
-    const p = el("p", { class: "note", id: "staleFootnotes" });
-    let firstGroup = true;
-    for (const [text, names] of groups) {
-      if (!firstGroup) p.append(document.createTextNode(" "));
-      firstGroup = false;
-      p.append(el("strong", { text: `† ${names.join(", ")}: ` }), document.createTextNode(text));
-    }
-    card.append(p);
+    // above. The agency-level aggregate row's reason names how many of its
+    // accounts are stale (never "this account" -- it is not one); a single
+    // account row's own reason is specific to it. Either way this is the
+    // plain-language `reason` scripts/reconcile_obligation_artifacts.py /
+    // scripts/rollup_obligations.py wrote, not the header's fixed "Not
+    // refreshed since" wording, which only makes sense naming exactly one
+    // account.
+    card.append(staleFootnote(staleRows, { id: "staleFootnotes" }));
   }
   $app.append(card);
 }
@@ -730,9 +762,15 @@ function renderCsvNote(level, path, data) {
 }
 
 // ---------- tiles ----------
-function appendTileGroup(row, { id = "", heading = "", note = "" } = {}) {
+// `footnote` (W17 item 9, reader review): an optional element -- the same
+// grouped stale-footnote paragraph the landing tables use -- appended
+// directly after the tile row, in whichever container the row itself lands
+// in (bare into $app, or inside the headed section), so it always sits
+// immediately below the tiles it explains.
+function appendTileGroup(row, { id = "", heading = "", note = "", footnote = null } = {}) {
   if (!heading) {
     $app.append(row);
+    if (footnote) $app.append(footnote);
     return;
   }
   const section = el("section", { class: "summary-group" });
@@ -741,8 +779,11 @@ function appendTileGroup(row, { id = "", heading = "", note = "" } = {}) {
   section.append(title);
   if (note) section.append(el("p", { class: "note", text: note }));
   section.append(row);
+  if (footnote) section.append(footnote);
   $app.append(section);
 }
+
+const awardCountNoun = data => data.provider === "nih" ? "Award records" : data.provider === "nsf" ? "New awards" : "Awards";
 
 function tiles(data, options = {}) {
   // Units with no current-FY awards (dormant offices) still get the tile
@@ -755,7 +796,7 @@ function tiles(data, options = {}) {
   const windowDone = gen >= new Date(data.currentFY, 7, 1); // Oct-Jul window complete once Aug arrives
   const suffix = windowDone ? "" : " to date";
   const mechanisms = mechanismLabels(data);
-  const countLabel = data.provider === "nih" ? "Award records" : data.provider === "nsf" ? "New awards" : "Awards";
+  const countLabel = awardCountNoun(data);
   const dollarLabel = data.provider === "nsf" ? "Intended $" : "Award $";
   const row = el("div", { class: "tiles" });
   const specs = [
@@ -764,11 +805,22 @@ function tiles(data, options = {}) {
     { label: `${mechanisms.std}, Oct–Jul${suffix}`, val: fmtN(cur.octJul.std), a: cur.octJul.std, key: "std" },
     { label: `${mechanisms.cont}, Oct–Jul${suffix}`, val: fmtN(cur.octJul.cont), a: cur.octJul.cont, key: "cont" },
   ];
+  // W17 item 9 (reader review): these tiles are this page's own aggregate,
+  // which already folds in any stale child's last-accepted snapshot -- mark
+  // every value the same way the landing table marks a stale row's numbers,
+  // with the same grouped footnote directly below the row. Skipped when
+  // this page's own header already carries the "Not refreshed since" note
+  // for a single stale unit (data.refreshStatus.unit): duplicating the
+  // disclosure there would be redundant, not additive.
+  const staleChildren = data.refreshStatus?.unit
+    ? []
+    : (data.children || []).filter(c => c.refreshStatus?.status === "stale");
+  const tileDagger = staleChildren.length ? " †" : "";
   for (const s of specs) {
     const b = avg(s.key);
     const hasBaseline = base.length > 0 && b !== 0;
     const tile = el("div", { class: "tile" });
-    tile.append(el("div", { class: "label", text: s.label }), el("div", { class: "value", text: s.val }));
+    tile.append(el("div", { class: "label", text: s.label }), el("div", { class: "value", text: s.val + tileDagger }));
     if (hasBaseline) {
       const pct = (s.a - b) / b;
       const d = el("div", { class: `delta ${pct >= 0 ? "up" : "down"}` });
@@ -779,14 +831,45 @@ function tiles(data, options = {}) {
     }
     row.append(tile);
   }
-  appendTileGroup(row, options);
+  appendTileGroup(row, { ...options,
+    footnote: staleChildren.length ? staleFootnote(staleChildren, { id: "tileStaleFootnotes" }) : null });
+}
+
+// The as-of date of an award dashboard's figures: a single stale unit's
+// last accepted snapshot (refreshStatus.staleSince), else the build date.
+const awardAsOfDate = data => (data.refreshStatus?.status === "stale"
+  && data.refreshStatus.unit && data.refreshStatus.staleSince) || data.generated || "";
+
+// Display-improvements batch item 9/12 (W17 reader review round 2,
+// owner-approved wording): formats one or more `refreshStatus.staleSince`
+// ("YYYY-MM-DD") values the same way the header stamps already format a
+// single such date, so a multi-leaf rollup's stamp can name a stale
+// unit/account's last-refreshed date too. One distinct date renders as
+// that date; several render as an en-dash range, earliest to latest.
+function formatStaleDateRange(dates) {
+  const distinct = [...new Set((dates || []).filter(Boolean))].sort();
+  if (!distinct.length) return "";
+  const fmt = d => new Date(d + "T12:00:00").toLocaleDateString("en-US",
+    { month: "long", day: "numeric", year: "numeric" });
+  return distinct.length > 1 ? `${fmt(distinct[0])} – ${fmt(distinct.at(-1))}` : fmt(distinct[0]);
 }
 
 // ---------- chart 1: monthly line ----------
 function monthlyChart(data) {
-  const { card, plot, tip } = makeCard("Awards per month",
-    "Every month since October 2014. Months with zero awards are shown as zero.");
   const pts = data.monthly || [];
+  // Stage 2 item 11 (W17 reader review): the series ends on the still-accruing current month.
+  // Drawn identically to a complete month, a low current-month count reads
+  // as a collapse rather than a mid-month partial count. A month is "in
+  // progress" when it is on or after the dashboard's as-of month; such
+  // months are rendered dashed with an open marker, never as complete.
+  const asOfMonth = awardAsOfDate(data).slice(0, 7);
+  const firstInProgress = asOfMonth ? pts.findIndex(p => p.month >= asOfMonth) : -1;
+  const anyInProgress = firstInProgress !== -1;
+  const inProgress = i => anyInProgress && i >= firstInProgress;
+  const note = anyInProgress
+    ? "Every month since October 2014. Months with zero awards are shown as zero. The last point is the current month to date — a partial count, drawn dashed with an open marker."
+    : "Every month since October 2014. Months with zero awards are shown as zero.";
+  const { card, plot, tip } = makeCard(`${awardCountNoun(data)} per month`, note);
   function render() {
     plot.querySelector("svg")?.remove();
     const f = frame(plot, 300, 46, 14);
@@ -799,12 +882,37 @@ function monthlyChart(data) {
         if (p.month.endsWith("-01") && p.month.slice(0, 4) % 2 === 1)
           f.svg.append(el("text", { class: "axis-text", x: x(i), y: f.B + 18, "text-anchor": "middle", text: p.month.slice(0, 4) }));
       });
-      const line = pts.map((p, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(p.awards).toFixed(1)}`).join("");
-      f.svg.append(el("path", { d: `${line}L${x(pts.length - 1)},${f.B}L${x(0)},${f.B}Z`, fill: css("--s1"), opacity: .1 }));
-      f.svg.append(el("path", { d: line, fill: "none", stroke: css("--s1"), "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
       const last = pts.length - 1;
-      f.svg.append(el("circle", { cx: x(last), cy: y(pts[last].awards), r: 4.5, fill: css("--s1"), stroke: css("--surface"), "stroke-width": 2 }));
-      f.svg.append(el("text", { class: "dlabel", x: x(last) - 6, y: y(pts[last].awards) - 10, "text-anchor": "end", text: fmtN(pts[last].awards) }));
+      const lastComplete = anyInProgress ? firstInProgress - 1 : last;
+      if (lastComplete >= 0) {
+        const completeLine = pts.slice(0, lastComplete + 1)
+          .map((p, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(p.awards).toFixed(1)}`).join("");
+        f.svg.append(el("path", { d: `${completeLine}L${x(lastComplete)},${f.B}L${x(0)},${f.B}Z`, fill: css("--s1"), opacity: .1 }));
+        f.svg.append(el("path", { d: completeLine, fill: "none", stroke: css("--s1"), "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+      }
+      if (anyInProgress) {
+        const dashFrom = Math.max(lastComplete, 0);
+        const dashLine = pts.slice(dashFrom, last + 1)
+          .map((p, i) => `${i ? "L" : "M"}${x(dashFrom + i).toFixed(1)},${y(p.awards).toFixed(1)}`).join("");
+        f.svg.append(el("path", { d: dashLine, fill: "none", stroke: css("--s1"), "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round", "stroke-dasharray": "5 4" }));
+      }
+      if (anyInProgress) {
+        f.svg.append(el("circle", { cx: x(last), cy: y(pts[last].awards), r: 4.5, fill: css("--surface"), stroke: css("--s1"), "stroke-width": 2 }));
+      } else {
+        f.svg.append(el("circle", { cx: x(last), cy: y(pts[last].awards), r: 4.5, fill: css("--s1"), stroke: css("--surface"), "stroke-width": 2 }));
+      }
+      const lastLabel = anyInProgress
+        ? `${fmtN(pts[last].awards)} · ${monthName(pts[last].month)} to date`
+        : fmtN(pts[last].awards);
+      // Stage 2 item (reader review): the in-progress end label used to sit
+      // at y(last) - 10 and, anchored "end", ran left across the
+      // dashed/solid line it was labeling. Placed above the higher of the
+      // last complete point and the (often lower, partial) last point
+      // instead, so it never overlaps either segment.
+      const lastLabelY = (anyInProgress && lastComplete >= 0)
+        ? Math.max(f.T + 12, Math.min(y(pts[lastComplete].awards), y(pts[last].awards)) - 10)
+        : y(pts[last].awards) - 10;
+      f.svg.append(el("text", { class: "dlabel", x: x(last) - 6, y: lastLabelY, "text-anchor": "end", text: lastLabel }));
       const cross = el("line", { y1: f.T, y2: f.B, stroke: css("--axis"), "stroke-width": 1, visibility: "hidden" });
       const dot = el("circle", { r: 4.5, fill: css("--s1"), stroke: css("--surface"), "stroke-width": 2, visibility: "hidden" });
       f.svg.append(cross, dot);
@@ -816,7 +924,7 @@ function monthlyChart(data) {
         const p = pts[i];
         cross.setAttribute("x1", x(i)); cross.setAttribute("x2", x(i)); cross.setAttribute("visibility", "visible");
         dot.setAttribute("cx", x(i)); dot.setAttribute("cy", y(p.awards)); dot.setAttribute("visibility", "visible");
-        showTip(tip, plot, x(i) * scale(), y(p.awards) * scale(), monthName(p.month), [
+        showTip(tip, plot, x(i) * scale(), y(p.awards) * scale(), inProgress(i) ? `${monthName(p.month)} (to date)` : monthName(p.month), [
           { color: css("--s1"), val: fmtN(p.awards), lab: "awards" },
           { val: fmtMoney(p.dollars), lab: "award dollars" },
         ]);
@@ -826,13 +934,13 @@ function monthlyChart(data) {
   }
   render();
   addTable(card, ["Month", "Awards", "Award $"],
-    pts.map(p => [monthName(p.month), fmtN(p.awards), fmtMoney(p.dollars)]));
+    pts.map((p, i) => [inProgress(i) ? `${monthName(p.month)} (to date)` : monthName(p.month), fmtN(p.awards), fmtMoney(p.dollars)]));
   return render;
 }
 
 // ---------- chart 2: FY awards columns ----------
 function fyAwardsChart(data, windowDone) {
-  const { card, plot, tip } = makeCard("Awards by fiscal year (Oct–Jul)",
+  const { card, plot, tip } = makeCard(`${awardCountNoun(data)} by fiscal year (Oct–Jul)`,
     "October through July of each fiscal year, so the current year compares like-for-like. Hairline: FY15–24 average.");
   const rows = data.fiscalYears || [];
   const base = rows.filter(r => r.fy >= BASE_FROM && r.fy <= BASE_TO);
@@ -889,7 +997,7 @@ function fyAwardsChart(data, windowDone) {
 // ---------- chart 3: mechanism lines ----------
 function mechanismChart(data) {
   const labels = mechanismLabels(data);
-  const { card, plot, tip } = makeCard("Awards by mechanism (Oct–Jul)",
+  const { card, plot, tip } = makeCard(`${awardCountNoun(data)} by mechanism (Oct–Jul)`,
     `${labels.std}, ${labels.cont}, and ${labels.fell.toLowerCase()}, Oct–Jul of each fiscal year. Mechanism changes can move counts without reflecting the same change in funding — see notes.`);
   const rows = data.fiscalYears || [];
   const series = [
@@ -899,7 +1007,7 @@ function mechanismChart(data) {
   ];
   function render() {
     plot.querySelector("svg")?.remove();
-    const f = frame(plot, 300, 46, 118);
+    const f = frame(plot, 300, 46, 150);
     const max = chartMax(rows, r => Math.max(r.octJul.std, r.octJul.cont, r.octJul.fell));
     yAxis(f.svg, f, max, fmtN);
     if (rows.length) {
@@ -919,7 +1027,7 @@ function mechanismChart(data) {
           while (endYs.some(v => Math.abs(v - ly) < 14)) ly -= 14;
         }
         endYs.push(ly);
-        f.svg.append(el("text", { class: "dlabel", x: x(rows.length - 1) + 10, y: ly, text: `${last} ${s.label.split(" ")[0].toLowerCase()}` }));
+        f.svg.append(el("text", { class: "dlabel", x: x(rows.length - 1) + 10, y: ly, text: `${fmtN(last)} ${s.label.split(" ")[0].toLowerCase()}` }));
       }
       const cross = el("line", { y1: f.T, y2: f.B, stroke: css("--axis"), "stroke-width": 1, visibility: "hidden" });
       f.svg.append(cross);
@@ -985,7 +1093,7 @@ function dollarsChart(data) {
     });
   }
   render();
-  legend(card, [{ label: "All other awards", color: css("--s1") }, { label: "Top 3 awards", color: css("--s2") }], "swatch");
+  legend(card, [{ label: "All other awards ($)", color: css("--s1") }, { label: "Top 3 awards ($)", color: css("--s2") }], "swatch");
   addTable(card, ["Fiscal year", "Total award $", "Top 3 awards", "All other", "Median award"],
     rows.map(r => [`FY${r.fy}${r.partial ? " (to date)" : ""}`, fmtM(r.dollars),
       fmtM(r.dollars - r.exTop3Dollars), fmtM(r.exTop3Dollars), fmtMoney(r.median)]));
@@ -1102,7 +1210,7 @@ function topAwards(data) {
   card.append(el("p", { class: "note", text: "The outliers behind the dollars chart. Award titles link to the source record." }));
   const t = el("table");
   const trh = el("tr");
-  ["FY", "Award", "Institution", ""].forEach((h, i) => trh.append(el("th", { class: i === 3 ? "num" : "", text: h })));
+  ["FY", "Award", "Institution", "Award $"].forEach((h, i) => trh.append(el("th", { class: i === 3 ? "num" : "", text: h })));
   t.append(trh);
   for (const r of recent) for (const a of (r.top3 || [])) {
     const tr = el("tr");
@@ -1167,17 +1275,27 @@ function obligationTiles(data, options = {}) {
     [ `File B − File C residual, FY${data.currentFY} to date`, fmtSignedMoney(cur.residualObligations || 0) ],
   ];
   const specs = options.compact ? primarySpecs : [...primarySpecs, ...reconciliationSpecs];
+  // W17 item 9 (reader review): same pattern as tiles() above -- these
+  // tiles are `data`'s own aggregate, which already folds in any stale
+  // child's last-accepted snapshot. Used both for an obligation node's own
+  // tile row (data.children are its own child accounts/agencies) and for
+  // the compact obligation tile group on the award root (data is the
+  // obligations root dashboard, whose children are agencies).
+  const staleChildren = (data.children || []).filter(c => c.refreshStatus?.status === "stale");
+  const tileDagger = staleChildren.length ? " †" : "";
   const row = el("div", { class: "tiles" });
   for (const [label, value] of specs) {
     const tile = el("div", { class: "tile" });
     tile.append(el("div", { class: "label", text: label }),
-      el("div", { class: "value", text: value }));
+      el("div", { class: "value", text: value + tileDagger }));
     row.append(tile);
   }
-  appendTileGroup(row, options);
+  appendTileGroup(row, { ...options,
+    footnote: staleChildren.length ? staleFootnote(staleChildren, { id: "obligationTileStaleFootnotes" }) : null });
 }
 
 const NOT_REPORTED_AT_PULL = "not reported at pull";
+const OBLIGATION_CADENCE_CAPTION = "obligations are reported in monthly agency submission periods; steps reflect reporting cadence, not action dates.";
 const svgTitle = text => {
   const node = document.createElementNS("http://www.w3.org/2000/svg", "title");
   node.textContent = text;
@@ -1187,6 +1305,7 @@ const svgTitle = text => {
 function obligationCumulativeChart(data) {
   const { card, plot, tip } = makeCard("Cumulative net obligations through the fiscal year",
     "Signed File B obligations reported through each submission period. File C supplies award-financial detail; the residual is the signed File B − File C difference. A hollow point marks a period whose File B snapshot was not reported at pull; the line holds the last reported value there.");
+  card.querySelector("p.note").after(el("p", { class: "note", text: OBLIGATION_CADENCE_CAPTION }));
   const series = (data.fyCumulative || []).slice().sort((a, b) => b.fy - a.fy)
     .map((s, i) => ({ ...s, v: ["--s1", "--s2", "--s3", "--s4", "--s5"][i] }));
   function render() {
@@ -1279,14 +1398,30 @@ function obligationCumulativeChart(data) {
 }
 
 function obligationPeriodsChart(data) {
-  const { card, plot, tip } = makeCard("Obligations by reporting period",
-    "Each point is signed activity in one agency submission period; the line is not cumulative. The first P02 point covers the first reporting window; quarterly reporters appear only at quarter end. A period not reported at pull is omitted from the chart and shown in the table below.");
+  const { card, plot, tip } = makeCard("Net obligations by reporting period",
+    "Each step is signed activity in one agency submission period; the line is not cumulative. The first P02 step covers the first reporting window; quarterly reporters appear only at quarter end. A period not reported at pull is omitted from the chart and shown in the table below.");
+  card.querySelector("p.note").after(el("p", { class: "note", text: OBLIGATION_CADENCE_CAPTION }));
   const allRows = (data.reportingPeriods || []).slice(-48);
   // The chart itself omits notReported periods entirely (owner decision 2):
   // there is no derived activity to plot for one, so it is neither a zero
   // nor a gap-worthy point, just absent. The table below still lists every
   // period, including notReported ones.
   const rows = allRows.filter(r => (r.status || "reported") !== "notReported");
+  // The next reported row after one or more notReported periods notes the
+  // span its activity covers, e.g. "P12 (covers P11-P12)" -- the delta was
+  // measured against the last reported snapshot, not the immediately
+  // preceding period (see docs/obligation-ledger.md "Snapshot acceptance
+  // and not-reported periods").
+  const short = period => String(period).replace(/^FY\d+/, "");
+  const periodLabel = r => (r.status !== "notReported" && r.coversPeriods && r.coversPeriods.length > 1)
+    ? `${r.submissionPeriod} (covers ${short(r.coversPeriods[0])}-${short(r.coversPeriods.at(-1))})`
+    : r.submissionPeriod;
+  // Curated, reader-facing source-figure callouts (docs/obligation-ledger.md
+  // "periodNotes"): a charted row whose submission period is noted gets a
+  // dashed guide in the plot and a "(see note)" suffix in the table, instead
+  // of silently plotting a figure the source itself flagged against the
+  // fiscal-year-end total.
+  const notedPeriods = new Map((data.periodNotes || []).map(n => [`FY${n.fy}P${String(n.period).padStart(2, "0")}`, n]));
   function render() {
     plot.querySelector("svg")?.remove();
     const f = frame(plot, 310, 62, 14);
@@ -1294,24 +1429,70 @@ function obligationPeriodsChart(data) {
     const y = signedYAxis(f.svg, f, domain, fmtSignedAxisMoney);
     if (rows.length) {
       const last = rows.length - 1;
-      const x = i => f.L + (rows.length > 1 ? i / last : 0.5) * (f.R - f.L);
+      // Equal-width slots, one per reported submission: the step's width is
+      // never scaled by how many periods it covers (owner request -- the
+      // step shape says only what the source resolution supports).
+      const slot = (f.R - f.L) / rows.length;
+      const xc = i => f.L + slot * (i + 0.5);
       const targetLabels = (plot.clientWidth || f.W) < 520 ? 5 : 10;
       const labelStep = Math.max(1, Math.ceil(rows.length / targetLabels));
       rows.forEach((r, i) => {
         if (i === last || (i % labelStep === 0 && last - i >= labelStep))
-          f.svg.append(el("text", { class: "axis-text", x: x(i), y: f.B + 18,
+          f.svg.append(el("text", { class: "axis-text", x: xc(i), y: f.B + 18,
             "text-anchor": i === last ? "end" : "middle",
             text: String(r.submissionPeriod || "").replace("FY", "") }));
       });
-      const line = rows.map((r, i) =>
-        `${i ? "L" : "M"}${x(i).toFixed(1)},${y(r.netObligations || 0).toFixed(1)}`).join("");
+      // Note guides draw before the step path so the line sits on top.
+      rows.forEach((r, i) => {
+        const note = notedPeriods.get(r.submissionPeriod);
+        if (!note) return;
+        f.svg.append(el("line", { x1: xc(i), x2: xc(i), y1: f.T, y2: f.B,
+          stroke: css("--axis"), "stroke-width": 1, "stroke-dasharray": "3 3" }));
+        const label = el("text", { class: "axis-text", x: xc(i), y: f.T + 10,
+          "text-anchor": "middle", text: "see note" });
+        label.append(svgTitle(note.note));
+        f.svg.append(label);
+      });
+      // Each period occupies its own equal-width slot [f.L + slot*i, f.L +
+      // slot*(i+1)]: a flat step at that period's value, joined to the next
+      // step by a vertical riser at the slot boundary. A sloped line between
+      // submissions would depict timing the source does not contain.
+      const line = rows.map((r, i) => {
+        const start = f.L + slot * i, end = f.L + slot * (i + 1), yy = y(r.netObligations || 0);
+        return i ? `V${yy.toFixed(1)}H${end.toFixed(1)}` : `M${start.toFixed(1)},${yy.toFixed(1)}H${end.toFixed(1)}`;
+      }).join("");
       f.svg.append(el("path", { d: line, fill: "none", stroke: css("--s1"),
         "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+      // Display-improvements batch item (reader review): a covering row
+      // (coversPeriods.length > 1) absorbs several not-reported periods into
+      // one step, but drawn plainly it reads as an ordinary single-period
+      // move. A small "covers Pxx–Pxx" span label at the step, drawn after
+      // (on top of) the step path, discloses the absorbed span in the chart
+      // itself, not only in the table's periodLabel text below.
+      // Adjacent span labels would overprint each other, so a label whose
+      // box overlaps one already placed moves up (or down, below the step)
+      // in 13px increments until it clears.
+      const placedSpans = [];
+      rows.forEach((r, i) => {
+        if (r.status === "notReported" || !r.coversPeriods || r.coversPeriods.length <= 1) return;
+        const value = r.netObligations || 0;
+        const text = `covers ${short(r.coversPeriods[0])}–${short(r.coversPeriods.at(-1))}`;
+        const halfW = text.length * 3.4;
+        const rawY = value >= 0 ? y(value) - 6 : y(value) + 14;
+        let spanY = Math.max(f.T + 10, Math.min(f.B - 4, rawY));
+        const step = value >= 0 ? -13 : 13;
+        const clashes = yy => placedSpans.some(b => Math.abs(b.x - xc(i)) < b.halfW + halfW && Math.abs(b.y - yy) < 12);
+        for (let tries = 0; tries < 6 && clashes(spanY); tries++)
+          spanY = Math.max(f.T + 10, Math.min(f.B - 4, spanY + step));
+        placedSpans.push({ x: xc(i), y: spanY, halfW });
+        f.svg.append(el("text", { class: "axis-text", x: xc(i), y: spanY,
+          "text-anchor": "middle", text }));
+      });
       const end = rows[last], endY = y(end.netObligations || 0);
-      f.svg.append(el("circle", { cx: x(last), cy: endY, r: 4.5,
+      f.svg.append(el("circle", { cx: xc(last), cy: endY, r: 4.5,
         fill: (end.netObligations || 0) < 0 ? css("--s2") : css("--s1"),
         stroke: css("--surface"), "stroke-width": 2 }));
-      f.svg.append(el("text", { class: "dlabel", x: x(last) - 7,
+      f.svg.append(el("text", { class: "dlabel", x: xc(last) - 7,
         y: Math.max(f.T + 12, Math.min(f.B - 8, endY - 10)), "text-anchor": "end",
         text: fmtSignedMoney(end.netObligations || 0) }));
       const cross = el("line", { y1: f.T, y2: f.B, stroke: css("--axis"),
@@ -1323,20 +1504,22 @@ function obligationPeriodsChart(data) {
       f.svg.addEventListener("pointermove", e => {
         const bounds = f.svg.getBoundingClientRect();
         const vx = (e.clientX - bounds.left) / scale();
-        const i = rows.length > 1
-          ? Math.max(0, Math.min(last, Math.round((vx - f.L) / (f.R - f.L) * last))) : 0;
+        const i = Math.max(0, Math.min(last, Math.floor((vx - f.L) / slot)));
         const r = rows[i], value = r.netObligations || 0, yy = y(value);
-        cross.setAttribute("x1", x(i)); cross.setAttribute("x2", x(i));
+        cross.setAttribute("x1", xc(i)); cross.setAttribute("x2", xc(i));
         cross.setAttribute("visibility", "visible");
-        dot.setAttribute("cx", x(i)); dot.setAttribute("cy", yy);
+        dot.setAttribute("cx", xc(i)); dot.setAttribute("cy", yy);
         dot.setAttribute("fill", value < 0 ? css("--s2") : css("--s1"));
         dot.setAttribute("visibility", "visible");
-        showTip(tip, plot, x(i) * scale(), yy * scale(), r.submissionPeriod, [
+        const tipRows = [
           { val: fmtSignedMoney(r.netObligations || 0), lab: "net obligations" },
           { val: fmtSignedMoney(r.awardLinkedObligations || 0), lab: "File C portion" },
           { val: fmtSignedMoney(r.residualObligations || 0), lab: "File B − File C residual" },
           { val: fmtN(r.distinctLinkedAwards || 0), lab: "distinct linked awards" },
-        ]);
+        ];
+        if (notedPeriods.has(r.submissionPeriod))
+          tipRows.push({ val: "see note", lab: "Notes on source figures below" });
+        showTip(tip, plot, xc(i) * scale(), yy * scale(), periodLabel(r), tipRows);
       });
       f.svg.addEventListener("pointerleave", () => {
         tip.style.display = "none";
@@ -1346,21 +1529,11 @@ function obligationPeriodsChart(data) {
     }
   }
   render();
-  // The next reported row after one or more notReported periods notes the
-  // span its activity covers, e.g. "P12 (covers P11-P12)" -- the delta was
-  // measured against the last reported snapshot, not the immediately
-  // preceding period (see docs/obligation-ledger.md "Snapshot acceptance
-  // and not-reported periods").
-  const periodLabel = r => {
-    const short = period => String(period).replace(/^FY\d+/, "");
-    return (r.status !== "notReported" && r.coversPeriods && r.coversPeriods.length > 1)
-      ? `${r.submissionPeriod} (covers ${short(r.coversPeriods[0])}-${short(r.coversPeriods.at(-1))})`
-      : r.submissionPeriod;
-  };
   addTable(card, ["Reporting period", "Net obligations", "File C portion", "Residual", "Positive entries", "Negative entries", "Distinct linked awards"],
     allRows.map(r => r.status === "notReported"
       ? [periodLabel(r), NOT_REPORTED_AT_PULL, "—", "—", "—", "—", "—"]
-      : [periodLabel(r), fmtSignedMoney(r.netObligations || 0),
+      : [notedPeriods.has(r.submissionPeriod) ? periodLabel(r) + " (see note)" : periodLabel(r),
+        fmtSignedMoney(r.netObligations || 0),
         fmtSignedMoney(r.awardLinkedObligations || 0), fmtSignedMoney(r.residualObligations || 0),
         fmtSignedMoney(r.grossObligations || 0), fmtSignedMoney(r.deobligations || 0),
         fmtN(r.distinctLinkedAwards || 0)]));
@@ -1403,6 +1576,14 @@ function obligationFYChart(data) {
   return render;
 }
 
+// Item 4 (display-improvements batch): a shown fiscal year with zero File C
+// rows linked to public awards gets an inline placeholder instead of a
+// header-only empty table (current FY empty, other shown years have rows)
+// or a silently absent card (no shown year has rows) -- see
+// obligationFlowTables below.
+const emptyFileCRowsNote = label =>
+  el("p", { class: "note empty-section", text: `No File C rows linked to public awards in ${label}.` });
+
 function obligationFlowTables(data) {
   const years = (data.fiscalYears || []).slice(-3).reverse();
   const yearRange = years.length > 1
@@ -1426,18 +1607,29 @@ function obligationFlowTables(data) {
     });
     return t;
   };
-  if (recipients.length) {
+  if (years.length) {
     const card = el("div", { class: "card" });
-    card.append(el("h2", { text: "Top recipients of award-attributed obligations" }),
-      el("p", { class: "note", text: `The ten leading recipients for FY${years[0].fy} are shown first. Rankings use linked File C only and exclude the File B − File C residual.` }));
+    card.append(el("h2", { text: "Top recipients of award-attributed obligations" }));
     const primary = recipients.filter(row => row.primary);
     const overflow = recipients.filter(row => !row.primary);
-    card.append(recipientTable(primary));
-    if (overflow.length) {
-      const details = el("details", { class: "detail-table" });
-      details.append(el("summary", { text: `Show ${overflow.length} more recipient rows (${yearRange})` }),
-        recipientTable(overflow));
-      card.append(details);
+    if (!recipients.length) {
+      // No File C rows linked to public awards in any of the shown years:
+      // the existing "shown first" note would promise rows that don't
+      // exist, so it is replaced outright by the placeholder.
+      card.append(emptyFileCRowsNote(yearRange));
+    } else {
+      // With no current-FY rows, drop the "shown first" sentence, which
+      // would promise rows the placeholder below says do not exist.
+      card.append(el("p", { class: "note", text: primary.length
+        ? `The ten leading recipients for FY${years[0].fy} are shown first. Rankings use linked File C only and exclude the File B − File C residual.`
+        : "Rankings use linked File C only and exclude the File B − File C residual." }));
+      card.append(primary.length ? recipientTable(primary) : emptyFileCRowsNote(`FY${years[0].fy}`));
+      if (overflow.length) {
+        const details = el("details", { class: "detail-table" });
+        details.append(el("summary", { text: `Show ${overflow.length} more recipient rows (${yearRange})` }),
+          recipientTable(overflow));
+        card.append(details);
+      }
     }
     $app.append(card);
   }
@@ -1450,10 +1642,18 @@ function obligationFlowTables(data) {
       flows.push({ fy: fy.fy, flow, direction: "Negative entry",
         primary: yearIndex === 0 && rank < 5 }));
   });
-  if (!flows.length) return;
+  if (!years.length) return;
   const card = el("div", { class: "card" });
-  card.append(el("h2", { text: "Largest award-attributed gross flows" }),
-    el("p", { class: "note", text: `The five largest positive and negative linked File C entries for FY${years[0].fy} are shown first, before same-award entries are netted within a reporting period. A negative entry may be a de-obligation or another downward adjustment; sign alone does not establish cancellation.` }));
+  card.append(el("h2", { text: "Largest award-attributed gross flows" }));
+  const hasCurrentFlows = flows.some(row => row.primary);
+  if (flows.length) {
+    card.append(el("p", { class: "note", text: hasCurrentFlows
+      ? `The five largest positive and negative linked File C entries for FY${years[0].fy} are shown first, before same-award entries are netted within a reporting period. A negative entry may be a de-obligation or another downward adjustment; sign alone does not establish cancellation.`
+      : "A negative entry may be a de-obligation or another downward adjustment; sign alone does not establish cancellation." }));
+  } else {
+    // No File C rows linked to public awards in any of the shown years.
+    card.append(emptyFileCRowsNote(yearRange));
+  }
   const flowTable = entries => {
     const t = el("table"), h = el("tr");
     ["FY / period", "Award", "Recipient", "Direction", "Amount"].forEach((x, i) =>
@@ -1477,12 +1677,14 @@ function obligationFlowTables(data) {
     return t;
   };
   const primary = flows.filter(row => row.primary), overflow = flows.filter(row => !row.primary);
-  card.append(flowTable(primary));
-  if (overflow.length) {
-    const details = el("details", { class: "detail-table" });
-    details.append(el("summary", { text: `Show ${overflow.length} more flow rows (${yearRange})` }),
-      flowTable(overflow));
-    card.append(details);
+  if (flows.length) {
+    card.append(primary.length ? flowTable(primary) : emptyFileCRowsNote(`FY${years[0].fy}`));
+    if (overflow.length) {
+      const details = el("details", { class: "detail-table" });
+      details.append(el("summary", { text: `Show ${overflow.length} more flow rows (${yearRange})` }),
+        flowTable(overflow));
+      card.append(details);
+    }
   }
   $app.append(card);
 }
@@ -1557,6 +1759,54 @@ function renderDataQualityNotes(notes) {
 function renderMethodologyNote(text) {
   if (!text) return;
   $app.append(el("p", { class: "sub", id: "methodologyNote", text }));
+}
+
+// ---------- validator-warning banner (Display-improvements batch item 10,
+// W17 reader review round 2) ----------
+// A raw validator string ("invariant violated: award id count shrank from
+// 2 to 1") reads to a policy audience as awards being cancelled, not as the
+// pipeline diagnostic it is. Every warning renders through this one shared
+// classifier so the register is plain language everywhere, with the raw
+// text kept, verbatim, behind a <details> for anyone who wants it. A
+// dedup notice ("N awards appear in more than one division...") is not a
+// warning at all -- it never reaches the banner; award pages fold it into
+// the neutral "Data quality notes" list via dedupNotices() (obligation
+// pages never emit this class).
+const WARNING_GLOSSES = [
+  ["dedup", /appears? in more than one division; counted once in this rollup/],
+  ["shrink", /invariant violated: award id count shrank from/],
+  ["retained", /stored awards not returned by this full re-pull; retained from the store/],
+  ["baseline", /pulled \d+ awards vs verified baseline/],
+];
+const WARNING_GLOSS_TEXT = {
+  shrink: "The stored award count went down since the previous pull. Stored awards are never deleted, so this flags a pipeline problem, not cancelled awards.",
+  retained: "Some awards already on record were not returned by the latest pull; they are kept, not removed.",
+  baseline: "A month's count came in below an independently verified tally; that month may be incomplete.",
+  other: "An automated consistency check flagged this pull; technical detail below.",
+};
+const WARNING_GLOSS_ORDER = ["shrink", "retained", "baseline", "other"];
+
+function classifyWarning(warning) {
+  for (const [key, test] of WARNING_GLOSSES) if (test.test(warning)) return key;
+  return "other";
+}
+
+const dedupNotices = warnings => (warnings || []).filter(w => classifyWarning(w) === "dedup");
+
+function renderWarnings(warnings) {
+  const rest = (warnings || []).filter(w => classifyWarning(w) !== "dedup");
+  if (!rest.length) return;
+  const present = WARNING_GLOSS_ORDER.filter(key => rest.some(w => classifyWarning(w) === key));
+  const b = el("div", { class: "banner" });
+  b.append(el("strong", { text: "Data quality warnings from the last pull: " }));
+  present.forEach(key => b.append(el("p", { text: WARNING_GLOSS_TEXT[key] })));
+  const details = el("details");
+  details.append(el("summary", { text: "Technical detail" }));
+  const ul = el("ul");
+  rest.forEach(w => ul.append(el("li", { text: w })));
+  details.append(ul);
+  b.append(details);
+  $app.append(b);
 }
 
 // Curated, reader-facing source-figure statements for specific fiscal-
@@ -1649,10 +1899,31 @@ function sourcedEpisodeHeading(episode) {
   return `${agency} ${typeLabel}${dateLabel ? ` — ${dateLabel}` : ""}`;
 }
 
-function episodeHeadingText(episode) {
+// Display-improvements batch item 6 (2026-09-23, W17 reader review #4):
+// repeated identical program-activity titles across episodes invite
+// double-counting, so a financial-observation episode's heading (no
+// sourcedEvents -- those keep sourcedEpisodeHeading's mechanical heading
+// above) adds the account and fiscal year it actually covers. Both are
+// derived from structured fields only, never from source language.
+function financialEpisodeHeading(episode, data) {
+  const registry = data?.coverage?.financialAccounts || [];
+  const accountAbbrev = (episode.federalAccounts || [])
+    .map(fa => registry.find(a => a.federalAccount === fa)?.abbrev)
+    .filter(Boolean)
+    .join(", ");
+  const fys = [...new Set((episode.financialObservations || [])
+    .map(o => (String(o.submissionPeriod || "").match(/^FY(\d{4})/) || [])[1])
+    .filter(Boolean))].sort();
+  const fyLabel = fys.length > 1 ? `FY${fys[0]}–FY${fys.at(-1)}`
+    : fys.length === 1 ? `FY${fys[0]}` : "";
+  return [episode.title || "Funding-action episode", accountAbbrev, fyLabel]
+    .filter(Boolean).join(" · ");
+}
+
+function episodeHeadingText(episode, data) {
   return (episode.sourcedEvents || []).length
     ? sourcedEpisodeHeading(episode)
-    : (episode.title || "Funding-action episode");
+    : financialEpisodeHeading(episode, data);
 }
 
 // Citation for a sourced event's attributed strings: the registered source's
@@ -1814,7 +2085,7 @@ function renderSentinelSourcedEvents(episode, card, data) {
 // overdue/not-overdue characterization -- age alone.
 function sentinelEpisodeCard(episode, data, container = $app) {
   const card = el("article", { class: "card" });
-  const heading = el("h2", { text: episodeHeadingText(episode) });
+  const heading = el("h2", { text: episodeHeadingText(episode, data) });
   const grossNegative = Number(episode.grossNegativeCents || 0);
   const netActivity = Number(episode.netActivityCents || 0);
   heading.append(el("span", { class: "sentinel-header-figures" },
@@ -1826,9 +2097,10 @@ function sentinelEpisodeCard(episode, data, container = $app) {
   card.append(heading);
   const observed = episode.firstObserved === episode.lastObserved
     ? episode.firstObserved : `${episode.firstObserved} through ${episode.lastObserved}`;
-  const age = episode.state === "unreviewed-signal"
-    ? ` · unreviewed for ${fmtN(episode.unreviewedAgeDays || 0)} days` : "";
-  card.append(el("p", { class: "note", text: `Observed ${observed || "date unavailable"}${age}` }));
+  // Display-improvements batch item 6 (W17 reader review #8): "unreviewed
+  // for N days" read as an SLA the page's own text disclaims (an
+  // unreviewed state is durable and carries no deadline) -- dropped.
+  card.append(el("p", { class: "note", text: `Observed ${observed || "date unavailable"}` }));
   if (netActivity > 0) {
     card.append(el("p", { class: "note",
       text: "State: net activity in this period was positive." }));
@@ -2038,12 +2310,41 @@ async function boot() {
     const gen = new Date(data.generated + "T12:00:00");
     const asOf = data.asOfPeriod || data.reportingPeriods?.at(-1)?.submissionPeriod || "latest available period";
     const totalNet = data.totalNetObligations ?? data.netObligations ?? 0;
+    // Item 7 (display-improvements batch): the stamp's all-years total sits
+    // directly above a current-FY tile with no horizon of its own -- label
+    // the fiscal-year span the total actually sums over.
+    const fyRange = (() => {
+      const fys = (data.fiscalYears || []).map(f => f.fy);
+      if (!fys.length) return "";
+      const a = Math.min(...fys), b = Math.max(...fys);
+      return a === b ? `FY${a}` : `FY${a}–FY${b} combined`;
+    })();
     document.getElementById("stamp").textContent =
-      `${fmtSignedMoney(totalNet)} net obligations across ${fmtN(data.distinctLinkedAwards || 0)} distinct linked awards · through ${submissionPeriodDisplay(asOf)} · last updated ${gen.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}`;
+      `${fmtSignedMoney(totalNet)} net obligations across ${fmtN(data.distinctLinkedAwards || 0)} distinct linked awards${fyRange ? `, ${fyRange}` : ""} · through ${submissionPeriodDisplay(asOf)} · last updated ${gen.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}`;
+    // Display-improvements batch item 9/12 (W17 reader review round 2): a
+    // root or agency obligation rollup with a stale account underneath
+    // gets the award-side stamp qualifier's obligation analogue (an
+    // account's own page already carries the "Not refreshed since" header
+    // note via renderStaleNote above, so this never doubles up with it).
+    if ((node.level === "root" || node.level === "agency")
+        && (data.children || []).some(c => c.refreshStatus?.status === "stale")) {
+      const staleChildren = (data.children || []).filter(c => c.refreshStatus?.status === "stale");
+      const k = typeof data.staleAccountCount === "number" && data.staleAccountCount > 0
+        ? data.staleAccountCount : staleChildren.length;
+      const dates = formatStaleDateRange(staleChildren.map(c => c.refreshStatus.staleSince));
+      document.getElementById("stamp").textContent +=
+        ` · includes ${k} ${k === 1 ? "account" : "accounts"} last refreshed ${dates} †`;
+    }
     if (node.level === "root") {
       // Phase 3.2d remediation decision 4 (fixed wording; count derived).
+      // Display-improvements batch item 3 (2026-09-23, owner-approved
+      // 2026-09-23): the award root no longer shows obligation figures at
+      // all (see the award branch below), so this landing subtitle now
+      // carries the not-additive disclosure itself, in place of the note
+      // that used to sit beside the award root's (now-removed) compact
+      // obligation tiles.
       $app.append(el("p", { class: "sub", id: "obligationsSubtitle",
-        text: `Obligations from ${fmtN(data.accountCount ?? 0)} registered science-related federal accounts, including defense RDT&E.` }));
+        text: `Obligations from ${fmtN(data.accountCount ?? 0)} registered science-related federal accounts, including defense RDT&E. They are separate from, and not additive to, the award totals on the award dashboards. Negative entries can include routine corrections or reductions; sign alone does not establish a cancellation.` }));
     }
     // Phase 3.2d remediation decision 3: an agency-neutral registry field is
     // the only switch -- present on every DoD account/PA dashboard, absent
@@ -2055,12 +2356,7 @@ async function boot() {
     // obligationChildrenCard), which is the only place a reader browsing
     // above the account level would otherwise miss the disclosure.
     if (node.level === "account") renderStaleNote(data.freshness);
-    if (data.warnings?.length) {
-      const b = el("div", { class: "banner" });
-      b.append(el("strong", { text: "Data quality warnings from the last pull: " }),
-        document.createTextNode(data.warnings.join(" · ")));
-      $app.append(b);
-    }
+    renderWarnings(data.warnings);
     renderObligationNotes(data);
     if (data.dataComplete === false && !data.reportingPeriods?.length) {
       document.getElementById("stamp").textContent = "Initial obligation-ledger pull pending";
@@ -2107,16 +2403,29 @@ async function boot() {
   const lastUpdated = unitStale ? new Date(data.refreshStatus.staleSince + "T12:00:00") : gen;
   document.getElementById("stamp").textContent =
     `${fmtN(data.totalAwards)} award${data.totalAwards === 1 ? "" : "s"} since Oct 2014 · last updated ${lastUpdated.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })} · refreshes weekly`;
+  // Display-improvements batch item 9/12 (W17 reader review round 2): a
+  // multi-leaf rollup (refreshStatus.status "stale" but no `.unit` -- the
+  // single-stale-unit case above already names its own snapshot date)
+  // gets a stamp qualifier naming how many units and since when, so a
+  // reader who never scrolls to the landing table or tiles still sees it.
+  if (data.refreshStatus?.status === "stale" && !data.refreshStatus.unit) {
+    const staleChildren = (data.children || []).filter(c => c.refreshStatus?.status === "stale");
+    const k = data.refreshStatus.staleUnits?.length ?? staleChildren.length;
+    const dates = formatStaleDateRange(staleChildren.length
+      ? staleChildren.map(c => c.refreshStatus.staleSince)
+      : [data.refreshStatus.staleSince]);
+    document.getElementById("stamp").textContent +=
+      ` · includes ${k} ${k === 1 ? "unit" : "units"} last refreshed ${dates} †`;
+  }
   // W1's award-ledger methodology line and data-quality notes render near
   // the header, whenever present, unchanged from the dashboard's own text.
   renderMethodologyNote(data.methodologyNote);
-  renderDataQualityNotes(data.dataQualityNotes);
+  // Item 10: a dedup notice ("N awards appear in more than one division;
+  // counted once in this rollup") is not a warning -- it joins the neutral
+  // "Data quality notes" list, rendered once, and never reaches the banner.
+  renderDataQualityNotes([...(data.dataQualityNotes || []), ...dedupNotices(data.warnings)]);
   renderUnitStaleNote(data.refreshStatus);
-  if (data.warnings?.length) {
-    const b = el("div", { class: "banner" });
-    b.append(el("strong", { text: "Data quality warnings from the last pull: " }), document.createTextNode(data.warnings.join(" · ")));
-    $app.append(b);
-  }
+  renderWarnings(data.warnings);
   if (data.dataComplete === false && data.totalAwards === 0) {
     document.getElementById("stamp").textContent =
       "Initial data pull pending · refreshes weekly";
@@ -2141,30 +2450,24 @@ async function boot() {
     $app.append(el("p", { class: "sub", id: "coverageLine",
       text: `Award ledger: NIH and NSF, ${fmtN(unitCount)} units. Obligation ledger: ${fmtN(accountCount)} registered federal accounts across ${fmtN(agencyCount)} agencies.` }));
   }
+  // Display-improvements batch item 3 (2026-09-23, owner-approved): each
+  // tab shows one kind of figure. The award root used to also show a
+  // compact obligation tile group and an obligation account table below
+  // the award data -- both removed; a link card (no figures) takes the
+  // table's place so the obligation ledger stays discoverable.
   tiles(data, node.level === "root" ? {
     id: "award-summary-heading",
     heading: "Award activity",
   } : {});
-  if (obligationSummary?.kind === "obligations") {
-    const obligationGenerated = new Date(obligationSummary.generated + "T12:00:00");
-    const obligationAsOf = obligationSummary.asOfPeriod || "latest available period";
-    const obligationScope = obligationSummary.children?.length === 1
-      ? obligationSummary.children[0].name : "Appropriations";
-    obligationTiles(obligationSummary, {
-      id: "obligation-summary-heading",
-      heading: `${obligationScope} obligations`,
-      // Phase 3.2d remediation decision 4: the fixed subtitle sentence
-      // (count derived) leads the root obligation tile's note.
-      note: `Obligations from ${fmtN(obligationSummary.accountCount ?? 0)} registered science-related federal accounts, including defense RDT&E. Signed account-ledger measures through ${submissionPeriodDisplay(obligationAsOf)}; updated ${obligationGenerated.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}. They are separate from, and not additive to, the award totals above. Negative entries can include routine corrections or reductions; sign alone does not establish a cancellation.`,
-      compact: true,
-    });
-  }
   if (indexData) childrenCard(data);
   if (obligationSummary?.kind === "obligations") {
-    const obligationGenerated = new Date(obligationSummary.generated + "T12:00:00");
-    const obligationAsOf = obligationSummary.asOfPeriod || "latest available period";
-    obligationChildrenCard(obligationSummary, "Appropriations obligation dashboards",
-      `Account-level signed obligations are separate from award totals because the measures are not additive or directly comparable. Data through ${submissionPeriodDisplay(obligationAsOf)}; updated ${obligationGenerated.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}.`);
+    const linkCard = el("div", { class: "card", id: "obligationLinkCard" });
+    linkCard.append(el("h2", { text: "Appropriations obligations" }));
+    linkCard.append(el("p", { class: "note",
+      text: "Account-level signed obligations are separate from award totals because the measures are not additive or directly comparable." }));
+    linkCard.append(el("p", {},
+      el("a", { href: "index.html?org=obligations", text: "Open the appropriations obligation dashboards" })));
+    $app.append(linkCard);
   }
   const renders = [];
   // Sparse/dormant units: skip both cumulative cards entirely rather than
@@ -2176,7 +2479,7 @@ async function boot() {
   });
   if (cumHasData) {
     renders.push(
-      cumulativeChart(data, "awards", "Cumulative awards through the fiscal year",
+      cumulativeChart(data, "awards", `Cumulative ${awardCountNoun(data).toLowerCase()} through the fiscal year`,
         "Running FY-to-date total, October through September, one line per year. Read the endpoint of the year in progress against the other lines at the same point in the year — no visual integration needed. Minor ticks are weeks.",
         fmtN, fmtN),
       cumulativeChart(data, "dollars", "Cumulative award dollars through the fiscal year",
