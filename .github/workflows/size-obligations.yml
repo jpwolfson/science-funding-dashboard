@@ -1,0 +1,87 @@
+name: Size obligation account downloads
+
+# Phase 3.2e: measure File B/File C custom-account download cost for an
+# account-year before registering it (scripts/size_obligation_account.py).
+# The dev container has no egress to USAspending, so the probe runs here and
+# commits its JSON report to reference/sizing/ on the triggering branch. It
+# never touches the obligation registry, baselines, or stores.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["claude/**"]
+    paths: [".github/triggers/size-obligations.json"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: obligation-sizing-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      timeout: ${{ steps.plan.outputs.timeout }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: plan
+        shell: python
+        run: |
+          import json, os
+          spec = json.load(open(".github/triggers/size-obligations.json"))
+          with open(os.environ["GITHUB_OUTPUT"], "a") as output:
+              output.write("matrix=" + json.dumps({"include": spec["jobs"]}) + "\n")
+              output.write(f"timeout={spec.get('timeout_hours', 5.5)}\n")
+
+  size:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    strategy:
+      fail-fast: false
+      # Production pulls are serialized against the shared USAspending
+      # generator; measure under the same condition.
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      PYTHONUNBUFFERED: "1"
+      BRANCH: ${{ github.ref_name }}
+      REPORT: reference/sizing/${{ matrix.account }}-FY${{ matrix.fy }}P${{ matrix.period }}.json
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Measure ${{ matrix.account }} FY${{ matrix.fy }} P${{ matrix.period }}
+        run: |
+          /usr/bin/time -v python scripts/size_obligation_account.py \
+            --federal-account "${{ matrix.account }}" \
+            --fy "${{ matrix.fy }}" --period "${{ matrix.period }}" \
+            --timeout-hours "${{ needs.plan.outputs.timeout }}" \
+            --report "$REPORT"
+      - name: Retain the report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sizing-${{ matrix.account }}-FY${{ matrix.fy }}P${{ matrix.period }}
+          path: reference/sizing
+          if-no-files-found: warn
+      - name: Commit the report to the branch
+        if: always()
+        run: |
+          [ -f "$REPORT" ] || exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$REPORT"
+          git diff --cached --quiet && exit 0
+          git commit -m "Sizing report $(basename "$REPORT") [skip ci]"
+          for attempt in 1 2 3 4 5; do
+            git push origin "HEAD:$BRANCH" && exit 0
+            git pull --rebase origin "$BRANCH"
+          done
+          exit 1
