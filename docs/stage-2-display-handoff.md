@@ -106,7 +106,57 @@ the owner replies.
 
 ## Decisions
 
-(pending)
+Owner reply of 2026-09-23 ~18:15 UTC, verbatim in substance:
+
+- **0 (#88): go with the recommendation.** The fix runs as its own session
+  (`session_01NJ9zrbVNzdpZDKQG78xx8n`), started 18:22 UTC. Its PR to `main`
+  carries a before/after diff for owner review.
+- **1 (item 3): A, with an addition.** "Each tab should have one kind of
+  figure. When you remove the obligations from the awards page, take the
+  subtitle language and move it onto the obligations page (fold it in in a
+  reasonable fashion)." Approval follows the coordinator's confirmation that
+  this is additive to decision 4 (confirmation and exact texts below).
+- **2 (item 6): recommendations approved.** 6a drops the counter; 6b
+  headings gain the account and fiscal year from structured fields.
+- **3 (item 8): approved.** Caption A, exact text as in the memo.
+- **4 (item 10): approved.** A: (i) de-duplication notices move to the
+  neutral notes block; (ii) real warnings are glossed, with the raw text in
+  a "technical detail" disclosure.
+- **5 (stamp qualifier): approved.** A: "· includes N unit(s) last
+  refreshed <date> †" on rollup stamps.
+
+**Item 3 confirmation sent to the owner (awaiting the final OK on exact
+text):**
+- Award root: the obligation tile group and the "Appropriations obligation
+  dashboards" table are removed. A link card replaces them, with no figures:
+  heading "Appropriations obligations"; text "Account-level signed
+  obligations are separate from award totals because the measures are not
+  additive or directly comparable." (the table's existing note sentence);
+  and a link "Open the appropriations obligation dashboards". The coverage
+  line stays.
+- Obligations landing subtitle (the decision-4 sentence stays first,
+  verbatim; the award-root tile note's remaining sentences are folded in):
+  "Obligations from 53 registered science-related federal accounts,
+  including defense RDT&E. They are separate from, and not additive to, the
+  award totals on the award dashboards. Negative entries can include routine
+  corrections or reductions; sign alone does not establish a cancellation."
+  The tile note's "Signed account-ledger measures through …; updated …"
+  clause is not moved, because the landing stamp already states the period
+  and date.
+
+**Owner message, 2026-09-23 ~18:50 UTC:** "You are authorized to merge PRs
+that are fully greenlit. I do not need to be in the loop at this stage."
+The coordinator takes this as (a) authority to merge item PRs, the #88
+data-fix PR, and the final Stage 2 PR to `main` once each is fully green
+(and outside the reconcile window for `main`), and (b) the go-ahead on
+item 3's confirmed text above.
+
+**Item 8 mechanism:** the caption is carried as a curated `publicNote` on
+the `dhs/cisa-rd` baseline's FY2025 period-12 `periodNotes` entry, which is
+the W16 mechanism (baseline → `rollup_obligations.py` → account
+`dashboard.json` → "Notes on source figures"). It renders as "FY2025, period
+12: <approved text>", and item 5 adds a "see note" guide at FY2025 P12. No
+code path is agency-conditional.
 
 ## Log
 

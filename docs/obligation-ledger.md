@@ -364,6 +364,12 @@ site renders it, when present, as a "Notes on source figures" block
 directly below the fiscal-year period table / cumulative chart on that
 account's page (`site/index.html`'s `renderPeriodNotes`).
 
+A `periodNotes` entry need not answer a drop-check finding. A
+fiscal-year-level source-figure statement is anchored at that year's final
+period (12). The first such entry is the owner-approved caption on
+`dhs/cisa-rd` FY2025 (Stage 2 item 8, 2026-09-23). The period chart marks
+a noted period with a "see note" guide (Stage 2 item 5).
+
 **Baseline-pin advancement.** A partial fiscal year's baseline pin
 (`asOfPeriod`, `obligationsCents`) may only advance onto a period File B
 classifies `reported` — a `notReported` period never becomes the pin's
