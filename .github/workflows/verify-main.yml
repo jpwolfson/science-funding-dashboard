@@ -53,9 +53,14 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      # The step is allowed to fail the job: a red run in the Actions list
+      # is the visible signal. (Until 2026-09-23 this step was
+      # `continue-on-error`, so every run read green and the only signal
+      # was a comment on the auto-filed issue -- which is how five red
+      # fast-tier runs after the 2026-09-21 scheduled refresh were misread
+      # as passes.) The issue step below still runs on failure.
       - name: Verify — fast tier against the committed main tree
         id: verify
-        continue-on-error: true
         run: python scripts/verify.py --tier fast --json _verify-fast.json
       - name: Upload verify --tier fast JSON
         if: always()
@@ -66,7 +71,7 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
       - name: File or update an issue naming the failing checks
-        if: steps.verify.outcome == 'failure'
+        if: ${{ failure() && steps.verify.outcome == 'failure' }}
         uses: actions/github-script@v7
         env:
           RESULT_PATH: _verify-fast.json
