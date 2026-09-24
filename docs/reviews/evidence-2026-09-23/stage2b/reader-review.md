@@ -298,3 +298,9 @@ neither blocks release under rule 5. H1 is fixed anyway.
 | 7 | Low | Pre-existing (Stage 2 item 8 design; the period chart carries "see note"). Recorded. |
 | 8 | Low | Not adopted: the approved sentence is about award counts; an obligations equivalent would be new wording (owner layer). Recorded. |
 | 9 | Low | "RESERVED" is now quoted and marked "source description" by item 18, which is the approved treatment of source text. No change. |
+
+**Owner decisions, 2026-09-24:** H2 — recommendation approved: no change
+beyond item 18 (the agency's own text stays quoted and marked "source
+description"). Also: the sentinel source-status wording becomes "source dated
+…" (the DOE source is an announcement, not a list), and the obligation
+reporting lag is labeled on every obligation page.

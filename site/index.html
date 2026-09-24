@@ -1314,6 +1314,7 @@ function obligationTiles(data, options = {}) {
 }
 
 const NOT_REPORTED_AT_PULL = "not reported at pull";
+const OBLIGATION_REPORTING_LAG_NOTE = "Reporting lag: each update collects reporting periods through two months before the month of the update, so the latest month or two are not yet shown. Agencies file each month's figures with USAspending after the month closes, and a period collected sooner can arrive incomplete.";
 const OBLIGATION_CADENCE_CAPTION = "obligations are reported in monthly agency submission periods; steps reflect reporting cadence, not action dates.";
 const svgTitle = text => {
   const node = document.createElementNS("http://www.w3.org/2000/svg", "title");
@@ -2025,9 +2026,9 @@ function sentinelTiles(data) {
 
 // Stage 2b item 21a (2026-09-23, owner-approved): a reader has no use for a
 // raw status word or a machine timestamp -- the Status cell instead reads
-// as dates ("source list dated <date>; checked <date>"), reusing the site's
+// as dates ("source dated <date>; checked <date>"), reusing the site's
 // existing long-date format. A non-"current" source keeps its status word
-// as a prefix ("stale: source list dated …") so the distinction is not
+// as a prefix ("stale: source dated …") so the distinction is not
 // lost, and the raw "Source as of" / "Last accepted" / "Last attempt"
 // timestamp columns are dropped so no raw ISO timestamp remains on the page.
 function humanDateOnly(value) {
@@ -2055,7 +2056,7 @@ function sentinelSourceCard(data) {
     table.append(head);
     statuses.forEach(source => {
       const asOfText = source.sourceAsOf
-        ? `source list dated ${humanDateOnly(source.sourceAsOf)}` : "source list date not stated";
+        ? `source dated ${humanDateOnly(source.sourceAsOf)}` : "source date not stated";
       const checkedText = source.lastAttemptAt
         ? `checked ${humanDateOnly(source.lastAttemptAt)}` : "checked (not attempted)";
       const statusText = `${asOfText}; ${checkedText}`;
@@ -2405,6 +2406,13 @@ async function boot() {
     })();
     document.getElementById("stamp").textContent =
       `${fmtSignedMoney(totalNet)} net obligations across ${fmtN(data.distinctLinkedAwards || 0)} distinct linked awards${fyRange ? `, ${fyRange}` : ""} · through ${submissionPeriodDisplay(asOf)} · last updated ${gen.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}`;
+    // Owner request 2026-09-24: label the refresh plan's reporting lag.
+    // The text mirrors config/obligation_accounts.json
+    // refreshDefaults.reportingLagMonths (2, no per-account overrides);
+    // tests/test_site_contract.py pins the two together.
+    document.getElementById("reportingLagNote")?.remove();
+    document.getElementById("stamp").after(el("p", { class: "note", id: "reportingLagNote",
+      text: OBLIGATION_REPORTING_LAG_NOTE }));
     // Display-improvements batch item 9/12 (W17 reader review round 2): a
     // root or agency obligation rollup with a stale account underneath
     // gets the award-side stamp qualifier's obligation analogue (an

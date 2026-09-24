@@ -2,51 +2,51 @@
  "schemaVersion": 1,
  "tier": "fast",
  "account": null,
- "generatedAt": "2026-09-24T00:13:47.751221+00:00",
- "durationSeconds": 536.716,
+ "generatedAt": "2026-09-24T02:38:05.326925+00:00",
+ "durationSeconds": 545.757,
  "passed": true,
  "checks": [
   {
    "name": "unit-tests",
    "passed": true,
    "evidence": "OK (skipped=1)",
-   "seconds": 167.592
+   "seconds": 186.043
   },
   {
    "name": "validate-obligations",
    "passed": true,
    "evidence": "Obligation ledger validation passed (empty stores allowed)",
-   "seconds": 304.242
+   "seconds": 288.268
   },
   {
    "name": "validate-nih",
    "passed": true,
    "evidence": "NIH validation passed: 28 units, 723486 unique awards",
-   "seconds": 7.295
+   "seconds": 10.094
   },
   {
    "name": "validate-usaspending-calibration",
    "passed": true,
    "evidence": "USAspending calibration gate passed (status: ready)",
-   "seconds": 0.027
+   "seconds": 0.032
   },
   {
    "name": "validate-funding-sentinel",
    "passed": true,
    "evidence": "Funding-action sentinel validation passed",
-   "seconds": 56.344
+   "seconds": 60.21
   },
   {
    "name": "verify-dms-baseline",
    "passed": true,
    "evidence": "DMS baseline verification PASSED: 141 months exact, 2 trailing months >= baseline, 11620 awards in store.",
-   "seconds": 0.109
+   "seconds": 0.081
   },
   {
    "name": "validate-award-invariants",
    "passed": true,
    "evidence": "Award invariant validation passed (132 award-ledger dashboard(s): totalAwards == sum(fiscalYears) == sum(monthly); fyCumulative endpoints exact; root == sum(children))",
-   "seconds": 1.107
+   "seconds": 1.029
   }
  ],
  "footprint": {
@@ -58,22 +58,22 @@
    "adapters": 190512,
    "config": 174939,
    "data": 680158978,
-   "docs": 32714325,
+   "docs": 35074482,
    "reference": 632353,
    "scripts": 386670,
-   "site": 143053,
-   "tests": 644887
+   "site": 143812,
+   "tests": 645684
   },
-  "totalTrackedBytes": 715120218,
+  "totalTrackedBytes": 717481931,
   "gzippedStoreBytes": 369805227,
   "pagesArtifact": {
    "fileCount": 1887,
-   "totalBytes": 346757045,
+   "totalBytes": 346757804,
    "status": "ok",
    "warningThresholdBytes": 850000000,
    "stopThresholdBytes": 950000000,
    "pagesLimitBytes": 1000000000,
-   "headroomBytes": 653242955,
+   "headroomBytes": 653242196,
    "excludedFromArtifact": "data/obligations/**/events/*.csv.gz"
   },
   "trajectory": {

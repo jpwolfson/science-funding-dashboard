@@ -91,8 +91,27 @@ Anchored at `reference/dod_army_rdte_obligation_baseline.json` FY2022
 ## Where things stand (cold-start pointer)
 
 - Items 12, 15–21 shipped; 14 and 22 no change by approval; 13 is 3.2e's.
-- Open owner follow-up (not a Stage 2b gate): release review H2 — whether
-  quoted source descriptions carrying agency disclaimers (USDA NIFA) get any
-  further treatment beyond "source description".
+- Release review H2 closed by the owner (2026-09-24): no change beyond item 18.
 - `claude/stage2b-army-repull` is evidence only (re-pull snapshot `65adafb0`);
   it can be deleted after merge.
+
+## Post-merge follow-ups (2026-09-24, PR after #95)
+
+Owner, 2026-09-24: "H2 rec approved. Yes, 'source dated' seems more accurate.
+Let's just have the reporting lag clearly labeled, with brief explanation for
+2 month choice."
+
+- H2: no change (disposition recorded in the reader review).
+- Sentinel source status: "source list dated …" → "source dated …" (and
+  "source date not stated").
+- Reporting lag: a labeled note after the stamp on every obligation page:
+  "Reporting lag: each update collects reporting periods through two months
+  before the month of the update, so the latest month or two are not yet
+  shown. Agencies file each month's figures with USAspending after the month
+  closes, and a period collected sooner can arrive incomplete." The
+  explanation states only what the planner does and what the ledger has
+  observed (e.g. W10: `doe/sc` P10 came back at 39 rows against 149 at P09
+  when pulled early); no filing deadline is claimed. A contract test pins the
+  text to `refreshDefaults.reportingLagMonths == 2` with no per-account
+  overrides, so a registry change fails the test instead of leaving the page
+  wrong.
