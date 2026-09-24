@@ -153,11 +153,31 @@ all 27 are registered.
 
 ### Backfill plan
 
-27 accounts × FY2017–FY2026 = 270 account-year jobs, above GitHub's
-256-job matrix limit. Run two sequential `mode: full` runs on
-`claude/phase-3.2e-nih` (≈13/14 accounts, ≈130–140 serialized jobs,
-≈36 h each). Each run's reconcile commits an atomic snapshot to the branch;
-the second run's reconcile includes the first's committed stores.
+26 accounts × FY2017–FY2026 + ARPA-H FY2022–FY2026 = 265 account-year jobs,
+above GitHub's 256-job matrix limit. Reconcile's `validate_obligations`
+(require_data) rejects any registered account without events, so a partial
+run cannot coexist with all 27 registered. Staged exactly as DoD was:
+
+- **Stage 1 (group A, 13 accounts, 130 jobs):** a single commit removes the
+  14 group-B registry entries (pure deletion, byte-preserving; baselines
+  stay on disk), then a separate trigger commit starts `mode: full` for
+  `hhs/nih-nlm, -bf, -od, -niehs, -ncats, -ninds, -ninr, -nimh, -nccih,
+  -fic, -nia, -nci, -nhlbi`. Stage-1 state: registry 471/471; the reconcile
+  unit set passes (69 tests; the exact-27 scope test skips).
+  `test_site_contract` (expects 80) is red on the branch until stage 2. That
+  is expected and branch-only.
+- **Stage 2 (group B, 14 accounts incl. ARPA-H, 135 jobs):** `git revert`
+  of the stage-1 removal commit restores group B byte-for-byte; trigger
+  `mode: full` for group B. Run 2's reconcile keeps group A's committed
+  stores.
+- Then restore the trigger to weekly/all, merge `main` (for Stage 2b's
+  `site/index.html` changes), remove the temporary NIH disclosure, run
+  release gates, and open the PR.
+
+Registry generation completed at `0e355c2` (27/27: registry 569/569, fast
+7/7, planner 265 jobs; ARPA-H PAC 0001 + PARK 61U701UBGJ3 folded into one
+PA; NIDDK `0031` Type 1 Diabetes registered separately; ZERO OBLIGATION
+aliases on NIA/NCI/NIDDK/NIAID).
 
 ## Log
 
@@ -167,11 +187,12 @@ the second run's reconcile includes the first's committed stores.
 | 2026-09-23 22:01 | Test run 35925926684 on probe commit | green (fast tier 9.5 min on CI) |
 | 2026-09-23 22:40 | Discovery run 35929645412 triggered | chunks 1–2 clean; chunk 3 pending |
 | 2026-09-24 01:15 | Registry worker: 9 accounts, File A pins | `claude/phase-3.2e-nih` @ 55b4630 |
+| 2026-09-24 05:45 | Discovery chunk 3 | clean; ARPA-H first FY2022 P07 |
+| 2026-09-24 06:40 | Registry 27/27 | `0e355c2`; registry 569/569, fast 7/7 |
+| 2026-09-24 | Stage 1 removal + group-A trigger pushed | backfill run 1 pending |
 
 ## Next action
 
-When chunk 3 lands (~05:40 UTC 2026-09-24): sanity-check it (ARPA-H
-`075-0837` availability especially); have the worker merge
-`origin/claude/phase-3.2e-nih-sizing` into `claude/phase-3.2e-nih` and
-regenerate all 27; verify registry/fast; then start backfill run 1 via
-`.github/triggers/update-obligations.json`.
+Monitor backfill run 1 (group A, 130 serialized jobs, ~36 h) on
+`claude/phase-3.2e-nih`. When its reconcile commits: verify exactness and
+zero warnings, then stage 2 (revert the removal commit + group-B trigger).
