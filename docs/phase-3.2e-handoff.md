@@ -172,6 +172,13 @@ run cannot coexist with all 27 registered. Staged exactly as DoD was:
   do not `git revert` it; confirm the diff is pure additions); trigger
   `mode: full` for group B. Run 2's reconcile keeps group A's committed
   stores.
+- **Ordering constraint:** `main` has since edited
+  `config/obligation_accounts.json` (Stage 2b #95 added the temporary NIH
+  `interpretationNote` to `hhs/aspr-rd-procurement` and `hhs/ahrq`). Do the
+  stage-2 `git checkout 0e355c25 -- config/...` restore BEFORE merging `main`,
+  or it would silently drop main's edits. After merging `main`, regenerate
+  any conflicted generated files (obligation rollups/dashboards) with
+  `scripts/rollup_obligations.py`, never by hand.
 - Then restore the trigger to weekly/all, merge `main` (for Stage 2b's
   `site/index.html` changes), remove the temporary NIH disclosure, run
   release gates, and open the PR.
@@ -191,6 +198,7 @@ aliases on NIA/NCI/NIDDK/NIAID).
 | 2026-09-24 01:15 | Registry worker: 9 accounts, File A pins | `claude/phase-3.2e-nih` @ 55b4630 |
 | 2026-09-24 05:45 | Discovery chunk 3 | clean; ARPA-H first FY2022 P07 |
 | 2026-09-24 06:40 | Registry 27/27 | `0e355c2`; registry 569/569, fast 7/7 |
+| 2026-09-24 11:05 | Run 1 check | 0 failed jobs; `main` at `8b8a13b` (Stage 2b #95 merged; disclosure present in site/index.html:2431, registry interpretationNote ×2, test_site_contract.py:219,1036) |
 | 2026-09-24 06:11 | Stage 1 `58945ab` + trigger `5869069`: backfill run 1 [`35963288599`](https://github.com/jpwolfson/science-funding-dashboard/actions/runs/35963288599) | running; first pull (B&F FY2018) green in 16 min; reconcile expected ~2026-09-25 17:00 |
 
 ## Next action
