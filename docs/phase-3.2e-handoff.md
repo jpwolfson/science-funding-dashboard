@@ -166,8 +166,10 @@ run cannot coexist with all 27 registered. Staged exactly as DoD was:
   unit set passes (69 tests; the exact-27 scope test skips).
   `test_site_contract` (expects 80) is red on the branch until stage 2. That
   is expected and branch-only.
-- **Stage 2 (group B, 14 accounts incl. ARPA-H, 135 jobs):** `git revert`
-  of the stage-1 removal commit restores group B byte-for-byte; trigger
+- **Stage 2 (group B, 14 accounts incl. ARPA-H, 135 jobs):**
+  `git checkout 0e355c25 -- config/obligation_accounts.json` restores group B
+  byte-for-byte (the stage-1 commit `58945ab` also carries handoff edits, so
+  do not `git revert` it; confirm the diff is pure additions); trigger
   `mode: full` for group B. Run 2's reconcile keeps group A's committed
   stores.
 - Then restore the trigger to weekly/all, merge `main` (for Stage 2b's
@@ -195,4 +197,4 @@ aliases on NIA/NCI/NIDDK/NIAID).
 
 Monitor backfill run 1 (group A, 130 serialized jobs, ~36 h) on
 `claude/phase-3.2e-nih`. When its reconcile commits: verify exactness and
-zero warnings, then stage 2 (revert the removal commit + group-B trigger).
+zero warnings, then stage 2 (restore the registry from `0e355c25` + group-B trigger).
