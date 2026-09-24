@@ -2,60 +2,60 @@
  "schemaVersion": 1,
  "tier": "rendered",
  "account": null,
- "generatedAt": "2026-09-24T00:04:50.735004+00:00",
- "durationSeconds": 145.73,
+ "generatedAt": "2026-09-24T02:28:59.288157+00:00",
+ "durationSeconds": 169.307,
  "passed": true,
  "checks": [
   {
    "name": "smoke-obligation-pages",
    "passed": true,
    "evidence": "Rendered obligation page matrix passed (5 cases)",
-   "seconds": 4.156
+   "seconds": 37.252
   },
   {
    "name": "smoke-obligation-pages-all-accounts",
    "passed": true,
    "evidence": "Rendered all-accounts obligation page matrix passed (212 cases)",
-   "seconds": 104.848
+   "seconds": 98.473
   },
   {
    "name": "smoke-pages-public-links",
    "passed": true,
    "evidence": "Rendered assembled-artifact public-link matrix passed (59 cases)",
-   "seconds": 31.861
+   "seconds": 29.325
   },
   {
    "name": "smoke-sentinel-page",
    "passed": true,
    "evidence": "Rendered funding-action sentinel passed (2 cases)",
-   "seconds": 4.865
+   "seconds": 4.257
   }
  ],
  "footprint": {
   "perTreeBytes": {
    ".github": 52226,
    ".gitignore": 70,
-   "CLAUDE.md": 14593,
+   "CLAUDE.md": 15142,
    "README.md": 7063,
    "adapters": 190512,
    "config": 174939,
    "data": 680158978,
-   "docs": 31128599,
+   "docs": 35074481,
    "reference": 632353,
    "scripts": 386670,
-   "site": 143053,
-   "tests": 644887
+   "site": 143812,
+   "tests": 645684
   },
-  "totalTrackedBytes": 713533943,
+  "totalTrackedBytes": 717481930,
   "gzippedStoreBytes": 369805227,
   "pagesArtifact": {
    "fileCount": 1887,
-   "totalBytes": 346757045,
+   "totalBytes": 346757804,
    "status": "ok",
    "warningThresholdBytes": 850000000,
    "stopThresholdBytes": 950000000,
    "pagesLimitBytes": 1000000000,
-   "headroomBytes": 653242955,
+   "headroomBytes": 653242196,
    "excludedFromArtifact": "data/obligations/**/events/*.csv.gz"
   },
   "trajectory": {
