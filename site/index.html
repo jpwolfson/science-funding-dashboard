@@ -144,6 +144,10 @@
   .attributed-quote { font-style: italic; color: var(--ink); }
   .attribution { font-style: normal; color: var(--muted); }
   .attribution a { color: var(--s1); }
+  .source-tag {
+    display: inline-block; margin-left: 6px; font-style: normal;
+    font-size: 11px; color: var(--muted);
+  }
   a { color: var(--s1); }
   .axis-text { fill: var(--muted); font-size: 11.5px; }
   .dlabel { fill: var(--ink-2); font-size: 12px; font-weight: 550; paint-order: stroke; stroke: var(--surface); stroke-width: 3px; stroke-linejoin: round; }
@@ -831,8 +835,13 @@ function tiles(data, options = {}) {
     }
     row.append(tile);
   }
-  appendTileGroup(row, { ...options,
-    footnote: staleChildren.length ? staleFootnote(staleChildren, { id: "tileStaleFootnotes" }) : null });
+  // Stage 2b item 19, release reader review H1: the lapse sentence also
+  // sits directly under the headline tiles whose Oct–Jul window contains
+  // it, not only in chart captions further down the page.
+  const footnotes = document.createDocumentFragment();
+  if (staleChildren.length) footnotes.append(staleFootnote(staleChildren, { id: "tileStaleFootnotes" }));
+  if (cur.fy === 2026) footnotes.append(el("p", { class: "note", id: "tileLapseNote", text: APPROPRIATIONS_LAPSE_NOTE }));
+  appendTileGroup(row, { ...options, footnote: footnotes.childNodes.length ? footnotes : null });
 }
 
 // The as-of date of an award dashboard's figures: a single stale unit's
@@ -855,6 +864,15 @@ function formatStaleDateRange(dates) {
 }
 
 // ---------- chart 1: monthly line ----------
+// Stage 2b item 19 (owner-approved 2026-09-23): an external fact stated
+// beside the award charts, not attributed as the cause of the low counts.
+// Dates verified against CRS R48765 (P.L. 119-37, signed November 12, 2025,
+// ended the lapse "from October 1, 2025, through November 11, 2025").
+const APPROPRIATIONS_LAPSE_NOTE = "October 1 – November 11, 2025 was a lapse in federal appropriations; award counts in those months are low.";
+const monthlyCoversLapse = data => (data.monthly || []).some(p => p.month === "2025-10");
+const cumulativeCoversLapse = data => (data.fyCumulative || []).some(s => s.fy === 2026);
+const withLapseNote = (note, covers) => covers ? `${note} ${APPROPRIATIONS_LAPSE_NOTE}` : note;
+
 function monthlyChart(data) {
   const pts = data.monthly || [];
   // Stage 2 item 11 (W17 reader review): the series ends on the still-accruing current month.
@@ -869,7 +887,8 @@ function monthlyChart(data) {
   const note = anyInProgress
     ? "Every month since October 2014. Months with zero awards are shown as zero. The last point is the current month to date — a partial count, drawn dashed with an open marker."
     : "Every month since October 2014. Months with zero awards are shown as zero.";
-  const { card, plot, tip } = makeCard(`${awardCountNoun(data)} per month`, note);
+  const { card, plot, tip } = makeCard(`${awardCountNoun(data)} per month`,
+    withLapseNote(note, monthlyCoversLapse(data)));
   function render() {
     plot.querySelector("svg")?.remove();
     const f = frame(plot, 300, 46, 14);
@@ -1654,6 +1673,17 @@ function obligationFlowTables(data) {
     // No File C rows linked to public awards in any of the shown years.
     card.append(emptyFileCRowsNote(yearRange));
   }
+  // Stage 2b item 18 (2026-09-23, owner-approved): `flow.title` is File C's
+  // own `prime_award_base_transaction_description` field, not dashboard-
+  // composed text -- reader review found an agency disclaimer embedded in
+  // one such description ("AWARDS ISSUED PRIOR TO... MAY NOT REFLECT...")
+  // reading as the dashboard's own explanation for a negative entry.
+  // Rendered by provenance, per the attributedText() rule above: quoted
+  // with curly quotes and marked "source description", one shared citation
+  // per card rather than per row. An empty title falls back to the award
+  // ID, which is a structured identifier, not source prose, so it renders
+  // unquoted with no marker.
+  const flowSource = { name: "USAspending File C (award financial)", url: "https://www.usaspending.gov/" };
   const flowTable = entries => {
     const t = el("table"), h = el("tr");
     ["FY / period", "Award", "Recipient", "Direction", "Amount"].forEach((x, i) =>
@@ -1662,11 +1692,20 @@ function obligationFlowTables(data) {
     for (const { fy, flow, direction } of entries) {
       const tr = el("tr");
       tr.append(el("td", { text: `FY${fy}${flow.submissionPeriod ? " · " + flow.submissionPeriod : ""}` }));
-      const award = el("td"), fullLabel = flow.title || flow.awardId || "Unlinked flow";
-      const label = compactLabel(fullLabel), flowUrl = publicUSAspendingAwardUrl(flow.awardUrl);
-      if (flowUrl) award.append(el("a", { href: flowUrl, text: label,
-        title: fullLabel, "aria-label": fullLabel }));
-      else award.append(el("span", { text: label, title: fullLabel }));
+      const award = el("td"), flowUrl = publicUSAspendingAwardUrl(flow.awardUrl);
+      if (flow.title) {
+        const label = compactLabel(flow.title);
+        const quote = el(flowUrl ? "a" : "span", flowUrl
+          ? { href: flowUrl, title: flow.title, "aria-label": flow.title }
+          : { title: flow.title, "aria-label": flow.title },
+          attributedText(label, null, { omitCitation: true }));
+        award.append(quote, el("span", { class: "source-tag", text: "source description" }));
+      } else {
+        const fullLabel = flow.awardId || "Unlinked flow", label = compactLabel(fullLabel);
+        if (flowUrl) award.append(el("a", { href: flowUrl, text: label,
+          title: fullLabel, "aria-label": fullLabel }));
+        else award.append(el("span", { text: label, title: fullLabel }));
+      }
       const amount = flow.amount ?? flow.netObligations ?? flow.obligations ?? 0;
       tr.append(award, el("td", { text: flow.recipient || "Unknown recipient" }),
         el("td", { text: direction }), el("td", {
@@ -1685,6 +1724,8 @@ function obligationFlowTables(data) {
         flowTable(overflow));
       card.append(details);
     }
+    if (flows.some(row => row.flow.title))
+      card.append(el("p", { class: "note" }, attributedText(null, flowSource)));
   }
   $app.append(card);
 }
@@ -1982,6 +2023,22 @@ function sentinelTiles(data) {
   group.append(tiles); $app.append(group);
 }
 
+// Stage 2b item 21a (2026-09-23, owner-approved): a reader has no use for a
+// raw status word or a machine timestamp -- the Status cell instead reads
+// as dates ("source list dated <date>; checked <date>"), reusing the site's
+// existing long-date format. A non-"current" source keeps its status word
+// as a prefix ("stale: source list dated …") so the distinction is not
+// lost, and the raw "Source as of" / "Last accepted" / "Last attempt"
+// timestamp columns are dropped so no raw ISO timestamp remains on the page.
+function humanDateOnly(value) {
+  if (!value) return "";
+  // Dates are UTC calendar dates (source dates and pipeline timestamps are
+  // both UTC); rendering in the viewer's zone could shift them a day.
+  const date = /^\d{4}-\d{2}-\d{2}$/.test(value) ? new Date(value + "T00:00:00Z") : new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" });
+}
+
 function sentinelSourceCard(data) {
   const card = el("div", { class: "card" });
   card.append(el("h2", { text: "Authoritative source freshness" }));
@@ -1993,16 +2050,20 @@ function sentinelSourceCard(data) {
       : "No authoritative source pilot is registered in the 3.2c-1 core. The first structured NSF and DOE source adapters are scoped to 3.2c-2; financial signals remain available meanwhile." }));
   } else {
     const table = el("table"), head = el("tr");
-    ["Source", "Status", "Source as of", "Records", "Last accepted", "Last attempt"].forEach(text =>
+    ["Source", "Status", "Records"].forEach(text =>
       head.append(el("th", { text })));
     table.append(head);
-    statuses.forEach(source => table.append(el("tr", {},
-      el("td", { text: source.name || source.id }),
-      el("td", { text: source.status }),
-      el("td", { text: source.sourceAsOf || "Not stated" }),
-      el("td", { text: source.recordCount == null ? "—" : fmtN(source.recordCount) }),
-      el("td", { text: source.lastAcceptedAt || "No accepted snapshot" }),
-      el("td", { text: source.lastAttemptAt || "Not attempted" }))));
+    statuses.forEach(source => {
+      const asOfText = source.sourceAsOf
+        ? `source list dated ${humanDateOnly(source.sourceAsOf)}` : "source list date not stated";
+      const checkedText = source.lastAttemptAt
+        ? `checked ${humanDateOnly(source.lastAttemptAt)}` : "checked (not attempted)";
+      const statusText = `${asOfText}; ${checkedText}`;
+      table.append(el("tr", {},
+        el("td", { text: source.name || source.id }),
+        el("td", { text: source.status !== "current" ? `${source.status}: ${statusText}` : statusText }),
+        el("td", { text: source.recordCount == null ? "—" : fmtN(source.recordCount) })));
+    });
     card.append(table);
     if (statuses.some(source => source.status !== "current"))
       card.append(el("p", { class: "note", text: "A stale or failed source retains its last accepted records. Other dashboards and deployments continue independently." }));
@@ -2083,15 +2144,31 @@ function renderSentinelSourcedEvents(episode, card, data) {
 // rather than the whole episode, a state line states plainly when net
 // activity was positive, and the unreviewed age is shown without any
 // overdue/not-overdue characterization -- age alone.
+// Stage 2b items 16/17 (2026-09-23, owner-approved): a source-only episode
+// (no financialObservations) has no ledger figures to show at all -- "$0
+// gross negative · $0 net" read as a measured zero rather than "not
+// applicable", so both the header and the facts row instead say "no linked
+// ledger activity", and its award-count fact is labeled "award IDs listed
+// by the source" (there is no negative entry to attribute them to). An
+// episode WITH financial observations keeps its gross/net figures, now
+// explicitly scoped to File C ("File C gross negative" / "File C net
+// activity (observation window)") so the figures are never read as a
+// ledger-wide or award-total number.
 function sentinelEpisodeCard(episode, data, container = $app) {
   const card = el("article", { class: "card" });
   const heading = el("h2", { text: episodeHeadingText(episode, data) });
   const grossNegative = Number(episode.grossNegativeCents || 0);
   const netActivity = Number(episode.netActivityCents || 0);
-  heading.append(el("span", { class: "sentinel-header-figures" },
-    el("strong", { text: fmtCents(grossNegative) }), document.createTextNode(" gross negative"),
-    document.createTextNode(" · "),
-    el("strong", { text: fmtCents(netActivity) }), document.createTextNode(" net")));
+  const hasFinancial = (episode.financialObservations || []).length > 0;
+  const figures = el("span", { class: "sentinel-header-figures" });
+  if (hasFinancial) {
+    figures.append(el("strong", { text: fmtCents(grossNegative) }), document.createTextNode(" File C gross negative"),
+      document.createTextNode(" · "),
+      el("strong", { text: fmtCents(netActivity) }), document.createTextNode(" File C net activity (observation window)"));
+  } else {
+    figures.append(document.createTextNode("no linked ledger activity"));
+  }
+  heading.append(figures);
   heading.append(el("span", { class: `state ${sentinelStateClass(episode.state)}`,
     text: SENTINEL_STATE_LABELS[episode.state] || episode.state }));
   card.append(heading);
@@ -2101,23 +2178,30 @@ function sentinelEpisodeCard(episode, data, container = $app) {
   // for N days" read as an SLA the page's own text disclaims (an
   // unreviewed state is durable and carries no deadline) -- dropped.
   card.append(el("p", { class: "note", text: `Observed ${observed || "date unavailable"}` }));
-  if (netActivity > 0) {
+  if (hasFinancial && netActivity > 0) {
     card.append(el("p", { class: "note",
-      text: "State: net activity in this period was positive." }));
+      text: "State: File C net activity in this observation window was positive." }));
   }
   const facts = el("div", { class: "sentinel-facts" });
-  facts.append(
-    el("span", {}, el("strong", { text: fmtCents(grossNegative) }), document.createTextNode(" gross negative activity")),
-    el("span", {}, el("strong", { text: fmtCents(netActivity) }), document.createTextNode(" net activity")),
-    el("span", {}, el("strong", { text: fmtN((episode.awardIds || []).length) }), document.createTextNode(" award IDs with negative entries")),
-  );
+  if (hasFinancial) {
+    facts.append(
+      el("span", {}, el("strong", { text: fmtCents(grossNegative) }), document.createTextNode(" File C gross negative")),
+      el("span", {}, el("strong", { text: fmtCents(netActivity) }), document.createTextNode(" File C net activity (observation window)")),
+      el("span", {}, el("strong", { text: fmtN((episode.awardIds || []).length) }), document.createTextNode(" award IDs with negative entries")),
+    );
+  } else {
+    facts.append(
+      el("span", {}, document.createTextNode("no linked ledger activity")),
+      el("span", {}, el("strong", { text: fmtN((episode.awardIds || []).length) }), document.createTextNode(" award IDs listed by the source")),
+    );
+  }
   card.append(facts);
   (episode.financialObservations || []).forEach(observation => {
     const section = el("div", { class: "sentinel-event" });
     const rules = (observation.ruleIds || []).map(rule => rule === "portfolio-cluster"
       ? "portfolio cluster rule" : "material gross-negative rule").join(" + ");
     section.append(el("p", {}, el("strong", { text: `${observation.submissionPeriod}: ` }),
-      document.createTextNode(`${rules}; ${fmtCents(observation.grossNegativeCents)} gross negative and ${fmtCents(observation.netActivityCents)} net activity.`)));
+      document.createTextNode(`${rules}; ${fmtCents(observation.grossNegativeCents)} File C gross negative and ${fmtCents(observation.netActivityCents)} File C net activity.`)));
     section.append(el("p", { class: "note", text: observation.classificationNote }));
     const publicUrl = (observation.awardUrls || []).find(publicUSAspendingAwardUrl);
     if (publicUrl) section.append(el("p", {}, el("a", {
@@ -2152,7 +2236,7 @@ function renderSentinelNotes(data) {
   (data.maintenanceEstimates || []).forEach(row => table.append(el("tr", {},
     el("td", { text: row.activity }), el("td", { text: row.initial }),
     el("td", { text: row.recurring }))));
-  notes.append(table, el("p", { class: "stamp", text: "These are planning ranges. Replace them with measured figures after eight weeks without delaying publication, account fan-out, or closing this implementation phase." }));
+  notes.append(table, el("p", { class: "stamp", text: "These are planning ranges." }));
 }
 
 // The sentinel dashboard can list well over a hundred unreviewed episodes.
@@ -2344,7 +2428,7 @@ async function boot() {
       // that used to sit beside the award root's (now-removed) compact
       // obligation tiles.
       $app.append(el("p", { class: "sub", id: "obligationsSubtitle",
-        text: `Obligations from ${fmtN(data.accountCount ?? 0)} registered science-related federal accounts, including defense RDT&E. They are separate from, and not additive to, the award totals on the award dashboards. Negative entries can include routine corrections or reductions; sign alone does not establish a cancellation. NIH accounts are not included here; NIH awards are on the award dashboards.` }));
+        text: `Obligations from ${fmtN(data.accountCount ?? 0)} registered science-related federal accounts, including defense RDT&E. They are separate from, and not additive to, the award totals on the award dashboards. Negative entries can include routine corrections or reductions; sign alone does not establish a cancellation. Accounts are included whole, so some totals also cover operations, procurement, or weapons activities alongside research. NIH accounts are not included here; NIH awards are on the award dashboards.` }));
     }
     // Phase 3.2d remediation decision 3: an agency-neutral registry field is
     // the only switch -- present on every DoD account/PA dashboard, absent
@@ -2457,7 +2541,7 @@ async function boot() {
   // table's place so the obligation ledger stays discoverable.
   tiles(data, node.level === "root" ? {
     id: "award-summary-heading",
-    heading: "Award activity",
+    heading: "Award activity (NIH and NSF)",
   } : {});
   if (indexData) childrenCard(data);
   if (obligationSummary?.kind === "obligations") {
@@ -2480,10 +2564,10 @@ async function boot() {
   if (cumHasData) {
     renders.push(
       cumulativeChart(data, "awards", `Cumulative ${awardCountNoun(data).toLowerCase()} through the fiscal year`,
-        "Running FY-to-date total, October through September, one line per year. Read the endpoint of the year in progress against the other lines at the same point in the year — no visual integration needed. Minor ticks are weeks.",
+        withLapseNote("Running FY-to-date total, October through September, one line per year. Read the endpoint of the year in progress against the other lines at the same point in the year — no visual integration needed. Minor ticks are weeks.", cumulativeCoversLapse(data)),
         fmtN, fmtN),
       cumulativeChart(data, "dollars", "Cumulative award dollars through the fiscal year",
-        "Running FY-to-date award dollars on the same axes. Institute-scale outlier awards arrive as visible steps. Minor ticks are weeks.",
+        withLapseNote("Running FY-to-date award dollars on the same axes. Institute-scale outlier awards arrive as visible steps. Minor ticks are weeks.", cumulativeCoversLapse(data)),
         fmtAxisM, fmtM));
   }
   renders.push(monthlyChart(data), fyAwardsChart(data, windowDone), mechanismChart(data), dollarsChart(data));

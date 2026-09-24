@@ -35,7 +35,14 @@
   },
   "2022": {
    "status": "complete",
-   "obligationsCents": 5252715920406
+   "obligationsCents": 5252715920406,
+   "periodNotes": [
+    {
+     "period": 10,
+     "note": "Stage 2b item 15 (owner-approved publicNote, 2026-09-23). Confirmed by re-pull (2026-09-23, run 35928876011, snapshot 65adafb0 on claude/stage2b-army-repull): File B row counts are full and unchanged in every period (P02..P12 = 219, 218, 288, 220, 216, 218, 292, 293, 296, 317, 318) and the cumulative path is identical to the cent (P06 3,096,319,772,499; P07 7,404,846,499,060; P09 8,174,199,975,491; P10 4,985,904,807,706; P12 5,252,715,920,406 cents = the FY2022 GTAS/File A pin). The P10 fall is 39%, below the >50% drop check, and does not revert, so no acceptance rule fires. The source's figures are what is published; the cause of the P07-P09 rise above the year-end total is not established.",
+     "publicNote": "In fiscal year 2022, the source reports cumulative net obligations for this account of $30.96 billion after period 6, $74.05 billion after period 7, and $81.74 billion after period 9, then $49.86 billion after period 10. The fiscal-year-end total (GTAS/File A), $52.53 billion, matches the ledger exactly. Source figures alone do not show why the cumulative total rose above the year-end figure and then fell."
+    }
+   ]
   },
   "2023": {
    "status": "complete",

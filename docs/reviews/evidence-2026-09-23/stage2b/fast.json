@@ -1,0 +1,92 @@
+{
+ "schemaVersion": 1,
+ "tier": "fast",
+ "account": null,
+ "generatedAt": "2026-09-24T00:13:47.751221+00:00",
+ "durationSeconds": 536.716,
+ "passed": true,
+ "checks": [
+  {
+   "name": "unit-tests",
+   "passed": true,
+   "evidence": "OK (skipped=1)",
+   "seconds": 167.592
+  },
+  {
+   "name": "validate-obligations",
+   "passed": true,
+   "evidence": "Obligation ledger validation passed (empty stores allowed)",
+   "seconds": 304.242
+  },
+  {
+   "name": "validate-nih",
+   "passed": true,
+   "evidence": "NIH validation passed: 28 units, 723486 unique awards",
+   "seconds": 7.295
+  },
+  {
+   "name": "validate-usaspending-calibration",
+   "passed": true,
+   "evidence": "USAspending calibration gate passed (status: ready)",
+   "seconds": 0.027
+  },
+  {
+   "name": "validate-funding-sentinel",
+   "passed": true,
+   "evidence": "Funding-action sentinel validation passed",
+   "seconds": 56.344
+  },
+  {
+   "name": "verify-dms-baseline",
+   "passed": true,
+   "evidence": "DMS baseline verification PASSED: 141 months exact, 2 trailing months >= baseline, 11620 awards in store.",
+   "seconds": 0.109
+  },
+  {
+   "name": "validate-award-invariants",
+   "passed": true,
+   "evidence": "Award invariant validation passed (132 award-ledger dashboard(s): totalAwards == sum(fiscalYears) == sum(monthly); fyCumulative endpoints exact; root == sum(children))",
+   "seconds": 1.107
+  }
+ ],
+ "footprint": {
+  "perTreeBytes": {
+   ".github": 52226,
+   ".gitignore": 70,
+   "CLAUDE.md": 15142,
+   "README.md": 7063,
+   "adapters": 190512,
+   "config": 174939,
+   "data": 680158978,
+   "docs": 32714325,
+   "reference": 632353,
+   "scripts": 386670,
+   "site": 143053,
+   "tests": 644887
+  },
+  "totalTrackedBytes": 715120218,
+  "gzippedStoreBytes": 369805227,
+  "pagesArtifact": {
+   "fileCount": 1887,
+   "totalBytes": 346757045,
+   "status": "ok",
+   "warningThresholdBytes": 850000000,
+   "stopThresholdBytes": 950000000,
+   "pagesLimitBytes": 1000000000,
+   "headroomBytes": 653242955,
+   "excludedFromArtifact": "data/obligations/**/events/*.csv.gz"
+  },
+  "trajectory": {
+   "method": "linear extrapolation of the data/ tree's committed byte total from the first commit that touched data/ to HEAD, projected 52 weeks forward",
+   "note": "the sampled history to date is dominated by one-time historical backfills (Phases 1-3.2c), not steady-state weekly incremental refreshes, so this rate is a conservative UPPER BOUND, not a steady-state forecast; re-derive after several weeks of pure incremental refresh history exist",
+   "firstDataCommit": "6e9ef91e07b89b717d6762e513ee38d4e0c5b932",
+   "firstDataCommitDate": "2026-09-21T16:08:54+00:00",
+   "weeksElapsed": 1.0,
+   "currentDataTreeBytes": 680158978,
+   "weeklyGrowthBytesUpperBound": 228240,
+   "projected52WeekBytesUpperBound": 692027458,
+   "thresholdBytes": 966367641,
+   "approachesOneGigabyte": false
+  }
+ }
+}
