@@ -2,45 +2,45 @@
  "schemaVersion": 1,
  "tier": "fast",
  "account": null,
- "generatedAt": "2026-09-23T23:46:12.694336+00:00",
- "durationSeconds": 560.844,
+ "generatedAt": "2026-09-24T00:13:47.751221+00:00",
+ "durationSeconds": 536.716,
  "passed": true,
  "checks": [
   {
    "name": "unit-tests",
    "passed": true,
    "evidence": "OK (skipped=1)",
-   "seconds": 181.0
+   "seconds": 167.592
   },
   {
    "name": "validate-obligations",
    "passed": true,
    "evidence": "Obligation ledger validation passed (empty stores allowed)",
-   "seconds": 310.993
+   "seconds": 304.242
   },
   {
    "name": "validate-nih",
    "passed": true,
    "evidence": "NIH validation passed: 28 units, 723486 unique awards",
-   "seconds": 7.451
+   "seconds": 7.295
   },
   {
    "name": "validate-usaspending-calibration",
    "passed": true,
    "evidence": "USAspending calibration gate passed (status: ready)",
-   "seconds": 0.079
+   "seconds": 0.027
   },
   {
    "name": "validate-funding-sentinel",
    "passed": true,
    "evidence": "Funding-action sentinel validation passed",
-   "seconds": 60.129
+   "seconds": 56.344
   },
   {
    "name": "verify-dms-baseline",
    "passed": true,
    "evidence": "DMS baseline verification PASSED: 141 months exact, 2 trailing months >= baseline, 11620 awards in store.",
-   "seconds": 0.084
+   "seconds": 0.109
   },
   {
    "name": "validate-award-invariants",
@@ -53,27 +53,27 @@
   "perTreeBytes": {
    ".github": 52226,
    ".gitignore": 70,
-   "CLAUDE.md": 14593,
+   "CLAUDE.md": 15142,
    "README.md": 7063,
    "adapters": 190512,
    "config": 174939,
    "data": 680158978,
-   "docs": 31103524,
+   "docs": 32714325,
    "reference": 632353,
    "scripts": 386670,
-   "site": 142607,
-   "tests": 644631
+   "site": 143053,
+   "tests": 644887
   },
-  "totalTrackedBytes": 713508166,
+  "totalTrackedBytes": 715120218,
   "gzippedStoreBytes": 369805227,
   "pagesArtifact": {
    "fileCount": 1887,
-   "totalBytes": 346756599,
+   "totalBytes": 346757045,
    "status": "ok",
    "warningThresholdBytes": 850000000,
    "stopThresholdBytes": 950000000,
    "pagesLimitBytes": 1000000000,
-   "headroomBytes": 653243401,
+   "headroomBytes": 653242955,
    "excludedFromArtifact": "data/obligations/**/events/*.csv.gz"
   },
   "trajectory": {
