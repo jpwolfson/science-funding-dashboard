@@ -119,16 +119,59 @@ registry entries and baseline scaffolds (NSF precedent: replaceable
 `partial` rows without `obligationsCents`; the backfill pins them). The
 backfill remains the fail-closed alias-drift gate.
 
+### Discovery results
+
+Chunk 1 (run 35929645412, ~2 h 20 min for 9 accounts) and chunk 2: zero
+errors; the account record's `total_obligated_amount` equals the File B
+final-period total to the cent for every account-year (FY2017–FY2025 P12,
+FY2026 P10). All accounts first active FY2017 P06. Uniform PA structure:
+one institute PAC (`00xx`, PAN "<INSTITUTE> (08xx)"), `0801` NIH
+REIMBURSABLE - OTHER, `0000` UNKNOWN/OTHER and/or ZERO OBLIGATION (zero
+cents), and in FY2026 one institute PARK plus, for some accounts, PARK
+`0000` (zero).
+
+Exception: NIDDK `075-0884` also reports PAC `0031` TYPE 1 DIABETES (the
+Special Diabetes Program, mandatory funding) every year FY2017–FY2025
+($141.3M FY2017 … $1.7M FY2025). FY2026 has no separate PARK; it is inside
+the NIDDK PARK `5ZC7KSR3EPY`. It is registered as its own historical PA.
+**Reader-review watch item:** its PA series ends at FY2025 because FY2026
+reporting folds it into the institute PARK. A reader could take that as the
+program ending or being defunded. The account total is unaffected.
+
+### Registry authoring
+
+Sonnet worker, branch `claude/phase-3.2e-nih` (generator
+`reference/sizing/build_nih_registry.py`, idempotent; re-run as chunks
+land). Coordinator decision: baselines carry reviewed File A/GTAS pins from
+the discovery account records (AHRQ/DoD precedent). The NSF pinless
+scaffold predates `e4fac31b` (2026-08-14), which made
+`baseline_pin_problems` require `obligationsCents`, and `pull()` checks every
+pin before downloading, so pinless scaffolds would fail every job. With 9
+accounts: registry 443/443; `validate_obligations --allow-empty` clean; fast
+6/7, failing only the intentional `test_site_contract` 80-account pin until
+all 27 are registered.
+
+### Backfill plan
+
+27 accounts × FY2017–FY2026 = 270 account-year jobs, above GitHub's
+256-job matrix limit. Run two sequential `mode: full` runs on
+`claude/phase-3.2e-nih` (≈13/14 accounts, ≈130–140 serialized jobs,
+≈36 h each). Each run's reconcile commits an atomic snapshot to the branch;
+the second run's reconcile includes the first's committed stores.
+
 ## Log
 
 | When (UTC) | Event | Result |
 |---|---|---|
 | 2026-09-23 22:01 | Sizing run 35925926839 | green; NCI small (above) |
 | 2026-09-23 22:01 | Test run 35925926684 on probe commit | green (fast tier 9.5 min on CI) |
-| 2026-09-23 | Discovery run (27 accounts) triggered | pending |
+| 2026-09-23 22:40 | Discovery run 35929645412 triggered | chunks 1–2 clean; chunk 3 pending |
+| 2026-09-24 01:15 | Registry worker: 9 accounts, File A pins | `claude/phase-3.2e-nih` @ 55b4630 |
 
 ## Next action
 
-Wait for the discovery run; read `reference/sizing/nih_registry_discovery_*.json`;
-brief a Sonnet worker to author 27 registry entries + scaffold baselines +
-`tests/test_obligations_nih.py` on `claude/phase-3.2e-nih-registry`.
+When chunk 3 lands (~05:40 UTC 2026-09-24): sanity-check it (ARPA-H
+`075-0837` availability especially); have the worker merge
+`origin/claude/phase-3.2e-nih-sizing` into `claude/phase-3.2e-nih` and
+regenerate all 27; verify registry/fast; then start backfill run 1 via
+`.github/triggers/update-obligations.json`.
