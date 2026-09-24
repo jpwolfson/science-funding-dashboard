@@ -191,7 +191,7 @@ aliases on NIA/NCI/NIDDK/NIAID).
 | 2026-09-24 01:15 | Registry worker: 9 accounts, File A pins | `claude/phase-3.2e-nih` @ 55b4630 |
 | 2026-09-24 05:45 | Discovery chunk 3 | clean; ARPA-H first FY2022 P07 |
 | 2026-09-24 06:40 | Registry 27/27 | `0e355c2`; registry 569/569, fast 7/7 |
-| 2026-09-24 | Stage 1 removal + group-A trigger pushed | backfill run 1 pending |
+| 2026-09-24 06:11 | Stage 1 `58945ab` + trigger `5869069`: backfill run 1 [`35963288599`](https://github.com/jpwolfson/science-funding-dashboard/actions/runs/35963288599) | running; first pull (B&F FY2018) green in 16 min; reconcile expected ~2026-09-25 17:00 |
 
 ## Next action
 
