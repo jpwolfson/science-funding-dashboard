@@ -315,6 +315,18 @@ class SiteContractTests(unittest.TestCase):
         for retired in ("affected award IDs", "(not overdue)"):
             self.assertNotIn(retired, self.html)
 
+    def test_obligation_reporting_lag_note_matches_the_registry(self):
+        # Owner request 2026-09-24: the obligation stamp is followed by a
+        # labeled reporting-lag note. Its "two months" must stay true to
+        # the refresh planner's registry setting.
+        import json
+        config = json.loads((REPO / "config" / "obligation_accounts.json").read_text())
+        self.assertEqual(config["refreshDefaults"]["reportingLagMonths"], 2)
+        self.assertFalse([a["path"] for a in config["accounts"] if "reportingLagMonths" in a])
+        self.assertIn('const OBLIGATION_REPORTING_LAG_NOTE = "Reporting lag: each update collects '
+                      'reporting periods through two months before the month of the update', self.html)
+        self.assertIn('id: "reportingLagNote"', self.html)
+
     def test_sentinel_source_only_episodes_show_no_ledger_activity(self):
         # Stage 2b item 16 (2026-09-23, owner-approved): a source-only
         # episode (no financialObservations) has no ledger figures to show;
@@ -1092,7 +1104,7 @@ class SiteContractTests(unittest.TestCase):
 
     def test_sentinel_source_card_shows_dates_not_raw_status_or_timestamps(self):
         # Stage 2b item 21a (2026-09-23, owner-approved): the Status cell
-        # reads as human dates ("source list dated …; checked …"), a
+        # reads as human dates ("source dated …; checked …"), a
         # non-"current" source keeps its status word as a prefix, and the
         # raw ISO-timestamp columns are dropped entirely.
         self.assertIn("function humanDateOnly(value) {", self.html)
@@ -1100,7 +1112,7 @@ class SiteContractTests(unittest.TestCase):
         source_card = source_card.split("function renderSentinelSourcedEvent(", 1)[0]
         for text in (
             '["Source", "Status", "Records"].forEach(text =>',
-            '`source list dated ${humanDateOnly(source.sourceAsOf)}` : "source list date not stated"',
+            '`source dated ${humanDateOnly(source.sourceAsOf)}` : "source date not stated"',
             '`checked ${humanDateOnly(source.lastAttemptAt)}` : "checked (not attempted)"',
             'source.status !== "current" ? `${source.status}: ${statusText}` : statusText',
         ):
