@@ -48,19 +48,40 @@ FULL_SCOPE = {
     "075-0898": "hhs/nih-nibib",
 }
 
-# Exact Program Activity code sets confirmed from discovery chunk 1
-# (reference/sizing/nih_registry_discovery_1.json, 9 accounts). Accounts not
-# yet discovered are exercised only by the generic checks below.
+# Exact Program Activity code sets confirmed from all three discovery
+# chunks (reference/sizing/nih_registry_discovery_{1,2,3}.json, 27
+# accounts). hhs/nih-niddk carries an extra activity (PAC 0031 "Type 1
+# Diabetes"); hhs/arpa-h has no 0801 reimbursable PA at all. Any account not
+# yet discovered (none currently) is exercised only by the generic checks
+# below.
 EXPECTED_CODES = {
-    "hhs/nih-nlm": {"0000", "0024", "0801"},
+    "hhs/arpa-h": {"0000", "0001"},
     "hhs/nih-bf": {"0000", "0026", "0801"},
-    "hhs/nih-od": {"0000", "0025", "0801"},
-    "hhs/nih-niehs": {"0000", "0010", "0801"},
+    "hhs/nih-fic": {"0000", "0023", "0801"},
     "hhs/nih-ncats": {"0000", "0028", "0801"},
+    "hhs/nih-nccih": {"0000", "0021", "0801"},
+    "hhs/nih-nci": {"0000", "0001", "0801"},
+    "hhs/nih-nei": {"0000", "0009", "0801"},
+    "hhs/nih-nhgri": {"0000", "0018", "0801"},
+    "hhs/nih-nhlbi": {"0000", "0002", "0801"},
+    "hhs/nih-nia": {"0000", "0011", "0801"},
+    "hhs/nih-niaaa": {"0000", "0016", "0801"},
+    "hhs/nih-niaid": {"0000", "0006", "0801"},
+    "hhs/nih-niams": {"0000", "0012", "0801"},
+    "hhs/nih-nibib": {"0000", "0019", "0801"},
+    "hhs/nih-nichd": {"0000", "0008", "0801"},
+    "hhs/nih-nida": {"0000", "0015", "0801"},
+    "hhs/nih-nidcd": {"0000", "0013", "0801"},
+    "hhs/nih-nidcr": {"0000", "0003", "0801"},
+    "hhs/nih-niddk": {"0000", "0004", "0031", "0801"},
+    "hhs/nih-niehs": {"0000", "0010", "0801"},
+    "hhs/nih-nigms": {"0000", "0007", "0801"},
+    "hhs/nih-nimh": {"0000", "0014", "0801"},
+    "hhs/nih-nimhd": {"0000", "0022", "0801"},
     "hhs/nih-ninds": {"0000", "0005", "0801"},
     "hhs/nih-ninr": {"0000", "0017", "0801"},
-    "hhs/nih-nimh": {"0000", "0014", "0801"},
-    "hhs/nih-nccih": {"0000", "0021", "0801"},
+    "hhs/nih-nlm": {"0000", "0024", "0801"},
+    "hhs/nih-od": {"0000", "0025", "0801"},
 }
 
 

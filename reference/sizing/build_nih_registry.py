@@ -254,6 +254,29 @@ def build_program_activities(federal_account, discovery_account):
                 )
             group["pac"] = code4
 
+    # ARPA-H (075-0837) names its FY2022-25 PAC/PAN "ADVANCED RESEARCH
+    # PROJECTS AGENCY FOR HEALTH (0837)" and its FY2026 PARK "ADVANCED
+    # RESEARCH PROJECTS AGENCY FOR HEALTH - DIRECT PROGRAM ACTIVITY" --
+    # different strings, so the name-match bridge above leaves them as two
+    # separate groups instead of one. Coordinator-reviewed rule (2026-09-24):
+    # when there is exactly one PARK-only group, exactly one PAC/PAN-only
+    # group, and no group already carries both (i.e. no natural name-match
+    # pairing occurred), they are the same institute activity under the
+    # FY2026 PARK-migration rename and are folded into one PA. This never
+    # fires for an account whose institute PARK/PAC names already match
+    # (that account's institute group already carries both, so the "no
+    # group has both" guard blocks it) and is otherwise inert.
+    park_only = [norm for norm, g in groups.items() if g["park"] and not g["pac"]]
+    pac_only = [norm for norm, g in groups.items() if g["pac"] and not g["park"]]
+    both = [norm for norm, g in groups.items() if g["park"] and g["pac"]]
+    if len(park_only) == 1 and len(pac_only) == 1 and not both:
+        park_norm, pac_norm = park_only[0], pac_only[0]
+        merged = groups.pop(pac_norm)
+        park_group = groups.pop(park_norm)
+        merged["park"] = park_group["park"]
+        merged["names"] |= park_group["names"]
+        groups[pac_norm] = merged
+
     park_to_norm = {g["park"]: norm for norm, g in groups.items() if g["park"]}
     code_to_norm = {}
     for norm, g in groups.items():
@@ -481,7 +504,7 @@ def _reviewed_obligations_cents(federal_account, fy, fy_row):
     return file_a_cents
 
 
-def build_scaffold_baseline(federal_account, first_fy, first_period,
+def build_scaffold_baseline(federal_account, first_fy, first_period, abbrev,
                              discovery_account, source_note):
     fiscal_years = {}
     for fy in range(2015, 2017):
@@ -490,15 +513,29 @@ def build_scaffold_baseline(federal_account, first_fy, first_period,
             "reason": "Files A/B/C begin in FY2017 Q2",
         }
     # An account whose own first active fiscal year is later than FY2017
-    # (none observed so far, but ARPA-H -- created after FY2017 -- has not
-    # yet been confirmed by a discovery chunk) did not exist yet in years
-    # the platform itself already covers; that is a different, account-
-    # specific reason from the platform-wide FY2015-16 gap.
+    # (ARPA-H, 075-0837, first funded FY2022) did not exist yet in years the
+    # platform itself already covers; that is a different, account-specific
+    # reason from the platform-wide FY2015-16 gap. Coordinator-reviewed
+    # wording (2026-09-24): "Account <symbol> has no File B activity before
+    # FY<first_fy> P<first_period> (<abbrev> first funded in FY<first_fy>)".
+    # Verified against discovery data (a nonzero File B total in a year this
+    # claims had none would be a real data-integrity conflict, not just a
+    # wording nit), since these years still have a live federal-account
+    # record (id assigned) even though the account had no File B activity.
     for fy in range(2017, first_fy):
+        fy_row = discovery_account["fiscalYears"].get(str(fy))
+        observed_cents = (fy_row or {}).get("fileB", {}).get("totalCents", 0)
+        if observed_cents:
+            raise ValueError(
+                f"{federal_account} FY{fy}: claimed no pre-first-active-year "
+                f"activity, but discovery shows {observed_cents} cents of "
+                "File B activity -- refusing to mark it unavailable"
+            )
         fiscal_years[str(fy)] = {
             "status": "unavailable",
-            "reason": f"{federal_account} had no activity before FY{first_fy} "
-                      "(account not yet established)",
+            "reason": f"Account {federal_account} has no File B activity "
+                      f"before FY{first_fy} P{first_period:02d} ({abbrev} "
+                      f"first funded in FY{first_fy})",
         }
     for fy in range(max(first_fy, 2017), 2027):
         fy_row = discovery_account["fiscalYears"].get(str(fy))
@@ -653,7 +690,8 @@ def main():
         first_fy = discovery[federal_account]["firstActiveFiscalYear"]
         first_period = discovery[federal_account]["fiscalYears"][str(first_fy)]["firstNonEmptyPeriod"]
         scaffold = build_scaffold_baseline(
-            federal_account, first_fy, first_period, discovery[federal_account],
+            federal_account, first_fy, first_period, entry["abbrev"],
+            discovery[federal_account],
             source_note=(
                 "USAspending federal account fiscal-year snapshots (GTAS/File A), "
                 "retrieved 2026-09-23 by discovery run 35929645412 "

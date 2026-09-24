@@ -1,0 +1,62 @@
+{
+ "schemaVersion": 2,
+ "federalAccount": "075-0885",
+ "source": "USAspending federal account fiscal-year snapshots (GTAS/File A), retrieved 2026-09-23 by discovery run 35929645412 (reference/sizing/nih_registry_discovery_*.json)",
+ "fiscalYears": {
+  "2015": {
+   "status": "unavailable",
+   "reason": "Files A/B/C begin in FY2017 Q2"
+  },
+  "2016": {
+   "status": "unavailable",
+   "reason": "Files A/B/C begin in FY2017 Q2"
+  },
+  "2017": {
+   "status": "partial",
+   "asOfPeriod": 12,
+   "obligationsCents": 520763236979,
+   "firstPeriod": 6
+  },
+  "2018": {
+   "status": "complete",
+   "obligationsCents": 533866288741
+  },
+  "2019": {
+   "status": "complete",
+   "obligationsCents": 565575539587
+  },
+  "2020": {
+   "status": "complete",
+   "obligationsCents": 667281008753
+  },
+  "2021": {
+   "status": "complete",
+   "obligationsCents": 652640076859
+  },
+  "2022": {
+   "status": "complete",
+   "obligationsCents": 674680296102
+  },
+  "2023": {
+   "status": "complete",
+   "obligationsCents": 686284897984
+  },
+  "2024": {
+   "status": "complete",
+   "obligationsCents": 672993861455
+  },
+  "2025": {
+   "status": "complete",
+   "obligationsCents": 663507497530
+  },
+  "2026": {
+   "status": "partial",
+   "asOfPeriod": 10,
+   "obligationsCents": 519261711556
+  }
+ },
+ "notes": [
+  "FY2017 is partial from P6; FY2018 is the first full DATA Act year unless the account availability entry states a later first fiscal year.",
+  "FY2026 is a partial pin as of the discovery run's current period and must be replaced with the accepted CI provenance pin if the source advances before the backfill runs."
+ ]
+}
