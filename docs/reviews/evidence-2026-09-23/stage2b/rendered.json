@@ -2,33 +2,33 @@
  "schemaVersion": 1,
  "tier": "rendered",
  "account": null,
- "generatedAt": "2026-09-23T23:48:40.553876+00:00",
- "durationSeconds": 147.582,
+ "generatedAt": "2026-09-24T00:04:50.735004+00:00",
+ "durationSeconds": 145.73,
  "passed": true,
  "checks": [
   {
    "name": "smoke-obligation-pages",
    "passed": true,
    "evidence": "Rendered obligation page matrix passed (5 cases)",
-   "seconds": 4.328
+   "seconds": 4.156
   },
   {
    "name": "smoke-obligation-pages-all-accounts",
    "passed": true,
    "evidence": "Rendered all-accounts obligation page matrix passed (212 cases)",
-   "seconds": 107.068
+   "seconds": 104.848
   },
   {
    "name": "smoke-pages-public-links",
    "passed": true,
    "evidence": "Rendered assembled-artifact public-link matrix passed (59 cases)",
-   "seconds": 31.42
+   "seconds": 31.861
   },
   {
    "name": "smoke-sentinel-page",
    "passed": true,
    "evidence": "Rendered funding-action sentinel passed (2 cases)",
-   "seconds": 4.766
+   "seconds": 4.865
   }
  ],
  "footprint": {
@@ -40,22 +40,22 @@
    "adapters": 190512,
    "config": 174939,
    "data": 680158978,
-   "docs": 31103523,
+   "docs": 31128599,
    "reference": 632353,
    "scripts": 386670,
-   "site": 142607,
-   "tests": 644631
+   "site": 143053,
+   "tests": 644887
   },
-  "totalTrackedBytes": 713508165,
+  "totalTrackedBytes": 713533943,
   "gzippedStoreBytes": 369805227,
   "pagesArtifact": {
    "fileCount": 1887,
-   "totalBytes": 346756599,
+   "totalBytes": 346757045,
    "status": "ok",
    "warningThresholdBytes": 850000000,
    "stopThresholdBytes": 950000000,
    "pagesLimitBytes": 1000000000,
-   "headroomBytes": 653243401,
+   "headroomBytes": 653242955,
    "excludedFromArtifact": "data/obligations/**/events/*.csv.gz"
   },
   "trajectory": {

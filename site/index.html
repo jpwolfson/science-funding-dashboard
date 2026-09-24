@@ -835,8 +835,13 @@ function tiles(data, options = {}) {
     }
     row.append(tile);
   }
-  appendTileGroup(row, { ...options,
-    footnote: staleChildren.length ? staleFootnote(staleChildren, { id: "tileStaleFootnotes" }) : null });
+  // Stage 2b item 19, release reader review H1: the lapse sentence also
+  // sits directly under the headline tiles whose Oct–Jul window contains
+  // it, not only in chart captions further down the page.
+  const footnotes = document.createDocumentFragment();
+  if (staleChildren.length) footnotes.append(staleFootnote(staleChildren, { id: "tileStaleFootnotes" }));
+  if (cur.fy === 2026) footnotes.append(el("p", { class: "note", id: "tileLapseNote", text: APPROPRIATIONS_LAPSE_NOTE }));
+  appendTileGroup(row, { ...options, footnote: footnotes.childNodes.length ? footnotes : null });
 }
 
 // The as-of date of an award dashboard's figures: a single stale unit's

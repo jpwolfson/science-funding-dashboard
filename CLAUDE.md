@@ -232,3 +232,11 @@ Full completed-phase history, evidence, and discovery narratives live in
       review's pre-existing findings are dispositioned. Stage 2b queue
       (ledger items 12–22) awaits owner decisions. Detail:
       `docs/phase-history.md`; record: `docs/stage-2-display-handoff.md`.
+- [x] Stage 2b display follow-ups (completed 2026-09-24): ledger items 12,
+      15–21 shipped; 14 and 22 no change by approval; 13 (NIH disclosure)
+      belongs to Phase 3.2e. Army RDT&E FY2022 re-pull confirmed the source
+      path unchanged, so it carries an owner-approved no-cause note. The
+      item-19 lapse dates were corrected to Oct 1–Nov 11, 2025 (CRS) before
+      publishing. Reader review: no Stage 2b-introduced High; open owner
+      follow-up on quoted NIFA disclaimer text. Record:
+      `docs/stage-2b-display-handoff.md`.

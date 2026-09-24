@@ -85,3 +85,14 @@ Anchored at `reference/dod_army_rdte_obligation_baseline.json` FY2022
 "see note" guide at P10):
 
 > In fiscal year 2022, the source reports cumulative net obligations for this account of $30.96 billion after period 6, $74.05 billion after period 7, and $81.74 billion after period 9, then $49.86 billion after period 10. The fiscal-year-end total (GTAS/File A), $52.53 billion, matches the ledger exactly. Source figures alone do not show why the cumulative total rose above the year-end figure and then fell.
+| 2026-09-23 23:45 | Owner approved the item-15 note. Baseline `periodNotes` FY2022 P10 added; rollup in a scratch worktree (every other output differed only by `generated`), Army `dashboard.json` taken alone; renders with "see note" at P10. |
+| 2026-09-24 00:05 | Release tiers green on `3bc91f2d`: registry 382/382, fast 7/7, rendered 4/4, screens 74. Fresh-agent reader review (Sonnet, screenshots only): 2 High, 3 Med, 4 Low; none introduced by Stage 2b. H1 fixed (lapse sentence under the FY2026 tiles); H2 routed to the owner. Dispositions in `docs/reviews/evidence-2026-09-23/stage2b/reader-review.md`. |
+
+## Where things stand (cold-start pointer)
+
+- Items 12, 15–21 shipped; 14 and 22 no change by approval; 13 is 3.2e's.
+- Open owner follow-up (not a Stage 2b gate): release review H2 — whether
+  quoted source descriptions carrying agency disclaimers (USDA NIFA) get any
+  further treatment beyond "source description".
+- `claude/stage2b-army-repull` is evidence only (re-pull snapshot `65adafb0`);
+  it can be deleted after merge.

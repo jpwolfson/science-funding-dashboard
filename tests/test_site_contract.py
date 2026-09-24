@@ -1086,6 +1086,9 @@ class SiteContractTests(unittest.TestCase):
         self.assertIn("withLapseNote(note, monthlyCoversLapse(data))", self.html)
         self.assertEqual(self.html.count("cumulativeCoversLapse(data))"), 2)
         self.assertNotIn("November 12, 2025 was a lapse", self.html)
+        # Release reader review H1: also directly under the FY2026 tiles.
+        self.assertIn('if (cur.fy === 2026) footnotes.append(el("p", { class: "note", '
+                      'id: "tileLapseNote", text: APPROPRIATIONS_LAPSE_NOTE }));', self.html)
 
     def test_sentinel_source_card_shows_dates_not_raw_status_or_timestamps(self):
         # Stage 2b item 21a (2026-09-23, owner-approved): the Status cell
