@@ -229,7 +229,7 @@ class SiteContractTests(unittest.TestCase):
         # silent code change.
         self.assertEqual(87, _leaf_unit_count())
         account_count, agency_count = _obligation_registry_counts()
-        self.assertEqual(53, account_count)
+        self.assertEqual(80, account_count)
         self.assertEqual(13, agency_count)
 
     def test_award_ledger_renders_w1_methodology_and_data_quality_fields(self):

@@ -165,7 +165,9 @@ jobs:
     # "Refresh, freshness, and publication".
     if: ${{ !cancelled() && needs.plan.result == 'success' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    # Raised from 60 (Phase 3.2e, 2026-09-24): 27 more NIH accounts grow both
+    # the reconcile step itself and the rendered all-accounts smoke test.
+    timeout-minutes: 120
     env:
       BRANCH: ${{ github.ref_name }}
     steps:
@@ -263,6 +265,7 @@ jobs:
           tests.test_obligations_doe
           tests.test_obligations_earth_ag
           tests.test_obligations_nasa
+          tests.test_obligations_nih
           tests.test_obligations_nsf
           tests.test_obligations_other_civilian
           tests.test_usaspending_obligations
