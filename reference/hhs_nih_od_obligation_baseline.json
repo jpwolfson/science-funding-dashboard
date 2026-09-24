@@ -1,7 +1,7 @@
 {
  "schemaVersion": 2,
  "federalAccount": "075-0846",
- "source": "USAspending federal account fiscal-year snapshots (GTAS/File A); account title and source availability reviewed via scripts/discover_obligation_program_activities.py (Office of the Director, National Institutes of Health, Health and Human Services)",
+ "source": "USAspending federal account fiscal-year snapshots (GTAS/File A), retrieved 2026-09-23 by discovery run 35929645412 (reference/sizing/nih_registry_discovery_*.json)",
  "fiscalYears": {
   "2015": {
    "status": "unavailable",
@@ -14,47 +14,49 @@
   "2017": {
    "status": "partial",
    "asOfPeriod": 12,
+   "obligationsCents": 181356405810,
    "firstPeriod": 6
   },
   "2018": {
-   "status": "partial",
-   "asOfPeriod": 12
+   "status": "complete",
+   "obligationsCents": 187987958693
   },
   "2019": {
-   "status": "partial",
-   "asOfPeriod": 12
+   "status": "complete",
+   "obligationsCents": 204197661270
   },
   "2020": {
-   "status": "partial",
-   "asOfPeriod": 12
+   "status": "complete",
+   "obligationsCents": 270135727321
   },
   "2021": {
-   "status": "partial",
-   "asOfPeriod": 12
+   "status": "complete",
+   "obligationsCents": 282202808208
   },
   "2022": {
-   "status": "partial",
-   "asOfPeriod": 12
+   "status": "complete",
+   "obligationsCents": 275266999815
   },
   "2023": {
-   "status": "partial",
-   "asOfPeriod": 12
+   "status": "complete",
+   "obligationsCents": 282415364498
   },
   "2024": {
-   "status": "partial",
-   "asOfPeriod": 12
+   "status": "complete",
+   "obligationsCents": 275845541885
   },
   "2025": {
-   "status": "partial",
-   "asOfPeriod": 12
+   "status": "complete",
+   "obligationsCents": 271201261948
   },
   "2026": {
    "status": "partial",
-   "asOfPeriod": 10
+   "asOfPeriod": 10,
+   "obligationsCents": 149308379056
   }
  },
  "notes": [
-  "Initial replaceable scaffolds intentionally omit obligationsCents until the first accepted full backfill.",
-  "The atomic reconcile promotes completed P12 years and pins exact File B cents; the first active fiscal year remains partial from its first reporting period and FY2026 remains period-specific."
+  "FY2017 is partial from P6; FY2018 is the first full DATA Act year unless the account availability entry states a later first fiscal year.",
+  "FY2026 is a partial pin as of the discovery run's current period and must be replaced with the accepted CI provenance pin if the source advances before the backfill runs."
  ]
 }

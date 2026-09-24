@@ -18,11 +18,17 @@ What it does, in order:
   3. Append any not-yet-registered account to
      ``config/obligation_accounts.json`` (existing entries are never
      reordered or modified).
-  4. Write that account's schema-v2 scaffold baseline (NSF Phase 3.2d
-     precedent shape: unavailable FY2015-16, partial FY2017.. without
-     ``obligationsCents`` -- the CI backfill pins exact values). A baseline
-     that already carries backfilled data (any fiscal year has
-     ``obligationsCents``) is left untouched by a rerun.
+  4. Write that account's schema-v2 scaffold baseline (current hhs/ahrq /
+     dod/* precedent shape, coordinator decision 2026-09-24: unavailable
+     FY2015-16, then REVIEWED File A/GTAS ``obligationsCents`` pins --
+     partial from the account's first active year through FY2025 complete,
+     partial again at FY2026 -- taken from the discovery run's own
+     ``accountRecord.total_obligated_amount`` and cross-checked exactly
+     against that year's File B total; a mismatch fails loudly instead of
+     pinning an unreconciled value). A baseline is (re)written only while
+     no real CI backfill has landed for that account yet (no
+     ``data/obligations/<path>/events`` directory) -- once one exists, a
+     rerun of this generator never touches that baseline again.
   5. Self-check: build ``adapters.usaspending_obligations.alias_map`` from
      every generated account's ``programActivities`` and resolve every
      single observed (code, name, PARK) identity from the discovery data
@@ -51,6 +57,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
 
 from adapters.usaspending_obligations import alias_map, _pa  # noqa: E402
+from adapters.obligation_common import cents  # noqa: E402
 
 CONFIG_PATH = REPO_ROOT / "config" / "obligation_accounts.json"
 DISCOVERY_GLOB = str(REPO_ROOT / "reference" / "sizing" / "nih_registry_discovery_*.json")
@@ -437,7 +444,45 @@ def build_account_entry(federal_account, discovery_account, meta):
     return account_entry, warnings
 
 
-def build_scaffold_baseline(federal_account, first_fy, first_period, source_note):
+def _reviewed_obligations_cents(federal_account, fy, fy_row):
+    """Exact File A cents for one discovery fiscal year, cross-checked
+    against File B's own total for the same year.
+
+    Coordinator decision (2026-09-24, superseding the earlier pinless-
+    scaffold approach): the current onboarding precedent
+    (hhs/ahrq -- docs/phase-3.2d-other-civilian-handoff.md "AHRQ release";
+    dod/* -- docs/phase-3.2d-dod-handoff.md "Stage 1 scaffold") scaffolds
+    with REVIEWED File A/GTAS pins taken from the official federal-account
+    endpoint, not empty placeholders -- adapters.obligation_common
+    .baseline_pin_problems (added after the original NSF onboarding)
+    requires an integer ``obligationsCents`` on every non-``unavailable``
+    row, and scripts/pull_obligation_account.py's ``pull()`` runs that same
+    check on every existing pin before downloading, so a pinless scaffold
+    would fail every backfill job outright, not just pre-backfill lint.
+    """
+    record = fy_row.get("accountRecord") or {}
+    amount = record.get("total_obligated_amount")
+    if amount is None:
+        raise ValueError(
+            f"{federal_account} FY{fy}: discovery accountRecord has no "
+            "total_obligated_amount to pin"
+        )
+    file_a_cents = cents(amount)
+    file_b = fy_row.get("fileB")
+    if not file_b:
+        raise ValueError(f"{federal_account} FY{fy}: discovery has no File B total")
+    file_b_cents = file_b["totalCents"]
+    if file_a_cents != file_b_cents:
+        raise ValueError(
+            f"{federal_account} FY{fy}: discovery File A cents {file_a_cents} "
+            f"!= File B total cents {file_b_cents} -- refusing to pin an "
+            "unreconciled scaffold value"
+        )
+    return file_a_cents
+
+
+def build_scaffold_baseline(federal_account, first_fy, first_period,
+                             discovery_account, source_note):
     fiscal_years = {}
     for fy in range(2015, 2017):
         fiscal_years[str(fy)] = {
@@ -455,23 +500,39 @@ def build_scaffold_baseline(federal_account, first_fy, first_period, source_note
             "reason": f"{federal_account} had no activity before FY{first_fy} "
                       "(account not yet established)",
         }
-    for fy in range(max(first_fy, 2017), 2026):
-        row = {"status": "partial", "asOfPeriod": 12}
+    for fy in range(max(first_fy, 2017), 2027):
+        fy_row = discovery_account["fiscalYears"].get(str(fy))
+        if not fy_row:
+            raise ValueError(f"{federal_account}: discovery is missing FY{fy}")
+        obligations_cents = _reviewed_obligations_cents(federal_account, fy, fy_row)
         if fy == first_fy:
-            row["firstPeriod"] = first_period
+            row = {
+                "status": "partial",
+                "asOfPeriod": 12,
+                "obligationsCents": obligations_cents,
+                "firstPeriod": first_period,
+            }
+        elif fy == 2026:
+            row = {
+                "status": "partial",
+                "asOfPeriod": fy_row["fileB"]["period"],
+                "obligationsCents": obligations_cents,
+            }
+        else:
+            row = {"status": "complete", "obligationsCents": obligations_cents}
         fiscal_years[str(fy)] = row
-    fiscal_years["2026"] = {"status": "partial", "asOfPeriod": 10}
     return {
         "schemaVersion": 2,
         "federalAccount": federal_account,
         "source": source_note,
         "fiscalYears": fiscal_years,
         "notes": [
-            "Initial replaceable scaffolds intentionally omit obligationsCents "
-            "until the first accepted full backfill.",
-            "The atomic reconcile promotes completed P12 years and pins exact "
-            "File B cents; the first active fiscal year remains partial from "
-            "its first reporting period and FY2026 remains period-specific.",
+            "FY2017 is partial from P6; FY2018 is the first full DATA Act "
+            "year unless the account availability entry states a later "
+            "first fiscal year.",
+            "FY2026 is a partial pin as of the discovery run's current "
+            "period and must be replaced with the accepted CI provenance "
+            "pin if the source advances before the backfill runs.",
         ],
     }
 
@@ -573,25 +634,30 @@ def main():
         entry, warnings = build_account_entry(federal_account, discovery[federal_account], meta)
         entries_by_account[federal_account] = entry
         all_warnings.extend(warnings)
-        if entry["path"] in existing_paths or federal_account in existing_federal_accounts:
-            continue
-        new_entries.append(entry)
+        is_new_registration = (
+            entry["path"] not in existing_paths
+            and federal_account not in existing_federal_accounts
+        )
+        if is_new_registration:
+            new_entries.append(entry)
 
-        baseline_path = REPO_ROOT / entry["baseline"]
-        if baseline_path.exists():
-            existing_baseline = json.loads(baseline_path.read_text())
-            if any("obligationsCents" in row for row in existing_baseline.get("fiscalYears", {}).values()):
-                # Already backfilled -- never clobber accepted pins.
-                continue
+        # The baseline is (re)written whenever no real CI backfill has
+        # landed for this account yet -- regardless of whether the registry
+        # entry itself is brand new or was appended by an earlier run of
+        # this generator (e.g. after a fix to the derivation logic here).
+        # The moment a real pull commits normalized events, this directory
+        # exists and the generator must never touch that baseline again.
+        store = REPO_ROOT / "data" / "obligations" / entry["path"] / "events"
+        if store.exists():
+            continue
         first_fy = discovery[federal_account]["firstActiveFiscalYear"]
         first_period = discovery[federal_account]["fiscalYears"][str(first_fy)]["firstNonEmptyPeriod"]
         scaffold = build_scaffold_baseline(
-            federal_account, first_fy, first_period,
+            federal_account, first_fy, first_period, discovery[federal_account],
             source_note=(
-                "USAspending federal account fiscal-year snapshots (GTAS/File A); "
-                "account title and source availability reviewed via "
-                "scripts/discover_obligation_program_activities.py "
-                f"({discovery[federal_account].get('title', federal_account)})"
+                "USAspending federal account fiscal-year snapshots (GTAS/File A), "
+                "retrieved 2026-09-23 by discovery run 35929645412 "
+                "(reference/sizing/nih_registry_discovery_*.json)"
             ),
         )
         new_baselines[entry["baseline"]] = scaffold
@@ -619,17 +685,17 @@ def main():
     if new_entries:
         raw_text = CONFIG_PATH.read_text()
         CONFIG_PATH.write_text(append_accounts_text(raw_text, new_entries))
-        # Baseline files are brand new (never pre-existing), so a plain
-        # dump matching house style (reference/hhs_ahrq_obligation_baseline.json
-        # etc. use ``json.dumps(..., indent=1)``) is safe here.
-        for baseline_rel, scaffold in new_baselines.items():
-            (REPO_ROOT / baseline_rel).write_text(json.dumps(scaffold, indent=1) + "\n")
-        print(
-            f"Wrote {len(new_entries)} new registry entrie(s) and "
-            f"{len(new_baselines)} scaffold baseline(s)."
-        )
-    else:
-        print("No new registry entries to write (all discovered accounts already registered).")
+    # Baseline files are (re)written independently of whether the registry
+    # entry itself is new -- house style
+    # (reference/hhs_ahrq_obligation_baseline.json etc.) is a plain
+    # ``json.dumps(..., indent=1)`` dump, safe to write whole every time
+    # since these files are never hand-edited.
+    for baseline_rel, scaffold in new_baselines.items():
+        (REPO_ROOT / baseline_rel).write_text(json.dumps(scaffold, indent=1) + "\n")
+    print(
+        f"Wrote {len(new_entries)} new registry entrie(s) and "
+        f"{len(new_baselines)} scaffold baseline(s)."
+    )
 
 
 if __name__ == "__main__":

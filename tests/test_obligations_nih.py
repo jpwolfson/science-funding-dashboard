@@ -2,6 +2,7 @@ import json
 import unittest
 from pathlib import Path
 
+from adapters.obligation_common import cents
 from adapters.usaspending_obligations import alias_map, _pa
 from scripts.plan_obligation_refresh import plan
 
@@ -120,7 +121,19 @@ class NIHObligationOnboardingTests(unittest.TestCase):
                 f"{path}: not every crosswalk row referencing {symbol} is resolved",
             )
 
-    def test_baselines_are_replaceable_scaffolds_before_backfill(self):
+    def test_baselines_carry_reviewed_file_a_pins_before_backfill(self):
+        """Coordinator decision 2026-09-24 (superseding the earlier NSF
+        pinless-scaffold approach, obsolete since
+        adapters.obligation_common.baseline_pin_problems started requiring
+        an integer ``obligationsCents`` on every non-``unavailable`` row):
+        NIH scaffolds follow the current hhs/ahrq and dod/* precedent and
+        carry REVIEWED File A/GTAS pins from the official federal-account
+        endpoint (docs/phase-3.2d-other-civilian-handoff.md "AHRQ release"),
+        not empty placeholders -- scripts/pull_obligation_account.py's
+        ``pull()`` runs the identical pin-shape check on every existing pin
+        before downloading, so a pinless scaffold would fail every backfill
+        job outright.
+        """
         for path, account in self.accounts.items():
             baseline = json.loads((REPO / account["baseline"]).read_text())
             self.assertEqual(2, baseline["schemaVersion"])
@@ -133,27 +146,45 @@ class NIHObligationOnboardingTests(unittest.TestCase):
             for fy in range(2015, first_fy):
                 self.assertEqual("unavailable", years[str(fy)]["status"])
                 self.assertTrue(years[str(fy)].get("reason"))
-            self.assertEqual("partial", years[str(first_fy)]["status"])
-            self.assertEqual(12, years[str(first_fy)]["asOfPeriod"])
-            self.assertEqual(first_period, years[str(first_fy)]["firstPeriod"])
+
+            first_row = years[str(first_fy)]
+            self.assertEqual("partial", first_row["status"])
+            self.assertEqual(12, first_row["asOfPeriod"])
+            self.assertEqual(first_period, first_row["firstPeriod"])
+            self.assertIsInstance(first_row["obligationsCents"], int)
+
             for fy in range(first_fy + 1, 2026):
-                self.assertEqual(
-                    {"status": "partial", "asOfPeriod": 12}, years[str(fy)],
-                    f"{path} FY{fy}",
-                )
-            self.assertEqual({"status": "partial", "asOfPeriod": 10}, years["2026"])
+                row = years[str(fy)]
+                self.assertEqual({"status", "obligationsCents"}, set(row),
+                                  f"{path} FY{fy}")
+                self.assertEqual("complete", row["status"])
+                self.assertIsInstance(row["obligationsCents"], int)
+
+            row_2026 = years["2026"]
+            self.assertEqual("partial", row_2026["status"])
+            self.assertIsInstance(row_2026["asOfPeriod"], int)
+            self.assertIsInstance(row_2026["obligationsCents"], int)
 
             store = REPO / "data" / "obligations" / path / "events"
-            if not store.exists():
-                # Pre-backfill: the scaffold must not carry any pinned
-                # obligationsCents value (adapters.obligation_common
-                # .baseline_pin_problems requires an integer once a value is
-                # present, so an unfilled scaffold must omit the field
-                # entirely rather than fake a placeholder number).
-                self.assertFalse(any(
-                    "obligationsCents" in row for row in years.values()
-                    if row["status"] != "unavailable"
-                ), f"{path}: scaffold retained an unfilled obligationsCents before backfill")
+            if store.exists():
+                # A real CI backfill may have advanced/replaced these pins
+                # (e.g. FY2026's asOfPeriod moving forward); only the shape
+                # asserted above still applies, not an exact discovery match.
+                continue
+            discovery_account = self.discovery.get(account["federalAccount"])
+            if not discovery_account:
+                continue
+            for fy in range(first_fy, 2027):
+                fy_row = discovery_account["fiscalYears"][str(fy)]
+                file_a_cents = cents(fy_row["accountRecord"]["total_obligated_amount"])
+                self.assertEqual(
+                    fy_row["fileB"]["totalCents"], file_a_cents,
+                    f"{path} FY{fy}: discovery File A/File B mismatch",
+                )
+                self.assertEqual(
+                    file_a_cents, years[str(fy)]["obligationsCents"],
+                    f"{path} FY{fy}: baseline pin does not match discovery File A",
+                )
 
     def test_full_backfill_plan_selects_every_scaffold_year(self):
         jobs = plan(repo=REPO, mode="full", selectors=",".join(self.accounts))["include"]
