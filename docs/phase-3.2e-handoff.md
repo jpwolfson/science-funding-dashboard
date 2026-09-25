@@ -198,6 +198,7 @@ aliases on NIA/NCI/NIDDK/NIAID).
 | 2026-09-24 01:15 | Registry worker: 9 accounts, File A pins | `claude/phase-3.2e-nih` @ 55b4630 |
 | 2026-09-24 05:45 | Discovery chunk 3 | clean; ARPA-H first FY2022 P07 |
 | 2026-09-24 06:40 | Registry 27/27 | `0e355c2`; registry 569/569, fast 7/7 |
+| 2026-09-25 10:20 | Run 1 check | 95/130 pulls green; **1 failed**: `hhs/nih-ninds` FY2019 (job 107516375728). File B P02–P12 accepted (through a USAspending disconnect burst 07:25–07:31); File C request accepted at 07:32 and never finished within the adapter's 2 h cap (`TimeoutError`). Same source-stall class as W11/W13, not volume. Remedy: after the run completes, re-run failed jobs once; W13 resumes the accepted request from raw artifact `obligation-raw-hhs--nih-ninds-FY2019-attempt1` (id 10855739411), and reconcile re-runs with the full partition set. |
 | 2026-09-24 11:05 | Run 1 check | 0 failed jobs; `main` at `8b8a13b` (Stage 2b #95 merged; disclosure present in site/index.html:2431, registry interpretationNote ×2, test_site_contract.py:219,1036) |
 | 2026-09-24 06:11 | Stage 1 `58945ab` + trigger `5869069`: backfill run 1 [`35963288599`](https://github.com/jpwolfson/science-funding-dashboard/actions/runs/35963288599) | running; first pull (B&F FY2018) green in 16 min; reconcile expected ~2026-09-25 17:00 |
 
