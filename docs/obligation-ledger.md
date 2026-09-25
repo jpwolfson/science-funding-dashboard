@@ -130,6 +130,15 @@ typically hit the adapter's 2 h cap again (ed/ies FY2018: 7 identical
 failures on 2026-09-07; usda/nifa-research-education FY2019: 2 more on
 2026-09-19/20).
 
+Resume is also bounded by age. An accepted request whose acceptance time
+(encoded in the source file name: `file_name`, `file_url`, or the status
+URL's `?file_name=`) is more than `MAX_AUTO_RESUME_AGE_HOURS` (4 h) old has
+already outlived the original 2 h cap plus one resumed window. It is
+abandoned for a fresh request, so a single stuck source export cannot pin
+every later attempt. Evidence: Phase 3.2e run `35963288599`, where
+`hhs/nih-ninds` FY2019's File C request, accepted 07:32 UTC, was still
+unfinished at 23:32 after one resume.
+
 A reviewed handoff may still be committed temporarily as
 `reference/obligation_download_resumes.json` so a bounded retry across
 *separate* workflow runs -- not just the current run's next attempt --

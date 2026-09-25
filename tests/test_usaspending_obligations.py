@@ -4,6 +4,7 @@ import json
 import tempfile
 import urllib.error
 import unittest
+from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import patch
 
@@ -19,8 +20,8 @@ from adapters.usaspending_obligations import (
     parse_file_b_snapshot, parse_file_c,
 )
 from scripts.pull_obligation_account import (
-    FILE_B_COLUMNS, _baseline_pin, _download,
-    _load_resume_handoffs, _resume_handoff_matches_run, _resume_request,
+    FILE_B_COLUMNS, FILE_C_COLUMNS, _accepted_at, _auto_resume,
+    _baseline_pin, _download, _load_resume_handoffs, _resume_handoff_matches_run, _resume_request,
     _validate_account_total, _write_resume_handoff, pull, run_identity_from_environ,
 )
 
@@ -469,6 +470,64 @@ class USAspendingObligationTests(unittest.TestCase):
         fresh.assert_not_called()
         self.assertEqual({}, members)
         self.assertEqual(0, audit["parsedRowCount"])
+
+    def _aged_resume_handoffs(self, file_name):
+        result = {
+            "status_url": "https://api.usaspending.gov/api/v2/download/status/resume",
+            "file_name": file_name,
+            "download_request": _echoed_download_request(
+                "5555", 2019, 12, "award_financial", FILE_C_COLUMNS
+            ),
+        }
+        return {
+            ("hhs/nih-ninds", 2019, 12, "award_financial"): {
+                "account": "hhs/nih-ninds", "fiscalYear": 2019, "period": 12,
+                "submissionType": "award_financial",
+                "runId": "111", "headSha": "abc123", "result": result,
+            },
+        }
+
+    def test_automatic_resume_abandons_a_request_older_than_the_resume_window(self):
+        # NINDS FY2019 (Phase 3.2e): accepted 07:32 UTC, timed out, resumed,
+        # timed out again. A third attempt must not re-poll the same stuck
+        # export; it issues a fresh request.
+        handoffs = self._aged_resume_handoffs(
+            "FY2019P01-P12_All_FA_AccountBreakdownByAward_2026-09-25_H07M32S57822702.zip"
+        )
+        now = datetime(2026, 9, 25, 23, 40, tzinfo=timezone.utc)
+        self.assertIsNone(_auto_resume(
+            {"path": "hhs/nih-ninds"}, "5555", 2019, 12, "award_financial",
+            FILE_C_COLUMNS, handoffs, {"runId": "111", "headSha": "abc123"},
+            now=now,
+        ))
+
+    def test_automatic_resume_keeps_a_request_inside_the_resume_window(self):
+        # The ordinary W13 case: an immediate rerun after the first 2 h cap.
+        handoffs = self._aged_resume_handoffs(
+            "FY2019P01-P12_All_FA_AccountBreakdownByAward_2026-09-25_H07M32S57822702.zip"
+        )
+        now = datetime(2026, 9, 25, 9, 40, tzinfo=timezone.utc)
+        resumed = _auto_resume(
+            {"path": "hhs/nih-ninds"}, "5555", 2019, 12, "award_financial",
+            FILE_C_COLUMNS, handoffs, {"runId": "111", "headSha": "abc123"},
+            now=now,
+        )
+        self.assertIsNotNone(resumed)
+
+    def test_accepted_at_parses_the_source_file_name_and_tolerates_absence(self):
+        self.assertEqual(
+            datetime(2026, 9, 23, 22, 2, 15, tzinfo=timezone.utc),
+            _accepted_at({"file_name":
+                "FY2025P01-P12_All_FA_AccountBreakdownByPA-OC_2026-09-23_H22M02S15173194.zip"}),
+        )
+        self.assertEqual(
+            datetime(2026, 9, 25, 7, 32, 57, tzinfo=timezone.utc),
+            _accepted_at({"status_url":
+                "https://api.usaspending.gov/api/v2/download/status?file_name="
+                "FY2019P01-P12_All_FA_AccountBreakdownByAward_2026-09-25_H07M32S57822702.zip"}),
+        )
+        self.assertIsNone(_accepted_at({"file_name": "accepted.zip"}))
+        self.assertIsNone(_accepted_at({}))
 
     def test_automatic_resume_falls_through_on_run_and_head_sha_mismatch(self):
         account = {"path": "ed/ies"}
