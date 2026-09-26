@@ -198,6 +198,7 @@ aliases on NIA/NCI/NIDDK/NIAID).
 | 2026-09-24 01:15 | Registry worker: 9 accounts, File A pins | `claude/phase-3.2e-nih` @ 55b4630 |
 | 2026-09-24 05:45 | Discovery chunk 3 | clean; ARPA-H first FY2022 P07 |
 | 2026-09-24 06:40 | Registry 27/27 | `0e355c2`; registry 569/569, fast 7/7 |
+| 2026-09-26 17:05 | **Group A committed.** Run `35963288599` attempt 4: the fresh NINDS FY2019 File C request finished (third request overall; the first two, 17 h apart, stalled at the source). Reconcile validated and committed atomic snapshot `c9dc3c58` (1,108 files). All 13 group-A accounts have 10/10 partitions through FY2026 P10. Every reviewed File A pin is unchanged: the reconcile diff to the 13 baselines is key order only, so File B = pin exactly for all 130 account-years. | Group A done; wait for group B |
 | 2026-09-26 14:35 | NINDS FY2019 attempt 4 (`rerun_failed_jobs` 14:31, fresh request). Group B check: 36 pulls green (median 17.3 min), 1 failed: `hhs/nih-niaaa` FY2019 (job 108321685827), File C request stalled 10:11→12:11, same `TimeoutError`. **Pattern:** every stall so far is an older-year File C export (NIFA FY2019, IES FY2018, NINDS FY2019, NIAAA FY2019), while most same-year pulls succeed. So it is intermittent at the source, not deterministic per account. | Group B continues; after it completes, one `rerun_failed_jobs` (the age bound forces fresh requests). |
 | 2026-09-26 03:45 | Group B run [`36212428737`](https://github.com/jpwolfson/science-funding-dashboard/actions/runs/36212428737) (136 jobs) running on `claude/phase-3.2e-nih-b`; first pulls green: ARPA-H FY2022 (first partial year, P07 start) and FY2024. Run 1 attempt 3 ended `failure` (fail-closed; nothing committed). | NINDS FY2019 attempt 4 scheduled ~14:30 UTC |
 | 2026-09-26 02:45 | Run 1 attempt 3: the resume-age bound worked (`abandoning automatic resume ... request accepted 2026-09-25T07:33:02+00:00 is older than 4 h; requesting a fresh download`), but the FRESH NINDS FY2019 File C request also stalled past 2 h (job 108297583034, 00:28→02:28). Two independent requests 17 h apart: persistent source-side stall for this one export. Reconcile attempt 3 (job 108319802106) will fail closed; nothing committed. | Decision (engineering): no immediate retry; retry NINDS FY2019 after ~12 h (attempt 4). Group B backfill started in parallel on `claude/phase-3.2e-nih-b` (registry = 53 + group B, `a3bc081`; trigger `c9fba04`, 135 jobs). Owner memo only if the stall persists for days (IES FY2018 quarantine precedent). Group-A partition artifacts (7-day retention) expire ~2026-10-01/02. |
@@ -210,11 +211,8 @@ aliases on NIA/NCI/NIDDK/NIAID).
 ## Next action
 
 Two parallel tracks:
-- **Group A** (`claude/phase-3.2e-nih`, run `35963288599`): 129/130 partitions
-  green; blocked on NINDS FY2019 File C (USAspending export stall). Retry with
-  `rerun_failed_jobs` about every 12 h (the resume-age bound forces a fresh
-  request). Partition artifacts expire ~2026-10-01. If the stall is still
-  unresolved by ~2026-09-29, send the owner the quarantine option memo.
+- **Group A**: DONE. Snapshot `c9dc3c58` on `claude/phase-3.2e-nih` (13 accounts,
+  130 account-years).
 - **Group B** (`claude/phase-3.2e-nih-b`): full backfill of 14 accounts
   (135 jobs, ~38 h).
 - **Integration** (after both commit): on `claude/phase-3.2e-nih`, merge
