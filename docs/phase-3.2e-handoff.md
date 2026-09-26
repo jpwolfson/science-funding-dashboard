@@ -198,6 +198,7 @@ aliases on NIA/NCI/NIDDK/NIAID).
 | 2026-09-24 01:15 | Registry worker: 9 accounts, File A pins | `claude/phase-3.2e-nih` @ 55b4630 |
 | 2026-09-24 05:45 | Discovery chunk 3 | clean; ARPA-H first FY2022 P07 |
 | 2026-09-24 06:40 | Registry 27/27 | `0e355c2`; registry 569/569, fast 7/7 |
+| 2026-09-26 02:45 | Run 1 attempt 3: the resume-age bound worked (`abandoning automatic resume ... request accepted 2026-09-25T07:33:02+00:00 is older than 4 h; requesting a fresh download`), but the FRESH NINDS FY2019 File C request also stalled past 2 h (job 108297583034, 00:28→02:28). Two independent requests 17 h apart: persistent source-side stall for this one export. Reconcile attempt 3 (job 108319802106) will fail closed; nothing committed. | Decision (engineering): no immediate retry; retry NINDS FY2019 after ~12 h (attempt 4). Group B backfill started in parallel on `claude/phase-3.2e-nih-b` (registry = 53 + group B, `a3bc081`; trigger `c9fba04`, 135 jobs). Owner memo only if the stall persists for days (IES FY2018 quarantine precedent). Group-A partition artifacts (7-day retention) expire ~2026-10-01/02. |
 | 2026-09-25 23:50 | Run 1 attempt 2: NINDS FY2019 pull job 108256105370 **failed again**. W13 resumed the same File C request accepted 07:32 UTC (`resuming accepted ... (automatic, previous attempt)`); it was still unfinished at 23:32, so this is a stuck source export (IES FY2018 pattern), not transient. A third plain rerun would re-poll the same dead request. Fix: an automatic resume now abandons accepted requests older than 4 h (acceptance time parsed from the source file name) and requests fresh; tests + `docs/obligation-ledger.md`. Pull jobs check out the branch tip, so attempt 3 picks up the fix. | fix pushed; attempt 3 after attempt 2's reconcile finishes |
 | 2026-09-25 21:25 | Run 1 attempt 1 complete: 129/130 pulls green; reconcile job 108220937537 reconciled 129 partitions, then `validate_obligations` failed closed (`hhs/nih-ninds FY2019: required shard file is missing`; `FY2019: required complete snapshot is missing`); nothing committed | `rerun_failed_jobs` issued (attempt 2: NINDS FY2019 W13 resume + reconcile) |
 | 2026-09-25 10:20 | Run 1 check | 95/130 pulls green; **1 failed**: `hhs/nih-ninds` FY2019 (job 107516375728). File B P02–P12 accepted (through a USAspending disconnect burst 07:25–07:31); File C request accepted at 07:32 and never finished within the adapter's 2 h cap (`TimeoutError`). Same source-stall class as W11/W13, not volume. Remedy: after the run completes, re-run failed jobs once; W13 resumes the accepted request from raw artifact `obligation-raw-hhs--nih-ninds-FY2019-attempt1` (id 10855739411), and reconcile re-runs with the full partition set. |
@@ -206,6 +207,16 @@ aliases on NIA/NCI/NIDDK/NIAID).
 
 ## Next action
 
-Monitor backfill run 1 (group A, 130 serialized jobs, ~36 h) on
-`claude/phase-3.2e-nih`. When its reconcile commits: verify exactness and
-zero warnings, then stage 2 (restore the registry from `0e355c25` + group-B trigger).
+Two parallel tracks:
+- **Group A** (`claude/phase-3.2e-nih`, run `35963288599`): 129/130 partitions
+  green; blocked on NINDS FY2019 File C (USAspending export stall). Retry with
+  `rerun_failed_jobs` about every 12 h (the resume-age bound forces a fresh
+  request). Partition artifacts expire ~2026-10-01. If the stall is still
+  unresolved by ~2026-09-29, send the owner the quarantine option memo.
+- **Group B** (`claude/phase-3.2e-nih-b`): full backfill of 14 accounts
+  (135 jobs, ~38 h).
+- **Integration** (after both commit): on `claude/phase-3.2e-nih`, merge
+  `claude/phase-3.2e-nih-b`; restore the registry from `0e355c25` (all 27; do
+  this BEFORE merging `main`); regenerate rollups/sentinel with repo tooling;
+  validate; restore the trigger to weekly/all; merge `main`; remove the
+  temporary NIH disclosure; release gates; PR.
