@@ -233,13 +233,12 @@ reviewer saw 13 pages and the rule-5 questions only.
 
 ## Next action
 
-Two parallel tracks:
-- **Group A**: DONE. Snapshot `c9dc3c58` on `claude/phase-3.2e-nih` (13 accounts,
-  130 account-years).
-- **Group B** (`claude/phase-3.2e-nih-b`): full backfill of 14 accounts
-  (135 jobs, ~38 h).
-- **Integration** (after both commit): on `claude/phase-3.2e-nih`, merge
-  `claude/phase-3.2e-nih-b`; restore the registry from `0e355c25` (all 27; do
-  this BEFORE merging `main`); regenerate rollups/sentinel with repo tooling;
-  validate; restore the trigger to weekly/all; merge `main`; remove the
-  temporary NIH disclosure; release gates; PR.
+Draft PR #97 (`claude/phase-3.2e-nih` → `main`). Blocked on the owner's
+answer to the F1/F1b wording memo (sent in chat 2026-09-27). Then:
+1. Register the approved notes as `programActivities[].interpretationNote`
+   on NIDDK `type-1-diabetes` and each `nih-reimbursable-other`.
+2. Regenerate with `build_obligations`, then run `validate_obligations`, the
+   rendered tier, and a screens re-shot of the noted pages. Re-review F1.
+3. Add the CLAUDE.md status bullet (include the ~45 h weekly-run window)
+   and the phase-history entry.
+4. Mark #97 ready and merge when green, outside Mon ~10:37 → ~Wed 07:00 UTC.
