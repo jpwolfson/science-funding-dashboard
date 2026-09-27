@@ -168,10 +168,18 @@ class NIHObligationOnboardingTests(unittest.TestCase):
                 self.assertEqual("unavailable", years[str(fy)]["status"])
                 self.assertTrue(years[str(fy)].get("reason"))
 
+            store = REPO / "data" / "obligations" / path / "events"
             first_row = years[str(first_fy)]
             self.assertEqual("partial", first_row["status"])
             self.assertEqual(12, first_row["asOfPeriod"])
-            self.assertEqual(first_period, first_row["firstPeriod"])
+            if store.exists():
+                # After a backfill, _baseline_pin records the first MATERIAL
+                # File B event period, which can follow the first non-empty
+                # snapshot (ARPA-H FY2022: snapshots from P07, first
+                # material activity P10; OCED FY2022 precedent).
+                self.assertGreaterEqual(first_row["firstPeriod"], first_period)
+            else:
+                self.assertEqual(first_period, first_row["firstPeriod"])
             self.assertIsInstance(first_row["obligationsCents"], int)
 
             for fy in range(first_fy + 1, 2026):
@@ -186,7 +194,6 @@ class NIHObligationOnboardingTests(unittest.TestCase):
             self.assertIsInstance(row_2026["asOfPeriod"], int)
             self.assertIsInstance(row_2026["obligationsCents"], int)
 
-            store = REPO / "data" / "obligations" / path / "events"
             if store.exists():
                 # A real CI backfill may have advanced/replaced these pins
                 # (e.g. FY2026's asOfPeriod moving forward); only the shape
