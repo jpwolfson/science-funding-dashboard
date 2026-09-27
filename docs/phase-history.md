@@ -534,3 +534,29 @@ the PR to `main`.
 captures, `--data` for staged scenarios). The screens tier now also
 captures award sub-pages discovered from `data/index.json`.
 
+
+## Display follow-ups: Stage 2b (2026-09-23 → 2026-09-24)
+
+Ledger items 12 and 14–22 (the Stage 2 release review's owner-layer queue),
+approved by the owner on 2026-09-23. Record: `docs/stage-2b-display-handoff.md`;
+evidence: `docs/reviews/evidence-2026-09-23/stage2b/`.
+
+- **Shipped (display):** 12 whole-account scope sentence on the obligations
+  landing (before the NIH sentence, which 3.2e removes); 16 source-only
+  sentinel cards say "no linked ledger activity" and "award IDs listed by the
+  source"; 17 sentinel figures labeled "File C gross negative" / "File C net
+  activity (observation window)"; 18 flow-table descriptions quoted, marked
+  "source description", one citation per card; 20 "Award activity (NIH and
+  NSF)"; 21 source status as dates, "eight weeks" process line removed.
+- **Item 19:** the approved "October 1 – November 12" failed primary-source
+  verification (CRS R48765: lapse through November 11; P.L. 119-37 signed
+  November 12). Held, memo'd, owner approved the corrected dates; shown beside
+  the award charts and, after the release review, under the FY2026 tiles.
+- **Item 15:** CI re-pull of `dod/army-rdte` FY2022 (run 35928876011) returned
+  identical row counts and a cent-identical cumulative path (5 File C text
+  fields changed, net $0). Not a defect; owner-approved no-cause `publicNote`
+  at FY2022 P10.
+- **14, 22:** no change by approval.
+- **Release bar:** registry 382/382, fast 7/7, rendered 4/4, screens 74; fresh
+  reader review 2 High / 3 Med / 4 Low, none introduced by Stage 2b; H1 fixed,
+  H2 (quoted USDA NIFA disclaimer text) routed to the owner.
