@@ -1,0 +1,763 @@
+{
+ "acceptedAt": "2026-09-27T15:34:15+00:00",
+ "accountPath": "hhs/nih-nimhd",
+ "asOfPeriod": 12,
+ "baselinePin": {
+  "obligationsCents": 31876986440,
+  "status": "complete"
+ },
+ "collectionStatus": "accepted",
+ "diff": {
+  "addedCount": 750,
+  "addedIdsSha256": "3a3eac0bfc484c7f232ab7d374985c03e5ac467447397b95a50c833bedb92877",
+  "changedCount": 0,
+  "changedIdsSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "netAmountChangeCents": 31876986440,
+  "previousRecordCount": 0,
+  "recordCount": 750,
+  "removedCount": 0,
+  "removedIdsSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+ },
+ "downloads": [
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "5502",
+     "fy": 2019,
+     "period": 2,
+     "quarter": null,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "bb769dec267923b50638b47779754437c5d53805ebbd96be7741de78544c8bad",
+   "memberRowCounts": {
+    "FY2019Q1-QNone_All_FA_AccountBreakdownByPA-OC_2026-09-27_H15M17S19_1.csv": 0
+   },
+   "parsedRowCount": 0,
+   "rawArtifactFile": "hhs--nih-nimhd-FY2019P02-object_class_program_activity-bb769dec2679.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "5502",
+     "fy": 2019,
+     "period": 2,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 0,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "5502",
+     "fy": 2019,
+     "period": 3,
+     "quarter": 1,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "01f42a9f205a7f0963421ca39c062a28ea2a2e3c33bf0f699197d470c98d7d0b",
+   "memberRowCounts": {
+    "FY2019Q1_All_FA_AccountBreakdownByPA-OC_2026-09-27_H15M17S56_1.csv": 30
+   },
+   "parsedRowCount": 30,
+   "rawArtifactFile": "hhs--nih-nimhd-FY2019P03-object_class_program_activity-01f42a9f205a.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "5502",
+     "fy": 2019,
+     "period": 3,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 30,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "5502",
+     "fy": 2019,
+     "period": 4,
+     "quarter": 1,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "75f19aa306c46e4fd5f1d202acd1d7f2ff7c208661f25212e42ace58ac4cbed6",
+   "memberRowCounts": {
+    "FY2019Q1_All_FA_AccountBreakdownByPA-OC_2026-09-27_H15M18S33_1.csv": 30
+   },
+   "parsedRowCount": 30,
+   "rawArtifactFile": "hhs--nih-nimhd-FY2019P04-object_class_program_activity-75f19aa306c4.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "5502",
+     "fy": 2019,
+     "period": 4,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 30,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "5502",
+     "fy": 2019,
+     "period": 5,
+     "quarter": 1,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "65dbe178c939bacc6555b9279f1c4a6360b60fdbb40a372d06586eeb9f0282ba",
+   "memberRowCounts": {
+    "FY2019Q1_All_FA_AccountBreakdownByPA-OC_2026-09-27_H15M19S10_1.csv": 30
+   },
+   "parsedRowCount": 30,
+   "rawArtifactFile": "hhs--nih-nimhd-FY2019P05-object_class_program_activity-65dbe178c939.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "5502",
+     "fy": 2019,
+     "period": 5,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 30,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "5502",
+     "fy": 2019,
+     "period": 6,
+     "quarter": 2,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "fcbfad49f8ecce995586a3c5868abaf5a28b12a759169f4d0b6af2ed8087ed0d",
+   "memberRowCounts": {
+    "FY2019Q1-Q2_All_FA_AccountBreakdownByPA-OC_2026-09-27_H15M19S46_1.csv": 34
+   },
+   "parsedRowCount": 34,
+   "rawArtifactFile": "hhs--nih-nimhd-FY2019P06-object_class_program_activity-fcbfad49f8ec.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "5502",
+     "fy": 2019,
+     "period": 6,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 34,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "5502",
+     "fy": 2019,
+     "period": 7,
+     "quarter": 2,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "1e85197edd6b757b855d1e582f6590976e14e8639e037e23709b56df37dad698",
+   "memberRowCounts": {
+    "FY2019Q1-Q2_All_FA_AccountBreakdownByPA-OC_2026-09-27_H15M20S23_1.csv": 34
+   },
+   "parsedRowCount": 34,
+   "rawArtifactFile": "hhs--nih-nimhd-FY2019P07-object_class_program_activity-1e85197edd6b.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "5502",
+     "fy": 2019,
+     "period": 7,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 34,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "5502",
+     "fy": 2019,
+     "period": 8,
+     "quarter": 2,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "955ef895fefff6550ace2129de1d4fa6ffd2709ef1de8af299350633f51ab6b1",
+   "memberRowCounts": {
+    "FY2019Q1-Q2_All_FA_AccountBreakdownByPA-OC_2026-09-27_H15M21S03_1.csv": 34
+   },
+   "parsedRowCount": 34,
+   "rawArtifactFile": "hhs--nih-nimhd-FY2019P08-object_class_program_activity-955ef895feff.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "5502",
+     "fy": 2019,
+     "period": 8,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 34,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "5502",
+     "fy": 2019,
+     "period": 9,
+     "quarter": 3,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "df4189d6f9d0851c4c245922bc71e85687367d67ef15e54970f8076ca103466e",
+   "memberRowCounts": {
+    "FY2019Q1-Q3_All_FA_AccountBreakdownByPA-OC_2026-09-27_H15M21S43_1.csv": 32
+   },
+   "parsedRowCount": 32,
+   "rawArtifactFile": "hhs--nih-nimhd-FY2019P09-object_class_program_activity-df4189d6f9d0.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "5502",
+     "fy": 2019,
+     "period": 9,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 32,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "5502",
+     "fy": 2019,
+     "period": 10,
+     "quarter": 3,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "42ef286a1a7b20e8afbac243e5b028e18599255c12cddcde7de1c02716998392",
+   "memberRowCounts": {
+    "FY2019Q1-Q3_All_FA_AccountBreakdownByPA-OC_2026-09-27_H15M26S26_1.csv": 32
+   },
+   "parsedRowCount": 32,
+   "rawArtifactFile": "hhs--nih-nimhd-FY2019P10-object_class_program_activity-42ef286a1a7b.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "5502",
+     "fy": 2019,
+     "period": 10,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 32,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "5502",
+     "fy": 2019,
+     "period": 11,
+     "quarter": 3,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "1f27aa265ef571e39ecf3ce2e3094082fc6ad7ca0dfe213bb96b5919e31e023f",
+   "memberRowCounts": {
+    "FY2019Q1-Q3_All_FA_AccountBreakdownByPA-OC_2026-09-27_H15M27S26_1.csv": 32
+   },
+   "parsedRowCount": 32,
+   "rawArtifactFile": "hhs--nih-nimhd-FY2019P11-object_class_program_activity-1f27aa265ef5.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "5502",
+     "fy": 2019,
+     "period": 11,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 32,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "download_types": [
+     "object_class_program_activity"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "5502",
+     "fy": 2019,
+     "period": 12,
+     "quarter": 4,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "b77bdfbf80ce336df624c8f01dbce54a18858064cc4017c9c4b5c1b538aef24d",
+   "memberRowCounts": {
+    "FY2019Q1-Q4_All_FA_AccountBreakdownByPA-OC_2026-09-27_H15M28S03_1.csv": 33
+   },
+   "parsedRowCount": 33,
+   "rawArtifactFile": "hhs--nih-nimhd-FY2019P12-object_class_program_activity-b77bdfbf80ce.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "obligations_incurred"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "5502",
+     "fy": 2019,
+     "period": 12,
+     "submission_types": [
+      "object_class_program_activity"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 33,
+   "submissionType": "object_class_program_activity"
+  },
+  {
+   "acceptedRequestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "transaction_obligated_amount",
+     "award_unique_key",
+     "award_id_piid",
+     "parent_award_id_piid",
+     "award_id_fain",
+     "award_id_uri",
+     "recipient_uei",
+     "recipient_name",
+     "prime_award_base_transaction_description",
+     "usaspending_permalink"
+    ],
+    "download_types": [
+     "award_financial"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "agency": "all",
+     "budget_function": "all",
+     "budget_subfunction": "all",
+     "federal_account": "5502",
+     "fy": 2019,
+     "period": 12,
+     "quarter": 4,
+     "submission_types": [
+      "award_financial"
+     ]
+    },
+    "request_type": "account"
+   },
+   "archiveSha256": "f0f6df775fdc019889423abd578133aa5807749b298019d4e084897d3ea4ee81",
+   "memberRowCounts": {
+    "FY2019Q1-QNone_All_FA_Assistance_AccountBreakdownByAward_2026-09-27_H15M32S39_01.csv": 700,
+    "FY2019Q1-QNone_All_FA_Contracts_AccountBreakdownByAward_2026-09-27_H15M32S39_01.csv": 88,
+    "FY2019Q1-QNone_All_FA_Unlinked_AccountBreakdownByAward_2026-09-27_H15M32S39_01.csv": 4
+   },
+   "parsedRowCount": 792,
+   "rawArtifactFile": "hhs--nih-nimhd-FY2019P12-award_financial-f0f6df775fdc.zip",
+   "requestScope": {
+    "account_level": "federal_account",
+    "columns": [
+     "submission_period",
+     "federal_account_symbol",
+     "program_activity_reporting_key",
+     "program_activity_code",
+     "program_activity_name",
+     "transaction_obligated_amount",
+     "award_unique_key",
+     "award_id_piid",
+     "parent_award_id_piid",
+     "award_id_fain",
+     "award_id_uri",
+     "recipient_uei",
+     "recipient_name",
+     "prime_award_base_transaction_description",
+     "usaspending_permalink"
+    ],
+    "file_format": "csv",
+    "filters": {
+     "federal_account": "5502",
+     "fy": 2019,
+     "period": 12,
+     "submission_types": [
+      "award_financial"
+     ]
+    }
+   },
+   "status": "finished",
+   "statusRowCount": 792,
+   "submissionType": "award_financial"
+  }
+ ],
+ "federalAccount": "075-0897",
+ "fiscalYear": 2019,
+ "normalized": {
+  "eventFingerprint": "fd43f034b44cbdfdac3a6be3bf8fdcf387a4cee7320be553026ff579a7cc44f0",
+  "netObligationsCents": 31876986440,
+  "recordCount": 750
+ },
+ "replacement": {
+  "previousEventFingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "previousProvenanceSha256": null
+ },
+ "schemaVersion": 2
+}
