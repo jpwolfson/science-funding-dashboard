@@ -188,6 +188,25 @@ Registry generation completed at `0e355c2` (27/27: registry 569/569, fast
 PA; NIDDK `0031` Type 1 Diabetes registered separately; ZERO OBLIGATION
 aliases on NIA/NCI/NIDDK/NIAID).
 
+## Release reader review (2026-09-27, fresh agent, screenshots only)
+
+Pack: `scripts/verify.py --tier screens` (101 pages) on `d361a835`, plus
+the HHS agency page, NCI institute PA and NIDDK Type 1 Diabetes PA. The
+reviewer saw 13 pages and the rule-5 questions only.
+
+| # | Sev | Introduced by 3.2e? | Finding | Disposition |
+|---|---|---|---|---|
+| F1 | High | **Yes** | NIDDK "Type 1 Diabetes" PA page shows $0 in every FY2026 tile beside $30–77M in prior years, with no explanation; reads as defunding. FY2026 File B has no separate PAC/PARK for it (it is inside the NIDDK PARK). | **Gates release.** Owner memo (wording is layer a/b). Engineering: add an optional PA-level `interpretationNote`. |
+| F1b | (Medium, found in follow-up scan) | **Yes** | Same shape on 21 "NIH reimbursable – other" (`0801`) PA pages: material FY2017–FY2020 (NIGMS $0.83–1.24B/yr), about $0 from FY2021. | In the same memo. |
+| F5 | Medium | Partly | No NIH-level obligations rollup; the award NIH total ($24.4B FY2026) and HHS obligations ($37.1B) are left unexplained side by side. | Brief forbids a public reconciliation; the existing separation disclosure stands. NIH rollup is a hierarchy/scope question (ARPA-H membership). Deferred; listed in the memo as a follow-up, not a release gate. |
+| F7 | Low | Yes | Single-PA institutes: the PA drill-down duplicates the institute page. | Existing site behavior for every single-PA account (e.g. ARPA-H, ASPR); display ledger. |
+| F9 | Low | Partly | Zero-value sibling PAs collapsed; a direct landing lacks sibling context. | Covered by the F1 note; display ledger. |
+| F2 | High | No | Award deltas vs FY15-24 average shown without the amendment-bias caveat nearby. | Pre-existing (award ledger); display ledger for the owner. |
+| F3 | High/Med | No | Sentinel unreviewed vs confirmed cards visually similar. | Pre-existing (sentinel language is owner-gated); display ledger. |
+| F4 | Medium | No | Partial FY26 bar marked only by an asterisk. | Pre-existing; display ledger. |
+| F6 | Medium | No | Commerce −7.1% File C/net and VA 0 linked awards unexplained on the landing. | Pre-existing; display ledger. |
+| F8 | Low | No | Award root "Data quality notes" duplicates an NSF sentence. | Pre-existing bug in `site/index.html` (Stage 2b-owned); display ledger. |
+
 ## Log
 
 | When (UTC) | Event | Result |

@@ -763,6 +763,41 @@ class InterpretationNoteRollupTests(unittest.TestCase):
             temp.cleanup()
 
 
+class ProgramActivityInterpretationNoteTests(unittest.TestCase):
+    """Phase 3.2e: an optional Program Activity `interpretationNote` reaches
+    only that PA's dashboard.json (after any account-level note), never the
+    account page, sibling PAs, or the landing table."""
+
+    def test_pa_note_is_scoped_to_its_program_activity(self):
+        import scripts.rollup_obligations as rollup_obligations
+        fixture = InterpretationNoteRollupTests()
+        temp, root = fixture.build_fixture()
+        try:
+            config_path = root / "config" / "obligation_accounts.json"
+            config = json.loads(config_path.read_text())
+            for account in config["accounts"]:
+                if account["path"] == "doe/sc":
+                    account["programActivities"][0]["interpretationNote"] = "PA note."
+                if account["path"] == "dod/army-rdte":
+                    account["programActivities"][0]["interpretationNote"] = "PA note."
+            config_path.write_text(json.dumps(config))
+            rollup_obligations.build(root)
+            base = root / "data" / "obligations"
+            doe_pa = json.loads((base / "doe" / "sc" / "bes" / "dashboard.json").read_text())
+            self.assertEqual("PA note.", doe_pa["interpretationNote"])
+            doe_account = json.loads((base / "doe" / "sc" / "dashboard.json").read_text())
+            self.assertNotIn("interpretationNote", doe_account)
+            army_pa = json.loads((base / "dod" / "army-rdte" / "basic-research" /
+                                  "dashboard.json").read_text())
+            self.assertEqual("Note text. PA note.", army_pa["interpretationNote"])
+            root_dashboard = json.loads((base / "dashboard.json").read_text())
+            doe_child = next(c for c in root_dashboard["children"]
+                             if c["path"] == "obligations/doe")
+            self.assertNotIn("interpretationNote", doe_child)
+        finally:
+            temp.cleanup()
+
+
 class RefreshStatusValidationTests(unittest.TestCase):
     """Phase 3.2d remediation W12: per-account atomicity + published
     staleness. A marked-stale account (data/obligations/refresh_status.json)

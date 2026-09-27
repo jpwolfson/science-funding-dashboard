@@ -202,6 +202,17 @@ def _lint_account(repo, account, crosswalk_rows):
             else f"{len(note)} character(s)",
         ))
 
+    for pa in account.get("programActivities") or []:
+        if "interpretationNote" in pa:
+            note = pa.get("interpretationNote")
+            note_ok = isinstance(note, str) and bool(note.strip())
+            checks.append(_check(
+                f"{path}/{pa.get('slug')}: interpretationNote is a non-empty string",
+                note_ok,
+                f"interpretationNote={note!r}" if not note_ok
+                else f"{len(note)} character(s)",
+            ))
+
     baseline_rel = account.get("baseline")
     baseline_path = (repo / baseline_rel) if baseline_rel else None
     if not baseline_path or not baseline_path.exists():
