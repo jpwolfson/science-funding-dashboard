@@ -245,8 +245,8 @@ Full completed-phase history, evidence, and discovery narratives live in
       agencies. No partitioning needed (NCI FY2025 File C 130k rows, ~¼ of
       NSF R&RA). NIH obligations stay separate from, and never reconciled
       with, the NIH award ledger. Weekly obligation run now spans ~45 h
-      from its actual start (cron Mon 10:37 UTC; GitHub has started it ~6 h
+      from its actual start (cron Mon 10:37 UTC; GitHub has started it 6–8 h
       late), so ~Wed 14:00 UTC: check the run, never merge to `main` mid-run.
       Auto-resume abandons source requests older than 4 h. Owner-approved
-      Program Activity notes (NIDDK T1D; 20 reimbursable lines). Record:
+      Program Activity notes (NIDDK T1D; 25 reimbursable lines). Record:
       `docs/phase-3.2e-handoff.md`.
