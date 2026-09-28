@@ -560,3 +560,46 @@ evidence: `docs/reviews/evidence-2026-09-23/stage2b/`.
 - **Release bar:** registry 382/382, fast 7/7, rendered 4/4, screens 74; fresh
   reader review 2 High / 3 Med / 4 Low, none introduced by Stage 2b; H1 fixed,
   H2 (quoted USDA NIFA disclaimer text) routed to the owner.
+
+
+## Phase 3.2e — NIH obligation accounts (2026-09-23 → 2026-09-28)
+
+Owner approval 2026-09-23 (option A): onboard NIH's federal obligation
+accounts into the appropriations obligation ledger. Record:
+`docs/phase-3.2e-handoff.md`; PR #97.
+
+- **Scope:** 27 accounts (26 NIH institute/center/OD/B&F accounts plus
+  ARPA-H, `075-*`), registered as `hhs/nih-<ic>` and `hhs/arpa-h`. Registry
+  53 → 80 accounts; agency count unchanged at 13. NIH obligations are a
+  separate ledger from the NIH award ledger, and no public reconciliation
+  is published.
+- **Sizing (step 1, CI run 35925926839):** NCI `075-0849` FY2025 File C
+  130,115 rows / 72 MB / 328 s / 554 MB RSS (FY2026 P10: 90,479 rows),
+  about ¼ of NSF R&RA. No partitioning needed; standard weekly plan. The
+  weekly obligation run grows from ~30 h to ~45 h (public repo: Actions
+  minutes are not recurring spend).
+- **Registry:** discovery on CI (`scripts/discover_obligation_program_activities.py`)
+  found File B PA identities, first active periods, and File A pins.
+  Every account has reviewed `obligationsCents` pins (FY2018–25 complete,
+  FY2026 P10). Program Activities: the institute line, `unknown-other`,
+  `nih-reimbursable-other` (0801), and NIDDK `type-1-diabetes` (PAC 0031,
+  absent as a separate identity in FY2026). ARPA-H starts FY2022 P07
+  (first material period P10).
+- **Backfill:** two staged groups (13 + 14 accounts, runs 35963288599 and
+  36212428737), integrated on one branch. Every File A pin held to the
+  cent. Four intermittent older-year File C source stalls (NINDS FY2019,
+  NIAAA FY2019, plus one transport storm) were cleared by
+  `rerun_failed_jobs`. The recurring stuck-request case drove a
+  pipeline fix: automatic resume now abandons a source request accepted
+  more than 4 h earlier.
+- **Result (FY2026 through P10):** HHS $37.07B (was ~$2.3B); the 27 accounts
+  are $49.29B in FY2025, 79.8% File C-linked; root FY2025 $394.03B. The
+  temporary "NIH accounts are not included" disclosure was removed.
+- **Reader review:** first pass found one phase-introduced High (NIDDK
+  Type 1 Diabetes $0 in FY2026) and the same pattern on the reimbursable
+  lines. The owner approved PA-level `interpretationNote` text (new registry
+  field, lint-checked): a reporting-structure note plus a no-cause FY2025
+  sentence on T1D, and two data-true reimbursable variants ("near zero from
+  FY2021" on 20 lines; "well below FY2017–2020 levels since FY2023" on 5),
+  each gated by a stated numeric test. B&F gets none. The re-check found no
+  remaining gating High (dispositions R5–R7 in the handoff).
