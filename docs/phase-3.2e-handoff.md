@@ -198,6 +198,10 @@ reviewer saw 13 pages and the rule-5 questions only.
 |---|---|---|---|---|
 | F1 | High | **Yes** | NIDDK "Type 1 Diabetes" PA page shows $0 in every FY2026 tile beside $30–77M in prior years, with no explanation; reads as defunding. FY2026 File B has no separate PAC/PARK for it (it is inside the NIDDK PARK). | **Owner approved option A 2026-09-28**; the memo text is registered verbatim as the PA-level `interpretationNote` on NIDDK `type-1-diabetes`. Re-review below. |
 | F1b | (Medium, found in follow-up scan) | **Yes** | Same shape on 21 "NIH reimbursable – other" (`0801`) PA pages: material FY2017–FY2020 (NIGMS $0.83–1.24B/yr), about $0 from FY2021. | Option A approved 2026-09-28, applied only where the claim is true by a stated test: max \|annual net\| FY2021–FY2026 ≤ 5% of the FY2017–20 mean, which must be positive. **20 accounts qualify**: NLM, OD, NCATS, NINDS, NINR, NIMH, NCCIH, FIC, NICHD, NIGMS, NHLBI, NIDCR, NIAID, NEI, NIAMS, NIDCD, NHGRI, NIAAA, NIMHD, NIBIB. **6 get no note**: NIA (FY2021 $8.7M vs a $9.1M mean, ratio 0.95), NIEHS (0.33), NCI (0.13), NIDA (0.09; $9.1M FY2024), NIDDK 0801 (0.08), B&F (no positive FY2017–20 history). On those six pages "near zero" would be false or unsupported, and the pattern that prompted F1b is absent or weaker. |
+| R1 | High | **Yes** | Re-review 2026-09-28 (fresh Sonnet agent, 4 re-shot pages, no build context). The NIA reimbursable page has no note (excluded by the "near zero from FY2021" test: FY2021 $8.7M), yet it shows the same collapse one year later (FY2022 $2.1M, then ≤$0.2M). The sibling NIGMS page has a note, so the inconsistency reads as NIA-specific defunding. The same applies to NIEHS, NCI, NIDA and NIDDK 0801. | **Gates release.** Wording is owner-layer; memo 2026-09-28 proposes a second, data-true variant ("since FY2023 ... well below FY2017–2020 levels") for the 5 accounts (max \|FY2023+\| ≤ 20% of the FY2017–20 mean: NIA 0.02, NIEHS 0.20, NCI 0.13, NIDA 0.09, NIDDK 0.06). B&F still has no note (no pattern). |
+| R2 | High | **Yes** | The T1D note explains FY2026 $0, but FY2025 shows $1.7M (vs $28.8–141M in FY2017–24), and the source reports that figure under PAC 0031 itself, so the reporting-structure explanation does not cover it. The reviewer also cites FY2024 $30.1M; that is inside the historical range (FY2018 $28.8M), so only FY2025 is a finding. | **Gates release.** Memo proposes appending a no-cause FY2025 sentence. |
+| R3 | Medium | No | "No File C rows linked to public awards in FY2026" on zero-activity PA pages compounds the zero impression. | Existing site behavior on every zero-activity PA page; display ledger. |
+| R4 | Low | No | The partial-FY asterisk key sits only at the page bottom. | Same as F4 (pre-existing); display ledger. |
 | F5 | Medium | Partly | No NIH-level obligations rollup; the award NIH total ($24.4B FY2026) and HHS obligations ($37.1B) are left unexplained side by side. | Brief forbids a public reconciliation; the existing separation disclosure stands. NIH rollup is a hierarchy/scope question (ARPA-H membership). Deferred; listed in the memo as a follow-up, not a release gate. |
 | F7 | Low | Yes | Single-PA institutes: the PA drill-down duplicates the institute page. | Existing site behavior for every single-PA account (e.g. ARPA-H, ASPR); display ledger. |
 | F9 | Low | Partly | Zero-value sibling PAs collapsed; a direct landing lacks sibling context. | Covered by the F1 note; display ledger. |
@@ -218,6 +222,7 @@ reviewer saw 13 pages and the rule-5 questions only.
 | 2026-09-24 05:45 | Discovery chunk 3 | clean; ARPA-H first FY2022 P07 |
 | 2026-09-24 06:40 | Registry 27/27 | `0e355c2`; registry 569/569, fast 7/7 |
 | 2026-09-27 22:40 | **Group B committed** on `claude/phase-3.2e-nih-b`: run `36212428737` attempt 2 (fresh requests after the age bound) pulled NIAAA FY2019 (1,813 File C rows) and NIGMS FY2018 (9,104). Attempt 2's reconcile failed only on my own test (`test_baselines_carry_reviewed_file_a_pins_before_backfill`: ARPA-H FY2022 `firstPeriod` 7 ≠ 10). Post-backfill, `firstPeriod` is the first material event period (P10), so the test was wrong, not the data. Fixed in `15c22534`; attempt 3's reconcile committed `5aa0f6ad`. 14 stores (13×10 + ARPA-H 5). Only pin-row change: ARPA-H FY2022 `firstPeriod` 7→10, `obligationsCents` unchanged. | Integrated |
+| 2026-09-28 17:20 | Regenerated with notes (`2638a5d3`): diff = 21 notes + date stamps; `validate_obligations` PASS, 144 tests OK, registry 590/590. Re-shot 4 pages; fresh re-review: F1 note works for FY2026, NIGMS reimbursable note adequate, NIDDK institute page clean; new gating R1 (unnoted NIA-class reimbursable pages) and R2 (T1D FY2025 $1.7M). | Owner memo sent in chat |
 | 2026-09-28 17:00 | Owner approved option A. Notes registered (1 T1D + 20 reimbursable, criterion above); regenerated. The weekly `main` obligation run had not started at 16:29 UTC, so the merge waits for it to commit. | Next: re-shoot and re-review F1, docs, merge `main` after the weekly run |
 | 2026-09-27 23:30 | CI `Test` green (registry/fast/rendered tiers) on every head: `d361a835` (run 36355981394), `a347794d` (36356560879 push, 36356596690 PR), PR #97 head `deb66a26` (36356612959). | Waiting on the owner's F1 wording |
 | 2026-09-27 23:55 | Push of `dc8fd1a7` (trigger restored to weekly/all without `[skip ci]`) started run `36354679967` on the branch; cancelled within ~2 min (plan + at most one pull; no reconcile, nothing committed). Merged `main` (`c68f1773`: Stage 2b #95/#96). Only 3 generated dashboards conflicted; regenerated. **Temporary NIH disclosure removed** from the obligations landing subtitle (`site/index.html`), the `interpretationNote` on `hhs/aspr-rd-procurement` and `hhs/ahrq`, and its two `tests/test_site_contract.py` pins. The test now asserts the sentence is absent; nothing else in the Stage 2b wording changed. `validate_obligations` PASS; site contract + NIH tests 67/67. | Next: release gates (registry/fast/rendered/screens), reader review, PR |
@@ -235,12 +240,9 @@ reviewer saw 13 pages and the rule-5 questions only.
 
 ## Next action
 
-Draft PR #97 (`claude/phase-3.2e-nih` → `main`). Blocked on the owner's
-answer to the F1/F1b wording memo (sent in chat 2026-09-27). Then:
-1. Register the approved notes as `programActivities[].interpretationNote`
-   on NIDDK `type-1-diabetes` and each `nih-reimbursable-other`.
-2. Regenerate with `build_obligations`, then run `validate_obligations`, the
-   rendered tier, and a screens re-shot of the noted pages. Re-review F1.
-3. Add the CLAUDE.md status bullet (include the ~45 h weekly-run window)
-   and the phase-history entry.
-4. Mark #97 ready and merge when green, outside Mon ~10:37 → ~Wed 07:00 UTC.
+Draft PR #97. Blocked on the owner's answer to the R1/R2 wording memo
+(2026-09-28). Then: register the approved text, regenerate, validate,
+re-shoot, and a one-page re-check. Wait for the weekly `main` obligation
+run to commit, merge `main`, regenerate, validate, add the
+phase-history entry, mark #97 ready and merge when green (no weekly run in
+flight). The CLAUDE.md bullet is already in place.
