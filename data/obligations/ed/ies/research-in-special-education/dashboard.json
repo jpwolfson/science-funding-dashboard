@@ -1,7 +1,7 @@
 {
  "schemaVersion": 2,
  "kind": "obligations",
- "generated": "2026-09-22",
+ "generated": "2026-09-29",
  "node": {
   "level": "programActivity",
   "path": "obligations/ed/ies/research-in-special-education",
@@ -13,22 +13,22 @@
  "dataComplete": true,
  "netObligationsCents": 57037034565,
  "netObligations": 570370345.65,
- "awardLinkedObligationsCents": 32522035953,
- "awardLinkedObligations": 325220359.53,
- "residualObligationsCents": 24514998612,
- "residualObligations": 245149986.12,
- "grossObligationsCents": 58846901704,
- "grossObligations": 588469017.04,
- "deobligationsCents": -1809867139,
- "deobligations": -18098671.39,
- "distinctLinkedAwards": 336,
- "fileCToNetRatio": 0.570191564148335,
+ "awardLinkedObligationsCents": 32521690532,
+ "awardLinkedObligations": 325216905.32,
+ "residualObligationsCents": 24515344033,
+ "residualObligations": 245153440.33,
+ "grossObligationsCents": 58863435525,
+ "grossObligations": 588634355.25,
+ "deobligationsCents": -1826400960,
+ "deobligations": -18264009.6,
+ "distinctLinkedAwards": 337,
+ "fileCToNetRatio": 0.570185508065605,
  "totalNetObligationsCents": 57037034565,
  "totalNetObligations": 570370345.65,
- "totalAwardLinkedObligationsCents": 32522035953,
- "totalAwardLinkedObligations": 325220359.53,
- "totalResidualObligationsCents": 24514998612,
- "totalResidualObligations": 245149986.12,
+ "totalAwardLinkedObligationsCents": 32521690532,
+ "totalAwardLinkedObligations": 325216905.32,
+ "totalResidualObligationsCents": 24515344033,
+ "totalResidualObligations": 245153440.33,
  "currentFY": 2026,
  "asOfPeriod": "FY2026P10",
  "reportingPeriods": [
@@ -1798,18 +1798,18 @@
   {
    "submissionPeriod": "FY2026P10",
    "month": "2026-07",
-   "status": "notReported",
-   "netObligationsCents": null,
-   "netObligations": null,
-   "awardLinkedObligationsCents": null,
-   "awardLinkedObligations": null,
-   "residualObligationsCents": null,
-   "residualObligations": null,
-   "grossObligationsCents": null,
-   "grossObligations": null,
-   "deobligationsCents": null,
-   "deobligations": null,
-   "distinctLinkedAwards": null,
+   "status": "reported",
+   "netObligationsCents": 0,
+   "netObligations": 0.0,
+   "awardLinkedObligationsCents": -345421,
+   "awardLinkedObligations": -3454.21,
+   "residualObligationsCents": 345421,
+   "residualObligations": 3454.21,
+   "grossObligationsCents": 16533821,
+   "grossObligations": 165338.21,
+   "deobligationsCents": -16533821,
+   "deobligations": -165338.21,
+   "distinctLinkedAwards": 3,
    "fileCToNetRatio": null
   }
  ],
@@ -2390,7 +2390,7 @@
      "id": "19079bd25aeb724785a51ed3a0a2dc6fbd15e674a29d052348a760a4f59898da",
      "awardId": "ASST_NON_R324A160019_091",
      "title": "SPECIAL EDUCATION RESEARCH PROGRAM",
-     "recipient": "REGENTS OF THE UNIVERSITY OF CALIFORNIA AT RIVERSIDE",
+     "recipient": "THE REGENTS OF THE UNIVERSITY OF CALIFORNIA",
      "amountCents": -347147,
      "amount": -3471.47,
      "netAmountCents": -347147,
@@ -5057,16 +5057,16 @@
    "partial": true,
    "netObligationsCents": 2314015200,
    "netObligations": 23140152.0,
-   "awardLinkedObligationsCents": 2286065333,
-   "awardLinkedObligations": 22860653.33,
-   "residualObligationsCents": 27949867,
-   "residualObligations": 279498.67,
-   "grossObligationsCents": 2706230782,
-   "grossObligations": 27062307.82,
-   "deobligationsCents": -392215582,
-   "deobligations": -3922155.82,
-   "distinctLinkedAwards": 65,
-   "fileCToNetRatio": 0.9879214851311262,
+   "awardLinkedObligationsCents": 2285719912,
+   "awardLinkedObligations": 22857199.12,
+   "residualObligationsCents": 28295288,
+   "residualObligations": 282952.88,
+   "grossObligationsCents": 2722764603,
+   "grossObligations": 27227646.03,
+   "deobligationsCents": -408749403,
+   "deobligations": -4087494.03,
+   "distinctLinkedAwards": 67,
+   "fileCToNetRatio": 0.9877722116950658,
    "topRecipients": [
     {
      "recipientUEI": "J22LNTMEDP73",
@@ -5118,6 +5118,13 @@
      "distinctLinkedAwards": 2
     },
     {
+     "recipientUEI": "NFJ3CMQ4B418",
+     "recipient": "UNIVERSITY OF WASHINGTON",
+     "netObligationsCents": 94713300,
+     "netObligations": 947133.0,
+     "distinctLinkedAwards": 2
+    },
+    {
      "recipientUEI": "YH86RTW2YVJ4",
      "recipient": "TRUSTEES OF INDIANA UNIVERSITY",
      "netObligationsCents": 87853400,
@@ -5136,13 +5143,6 @@
      "recipient": "BOARD OF REGENTS OF THE UNIVERSITY OF NEBRASKA",
      "netObligationsCents": 82890900,
      "netObligations": 828909.0,
-     "distinctLinkedAwards": 1
-    },
-    {
-     "recipientUEI": "NFJ3CMQ4B418",
-     "recipient": "UNIVERSITY OF WASHINGTON",
-     "netObligationsCents": 78524900,
-     "netObligations": 785249.0,
      "distinctLinkedAwards": 1
     },
     {
@@ -5525,6 +5525,18 @@
      "awardUrl": "https://www.usaspending.gov/award/ASST_NON_R324B210020_091/"
     },
     {
+     "id": "4ea43d893f995f132261a64b23c33c4f2257bae20437e468adfd867dd91f894d",
+     "awardId": "ASST_NON_R324B230011_091",
+     "title": "IMPACTO: PARTNERING FOR AUTISM FOCUSED SOCIAL COMMUNICATION INTERVENTION WITH TRANSBORDER LATINE CAREGIVERS",
+     "recipient": "SAN DIEGO STATE UNIVERSITY FOUNDATION",
+     "amountCents": -16188400,
+     "amount": -161884.0,
+     "netAmountCents": -16188400,
+     "netAmount": -161884.0,
+     "submissionPeriod": "FY2026P10",
+     "awardUrl": "https://www.usaspending.gov/award/ASST_NON_R324B230011_091/"
+    },
+    {
      "id": "2018638439697e95ab806892a98565be151fa20aaa86b143d152a552c8cb9971",
      "awardId": "ASST_NON_R324A190076_091",
      "title": "EXAMINING THE EFFICACY OF PROJECT IMPACT FOR TODDLERS",
@@ -5583,6 +5595,18 @@
      "netAmount": -5885.56,
      "submissionPeriod": "FY2026P07",
      "awardUrl": "https://www.usaspending.gov/award/ASST_NON_R324A200209_091/"
+    },
+    {
+     "id": "cd33248f3d5134e1c78f44cc6b9609b8cac07f7c696bcbe0e1a9a8851caba252",
+     "awardId": "ASST_NON_R324A190154_091",
+     "title": "EXAMINING OUTCOMES OF A MULTI-COMPONENT, INDIVIDUALLY-TAILORED CONSULTATION PROCESS FOCUSED ON CLASSROOM MANAGEMENT FOR TEACHERS (K-5)",
+     "recipient": "OHIO UNIVERSITY",
+     "amountCents": -345421,
+     "amount": -3454.21,
+     "netAmountCents": -345421,
+     "netAmount": -3454.21,
+     "submissionPeriod": "FY2026P10",
+     "awardUrl": "https://www.usaspending.gov/award/ASST_NON_R324A190154_091/"
     },
     {
      "id": "5f087a7982958080c7cd59ae62612910ae81ea0cef0f1fa1df42d3500192190e",
@@ -5667,30 +5691,6 @@
      "netAmount": -759.13,
      "submissionPeriod": "FY2026P05",
      "awardUrl": "https://www.usaspending.gov/award/ASST_NON_R324B210003_091/"
-    },
-    {
-     "id": "9cfd5333f31c9592783d85b383b6776f3c4494f00a9a8e06d0b697a81fcc0b54",
-     "awardId": "ASST_NON_R324B220001_091",
-     "title": "COMPREHENSIVE PROGRAM FOR ADAPTIVE INTERVENTIONS TRAINING IN EDUCATION SCIENCES (CATIE)",
-     "recipient": "REGENTS OF THE UNIVERSITY OF MICHIGAN",
-     "amountCents": -61482,
-     "amount": -614.82,
-     "netAmountCents": -61482,
-     "netAmount": -614.82,
-     "submissionPeriod": "FY2026P05",
-     "awardUrl": "https://www.usaspending.gov/award/ASST_NON_R324B220001_091/"
-    },
-    {
-     "id": "0366efd6fb1825038cee0c0307ad6f0bc4114802503ed8d7ad849f741b845741",
-     "awardId": "ASST_NON_R324A190223_091",
-     "title": "PROFESSIONAL DEVELOPMENT TO SUPPORT INTERVENTION IMPLEMENTATION OF THE PROMOTING COMMUNICATION TOOLS FOR ADVANCING LANGUAGE IN KIDS (PC TALK) FOR INFANTS AND TODDLERS AT RISK FOR OR WITH DISABILITIES",
-     "recipient": "UNIVERSITY OF KANSAS CENTER FOR RESEARCH INC",
-     "amountCents": -32209,
-     "amount": -322.09,
-     "netAmountCents": -32209,
-     "netAmount": -322.09,
-     "submissionPeriod": "FY2026P02",
-     "awardUrl": "https://www.usaspending.gov/award/ASST_NON_R324A190223_091/"
     }
    ]
   }
@@ -6611,19 +6611,19 @@
     {
      "d": 303,
      "submissionPeriod": "FY2026P10",
-     "status": "notReported",
+     "status": "reported",
      "netObligationsCents": 2314015200,
      "netObligations": 23140152.0,
-     "awardLinkedObligationsCents": 2286065333,
-     "awardLinkedObligations": 22860653.33,
-     "residualObligationsCents": 27949867,
-     "residualObligations": 279498.67,
-     "grossObligationsCents": 2706230782,
-     "grossObligations": 27062307.82,
-     "deobligationsCents": -392215582,
-     "deobligations": -3922155.82,
-     "distinctLinkedAwards": 65,
-     "fileCToNetRatio": 0.9879214851311262
+     "awardLinkedObligationsCents": 2285719912,
+     "awardLinkedObligations": 22857199.12,
+     "residualObligationsCents": 28295288,
+     "residualObligations": 282952.88,
+     "grossObligationsCents": 2722764603,
+     "grossObligations": 27227646.03,
+     "deobligationsCents": -408749403,
+     "deobligations": -4087494.03,
+     "distinctLinkedAwards": 67,
+     "fileCToNetRatio": 0.9877722116950658
     }
    ]
   }
@@ -6632,11 +6632,11 @@
  "federalAccount": "091-1100",
  "programActivityCode": "0006",
  "freshness": {
-  "latestAcceptedAt": "2026-09-22T09:42:13+00:00",
+  "latestAcceptedAt": "2026-09-29T10:40:50+00:00",
   "maxAgeDays": 10,
   "refreshStatus": {
-   "lastAcceptedAt": "2026-09-22T09:42:13+00:00",
-   "lastRefreshAttemptAt": "2026-09-22T21:56:09.037526+00:00",
+   "lastAcceptedAt": "2026-09-29T10:40:50+00:00",
+   "lastRefreshAttemptAt": "2026-09-29T22:37:28.464525+00:00",
    "status": "fresh"
   }
  }

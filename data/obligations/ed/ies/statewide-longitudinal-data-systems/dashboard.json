@@ -1,7 +1,7 @@
 {
  "schemaVersion": 2,
  "kind": "obligations",
- "generated": "2026-09-22",
+ "generated": "2026-09-29",
  "node": {
   "level": "programActivity",
   "path": "obligations/ed/ies/statewide-longitudinal-data-systems",
@@ -11,22 +11,22 @@
  "source": "USAspending File B and File C",
  "warnings": [],
  "dataComplete": true,
- "netObligationsCents": 28811228074,
- "netObligations": 288112280.74,
- "awardLinkedObligationsCents": 18228324989,
- "awardLinkedObligations": 182283249.89,
+ "netObligationsCents": 28809172248,
+ "netObligations": 288091722.48,
+ "awardLinkedObligationsCents": 18226269163,
+ "awardLinkedObligations": 182262691.63,
  "residualObligationsCents": 10582903085,
  "residualObligations": 105829030.85,
  "grossObligationsCents": 28909403652,
  "grossObligations": 289094036.52,
- "deobligationsCents": -98175578,
- "deobligations": -981755.78,
+ "deobligationsCents": -100231404,
+ "deobligations": -1002314.04,
  "distinctLinkedAwards": 76,
- "fileCToNetRatio": 0.6326812915500021,
- "totalNetObligationsCents": 28811228074,
- "totalNetObligations": 288112280.74,
- "totalAwardLinkedObligationsCents": 18228324989,
- "totalAwardLinkedObligations": 182283249.89,
+ "fileCToNetRatio": 0.632655079642745,
+ "totalNetObligationsCents": 28809172248,
+ "totalNetObligations": 288091722.48,
+ "totalAwardLinkedObligationsCents": 18226269163,
+ "totalAwardLinkedObligations": 182262691.63,
  "totalResidualObligationsCents": 10582903085,
  "totalResidualObligations": 105829030.85,
  "currentFY": 2026,
@@ -1798,19 +1798,19 @@
   {
    "submissionPeriod": "FY2026P10",
    "month": "2026-07",
-   "status": "notReported",
-   "netObligationsCents": null,
-   "netObligations": null,
-   "awardLinkedObligationsCents": null,
-   "awardLinkedObligations": null,
-   "residualObligationsCents": null,
-   "residualObligations": null,
-   "grossObligationsCents": null,
-   "grossObligations": null,
-   "deobligationsCents": null,
-   "deobligations": null,
-   "distinctLinkedAwards": null,
-   "fileCToNetRatio": null
+   "status": "reported",
+   "netObligationsCents": -2055826,
+   "netObligations": -20558.26,
+   "awardLinkedObligationsCents": -2055826,
+   "awardLinkedObligations": -20558.26,
+   "residualObligationsCents": 0,
+   "residualObligations": 0.0,
+   "grossObligationsCents": 0,
+   "grossObligations": 0.0,
+   "deobligationsCents": -2055826,
+   "deobligations": -20558.26,
+   "distinctLinkedAwards": 1,
+   "fileCToNetRatio": 1.0
   }
  ],
  "fiscalYears": [
@@ -3779,16 +3779,16 @@
   {
    "fy": 2026,
    "partial": true,
-   "netObligationsCents": 1948370691,
-   "netObligations": 19483706.91,
-   "awardLinkedObligationsCents": 1948370691,
-   "awardLinkedObligations": 19483706.91,
+   "netObligationsCents": 1946314865,
+   "netObligations": 19463148.65,
+   "awardLinkedObligationsCents": 1946314865,
+   "awardLinkedObligations": 19463148.65,
    "residualObligationsCents": 0,
    "residualObligations": 0.0,
    "grossObligationsCents": 1948370691,
    "grossObligations": 19483706.91,
-   "deobligationsCents": 0,
-   "deobligations": 0.0,
+   "deobligationsCents": -2055826,
+   "deobligations": -20558.26,
    "distinctLinkedAwards": 28,
    "fileCToNetRatio": 1.0,
    "topRecipients": [
@@ -3921,8 +3921,8 @@
     {
      "recipientUEI": "LJSWW81RS9G7",
      "recipient": "APPLIED ENTERPRISE MANAGEMENT CORPORATION",
-     "netObligationsCents": 60264062,
-     "netObligations": 602640.62,
+     "netObligationsCents": 58208236,
+     "netObligations": 582082.36,
      "distinctLinkedAwards": 1
     },
     {
@@ -4175,7 +4175,20 @@
      "awardUrl": "https://www.usaspending.gov/award/ASST_NON_R372A230031_091/"
     }
    ],
-   "negativeFlows": []
+   "negativeFlows": [
+    {
+     "id": "defab67cdd07c75d15cab7b078822c4160c6d8db2feb5b1755b70c4215235e4d",
+     "awardId": "CONT_AWD_91990026F0024_9100_47QTCA18D00JV_4732",
+     "title": "THE REQUIREMENT IS TO OBTAIN CONTRACTOR SUPPORT AND TECHNICAL EXPERTISE OR THE DEPARTMENTS STUDENT PRIVACY POLICY OFFICE THROUGH ITS PRIVACY TECHNICAL ASSISTANCE CENTER",
+     "recipient": "APPLIED ENTERPRISE MANAGEMENT CORPORATION",
+     "amountCents": -2055826,
+     "amount": -20558.26,
+     "netAmountCents": -2055826,
+     "netAmount": -20558.26,
+     "submissionPeriod": "FY2026P10",
+     "awardUrl": "https://www.usaspending.gov/award/CONT_AWD_91990026F0024_9100_47QTCA18D00JV_4732/"
+    }
+   ]
   }
  ],
  "fyCumulative": [
@@ -5094,17 +5107,17 @@
     {
      "d": 303,
      "submissionPeriod": "FY2026P10",
-     "status": "notReported",
-     "netObligationsCents": 1948370691,
-     "netObligations": 19483706.91,
-     "awardLinkedObligationsCents": 1948370691,
-     "awardLinkedObligations": 19483706.91,
+     "status": "reported",
+     "netObligationsCents": 1946314865,
+     "netObligations": 19463148.65,
+     "awardLinkedObligationsCents": 1946314865,
+     "awardLinkedObligations": 19463148.65,
      "residualObligationsCents": 0,
      "residualObligations": 0.0,
      "grossObligationsCents": 1948370691,
      "grossObligations": 19483706.91,
-     "deobligationsCents": 0,
-     "deobligations": 0.0,
+     "deobligationsCents": -2055826,
+     "deobligations": -20558.26,
      "distinctLinkedAwards": 28,
      "fileCToNetRatio": 1.0
     }
@@ -5115,11 +5128,11 @@
  "federalAccount": "091-1100",
  "programActivityCode": "0007",
  "freshness": {
-  "latestAcceptedAt": "2026-09-22T09:42:13+00:00",
+  "latestAcceptedAt": "2026-09-29T10:40:50+00:00",
   "maxAgeDays": 10,
   "refreshStatus": {
-   "lastAcceptedAt": "2026-09-22T09:42:13+00:00",
-   "lastRefreshAttemptAt": "2026-09-22T21:56:09.037526+00:00",
+   "lastAcceptedAt": "2026-09-29T10:40:50+00:00",
+   "lastRefreshAttemptAt": "2026-09-29T22:37:28.464525+00:00",
    "status": "fresh"
   }
  }
