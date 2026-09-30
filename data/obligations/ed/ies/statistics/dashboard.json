@@ -1,7 +1,7 @@
 {
  "schemaVersion": 2,
  "kind": "obligations",
- "generated": "2026-09-28",
+ "generated": "2026-09-30",
  "node": {
   "level": "programActivity",
   "path": "obligations/ed/ies/statistics",
@@ -11,24 +11,24 @@
  "source": "USAspending File B and File C",
  "warnings": [],
  "dataComplete": true,
- "netObligationsCents": 101174915717,
- "netObligations": 1011749157.17,
- "awardLinkedObligationsCents": 39390242986,
- "awardLinkedObligations": 393902429.86,
- "residualObligationsCents": 61784672731,
- "residualObligations": 617846727.31,
- "grossObligationsCents": 107150053047,
- "grossObligations": 1071500530.47,
+ "netObligationsCents": 101282745296,
+ "netObligations": 1012827452.96,
+ "awardLinkedObligationsCents": 39495572565,
+ "awardLinkedObligations": 394955725.65,
+ "residualObligationsCents": 61787172731,
+ "residualObligations": 617871727.31,
+ "grossObligationsCents": 107257882626,
+ "grossObligations": 1072578826.26,
  "deobligationsCents": -5975137330,
  "deobligations": -59751373.3,
  "distinctLinkedAwards": 228,
- "fileCToNetRatio": 0.38932815220899086,
- "totalNetObligationsCents": 101174915717,
- "totalNetObligations": 1011749157.17,
- "totalAwardLinkedObligationsCents": 39390242986,
- "totalAwardLinkedObligations": 393902429.86,
- "totalResidualObligationsCents": 61784672731,
- "totalResidualObligations": 617846727.31,
+ "fileCToNetRatio": 0.38995361400970846,
+ "totalNetObligationsCents": 101282745296,
+ "totalNetObligations": 1012827452.96,
+ "totalAwardLinkedObligationsCents": 39495572565,
+ "totalAwardLinkedObligations": 394955725.65,
+ "totalResidualObligationsCents": 61787172731,
+ "totalResidualObligations": 617871727.31,
  "currentFY": 2026,
  "asOfPeriod": "FY2026P10",
  "reportingPeriods": [
@@ -1798,19 +1798,19 @@
   {
    "submissionPeriod": "FY2026P10",
    "month": "2026-07",
-   "status": "notReported",
-   "netObligationsCents": null,
-   "netObligations": null,
-   "awardLinkedObligationsCents": null,
-   "awardLinkedObligations": null,
-   "residualObligationsCents": null,
-   "residualObligations": null,
-   "grossObligationsCents": null,
-   "grossObligations": null,
-   "deobligationsCents": null,
-   "deobligations": null,
-   "distinctLinkedAwards": null,
-   "fileCToNetRatio": null
+   "status": "reported",
+   "netObligationsCents": 107829579,
+   "netObligations": 1078295.79,
+   "awardLinkedObligationsCents": 105329579,
+   "awardLinkedObligations": 1053295.79,
+   "residualObligationsCents": 2500000,
+   "residualObligations": 25000.0,
+   "grossObligationsCents": 107829579,
+   "grossObligations": 1078295.79,
+   "deobligationsCents": 0,
+   "deobligations": 0.0,
+   "distinctLinkedAwards": 3,
+   "fileCToNetRatio": 0.976815266987178
   }
  ],
  "fiscalYears": [
@@ -5043,25 +5043,32 @@
   {
    "fy": 2026,
    "partial": true,
-   "netObligationsCents": 2928516263,
-   "netObligations": 29285162.63,
-   "awardLinkedObligationsCents": 2089846772,
-   "awardLinkedObligations": 20898467.72,
-   "residualObligationsCents": 838669491,
-   "residualObligations": 8386694.91,
-   "grossObligationsCents": 3299153146,
-   "grossObligations": 32991531.46,
+   "netObligationsCents": 3036345842,
+   "netObligations": 30363458.42,
+   "awardLinkedObligationsCents": 2195176351,
+   "awardLinkedObligations": 21951763.51,
+   "residualObligationsCents": 841169491,
+   "residualObligations": 8411694.91,
+   "grossObligationsCents": 3406982725,
+   "grossObligations": 34069827.25,
    "deobligationsCents": -370636883,
    "deobligations": -3706368.83,
-   "distinctLinkedAwards": 23,
-   "fileCToNetRatio": 0.7136196573001582,
+   "distinctLinkedAwards": 26,
+   "fileCToNetRatio": 0.7229665081742029,
    "topRecipients": [
     {
      "recipientUEI": "LJSWW81RS9G7",
      "recipient": "APPLIED ENTERPRISE MANAGEMENT CORPORATION",
-     "netObligationsCents": 853767826,
-     "netObligations": 8537678.26,
-     "distinctLinkedAwards": 2
+     "netObligationsCents": 856946269,
+     "netObligations": 8569462.69,
+     "distinctLinkedAwards": 3
+    },
+    {
+     "recipientUEI": "JJHCMK4NT5N3",
+     "recipient": "RESEARCH TRIANGLE INSTITUTE",
+     "netObligationsCents": 454503165,
+     "netObligations": 4545031.65,
+     "distinctLinkedAwards": 4
     },
     {
      "recipientUEI": "GG75WES61DK8",
@@ -5069,13 +5076,6 @@
      "netObligationsCents": 433295715,
      "netObligations": 4332957.15,
      "distinctLinkedAwards": 4
-    },
-    {
-     "recipientUEI": "JJHCMK4NT5N3",
-     "recipient": "RESEARCH TRIANGLE INSTITUTE",
-     "netObligationsCents": 420602765,
-     "netObligations": 4206027.65,
-     "distinctLinkedAwards": 3
     },
     {
      "recipientUEI": "HV56U7ZK6VM7",
@@ -5127,18 +5127,18 @@
      "distinctLinkedAwards": 3
     },
     {
+     "recipientUEI": "MCN6J5L6M3T4",
+     "recipient": "AMERICAN INSTITUTES FOR RESEARCH IN THE BEHAVIORAL SCIENCES",
+     "netObligationsCents": -69681709,
+     "netObligations": -696817.09,
+     "distinctLinkedAwards": 3
+    },
+    {
      "recipientUEI": "WR4LJXNPX627",
      "recipient": "OPTIMAL SOLUTIONS GROUP, L.L.C",
      "netObligationsCents": -109725512,
      "netObligations": -1097255.12,
      "distinctLinkedAwards": 1
-    },
-    {
-     "recipientUEI": "MCN6J5L6M3T4",
-     "recipient": "AMERICAN INSTITUTES FOR RESEARCH IN THE BEHAVIORAL SCIENCES",
-     "netObligationsCents": -137932445,
-     "netObligations": -1379324.45,
-     "distinctLinkedAwards": 2
     }
    ],
    "positiveFlows": [
@@ -5239,6 +5239,18 @@
      "awardUrl": "https://www.usaspending.gov/award/CONT_AWD_91990022F0007_9100_GS35F0329Y_4732/"
     },
     {
+     "id": "5b784f3d78a04d16b0c49d123cae8cd555b9280ac1f6dfdc0c679144054135a9",
+     "awardId": "CONT_AWD_91990022F0350_9100_91990020A0014_9100",
+     "title": "THE PURPOSE OF THIS REQUIREMENT IS TO PROVIDE SUPPORT TO THE ADMINISTRATIVE DATA DIVISION (ADD/EL-SEC) STAFF TO ENSURE DATA QUALITY, IMPROVE STATISTICAL METHODOLOGY, AND INCREASE PRODUCTION EFFICIENCY OF DATA FILES AND REPORTS.",
+     "recipient": "AMERICAN INSTITUTES FOR RESEARCH IN THE BEHAVIORAL SCIENCES",
+     "amountCents": 68250736,
+     "amount": 682507.36,
+     "netAmountCents": 68250736,
+     "netAmount": 682507.36,
+     "submissionPeriod": "FY2026P10",
+     "awardUrl": "https://www.usaspending.gov/award/CONT_AWD_91990022F0350_9100_91990020A0014_9100/"
+    },
+    {
      "id": "a05ec7b2941d681747fd0e2a4a07a1d323736c089b9ed3261698d33615bd2155",
      "awardId": "CONT_AWD_91990022C0017_9100_-NONE-_-NONE-",
      "title": "2023-24 NATIONAL POSTSECONDARY STUDENT AID STUDY (NPSAS: 2024) & POSTSECONDARY LONGITUDINAL STUDIES. NPSAS IS A CROSS-SECTIONAL STUDY THAT PROVIDES INFO ABOUT THE COSTS OF POSTSECONDARY EDUCATION AND HOW STUDENTS AND FAMILIES PAY FOR THESE COSTS.",
@@ -5261,6 +5273,18 @@
      "netAmount": 346574.0,
      "submissionPeriod": "FY2026P04",
      "awardUrl": "https://www.usaspending.gov/award/CONT_AWD_91990024F0329_9100_91990023D0005_9100/"
+    },
+    {
+     "id": "4cf30ff4e4e43536b83a197f1e24bf54acea398e92230558a3411d37a567a88c",
+     "awardId": "CONT_AWD_91990018C0039_9100_-NONE-_-NONE-",
+     "title": "2019-20 NATIONAL POSTSECONDARY STUDENT AID STUDY (NPSAS 2020). THE NPSAS 2020 CONTRACT IS DESIGNED TO FULFILL A REQUIREMENT TO CONDUCT A SERIES OF STUDIES, BASED LARGELY ON ADMINISTRATIVE DATA COLLECTIONS AND SOME STUDENT INTERVIEWS, TO COMPLY WITH THE HIGHER EDUCATION OPPORTUNITY ACT OF 2008. THESE STUDIES ARE DESIGNED TO DESCRIBE (1) HOW STUDENTS AND THEIR FAMILIES FINANCE POSTSECONDARY EDUCATION AND (2) STUDENTS' PERSISTENCE, ATTAINMENT, AND WORKFORCE OUTCOMES.",
+     "recipient": "RESEARCH TRIANGLE INSTITUTE",
+     "amountCents": 33900400,
+     "amount": 339004.0,
+     "netAmountCents": 33900400,
+     "netAmount": 339004.0,
+     "submissionPeriod": "FY2026P10",
+     "awardUrl": "https://www.usaspending.gov/award/CONT_AWD_91990018C0039_9100_-NONE-_-NONE-/"
     },
     {
      "id": "9c82726469152ead0d45799edab60bfd5f679ed4ca60585e44ee29faafe37dd9",
@@ -5297,6 +5321,18 @@
      "netAmount": 83197.32,
      "submissionPeriod": "FY2026P09",
      "awardUrl": "https://www.usaspending.gov/award/CONT_AWD_91990025C0090_9100_-NONE-_-NONE-/"
+    },
+    {
+     "id": "f48a6ced1b9d51fcb8e9875dd7aa0065bc0c5aab835b829913be7f24563bb2fe",
+     "awardId": "CONT_AWD_91990024F0331_9100_91990023D0008_9100",
+     "title": "ED FACTS DATA AND DISSEMINATION SUPPORT SERVICES",
+     "recipient": "APPLIED ENTERPRISE MANAGEMENT CORPORATION",
+     "amountCents": 3178443,
+     "amount": 31784.43,
+     "netAmountCents": 3178443,
+     "netAmount": 31784.43,
+     "submissionPeriod": "FY2026P10",
+     "awardUrl": "https://www.usaspending.gov/award/CONT_AWD_91990024F0331_9100_91990023D0008_9100/"
     }
    ],
    "negativeFlows": [
@@ -6363,19 +6399,19 @@
     {
      "d": 303,
      "submissionPeriod": "FY2026P10",
-     "status": "notReported",
-     "netObligationsCents": 2928516263,
-     "netObligations": 29285162.63,
-     "awardLinkedObligationsCents": 2089846772,
-     "awardLinkedObligations": 20898467.72,
-     "residualObligationsCents": 838669491,
-     "residualObligations": 8386694.91,
-     "grossObligationsCents": 3299153146,
-     "grossObligations": 32991531.46,
+     "status": "reported",
+     "netObligationsCents": 3036345842,
+     "netObligations": 30363458.42,
+     "awardLinkedObligationsCents": 2195176351,
+     "awardLinkedObligations": 21951763.51,
+     "residualObligationsCents": 841169491,
+     "residualObligations": 8411694.91,
+     "grossObligationsCents": 3406982725,
+     "grossObligations": 34069827.25,
      "deobligationsCents": -370636883,
      "deobligations": -3706368.83,
-     "distinctLinkedAwards": 23,
-     "fileCToNetRatio": 0.7136196573001582
+     "distinctLinkedAwards": 26,
+     "fileCToNetRatio": 0.7229665081742029
     }
    ]
   }
@@ -6384,11 +6420,11 @@
  "federalAccount": "091-1100",
  "programActivityCode": "0002",
  "freshness": {
-  "latestAcceptedAt": "2026-09-22T09:42:13+00:00",
+  "latestAcceptedAt": "2026-09-29T10:40:50+00:00",
   "maxAgeDays": 10,
   "refreshStatus": {
-   "lastAcceptedAt": "2026-09-22T09:42:13+00:00",
-   "lastRefreshAttemptAt": "2026-09-22T21:56:09.037526+00:00",
+   "lastAcceptedAt": "2026-09-29T10:40:50+00:00",
+   "lastRefreshAttemptAt": "2026-09-29T22:37:28.464525+00:00",
    "status": "fresh"
   }
  }
