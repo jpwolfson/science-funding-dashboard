@@ -240,3 +240,13 @@ Full completed-phase history, evidence, and discovery narratives live in
       publishing. Reader review: no Stage 2b-introduced High; open owner
       follow-up on quoted NIFA disclaimer text. Record:
       `docs/stage-2b-display-handoff.md`.
+- [x] Phase 3.2e — NIH obligation accounts (completed 2026-09-28, PR #97):
+      27 accounts (26 NIH + ARPA-H) onboarded; registry now 80 accounts / 13
+      agencies. No partitioning needed (NCI FY2025 File C 130k rows, ~¼ of
+      NSF R&RA). NIH obligations stay separate from, and never reconciled
+      with, the NIH award ledger. Weekly obligation run now spans ~45 h
+      from its actual start (cron Mon 10:37 UTC; GitHub has started it 6–8 h
+      late), so ~Wed 14:00 UTC: check the run, never merge to `main` mid-run.
+      Auto-resume abandons source requests older than 4 h. Owner-approved
+      Program Activity notes (NIDDK T1D; 25 reimbursable lines). Record:
+      `docs/phase-3.2e-handoff.md`.

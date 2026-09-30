@@ -201,8 +201,13 @@ def build(repo=REPO):
             pa_metadata = {"federalAccount": account["federalAccount"],
                           "programActivityCode": pa["code"],
                           "freshness": freshness}
-            if interpretation_note:
-                pa_metadata["interpretationNote"] = interpretation_note
+            # A Program Activity may carry its own owner-approved note
+            # (docs/verification-regime.md specialization schema), shown on
+            # that PA's page after any account-level note.
+            pa_note = " ".join(n for n in (interpretation_note,
+                                           pa.get("interpretationNote")) if n)
+            if pa_note:
+                pa_metadata["interpretationNote"] = pa_note
             write_dashboard(data_root / account["path"] / pa["slug"],
                 {"level": "programActivity", "path": path, "name": pa["name"],
                  "abbrev": pa.get("abbrev", "")}, "USAspending File B and File C",

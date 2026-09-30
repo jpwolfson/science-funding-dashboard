@@ -1,0 +1,91 @@
+{
+  "federalAccount": "075-0849",
+  "fiscalYear": 2026,
+  "period": 10,
+  "startedAt": "2026-09-23T22:09:02+00:00",
+  "timeoutHours": 5.5,
+  "measurements": [
+    {
+      "kind": "object_class_program_activity",
+      "fiscalYear": 2026,
+      "period": 10,
+      "requestSeconds": 2.4,
+      "generateAndRetrieveSeconds": 15.7,
+      "parseSeconds": 0.0,
+      "zipBytes": 662,
+      "statusRowCount": 48,
+      "statusSeconds": "2.354371",
+      "statusFileName": "FY2026P01-P10_All_FA_AccountBreakdownByPA-OC_2026-09-23_H22M09S07626375.zip",
+      "memberRowCounts": {
+        "FY2026P01-P10_All_FA_AccountBreakdownByPA-OC_2026-09-23_H22M09S07_1.csv": 48
+      },
+      "peakRssMbAfterParse": 25.8,
+      "programActivities": [
+        {
+          "code": "",
+          "name": "",
+          "park": "0000",
+          "rows": 1,
+          "cents": 0
+        },
+        {
+          "code": "",
+          "name": "",
+          "park": "5ZC7KSR3EPF",
+          "rows": 47,
+          "cents": 464470350838
+        }
+      ],
+      "totalCents": 464470350838
+    },
+    {
+      "kind": "award_financial",
+      "fiscalYear": 2026,
+      "period": 10,
+      "requestSeconds": 21.1,
+      "generateAndRetrieveSeconds": 278.9,
+      "parseSeconds": 3.6,
+      "zipBytes": 57368957,
+      "statusRowCount": 90479,
+      "statusSeconds": "267.824146",
+      "statusFileName": "FY2026P01-P10_All_FA_AccountBreakdownByAward_2026-09-23_H22M09S44408503.zip",
+      "memberRowCounts": {
+        "FY2026P01-P10_All_FA_Assistance_AccountBreakdownByAward_2026-09-23_H22M12S18_01.csv": 80848,
+        "FY2026P01-P10_All_FA_Contracts_AccountBreakdownByAward_2026-09-23_H22M12S18_01.csv": 9039,
+        "FY2026P01-P10_All_FA_Unlinked_AccountBreakdownByAward_2026-09-23_H22M12S18_01.csv": 592
+      },
+      "peakRssMbAfterParse": 436.6,
+      "rows": 90479,
+      "nonzeroRows": 7898,
+      "distinctAwards": 6667,
+      "normalizedEventEstimate": 7840,
+      "rowsBySubmissionPeriod": {
+        "FY2026P02": 167,
+        "FY2026P03": 635,
+        "FY2026P04": 627,
+        "FY2026P05": 465,
+        "FY2026P06": 715,
+        "FY2026P07": 1648,
+        "FY2026P08": 889,
+        "FY2026P09": 1189,
+        "FY2026P10": 1563
+      },
+      "totalCents": 306083491660,
+      "programActivities": [
+        {
+          "code": "",
+          "name": "",
+          "park": "5ZC7KSR3EPF",
+          "rows": 90479,
+          "cents": 306083491660
+        }
+      ],
+      "shapeSeconds": 0.2,
+      "peakRssMbAfterShape": 436.6
+    }
+  ],
+  "accountId": "5478",
+  "accountTitle": "National Cancer Institute, National Institutes of Health, Health and Human Services",
+  "peakRssMb": 436.6,
+  "finishedAt": "2026-09-23T22:14:27+00:00"
+}

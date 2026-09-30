@@ -216,13 +216,13 @@ class SiteContractTests(unittest.TestCase):
             "include routine corrections or reductions; sign alone does "
             "not establish a cancellation. Accounts are included whole, so "
             "some totals also cover operations, procurement, or weapons "
-            "activities alongside research. NIH accounts are not included "
-            "here; NIH awards are on the award dashboards.`",
+            "activities alongside research.`",
             self.html,
         )
-        # Temporary disclosure (owner decision 2026-09-23, option A): it is
-        # removed by Phase 3.2e's final PR once NIH obligation accounts are
-        # registered.
+        # The temporary NIH-not-included disclosure (owner decision
+        # 2026-09-23, option A) was removed by Phase 3.2e once the 27 NIH
+        # obligation accounts were registered.
+        self.assertNotIn("NIH accounts are not included", self.html)
         self.assertIn("function countLeaves(node) {", self.html)
         # No number in the fixed wording is a hardcoded literal.
         self.assertNotIn("NIH and NSF, 87 units", self.html)
@@ -235,7 +235,7 @@ class SiteContractTests(unittest.TestCase):
         # silent code change.
         self.assertEqual(87, _leaf_unit_count())
         account_count, agency_count = _obligation_registry_counts()
-        self.assertEqual(53, account_count)
+        self.assertEqual(80, account_count)
         self.assertEqual(13, agency_count)
 
     def test_award_ledger_renders_w1_methodology_and_data_quality_fields(self):
@@ -1037,16 +1037,15 @@ class SiteContractTests(unittest.TestCase):
     def test_obligation_subtitle_discloses_whole_account_scope(self):
         # Stage 2b item 12 (2026-09-23, owner-approved): an account is
         # included whole, so its total can cover operations, procurement,
-        # or weapons activities alongside research -- disclosed immediately
-        # before the (unrelated, and must stay last) NIH-not-included
-        # sentence.
+        # or weapons activities alongside research -- the subtitle's last
+        # sentence since Phase 3.2e removed the temporary NIH-not-included
+        # disclosure.
         self.assertIn(
             "Negative entries can include routine corrections or "
             "reductions; sign alone does not establish a cancellation. "
             "Accounts are included whole, so some totals also cover "
             "operations, procurement, or weapons activities alongside "
-            "research. NIH accounts are not included here; NIH awards "
-            "are on the award dashboards.",
+            "research.`",
             self.html,
         )
 

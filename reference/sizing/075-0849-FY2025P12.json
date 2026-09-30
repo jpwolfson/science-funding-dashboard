@@ -1,0 +1,107 @@
+{
+  "federalAccount": "075-0849",
+  "fiscalYear": 2025,
+  "period": 12,
+  "startedAt": "2026-09-23T22:01:59+00:00",
+  "timeoutHours": 5.5,
+  "measurements": [
+    {
+      "kind": "object_class_program_activity",
+      "fiscalYear": 2025,
+      "period": 12,
+      "requestSeconds": 7.1,
+      "generateAndRetrieveSeconds": 21.4,
+      "parseSeconds": 0.0,
+      "zipBytes": 776,
+      "statusRowCount": 58,
+      "statusSeconds": "2.689864",
+      "statusFileName": "FY2025P01-P12_All_FA_AccountBreakdownByPA-OC_2026-09-23_H22M02S15173194.zip",
+      "memberRowCounts": {
+        "FY2025P01-P12_All_FA_AccountBreakdownByPA-OC_2026-09-23_H22M02S15_1.csv": 58
+      },
+      "peakRssMbAfterParse": 25.7,
+      "programActivities": [
+        {
+          "code": "0000",
+          "name": "UNKNOWN/OTHER",
+          "park": "",
+          "rows": 1,
+          "cents": 0
+        },
+        {
+          "code": "0001",
+          "name": "NATIONAL CANCER INSTITUTE (0849)",
+          "park": "",
+          "rows": 48,
+          "cents": 742150537817
+        },
+        {
+          "code": "0801",
+          "name": "NIH REIMBURSABLE - OTHER",
+          "park": "",
+          "rows": 9,
+          "cents": 158666401
+        }
+      ],
+      "totalCents": 742309204218
+    },
+    {
+      "kind": "award_financial",
+      "fiscalYear": 2025,
+      "period": 12,
+      "requestSeconds": 21.2,
+      "generateAndRetrieveSeconds": 328.1,
+      "parseSeconds": 4.5,
+      "zipBytes": 72167204,
+      "statusRowCount": 130115,
+      "statusSeconds": "321.26199",
+      "statusFileName": "FY2025P01-P12_All_FA_AccountBreakdownByAward_2026-09-23_H22M02S57822702.zip",
+      "memberRowCounts": {
+        "FY2025P01-P12_All_FA_Assistance_AccountBreakdownByAward_2026-09-23_H22M05S56_01.csv": 112280,
+        "FY2025P01-P12_All_FA_Contracts_AccountBreakdownByAward_2026-09-23_H22M05S56_01.csv": 17294,
+        "FY2025P01-P12_All_FA_Unlinked_AccountBreakdownByAward_2026-09-23_H22M05S56_01.csv": 541
+      },
+      "peakRssMbAfterParse": 554.3,
+      "rows": 130115,
+      "nonzeroRows": 12981,
+      "distinctAwards": 10189,
+      "normalizedEventEstimate": 12904,
+      "rowsBySubmissionPeriod": {
+        "FY2025P02": 804,
+        "FY2025P03": 775,
+        "FY2025P04": 621,
+        "FY2025P05": 523,
+        "FY2025P06": 1190,
+        "FY2025P07": 853,
+        "FY2025P08": 1811,
+        "FY2025P09": 1266,
+        "FY2025P10": 1627,
+        "FY2025P11": 1865,
+        "FY2025P12": 1646
+      },
+      "totalCents": 559366312191,
+      "programActivities": [
+        {
+          "code": "0001",
+          "name": "NATIONAL CANCER INSTITUTE (0849)",
+          "park": "",
+          "rows": 130095,
+          "cents": 559247935271
+        },
+        {
+          "code": "0801",
+          "name": "NIH REIMBURSABLE - OTHER",
+          "park": "",
+          "rows": 20,
+          "cents": 118376920
+        }
+      ],
+      "shapeSeconds": 0.4,
+      "peakRssMbAfterShape": 554.3
+    }
+  ],
+  "accountId": "5478",
+  "accountTitle": "National Cancer Institute, National Institutes of Health, Health and Human Services",
+  "peakRssMb": 554.3,
+  "finishedAt": "2026-09-23T22:08:30+00:00"
+}

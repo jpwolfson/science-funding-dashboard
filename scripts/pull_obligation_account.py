@@ -5,9 +5,10 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import shutil
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
@@ -180,8 +181,36 @@ def _resume_handoff_matches_run(row, run_identity, account, fy):
     )
 
 
+# An accepted request is resumed only while one more status window can
+# plausibly finish it: the original attempt's 2 h cap plus one resumed 2 h
+# window. A request older than that has already outlived two windows and is
+# treated as a stuck source export (NINDS FY2019 in Phase 3.2e: accepted
+# 07:32 UTC, still unfinished at 23:32 after one resume; the IES FY2018 export
+# precedent stayed "ready" for days). Re-polling it forever pins every later
+# attempt to the same dead request, so a fresh request is issued instead.
+MAX_AUTO_RESUME_AGE_HOURS = 4
+_ACCEPTED_AT_RE = re.compile(r"_(\d{4}-\d{2}-\d{2})_H(\d{2})M(\d{2})S(\d{2})")
+
+
+def _accepted_at(result):
+    """UTC acceptance time encoded in USAspending's download file name.
+
+    The name appears in ``file_name``, ``file_url``, and the status URL's
+    ``?file_name=`` query; any of them suffices.
+    """
+    text = " ".join(str(result.get(key) or "")
+                    for key in ("file_name", "file_url", "status_url"))
+    match = _ACCEPTED_AT_RE.search(text)
+    if not match:
+        return None
+    day, hour, minute, second = match.groups()
+    return datetime.strptime(
+        f"{day} {hour}:{minute}:{second}", "%Y-%m-%d %H:%M:%S"
+    ).replace(tzinfo=timezone.utc)
+
+
 def _auto_resume(account, account_id, fy, period, kind, columns,
-                 resume_handoffs, run_identity):
+                 resume_handoffs, run_identity, now=None):
     row = resume_handoffs.get((account["path"], fy, period, kind))
     if not row:
         return None
@@ -194,6 +223,17 @@ def _auto_resume(account, account_id, fy, period, kind, columns,
         return None
     result = row.get("result")
     if not isinstance(result, dict):
+        return None
+    accepted_at = _accepted_at(result)
+    now = now or datetime.now(timezone.utc)
+    if accepted_at and now - accepted_at > timedelta(hours=MAX_AUTO_RESUME_AGE_HOURS):
+        print(
+            f"abandoning automatic resume for {account['path']} FY{fy} "
+            f"P{period:02} {kind}: request accepted "
+            f"{accepted_at.isoformat()} is older than "
+            f"{MAX_AUTO_RESUME_AGE_HOURS} h; requesting a fresh download",
+            flush=True,
+        )
         return None
     try:
         return resume_download(account_id, fy, period, kind, columns, result)
