@@ -1,6 +1,6 @@
 # Phase 3.2e — NIH obligation accounts: running record
 
-Status: in progress. Owner approval 2026-09-23 (option A of the scope memo):
+Status: **complete** (2026-09-30, PR #97 merged as `bf388689`). Owner approval 2026-09-23 (option A of the scope memo):
 onboard the 27 NIH federal accounts that Phase 3.2d deliberately left out
 (`docs/phase-history.md`, Phase 3.2d entry) into the appropriations
 obligation ledger. This supersedes the NIH descoping notes in
@@ -225,6 +225,7 @@ reviewer saw 13 pages and the rule-5 questions only.
 | 2026-09-24 05:45 | Discovery chunk 3 | clean; ARPA-H first FY2022 P07 |
 | 2026-09-24 06:40 | Registry 27/27 | `0e355c2`; registry 569/569, fast 7/7 |
 | 2026-09-27 22:40 | **Group B committed** on `claude/phase-3.2e-nih-b`: run `36212428737` attempt 2 (fresh requests after the age bound) pulled NIAAA FY2019 (1,813 File C rows) and NIGMS FY2018 (9,104). Attempt 2's reconcile failed only on my own test (`test_baselines_carry_reviewed_file_a_pins_before_backfill`: ARPA-H FY2022 `firstPeriod` 7 ≠ 10). Post-backfill, `firstPeriod` is the first material event period (P10), so the test was wrong, not the data. Fixed in `15c22534`; attempt 3's reconcile committed `5aa0f6ad`. 14 stores (13×10 + ARPA-H 5). Only pin-row change: ARPA-H FY2022 `firstPeriod` 7→10, `obligationsCents` unchanged. | Integrated |
+| 2026-09-30 02:50 | **Merged** PR #97 as `bf388689` after CI green on `d2b9525a`, with nothing in flight on `main`. `Test` 36659446966 and `Deploy Pages` 36659446960 both green (the deploy's footprint check included). Live QA: the session proxy denies `jpwolfson.github.io` and Actions artifact storage, so it was verified on the deployed commit instead: `assemble_pages_site.py` on `bf388689` (the deploy's own step) gives 2,287 files, root `accountCount` 80, FY2025 $394.03B / FY2026 P10 $320.58B, 26 `hhs/nih-*` + `hhs/arpa-h`, the T1D and NIA reimbursable notes present, and the "NIH accounts are not included" sentence absent. A browser check of the public URL is left to the owner. | Phase complete |
 | 2026-09-30 01:55 | Weekly `Update obligation ledger` 36463768489 committed `ba2b5c5d` (success, 22:59 Tue); sentinel refresh `4446a898` landed; nothing in flight on `main`. Merged `main` (92 commits). 769 generated files conflicted: took `main`'s, then regenerated with `build_obligations` + `build_sentinel`. `refresh_status.json` = union (53 shared entries from `main`'s newer run, plus 27 NIH). No config/site/code conflicts. `validate_obligations` PASS; tests OK; registry 595/595. Root 80 accounts, FY2026 $320.58B. | Push; mark #97 ready; merge on green CI |
 | 2026-09-28 18:15 | CI `Test` green on `4de08159`. Scheduled runs were delayed, not dropped: `Update data` 36459604422 started 17:38 (cron 09:13); `Update obligation ledger` 36463768489 started 18:14 (cron 10:37, 53 accounts, ~30 h → ~Wed 00:30 UTC). | Merge `main` after it commits |
 | 2026-09-28 18:00 | Owner approved both R1/R2 texts; `4de08159` (5 variant notes + T1D FY2025 sentence; validate PASS, tests OK, registry 595/595). Re-check by a fresh agent: R5–R7, none gating (dispositions above). No scheduled workflow has fired today (obligation cron 10:37, data cron 09:13). | Waiting on the weekly `main` run |
@@ -246,9 +247,7 @@ reviewer saw 13 pages and the rule-5 questions only.
 
 ## Next action
 
-Draft PR #97. Blocked on the owner's answer to the R1/R2 wording memo
-(2026-09-28). Then: register the approved text, regenerate, validate,
-re-shoot, and a one-page re-check. Wait for the weekly `main` obligation
-run to commit, merge `main`, regenerate, validate, add the
-phase-history entry, mark #97 ready and merge when green (no weekly run in
-flight). The CLAUDE.md bullet is already in place.
+None; the phase is complete. Open, non-blocking follow-ups:
+- Display ledger: F2–F4, F6, F8, R3, R4 (pre-existing), and F5/F7/F9 (deferred).
+- Optional owner wording refinement for R5 (NIA onset year).
+- The first weekly run with 80 accounts (Mon 2026-10-05) is the first real measure of the ~45 h window.
