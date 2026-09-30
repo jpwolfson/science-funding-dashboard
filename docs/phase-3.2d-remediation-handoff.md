@@ -416,7 +416,10 @@ under W19; check reconcile logs for any `DOLLAR-TRANSIENT` line), the Tue
 2026-09-29 12:17 UTC sentinel run, and `Verify main` after each (its run
 conclusion is meaningful since W18). Any red: diagnose and fix under the
 same regime. `claude/w17-acceptance` is a test branch kept as evidence;
-never merge it.
+never merge it. **Step 5 done 2026-09-30:** all three workflows' first cron firings after the
+closeout are green (`Update data` 36459604422, sentinel 36609412641,
+obligation 36463768489), each followed by a green `Verify main`; nothing
+remains open for the Phase 3.2d remediation.
 
 Standing facts the new agent needs:
 - Environment has no egress to federal APIs or to `github.io`; all pulls
@@ -505,6 +508,8 @@ Standing facts the new agent needs:
 | 2026-09-28 17:38–18:31 UTC | scheduled `Update data` run 36459604422 (cron 09:13, started ~8.4 h late; incremental) | Step-5 confirmation; first cron-fired run under W17 | **green**: 91/91 jobs (59 NSF + 28 NIH pulls, rollup, deploy); `award_refresh_status.py` wrote 87/87 `fresh` (`lastAcceptedAt` 2026-09-28); no STALE lines; `validate_nih.py --live`: `NIH validation passed: 28 units, 724176 unique awards`, per-IC gaps 0–2; rollup commit `e65c3a2`; branch-only dry-run steps skipped on `main` as designed |
 | 2026-09-28 18:31–18:38 UTC | `Verify main` run 36465774758 (after the award refresh) | fast tier on the refreshed tree | **green** (conclusion meaningful since W18) |
 | 2026-09-28 18:14 UTC | scheduled `Update obligation ledger` run 36463768489 created (cron 10:37, ~7.6 h late) | Step-5 confirmation; first weekly pass under W19 | queued; read at the Wed 2026-09-30 03:00 UTC check-in (note: Phase 3.2e is changing the obligation registry on its own branches) |
+| 2026-09-29 18:04–18:14 UTC | scheduled `Update funding-action sentinel` run 36609412641 (cron 12:17, ~5.8 h late) | Step-5 confirmation | **green**; snapshot `4446a898`; `Verify main` 36610592643 green |
+| 2026-09-28 18:14 – 09-29 22:59 UTC | scheduled `Update obligation ledger` run 36463768489 (weekly; cron 10:37 Mon, ~7.6 h late) | Step-5 confirmation; first weekly pass under W19 | **green**: 106/106 account-year pulls (FY2026 P10 current + FY2021 rotation; 53-account registry as planned from `main`), no SKIPPED partitions, reconcile → validate → unit tests → award invariants → rendered tier → atomic commit `ba2b5c5d` (53/53 `fresh`) → Pages deploy. **W19 in production:** the `usda/nass` FY2026 pull logged `DOLLAR-TRANSIENT: usda/nass FY2026 P04 reported -> notReported`, the same period the W14 rebuild reclassifies. `Verify main` 36642744734 green on `ba2b5c5d`. Phase 3.2e (#97, 80-account registry) merged at 02:21 UTC Sep 30, after this reconcile committed; its merge of `ba2b5c5d` carried the 53 entries into the 80-account `refresh_status.json` |
 
 ## Finding closure evidence (filled at closeout)
 
