@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-28",
+ "generated": "2026-10-05",
  "node": {
   "name": "Division of Computing and Communication Foundations",
   "abbrev": "CCF",
@@ -7,9 +7,11 @@
   "level": "division"
  },
  "source": "https://api.nsf.gov/services/v1/awards.json?org_code_div=05010000 (NSF Award Search API), month-by-month on Original Award Date",
- "warnings": [],
+ "warnings": [
+  "1849 stored awards not returned by this full re-pull; retained from the store"
+ ],
  "totalAwards": 5449,
- "currentFY": 2026,
+ "currentFY": 2027,
  "monthly": [
   {
    "month": "2014-10",
@@ -1306,6 +1308,15 @@
    "cont": 1,
    "fell": 0,
    "other": 0
+  },
+  {
+   "month": "2026-10",
+   "awards": 0,
+   "dollars": 0,
+   "std": 0,
+   "cont": 0,
+   "fell": 0,
+   "other": 0
   }
  ],
  "fiscalYears": [
@@ -1707,7 +1718,7 @@
   },
   {
    "fy": 2026,
-   "partial": true,
+   "partial": false,
    "awards": 168,
    "dollars": 93774182,
    "median": 462100,
@@ -1743,277 +1754,6 @@
   }
  ],
  "fyCumulative": [
-  {
-   "fy": 2022,
-   "partial": false,
-   "points": [
-    {
-     "d": 6,
-     "awards": 0,
-     "dollars": 0
-    },
-    {
-     "d": 13,
-     "awards": 0,
-     "dollars": 0
-    },
-    {
-     "d": 20,
-     "awards": 0,
-     "dollars": 0
-    },
-    {
-     "d": 27,
-     "awards": 1,
-     "dollars": 399879
-    },
-    {
-     "d": 34,
-     "awards": 3,
-     "dollars": 1402877
-    },
-    {
-     "d": 41,
-     "awards": 4,
-     "dollars": 1647877
-    },
-    {
-     "d": 48,
-     "awards": 4,
-     "dollars": 1647877
-    },
-    {
-     "d": 55,
-     "awards": 4,
-     "dollars": 1647877
-    },
-    {
-     "d": 62,
-     "awards": 7,
-     "dollars": 3046930
-    },
-    {
-     "d": 69,
-     "awards": 7,
-     "dollars": 3046930
-    },
-    {
-     "d": 76,
-     "awards": 8,
-     "dollars": 3346196
-    },
-    {
-     "d": 83,
-     "awards": 8,
-     "dollars": 3346196
-    },
-    {
-     "d": 90,
-     "awards": 8,
-     "dollars": 3346196
-    },
-    {
-     "d": 97,
-     "awards": 10,
-     "dollars": 3861196
-    },
-    {
-     "d": 104,
-     "awards": 25,
-     "dollars": 10760085
-    },
-    {
-     "d": 111,
-     "awards": 25,
-     "dollars": 10760085
-    },
-    {
-     "d": 118,
-     "awards": 57,
-     "dollars": 27122076
-    },
-    {
-     "d": 125,
-     "awards": 72,
-     "dollars": 33278397
-    },
-    {
-     "d": 132,
-     "awards": 73,
-     "dollars": 33377313
-    },
-    {
-     "d": 139,
-     "awards": 74,
-     "dollars": 33782292
-    },
-    {
-     "d": 146,
-     "awards": 84,
-     "dollars": 37689664
-    },
-    {
-     "d": 153,
-     "awards": 92,
-     "dollars": 39951745
-    },
-    {
-     "d": 160,
-     "awards": 102,
-     "dollars": 43727523
-    },
-    {
-     "d": 167,
-     "awards": 102,
-     "dollars": 43727523
-    },
-    {
-     "d": 174,
-     "awards": 105,
-     "dollars": 44513658
-    },
-    {
-     "d": 181,
-     "awards": 108,
-     "dollars": 60343886
-    },
-    {
-     "d": 188,
-     "awards": 116,
-     "dollars": 64026150
-    },
-    {
-     "d": 195,
-     "awards": 117,
-     "dollars": 64200440
-    },
-    {
-     "d": 202,
-     "awards": 117,
-     "dollars": 64200440
-    },
-    {
-     "d": 209,
-     "awards": 117,
-     "dollars": 64200440
-    },
-    {
-     "d": 216,
-     "awards": 117,
-     "dollars": 64200440
-    },
-    {
-     "d": 223,
-     "awards": 117,
-     "dollars": 64200440
-    },
-    {
-     "d": 230,
-     "awards": 119,
-     "dollars": 64900325
-    },
-    {
-     "d": 237,
-     "awards": 157,
-     "dollars": 80844931
-    },
-    {
-     "d": 244,
-     "awards": 163,
-     "dollars": 82644782
-    },
-    {
-     "d": 251,
-     "awards": 175,
-     "dollars": 88211202
-    },
-    {
-     "d": 258,
-     "awards": 213,
-     "dollars": 107119479
-    },
-    {
-     "d": 265,
-     "awards": 219,
-     "dollars": 108978668
-    },
-    {
-     "d": 272,
-     "awards": 268,
-     "dollars": 139873009
-    },
-    {
-     "d": 279,
-     "awards": 269,
-     "dollars": 140464413
-    },
-    {
-     "d": 286,
-     "awards": 336,
-     "dollars": 180589702
-    },
-    {
-     "d": 293,
-     "awards": 380,
-     "dollars": 203845865
-    },
-    {
-     "d": 300,
-     "awards": 389,
-     "dollars": 217547366
-    },
-    {
-     "d": 307,
-     "awards": 403,
-     "dollars": 226560223
-    },
-    {
-     "d": 314,
-     "awards": 406,
-     "dollars": 228154842
-    },
-    {
-     "d": 321,
-     "awards": 425,
-     "dollars": 237444098
-    },
-    {
-     "d": 328,
-     "awards": 453,
-     "dollars": 254285385
-    },
-    {
-     "d": 335,
-     "awards": 468,
-     "dollars": 263294713
-    },
-    {
-     "d": 342,
-     "awards": 469,
-     "dollars": 264793173
-    },
-    {
-     "d": 349,
-     "awards": 486,
-     "dollars": 267501173
-    },
-    {
-     "d": 356,
-     "awards": 486,
-     "dollars": 267501173
-    },
-    {
-     "d": 363,
-     "awards": 486,
-     "dollars": 267501173
-    },
-    {
-     "d": 364,
-     "awards": 486,
-     "dollars": 267501173
-    }
-   ]
-  },
   {
    "fy": 2023,
    "partial": false,
@@ -2829,7 +2569,7 @@
   },
   {
    "fy": 2026,
-   "partial": true,
+   "partial": false,
    "points": [
     {
      "d": 6,
@@ -3087,7 +2827,12 @@
      "dollars": 93062684
     },
     {
-     "d": 362,
+     "d": 363,
+     "awards": 168,
+     "dollars": 93774182
+    },
+    {
+     "d": 364,
      "awards": 168,
      "dollars": 93774182
     }
