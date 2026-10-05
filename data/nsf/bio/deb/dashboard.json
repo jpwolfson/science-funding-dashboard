@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-28",
+ "generated": "2026-10-05",
  "node": {
   "name": "Division of Environmental Biology",
   "abbrev": "DEB",
@@ -7,9 +7,11 @@
   "level": "division"
  },
  "source": "https://api.nsf.gov/services/v1/awards.json?org_code_div=08010000 (NSF Award Search API), month-by-month on Original Award Date",
- "warnings": [],
+ "warnings": [
+  "1308 stored awards not returned by this full re-pull; retained from the store"
+ ],
  "totalAwards": 3951,
- "currentFY": 2026,
+ "currentFY": 2027,
  "monthly": [
   {
    "month": "2014-10",
@@ -1306,6 +1308,15 @@
    "cont": 0,
    "fell": 0,
    "other": 0
+  },
+  {
+   "month": "2026-10",
+   "awards": 0,
+   "dollars": 0,
+   "std": 0,
+   "cont": 0,
+   "fell": 0,
+   "other": 0
   }
  ],
  "fiscalYears": [
@@ -1707,7 +1718,7 @@
   },
   {
    "fy": 2026,
-   "partial": true,
+   "partial": false,
    "awards": 216,
    "dollars": 141064759,
    "median": 599794,
@@ -1743,277 +1754,6 @@
   }
  ],
  "fyCumulative": [
-  {
-   "fy": 2022,
-   "partial": false,
-   "points": [
-    {
-     "d": 6,
-     "awards": 0,
-     "dollars": 0
-    },
-    {
-     "d": 13,
-     "awards": 0,
-     "dollars": 0
-    },
-    {
-     "d": 20,
-     "awards": 0,
-     "dollars": 0
-    },
-    {
-     "d": 27,
-     "awards": 0,
-     "dollars": 0
-    },
-    {
-     "d": 34,
-     "awards": 1,
-     "dollars": 308466
-    },
-    {
-     "d": 41,
-     "awards": 4,
-     "dollars": 478606
-    },
-    {
-     "d": 48,
-     "awards": 4,
-     "dollars": 478606
-    },
-    {
-     "d": 55,
-     "awards": 9,
-     "dollars": 1996339
-    },
-    {
-     "d": 62,
-     "awards": 9,
-     "dollars": 1996339
-    },
-    {
-     "d": 69,
-     "awards": 20,
-     "dollars": 5729867
-    },
-    {
-     "d": 76,
-     "awards": 24,
-     "dollars": 8282483
-    },
-    {
-     "d": 83,
-     "awards": 28,
-     "dollars": 10579048
-    },
-    {
-     "d": 90,
-     "awards": 36,
-     "dollars": 14663763
-    },
-    {
-     "d": 97,
-     "awards": 42,
-     "dollars": 19577400
-    },
-    {
-     "d": 104,
-     "awards": 51,
-     "dollars": 23545566
-    },
-    {
-     "d": 111,
-     "awards": 57,
-     "dollars": 27203520
-    },
-    {
-     "d": 118,
-     "awards": 63,
-     "dollars": 32456194
-    },
-    {
-     "d": 125,
-     "awards": 79,
-     "dollars": 39145428
-    },
-    {
-     "d": 132,
-     "awards": 85,
-     "dollars": 43601851
-    },
-    {
-     "d": 139,
-     "awards": 91,
-     "dollars": 48482496
-    },
-    {
-     "d": 146,
-     "awards": 95,
-     "dollars": 50210428
-    },
-    {
-     "d": 153,
-     "awards": 99,
-     "dollars": 58462760
-    },
-    {
-     "d": 160,
-     "awards": 102,
-     "dollars": 60077285
-    },
-    {
-     "d": 167,
-     "awards": 105,
-     "dollars": 62586164
-    },
-    {
-     "d": 174,
-     "awards": 106,
-     "dollars": 63286047
-    },
-    {
-     "d": 181,
-     "awards": 112,
-     "dollars": 66414973
-    },
-    {
-     "d": 188,
-     "awards": 115,
-     "dollars": 66792615
-    },
-    {
-     "d": 195,
-     "awards": 118,
-     "dollars": 67590058
-    },
-    {
-     "d": 202,
-     "awards": 122,
-     "dollars": 70289873
-    },
-    {
-     "d": 209,
-     "awards": 123,
-     "dollars": 71755242
-    },
-    {
-     "d": 216,
-     "awards": 128,
-     "dollars": 73395223
-    },
-    {
-     "d": 223,
-     "awards": 131,
-     "dollars": 74586744
-    },
-    {
-     "d": 230,
-     "awards": 133,
-     "dollars": 74716493
-    },
-    {
-     "d": 237,
-     "awards": 134,
-     "dollars": 75487361
-    },
-    {
-     "d": 244,
-     "awards": 141,
-     "dollars": 78923180
-    },
-    {
-     "d": 251,
-     "awards": 144,
-     "dollars": 80190855
-    },
-    {
-     "d": 258,
-     "awards": 149,
-     "dollars": 82569530
-    },
-    {
-     "d": 265,
-     "awards": 161,
-     "dollars": 94703453
-    },
-    {
-     "d": 272,
-     "awards": 167,
-     "dollars": 96426637
-    },
-    {
-     "d": 279,
-     "awards": 175,
-     "dollars": 101013114
-    },
-    {
-     "d": 286,
-     "awards": 199,
-     "dollars": 115535188
-    },
-    {
-     "d": 293,
-     "awards": 214,
-     "dollars": 126929287
-    },
-    {
-     "d": 300,
-     "awards": 227,
-     "dollars": 133725259
-    },
-    {
-     "d": 307,
-     "awards": 248,
-     "dollars": 152907239
-    },
-    {
-     "d": 314,
-     "awards": 285,
-     "dollars": 178571070
-    },
-    {
-     "d": 321,
-     "awards": 310,
-     "dollars": 194722905
-    },
-    {
-     "d": 328,
-     "awards": 320,
-     "dollars": 199491584
-    },
-    {
-     "d": 335,
-     "awards": 321,
-     "dollars": 199809292
-    },
-    {
-     "d": 342,
-     "awards": 323,
-     "dollars": 201257996
-    },
-    {
-     "d": 349,
-     "awards": 323,
-     "dollars": 201257996
-    },
-    {
-     "d": 356,
-     "awards": 323,
-     "dollars": 201257996
-    },
-    {
-     "d": 363,
-     "awards": 323,
-     "dollars": 201257996
-    },
-    {
-     "d": 364,
-     "awards": 323,
-     "dollars": 201257996
-    }
-   ]
-  },
   {
    "fy": 2023,
    "partial": false,
@@ -2829,7 +2569,7 @@
   },
   {
    "fy": 2026,
-   "partial": true,
+   "partial": false,
    "points": [
     {
      "d": 6,
@@ -3087,7 +2827,12 @@
      "dollars": 141064759
     },
     {
-     "d": 362,
+     "d": 363,
+     "awards": 216,
+     "dollars": 141064759
+    },
+    {
+     "d": 364,
      "awards": 216,
      "dollars": 141064759
     }
