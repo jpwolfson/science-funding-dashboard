@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-28",
+ "generated": "2026-10-05",
  "node": {
   "name": "Division of Atmospheric and Geospace Sciences",
   "abbrev": "AGS",
@@ -7,9 +7,11 @@
   "level": "division"
  },
  "source": "https://api.nsf.gov/services/v1/awards.json?org_code_div=06020000 (NSF Award Search API), month-by-month on Original Award Date",
- "warnings": [],
+ "warnings": [
+  "1236 stored awards not returned by this full re-pull; retained from the store"
+ ],
  "totalAwards": 3453,
- "currentFY": 2026,
+ "currentFY": 2027,
  "monthly": [
   {
    "month": "2014-10",
@@ -1306,6 +1308,15 @@
    "cont": 0,
    "fell": 0,
    "other": 0
+  },
+  {
+   "month": "2026-10",
+   "awards": 0,
+   "dollars": 0,
+   "std": 0,
+   "cont": 0,
+   "fell": 0,
+   "other": 0
   }
  ],
  "fiscalYears": [
@@ -1707,7 +1718,7 @@
   },
   {
    "fy": 2026,
-   "partial": true,
+   "partial": false,
    "awards": 142,
    "dollars": 97166086,
    "median": 426105,
@@ -1743,277 +1754,6 @@
   }
  ],
  "fyCumulative": [
-  {
-   "fy": 2022,
-   "partial": false,
-   "points": [
-    {
-     "d": 6,
-     "awards": 0,
-     "dollars": 0
-    },
-    {
-     "d": 13,
-     "awards": 0,
-     "dollars": 0
-    },
-    {
-     "d": 20,
-     "awards": 0,
-     "dollars": 0
-    },
-    {
-     "d": 27,
-     "awards": 0,
-     "dollars": 0
-    },
-    {
-     "d": 34,
-     "awards": 7,
-     "dollars": 2630098
-    },
-    {
-     "d": 41,
-     "awards": 9,
-     "dollars": 3595983
-    },
-    {
-     "d": 48,
-     "awards": 17,
-     "dollars": 7077475
-    },
-    {
-     "d": 55,
-     "awards": 17,
-     "dollars": 7077475
-    },
-    {
-     "d": 62,
-     "awards": 19,
-     "dollars": 8706305
-    },
-    {
-     "d": 69,
-     "awards": 21,
-     "dollars": 9996870
-    },
-    {
-     "d": 76,
-     "awards": 24,
-     "dollars": 11256518
-    },
-    {
-     "d": 83,
-     "awards": 24,
-     "dollars": 11256518
-    },
-    {
-     "d": 90,
-     "awards": 24,
-     "dollars": 11256518
-    },
-    {
-     "d": 97,
-     "awards": 26,
-     "dollars": 12218995
-    },
-    {
-     "d": 104,
-     "awards": 29,
-     "dollars": 13656306
-    },
-    {
-     "d": 111,
-     "awards": 32,
-     "dollars": 14862105
-    },
-    {
-     "d": 118,
-     "awards": 38,
-     "dollars": 16814149
-    },
-    {
-     "d": 125,
-     "awards": 51,
-     "dollars": 23084262
-    },
-    {
-     "d": 132,
-     "awards": 55,
-     "dollars": 25253171
-    },
-    {
-     "d": 139,
-     "awards": 60,
-     "dollars": 28043725
-    },
-    {
-     "d": 146,
-     "awards": 69,
-     "dollars": 32422387
-    },
-    {
-     "d": 153,
-     "awards": 75,
-     "dollars": 36688180
-    },
-    {
-     "d": 160,
-     "awards": 84,
-     "dollars": 40518891
-    },
-    {
-     "d": 167,
-     "awards": 85,
-     "dollars": 40708891
-    },
-    {
-     "d": 174,
-     "awards": 92,
-     "dollars": 41403596
-    },
-    {
-     "d": 181,
-     "awards": 92,
-     "dollars": 41403596
-    },
-    {
-     "d": 188,
-     "awards": 92,
-     "dollars": 41403596
-    },
-    {
-     "d": 195,
-     "awards": 94,
-     "dollars": 42312083
-    },
-    {
-     "d": 202,
-     "awards": 97,
-     "dollars": 43891424
-    },
-    {
-     "d": 209,
-     "awards": 116,
-     "dollars": 56595831
-    },
-    {
-     "d": 216,
-     "awards": 121,
-     "dollars": 58109083
-    },
-    {
-     "d": 223,
-     "awards": 129,
-     "dollars": 60880183
-    },
-    {
-     "d": 230,
-     "awards": 131,
-     "dollars": 61661926
-    },
-    {
-     "d": 237,
-     "awards": 135,
-     "dollars": 70935335
-    },
-    {
-     "d": 244,
-     "awards": 153,
-     "dollars": 77177072
-    },
-    {
-     "d": 251,
-     "awards": 166,
-     "dollars": 81727267
-    },
-    {
-     "d": 258,
-     "awards": 174,
-     "dollars": 87340324
-    },
-    {
-     "d": 265,
-     "awards": 180,
-     "dollars": 90148041
-    },
-    {
-     "d": 272,
-     "awards": 203,
-     "dollars": 118270319
-    },
-    {
-     "d": 279,
-     "awards": 208,
-     "dollars": 119875797
-    },
-    {
-     "d": 286,
-     "awards": 218,
-     "dollars": 123582958
-    },
-    {
-     "d": 293,
-     "awards": 226,
-     "dollars": 127809522
-    },
-    {
-     "d": 300,
-     "awards": 262,
-     "dollars": 141295158
-    },
-    {
-     "d": 307,
-     "awards": 266,
-     "dollars": 142032683
-    },
-    {
-     "d": 314,
-     "awards": 292,
-     "dollars": 153208289
-    },
-    {
-     "d": 321,
-     "awards": 297,
-     "dollars": 157503426
-    },
-    {
-     "d": 328,
-     "awards": 299,
-     "dollars": 158525076
-    },
-    {
-     "d": 335,
-     "awards": 299,
-     "dollars": 158525076
-    },
-    {
-     "d": 342,
-     "awards": 299,
-     "dollars": 158525076
-    },
-    {
-     "d": 349,
-     "awards": 304,
-     "dollars": 162234335
-    },
-    {
-     "d": 356,
-     "awards": 304,
-     "dollars": 162234335
-    },
-    {
-     "d": 363,
-     "awards": 304,
-     "dollars": 162234335
-    },
-    {
-     "d": 364,
-     "awards": 304,
-     "dollars": 162234335
-    }
-   ]
-  },
   {
    "fy": 2023,
    "partial": false,
@@ -2829,7 +2569,7 @@
   },
   {
    "fy": 2026,
-   "partial": true,
+   "partial": false,
    "points": [
     {
      "d": 6,
@@ -3087,7 +2827,12 @@
      "dollars": 97166086
     },
     {
-     "d": 362,
+     "d": 363,
+     "awards": 142,
+     "dollars": 97166086
+    },
+    {
+     "d": 364,
      "awards": 142,
      "dollars": 97166086
     }
