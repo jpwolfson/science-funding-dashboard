@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-28",
+ "generated": "2026-10-05",
  "node": {
   "name": "U.S. National Science Foundation",
   "abbrev": "NSF",
@@ -8,12 +8,41 @@
  },
  "source": "Aggregated from 59 leaf dataset(s) (59 configured); each source page documents its own API provenance.",
  "warnings": [
+  "BIO: DEB: 1308 stored awards not returned by this full re-pull; retained from the store",
+  "BIO: EF: 86 stored awards not returned by this full re-pull; retained from the store",
+  "BIO: MCB: 963 stored awards not returned by this full re-pull; retained from the store",
+  "BIO: DBI: 1145 stored awards not returned by this full re-pull; retained from the store",
+  "BIO: IOS: 1180 stored awards not returned by this full re-pull; retained from the store",
   "BIO: 4 awards appear in more than one division; counted once in this rollup",
-  "CSE: 2 awards appear in more than one division; counted once in this rollup",
-  "7 awards appear in more than one division; counted once in this rollup"
+  "CSE: CCF: 1849 stored awards not returned by this full re-pull; retained from the store",
+  "CSE: IIS: 2134 stored awards not returned by this full re-pull; retained from the store",
+  "CSE: CNS: 2256 stored awards not returned by this full re-pull; retained from the store",
+  "CSE: OAC: 1174 stored awards not returned by this full re-pull; retained from the store",
+  "CSE: 4 awards appear in more than one division; counted once in this rollup",
+  "EDU: DGE: 897 stored awards not returned by this full re-pull; retained from the store",
+  "EDU: DUE: 3088 stored awards not returned by this full re-pull; retained from the store",
+  "EDU: EES: 87 stored awards not returned by this full re-pull; retained from the store",
+  "EDU: DRL: 1016 stored awards not returned by this full re-pull; retained from the store",
+  "ENG: ECCS: 1400 stored awards not returned by this full re-pull; retained from the store",
+  "ENG: CBET: 2342 stored awards not returned by this full re-pull; retained from the store",
+  "ENG: CMMI: 2262 stored awards not returned by this full re-pull; retained from the store",
+  "ENG: EFMA: 103 stored awards not returned by this full re-pull; retained from the store",
+  "ENG: EEC: 603 stored awards not returned by this full re-pull; retained from the store",
+  "GEO: RISE: 685 stored awards not returned by this full re-pull; retained from the store",
+  "GEO: AGS: 1236 stored awards not returned by this full re-pull; retained from the store",
+  "GEO: EAR: 1799 stored awards not returned by this full re-pull; retained from the store",
+  "GEO: OCE: 1492 stored awards not returned by this full re-pull; retained from the store",
+  "MPS: PHY: 1550 stored awards not returned by this full re-pull; retained from the store",
+  "MPS: AST: 977 stored awards not returned by this full re-pull; retained from the store",
+  "MPS: OSI: 134 stored awards not returned by this full re-pull; retained from the store",
+  "MPS: CHE: 2107 stored awards not returned by this full re-pull; retained from the store",
+  "OD: OIA: 1 stored awards not returned by this full re-pull; retained from the store",
+  "TIP: TF: 15 stored awards not returned by this full re-pull; retained from the store",
+  "TIP: ITE: 538 stored awards not returned by this full re-pull; retained from the store",
+  "9 awards appear in more than one division; counted once in this rollup"
  ],
  "totalAwards": 139639,
- "currentFY": 2026,
+ "currentFY": 2027,
  "monthly": [
   {
    "month": "2014-10",
@@ -1310,6 +1339,15 @@
    "cont": 13,
    "fell": 0,
    "other": 48
+  },
+  {
+   "month": "2026-10",
+   "awards": 0,
+   "dollars": 0,
+   "std": 0,
+   "cont": 0,
+   "fell": 0,
+   "other": 0
   }
  ],
  "fiscalYears": [
@@ -1711,7 +1749,7 @@
   },
   {
    "fy": 2026,
-   "partial": true,
+   "partial": false,
    "awards": 6785,
    "dollars": 5679275850,
    "median": 415000,
@@ -1747,277 +1785,6 @@
   }
  ],
  "fyCumulative": [
-  {
-   "fy": 2022,
-   "partial": false,
-   "points": [
-    {
-     "d": 6,
-     "awards": 0,
-     "dollars": 0
-    },
-    {
-     "d": 13,
-     "awards": 2,
-     "dollars": 470190
-    },
-    {
-     "d": 20,
-     "awards": 21,
-     "dollars": 6406304
-    },
-    {
-     "d": 27,
-     "awards": 54,
-     "dollars": 19862217
-    },
-    {
-     "d": 34,
-     "awards": 135,
-     "dollars": 48791964
-    },
-    {
-     "d": 41,
-     "awards": 205,
-     "dollars": 77386162
-    },
-    {
-     "d": 48,
-     "awards": 270,
-     "dollars": 112655752
-    },
-    {
-     "d": 55,
-     "awards": 306,
-     "dollars": 142901728
-    },
-    {
-     "d": 62,
-     "awards": 466,
-     "dollars": 227538325
-    },
-    {
-     "d": 69,
-     "awards": 637,
-     "dollars": 356411632
-    },
-    {
-     "d": 76,
-     "awards": 761,
-     "dollars": 418564485
-    },
-    {
-     "d": 83,
-     "awards": 866,
-     "dollars": 482478083
-    },
-    {
-     "d": 90,
-     "awards": 941,
-     "dollars": 519325207
-    },
-    {
-     "d": 97,
-     "awards": 1072,
-     "dollars": 585675834
-    },
-    {
-     "d": 104,
-     "awards": 1226,
-     "dollars": 665658130
-    },
-    {
-     "d": 111,
-     "awards": 1345,
-     "dollars": 797024479
-    },
-    {
-     "d": 118,
-     "awards": 1650,
-     "dollars": 945915439
-    },
-    {
-     "d": 125,
-     "awards": 1850,
-     "dollars": 1070913158
-    },
-    {
-     "d": 132,
-     "awards": 2008,
-     "dollars": 1130899467
-    },
-    {
-     "d": 139,
-     "awards": 2203,
-     "dollars": 1229697645
-    },
-    {
-     "d": 146,
-     "awards": 2399,
-     "dollars": 1317923188
-    },
-    {
-     "d": 153,
-     "awards": 2581,
-     "dollars": 1396269819
-    },
-    {
-     "d": 160,
-     "awards": 2795,
-     "dollars": 1485404462
-    },
-    {
-     "d": 167,
-     "awards": 2957,
-     "dollars": 1556016740
-    },
-    {
-     "d": 174,
-     "awards": 3195,
-     "dollars": 1639330888
-    },
-    {
-     "d": 181,
-     "awards": 3386,
-     "dollars": 1749711565
-    },
-    {
-     "d": 188,
-     "awards": 3650,
-     "dollars": 1841218992
-    },
-    {
-     "d": 195,
-     "awards": 3796,
-     "dollars": 1903794774
-    },
-    {
-     "d": 202,
-     "awards": 4027,
-     "dollars": 2080552018
-    },
-    {
-     "d": 209,
-     "awards": 4253,
-     "dollars": 2241534063
-    },
-    {
-     "d": 216,
-     "awards": 4438,
-     "dollars": 2315633854
-    },
-    {
-     "d": 223,
-     "awards": 4601,
-     "dollars": 2403976231
-    },
-    {
-     "d": 230,
-     "awards": 4740,
-     "dollars": 2562504368
-    },
-    {
-     "d": 237,
-     "awards": 4985,
-     "dollars": 2681631906
-    },
-    {
-     "d": 244,
-     "awards": 5185,
-     "dollars": 2753074598
-    },
-    {
-     "d": 251,
-     "awards": 5479,
-     "dollars": 2869839779
-    },
-    {
-     "d": 258,
-     "awards": 5819,
-     "dollars": 3006515842
-    },
-    {
-     "d": 265,
-     "awards": 6077,
-     "dollars": 3143256077
-    },
-    {
-     "d": 272,
-     "awards": 6531,
-     "dollars": 3434047412
-    },
-    {
-     "d": 279,
-     "awards": 6747,
-     "dollars": 3538522738
-    },
-    {
-     "d": 286,
-     "awards": 7188,
-     "dollars": 3760616953
-    },
-    {
-     "d": 293,
-     "awards": 7765,
-     "dollars": 4088865567
-    },
-    {
-     "d": 300,
-     "awards": 8350,
-     "dollars": 4434014597
-    },
-    {
-     "d": 307,
-     "awards": 9003,
-     "dollars": 4866014359
-    },
-    {
-     "d": 314,
-     "awards": 9591,
-     "dollars": 5318103820
-    },
-    {
-     "d": 321,
-     "awards": 10303,
-     "dollars": 5795128112
-    },
-    {
-     "d": 328,
-     "awards": 10959,
-     "dollars": 6220862373
-    },
-    {
-     "d": 335,
-     "awards": 11347,
-     "dollars": 6530439502
-    },
-    {
-     "d": 342,
-     "awards": 11540,
-     "dollars": 6798192321
-    },
-    {
-     "d": 349,
-     "awards": 11792,
-     "dollars": 6985764809
-    },
-    {
-     "d": 356,
-     "awards": 11896,
-     "dollars": 7376310113
-    },
-    {
-     "d": 363,
-     "awards": 11905,
-     "dollars": 7379603915
-    },
-    {
-     "d": 364,
-     "awards": 11905,
-     "dollars": 7379603915
-    }
-   ]
-  },
   {
    "fy": 2023,
    "partial": false,
@@ -2833,7 +2600,7 @@
   },
   {
    "fy": 2026,
-   "partial": true,
+   "partial": false,
    "points": [
     {
      "d": 6,
@@ -3091,7 +2858,12 @@
      "dollars": 5677489121
     },
     {
-     "d": 362,
+     "d": 363,
+     "awards": 6785,
+     "dollars": 5679275850
+    },
+    {
+     "d": 364,
      "awards": 6785,
      "dollars": 5679275850
     }
@@ -3108,7 +2880,7 @@
    "active": true,
    "hasData": true,
    "totalAwards": 76,
-   "currentFY": 2026,
+   "currentFY": 2027,
    "octJulAwards": 0,
    "octJulDollars": 0,
    "avgOctJulAwards": 4.5,
@@ -3122,9 +2894,9 @@
    "active": true,
    "hasData": true,
    "totalAwards": 13740,
-   "currentFY": 2026,
-   "octJulAwards": 554,
-   "octJulDollars": 410822944,
+   "currentFY": 2027,
+   "octJulAwards": 0,
+   "octJulDollars": 0,
    "avgOctJulAwards": 968.8,
    "avgOctJulDollars": 586896004.5
   },
@@ -3136,9 +2908,9 @@
    "active": true,
    "hasData": true,
    "totalAwards": 22918,
-   "currentFY": 2026,
-   "octJulAwards": 959,
-   "octJulDollars": 615941275,
+   "currentFY": 2027,
+   "octJulAwards": 0,
+   "octJulDollars": 0,
    "avgOctJulAwards": 1220.5,
    "avgOctJulDollars": 609185560.9
   },
@@ -3150,9 +2922,9 @@
    "active": true,
    "hasData": true,
    "totalAwards": 13033,
-   "currentFY": 2026,
-   "octJulAwards": 203,
-   "octJulDollars": 181347358,
+   "currentFY": 2027,
+   "octJulAwards": 0,
+   "octJulDollars": 0,
    "avgOctJulAwards": 684.6,
    "avgOctJulDollars": 604572422.4
   },
@@ -3164,9 +2936,9 @@
    "active": true,
    "hasData": true,
    "totalAwards": 20189,
-   "currentFY": 2026,
-   "octJulAwards": 760,
-   "octJulDollars": 356257176,
+   "currentFY": 2027,
+   "octJulAwards": 0,
+   "octJulDollars": 0,
    "avgOctJulAwards": 1180.5,
    "avgOctJulDollars": 421945985.4
   },
@@ -3178,11 +2950,19 @@
    "active": true,
    "hasData": true,
    "totalAwards": 17134,
-   "currentFY": 2026,
-   "octJulAwards": 546,
-   "octJulDollars": 402934769,
+   "currentFY": 2027,
+   "octJulAwards": 0,
+   "octJulDollars": 0,
    "avgOctJulAwards": 1102.2,
-   "avgOctJulDollars": 566273084.6
+   "avgOctJulDollars": 566273084.6,
+   "refreshStatus": {
+    "status": "stale",
+    "staleSince": "2026-09-28",
+    "staleUnits": [
+     "nsf/geo/opp"
+    ],
+    "reason": "1 of 5 unit(s) in this directorate were not refreshed in the most recent scheduled pull; see the directorate page for which unit."
+   }
   },
   {
    "slug": "irm",
@@ -3192,7 +2972,7 @@
    "active": true,
    "hasData": true,
    "totalAwards": 148,
-   "currentFY": 2026,
+   "currentFY": 2027,
    "octJulAwards": 0,
    "octJulDollars": 0,
    "avgOctJulAwards": 13.375,
@@ -3206,11 +2986,20 @@
    "active": true,
    "hasData": true,
    "totalAwards": 29864,
-   "currentFY": 2026,
-   "octJulAwards": 1082,
-   "octJulDollars": 650070778,
+   "currentFY": 2027,
+   "octJulAwards": 0,
+   "octJulDollars": 0,
    "avgOctJulAwards": 1904.6,
-   "avgOctJulDollars": 988901644.3
+   "avgOctJulDollars": 988901644.3,
+   "refreshStatus": {
+    "status": "stale",
+    "staleSince": "2026-09-28",
+    "staleUnits": [
+     "nsf/mps/dms",
+     "nsf/mps/dmr"
+    ],
+    "reason": "2 of 6 unit(s) in this directorate were not refreshed in the most recent scheduled pull; see the directorate page for which unit."
+   }
   },
   {
    "slug": "nco",
@@ -3220,11 +3009,19 @@
    "active": true,
    "hasData": true,
    "totalAwards": 2,
-   "currentFY": 2026,
+   "currentFY": 2027,
    "octJulAwards": 0,
    "octJulDollars": 0,
    "avgOctJulAwards": null,
-   "avgOctJulDollars": null
+   "avgOctJulDollars": null,
+   "refreshStatus": {
+    "lastAcceptedAt": "2026-09-28T17:58:18Z",
+    "lastRefreshAttemptAt": "2026-10-05T21:35:23Z",
+    "reason": "Not refreshed since 2026-09-28: the most recent scheduled pull for this unit did not complete; figures are the last accepted snapshot.",
+    "staleSince": "2026-09-28",
+    "status": "stale",
+    "unit": "nsf/nco/nco"
+   }
   },
   {
    "slug": "nnco",
@@ -3234,11 +3031,19 @@
    "active": true,
    "hasData": true,
    "totalAwards": 4,
-   "currentFY": 2026,
+   "currentFY": 2027,
    "octJulAwards": 0,
    "octJulDollars": 0,
    "avgOctJulAwards": null,
-   "avgOctJulDollars": null
+   "avgOctJulDollars": null,
+   "refreshStatus": {
+    "lastAcceptedAt": "2026-09-28T17:59:26Z",
+    "lastRefreshAttemptAt": "2026-10-05T21:35:23Z",
+    "reason": "Not refreshed since 2026-09-28: the most recent scheduled pull for this unit did not complete; figures are the last accepted snapshot.",
+    "staleSince": "2026-09-28",
+    "status": "stale",
+    "unit": "nsf/nnco/nnco"
+   }
   },
   {
    "slug": "ocio",
@@ -3248,11 +3053,19 @@
    "active": true,
    "hasData": true,
    "totalAwards": 4,
-   "currentFY": 2026,
+   "currentFY": 2027,
    "octJulAwards": 0,
    "octJulDollars": 0,
    "avgOctJulAwards": null,
-   "avgOctJulDollars": null
+   "avgOctJulDollars": null,
+   "refreshStatus": {
+    "lastAcceptedAt": "2026-09-28T18:00:10Z",
+    "lastRefreshAttemptAt": "2026-10-05T21:35:23Z",
+    "reason": "Not refreshed since 2026-09-28: the most recent scheduled pull for this unit did not complete; figures are the last accepted snapshot.",
+    "staleSince": "2026-09-28",
+    "status": "stale",
+    "unit": "nsf/ocio/des"
+   }
   },
   {
    "slug": "od",
@@ -3262,11 +3075,22 @@
    "active": true,
    "hasData": true,
    "totalAwards": 2484,
-   "currentFY": 2026,
-   "octJulAwards": 58,
-   "octJulDollars": 122307860,
+   "currentFY": 2027,
+   "octJulAwards": 0,
+   "octJulDollars": 0,
    "avgOctJulAwards": 142.7,
-   "avgOctJulDollars": 112619033.2
+   "avgOctJulDollars": 112619033.2,
+   "refreshStatus": {
+    "status": "stale",
+    "staleSince": "2026-09-28",
+    "staleUnits": [
+     "nsf/od/ogc",
+     "nsf/od/lpa",
+     "nsf/od/ocr",
+     "nsf/od/oise"
+    ],
+    "reason": "4 of 7 unit(s) in this directorate were not refreshed in the most recent scheduled pull; see the directorate page for which unit."
+   }
   },
   {
    "slug": "sbe",
@@ -3276,11 +3100,20 @@
    "active": true,
    "hasData": true,
    "totalAwards": 10249,
-   "currentFY": 2026,
-   "octJulAwards": 99,
-   "octJulDollars": 59160186,
+   "currentFY": 2027,
+   "octJulAwards": 0,
+   "octJulDollars": 0,
    "avgOctJulAwards": 670.2,
-   "avgOctJulDollars": 145007000.9
+   "avgOctJulDollars": 145007000.9,
+   "refreshStatus": {
+    "status": "stale",
+    "staleSince": "2026-09-28",
+    "staleUnits": [
+     "nsf/sbe/sma",
+     "nsf/sbe/bcs"
+    ],
+    "reason": "2 of 4 unit(s) in this directorate were not refreshed in the most recent scheduled pull; see the directorate page for which unit."
+   }
   },
   {
    "slug": "tip",
@@ -3290,11 +3123,20 @@
    "active": true,
    "hasData": true,
    "totalAwards": 9795,
-   "currentFY": 2026,
-   "octJulAwards": 309,
-   "octJulDollars": 742130577,
+   "currentFY": 2027,
+   "octJulAwards": 0,
+   "octJulDollars": 0,
    "avgOctJulAwards": 627.7,
-   "avgOctJulDollars": 202809900.6
+   "avgOctJulDollars": 202809900.6,
+   "refreshStatus": {
+    "status": "stale",
+    "staleSince": "2026-09-28",
+    "staleUnits": [
+     "nsf/tip/ti",
+     "nsf/tip/sph"
+    ],
+    "reason": "2 of 4 unit(s) in this directorate were not refreshed in the most recent scheduled pull; see the directorate page for which unit."
+   }
   }
  ],
  "provider": "nsf",
@@ -3306,5 +3148,26 @@
   "other": "Other awards"
  },
  "dataComplete": true,
- "dataQualityNotes": []
+ "dataQualityNotes": [],
+ "refreshStatus": {
+  "status": "stale",
+  "staleSince": "2026-09-28",
+  "staleUnits": [
+   "nsf/geo/opp",
+   "nsf/mps/dms",
+   "nsf/mps/dmr",
+   "nsf/nco/nco",
+   "nsf/nnco/nnco",
+   "nsf/ocio/des",
+   "nsf/od/ogc",
+   "nsf/od/lpa",
+   "nsf/od/ocr",
+   "nsf/od/oise",
+   "nsf/sbe/sma",
+   "nsf/sbe/bcs",
+   "nsf/tip/ti",
+   "nsf/tip/sph"
+  ],
+  "reason": "14 of 59 unit(s) in this agency were not refreshed in the most recent scheduled pull; see the agency page for which unit."
+ }
 }

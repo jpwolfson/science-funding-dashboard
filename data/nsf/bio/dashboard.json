@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-28",
+ "generated": "2026-10-05",
  "node": {
   "name": "Directorate for Biological Sciences",
   "abbrev": "BIO",
@@ -8,10 +8,15 @@
  },
  "source": "Aggregated from 6 leaf dataset(s) (6 configured); each source page documents its own API provenance.",
  "warnings": [
+  "DEB: 1308 stored awards not returned by this full re-pull; retained from the store",
+  "EF: 86 stored awards not returned by this full re-pull; retained from the store",
+  "MCB: 963 stored awards not returned by this full re-pull; retained from the store",
+  "DBI: 1145 stored awards not returned by this full re-pull; retained from the store",
+  "IOS: 1180 stored awards not returned by this full re-pull; retained from the store",
   "4 awards appear in more than one division; counted once in this rollup"
  ],
  "totalAwards": 13740,
- "currentFY": 2026,
+ "currentFY": 2027,
  "monthly": [
   {
    "month": "2014-10",
@@ -1308,6 +1313,15 @@
    "cont": 1,
    "fell": 0,
    "other": 3
+  },
+  {
+   "month": "2026-10",
+   "awards": 0,
+   "dollars": 0,
+   "std": 0,
+   "cont": 0,
+   "fell": 0,
+   "other": 0
   }
  ],
  "fiscalYears": [
@@ -1709,7 +1723,7 @@
   },
   {
    "fy": 2026,
-   "partial": true,
+   "partial": false,
    "awards": 593,
    "dollars": 480293880,
    "median": 600630,
@@ -1745,277 +1759,6 @@
   }
  ],
  "fyCumulative": [
-  {
-   "fy": 2022,
-   "partial": false,
-   "points": [
-    {
-     "d": 6,
-     "awards": 0,
-     "dollars": 0
-    },
-    {
-     "d": 13,
-     "awards": 1,
-     "dollars": 14548
-    },
-    {
-     "d": 20,
-     "awards": 2,
-     "dollars": 40648
-    },
-    {
-     "d": 27,
-     "awards": 5,
-     "dollars": 3428921
-    },
-    {
-     "d": 34,
-     "awards": 7,
-     "dollars": 4037331
-    },
-    {
-     "d": 41,
-     "awards": 15,
-     "dollars": 8111488
-    },
-    {
-     "d": 48,
-     "awards": 18,
-     "dollars": 10683369
-    },
-    {
-     "d": 55,
-     "awards": 28,
-     "dollars": 19405258
-    },
-    {
-     "d": 62,
-     "awards": 38,
-     "dollars": 28642388
-    },
-    {
-     "d": 69,
-     "awards": 76,
-     "dollars": 51572227
-    },
-    {
-     "d": 76,
-     "awards": 91,
-     "dollars": 63724578
-    },
-    {
-     "d": 83,
-     "awards": 102,
-     "dollars": 74125742
-    },
-    {
-     "d": 90,
-     "awards": 116,
-     "dollars": 82390899
-    },
-    {
-     "d": 97,
-     "awards": 141,
-     "dollars": 106059543
-    },
-    {
-     "d": 104,
-     "awards": 166,
-     "dollars": 123729630
-    },
-    {
-     "d": 111,
-     "awards": 186,
-     "dollars": 138366838
-    },
-    {
-     "d": 118,
-     "awards": 219,
-     "dollars": 164985942
-    },
-    {
-     "d": 125,
-     "awards": 264,
-     "dollars": 188782643
-    },
-    {
-     "d": 132,
-     "awards": 273,
-     "dollars": 194463469
-    },
-    {
-     "d": 139,
-     "awards": 291,
-     "dollars": 206634539
-    },
-    {
-     "d": 146,
-     "awards": 304,
-     "dollars": 215783114
-    },
-    {
-     "d": 153,
-     "awards": 317,
-     "dollars": 228306919
-    },
-    {
-     "d": 160,
-     "awards": 333,
-     "dollars": 237095155
-    },
-    {
-     "d": 167,
-     "awards": 346,
-     "dollars": 244654027
-    },
-    {
-     "d": 174,
-     "awards": 357,
-     "dollars": 249258273
-    },
-    {
-     "d": 181,
-     "awards": 367,
-     "dollars": 254018149
-    },
-    {
-     "d": 188,
-     "awards": 379,
-     "dollars": 258252042
-    },
-    {
-     "d": 195,
-     "awards": 382,
-     "dollars": 259049485
-    },
-    {
-     "d": 202,
-     "awards": 392,
-     "dollars": 266518817
-    },
-    {
-     "d": 209,
-     "awards": 399,
-     "dollars": 271010706
-    },
-    {
-     "d": 216,
-     "awards": 418,
-     "dollars": 279441998
-    },
-    {
-     "d": 223,
-     "awards": 434,
-     "dollars": 287167891
-    },
-    {
-     "d": 230,
-     "awards": 457,
-     "dollars": 297289584
-    },
-    {
-     "d": 237,
-     "awards": 494,
-     "dollars": 311138421
-    },
-    {
-     "d": 244,
-     "awards": 522,
-     "dollars": 323330456
-    },
-    {
-     "d": 251,
-     "awards": 564,
-     "dollars": 344279996
-    },
-    {
-     "d": 258,
-     "awards": 590,
-     "dollars": 355905375
-    },
-    {
-     "d": 265,
-     "awards": 625,
-     "dollars": 398002715
-    },
-    {
-     "d": 272,
-     "awards": 666,
-     "dollars": 423369820
-    },
-    {
-     "d": 279,
-     "awards": 692,
-     "dollars": 438174943
-    },
-    {
-     "d": 286,
-     "awards": 746,
-     "dollars": 473434048
-    },
-    {
-     "d": 293,
-     "awards": 802,
-     "dollars": 520560430
-    },
-    {
-     "d": 300,
-     "awards": 881,
-     "dollars": 568732243
-    },
-    {
-     "d": 307,
-     "awards": 960,
-     "dollars": 669572170
-    },
-    {
-     "d": 314,
-     "awards": 1068,
-     "dollars": 758678855
-    },
-    {
-     "d": 321,
-     "awards": 1152,
-     "dollars": 831482790
-    },
-    {
-     "d": 328,
-     "awards": 1174,
-     "dollars": 846116652
-    },
-    {
-     "d": 335,
-     "awards": 1179,
-     "dollars": 850226850
-    },
-    {
-     "d": 342,
-     "awards": 1184,
-     "dollars": 853686439
-    },
-    {
-     "d": 349,
-     "awards": 1185,
-     "dollars": 854183577
-    },
-    {
-     "d": 356,
-     "awards": 1186,
-     "dollars": 855225145
-    },
-    {
-     "d": 363,
-     "awards": 1186,
-     "dollars": 855225145
-    },
-    {
-     "d": 364,
-     "awards": 1186,
-     "dollars": 855225145
-    }
-   ]
-  },
   {
    "fy": 2023,
    "partial": false,
@@ -2831,7 +2574,7 @@
   },
   {
    "fy": 2026,
-   "partial": true,
+   "partial": false,
    "points": [
     {
      "d": 6,
@@ -3089,7 +2832,12 @@
      "dollars": 480293880
     },
     {
-     "d": 362,
+     "d": 363,
+     "awards": 593,
+     "dollars": 480293880
+    },
+    {
+     "d": 364,
      "awards": 593,
      "dollars": 480293880
     }
@@ -3106,7 +2854,7 @@
    "active": false,
    "hasData": true,
    "totalAwards": 1,
-   "currentFY": 2026,
+   "currentFY": 2027,
    "octJulAwards": 0,
    "octJulDollars": 0,
    "avgOctJulAwards": null,
@@ -3120,9 +2868,9 @@
    "active": true,
    "hasData": true,
    "totalAwards": 3951,
-   "currentFY": 2026,
-   "octJulAwards": 207,
-   "octJulDollars": 136204710,
+   "currentFY": 2027,
+   "octJulAwards": 0,
+   "octJulDollars": 0,
    "avgOctJulAwards": 289.4,
    "avgOctJulDollars": 137658823.2
   },
@@ -3134,9 +2882,9 @@
    "active": true,
    "hasData": true,
    "totalAwards": 226,
-   "currentFY": 2026,
-   "octJulAwards": 1,
-   "octJulDollars": 799999,
+   "currentFY": 2027,
+   "octJulAwards": 0,
+   "octJulDollars": 0,
    "avgOctJulAwards": 8.0,
    "avgOctJulDollars": 11047214.6
   },
@@ -3148,9 +2896,9 @@
    "active": true,
    "hasData": true,
    "totalAwards": 2649,
-   "currentFY": 2026,
-   "octJulAwards": 183,
-   "octJulDollars": 138050928,
+   "currentFY": 2027,
+   "octJulAwards": 0,
+   "octJulDollars": 0,
    "avgOctJulAwards": 186.8,
    "avgOctJulDollars": 118453941.9
   },
@@ -3162,9 +2910,9 @@
    "active": true,
    "hasData": true,
    "totalAwards": 3440,
-   "currentFY": 2026,
-   "octJulAwards": 139,
-   "octJulDollars": 118370438,
+   "currentFY": 2027,
+   "octJulAwards": 0,
+   "octJulDollars": 0,
    "avgOctJulAwards": 232.2,
    "avgOctJulDollars": 161216063.5
   },
@@ -3176,9 +2924,9 @@
    "active": true,
    "hasData": true,
    "totalAwards": 3477,
-   "currentFY": 2026,
-   "octJulAwards": 24,
-   "octJulDollars": 17396869,
+   "currentFY": 2027,
+   "octJulAwards": 0,
+   "octJulDollars": 0,
    "avgOctJulAwards": 252.6,
    "avgOctJulDollars": 162769207.3
   }
