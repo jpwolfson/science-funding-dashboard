@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-19",
+ "generated": "2026-10-26",
  "node": {
   "name": "National Institute on Deafness and Other Communication Disorders",
   "abbrev": "NIDCD",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.reporter.nih.gov/v2/projects/search (NIH RePORTER v2), administering IC NIDCD; one application record per fiscal year; intramural projects excluded; dated by award notice, then budget/project start when unavailable",
  "warnings": [],
- "totalAwards": 13631,
+ "totalAwards": 13632,
  "currentFY": 2027,
  "monthly": [
   {
@@ -1309,10 +1309,10 @@
   },
   {
    "month": "2026-10",
-   "awards": 0,
-   "dollars": 0,
+   "awards": 1,
+   "dollars": 94340,
    "std": 0,
-   "cont": 0,
+   "cont": 1,
    "fell": 0,
    "other": 0
   }
@@ -1747,6 +1747,30 @@
      "title": "Inflammation and chemosensory loss",
      "awardee": "MONELL CHEMICAL SENSES CENTER",
      "amount": 2654249
+    }
+   ]
+  },
+  {
+   "fy": 2027,
+   "partial": true,
+   "awards": 1,
+   "dollars": 94340,
+   "median": 94340,
+   "exTop3Dollars": 0,
+   "octJul": {
+    "awards": 1,
+    "dollars": 94340,
+    "std": 0,
+    "cont": 1,
+    "fell": 0,
+    "other": 0
+   },
+   "top3": [
+    {
+     "id": "nih:11657731",
+     "title": "Pharmacological Approaches for Transepithelial Delivery of Therapeutics to the Vocal Folds",
+     "awardee": "TEXAS CHRISTIAN UNIVERSITY",
+     "amount": 94340
     }
    ]
   }
@@ -2835,9 +2859,35 @@
      "dollars": 443086143
     }
    ]
+  },
+  {
+   "fy": 2027,
+   "partial": true,
+   "points": [
+    {
+     "d": 6,
+     "awards": 0,
+     "dollars": 0
+    },
+    {
+     "d": 13,
+     "awards": 0,
+     "dollars": 0
+    },
+    {
+     "d": 20,
+     "awards": 0,
+     "dollars": 0
+    },
+    {
+     "d": 25,
+     "awards": 1,
+     "dollars": 94340
+    }
+   ]
   }
  ],
- "storeIdCount": 13631,
+ "storeIdCount": 13632,
  "children": [],
  "provider": "nih",
  "dataComplete": true,
@@ -2851,6 +2901,6 @@
  },
  "methodologyNote": "counts as of the pull date; NIH revises award notice dates and amounts.",
  "dataQualityNotes": [
-  "1 award record(s) had their amount, title, or type revised by NIH since the previous pull; figures reflect the source as of the pull date."
+  "1 award record(s) carry a NIH-reported award notice date outside their own declared fiscal year; retained and dated by the source's current notice date."
  ]
 }
