@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-26",
+ "generated": "2026-11-02",
  "node": {
   "name": "National Institute on Drug Abuse",
   "abbrev": "NIDA",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.reporter.nih.gov/v2/projects/search (NIH RePORTER v2), administering IC NIDA; one application record per fiscal year; intramural projects excluded; dated by award notice, then budget/project start when unavailable",
  "warnings": [],
- "totalAwards": 28933,
+ "totalAwards": 28934,
  "currentFY": 2027,
  "monthly": [
   {
@@ -1282,12 +1282,12 @@
   },
   {
    "month": "2026-07",
-   "awards": 395,
-   "dollars": 252166745,
+   "awards": 396,
+   "dollars": 252470392,
    "std": 71,
    "cont": 291,
    "fell": 33,
-   "other": 0
+   "other": 1
   },
   {
    "month": "2026-08",
@@ -1309,6 +1309,15 @@
   },
   {
    "month": "2026-10",
+   "awards": 0,
+   "dollars": 0,
+   "std": 0,
+   "cont": 0,
+   "fell": 0,
+   "other": 0
+  },
+  {
+   "month": "2026-11",
    "awards": 0,
    "dollars": 0,
    "std": 0,
@@ -1717,17 +1726,17 @@
   {
    "fy": 2026,
    "partial": false,
-   "awards": 2281,
-   "dollars": 1503916022,
-   "median": 508313,
-   "exTop3Dollars": 1464596075,
+   "awards": 2282,
+   "dollars": 1504219669,
+   "median": 507939,
+   "exTop3Dollars": 1464899722,
    "octJul": {
-    "awards": 1845,
-    "dollars": 1208271676,
+    "awards": 1846,
+    "dollars": 1208575323,
     "std": 369,
     "cont": 1321,
     "fell": 130,
-    "other": 25
+    "other": 26
    },
    "top3": [
     {
@@ -2781,63 +2790,63 @@
     },
     {
      "d": 300,
-     "awards": 1780,
-     "dollars": 1173547240
+     "awards": 1781,
+     "dollars": 1173850887
     },
     {
      "d": 307,
-     "awards": 1867,
-     "dollars": 1227568262
+     "awards": 1868,
+     "dollars": 1227871909
     },
     {
      "d": 314,
-     "awards": 1924,
-     "dollars": 1257843000
+     "awards": 1925,
+     "dollars": 1258146647
     },
     {
      "d": 321,
-     "awards": 1999,
-     "dollars": 1301343928
+     "awards": 2000,
+     "dollars": 1301647575
     },
     {
      "d": 328,
-     "awards": 2073,
-     "dollars": 1346649727
+     "awards": 2074,
+     "dollars": 1346953374
     },
     {
      "d": 335,
-     "awards": 2158,
-     "dollars": 1395348190
+     "awards": 2159,
+     "dollars": 1395651837
     },
     {
      "d": 342,
-     "awards": 2223,
-     "dollars": 1457302764
+     "awards": 2224,
+     "dollars": 1457606411
     },
     {
      "d": 349,
-     "awards": 2250,
-     "dollars": 1484578012
+     "awards": 2251,
+     "dollars": 1484881659
     },
     {
      "d": 356,
-     "awards": 2281,
-     "dollars": 1503916022
+     "awards": 2282,
+     "dollars": 1504219669
     },
     {
      "d": 363,
-     "awards": 2281,
-     "dollars": 1503916022
+     "awards": 2282,
+     "dollars": 1504219669
     },
     {
      "d": 364,
-     "awards": 2281,
-     "dollars": 1503916022
+     "awards": 2282,
+     "dollars": 1504219669
     }
    ]
   }
  ],
- "storeIdCount": 28933,
+ "storeIdCount": 28934,
  "children": [],
  "provider": "nih",
  "dataComplete": true,
@@ -2851,6 +2860,6 @@
  },
  "methodologyNote": "counts as of the pull date; NIH revises award notice dates and amounts.",
  "dataQualityNotes": [
-  "6 award record(s) had their amount, title, or type revised by NIH since the previous pull; figures reflect the source as of the pull date."
+  "288 award record(s) carry a NIH-reported award notice date outside their own declared fiscal year; retained and dated by the source's current notice date."
  ]
 }
