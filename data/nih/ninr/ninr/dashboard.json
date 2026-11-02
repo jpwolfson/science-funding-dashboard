@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-26",
+ "generated": "2026-11-02",
  "node": {
   "name": "National Institute of Nursing Research",
   "abbrev": "NINR",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.reporter.nih.gov/v2/projects/search (NIH RePORTER v2), administering IC NINR; one application record per fiscal year; intramural projects excluded; dated by award notice, then budget/project start when unavailable",
  "warnings": [],
- "totalAwards": 4128,
+ "totalAwards": 4129,
  "currentFY": 2027,
  "monthly": [
   {
@@ -1291,11 +1291,11 @@
   },
   {
    "month": "2026-08",
-   "awards": 34,
-   "dollars": 15277448,
+   "awards": 35,
+   "dollars": 15327562,
    "std": 11,
    "cont": 18,
-   "fell": 5,
+   "fell": 6,
    "other": 0
   },
   {
@@ -1309,6 +1309,15 @@
   },
   {
    "month": "2026-10",
+   "awards": 0,
+   "dollars": 0,
+   "std": 0,
+   "cont": 0,
+   "fell": 0,
+   "other": 0
+  },
+  {
+   "month": "2026-11",
    "awards": 0,
    "dollars": 0,
    "std": 0,
@@ -1717,10 +1726,10 @@
   {
    "fy": 2026,
    "partial": false,
-   "awards": 248,
-   "dollars": 149392334,
-   "median": 563956,
-   "exTop3Dollars": 138664052,
+   "awards": 249,
+   "dollars": 149442448,
+   "median": 561819,
+   "exTop3Dollars": 138714166,
    "octJul": {
     "awards": 173,
     "dollars": 106544021,
@@ -2796,48 +2805,48 @@
     },
     {
      "d": 321,
-     "awards": 193,
-     "dollars": 114078931
+     "awards": 194,
+     "dollars": 114129045
     },
     {
      "d": 328,
-     "awards": 202,
-     "dollars": 119133703
+     "awards": 203,
+     "dollars": 119183817
     },
     {
      "d": 335,
-     "awards": 208,
-     "dollars": 122610897
+     "awards": 209,
+     "dollars": 122661011
     },
     {
      "d": 342,
-     "awards": 213,
-     "dollars": 126670849
+     "awards": 214,
+     "dollars": 126720963
     },
     {
      "d": 349,
-     "awards": 221,
-     "dollars": 131061698
+     "awards": 222,
+     "dollars": 131111812
     },
     {
      "d": 356,
-     "awards": 248,
-     "dollars": 149392334
+     "awards": 249,
+     "dollars": 149442448
     },
     {
      "d": 363,
-     "awards": 248,
-     "dollars": 149392334
+     "awards": 249,
+     "dollars": 149442448
     },
     {
      "d": 364,
-     "awards": 248,
-     "dollars": 149392334
+     "awards": 249,
+     "dollars": 149442448
     }
    ]
   }
  ],
- "storeIdCount": 4128,
+ "storeIdCount": 4129,
  "children": [],
  "provider": "nih",
  "dataComplete": true,
@@ -2850,5 +2859,7 @@
   "other": "Other awards"
  },
  "methodologyNote": "counts as of the pull date; NIH revises award notice dates and amounts.",
- "dataQualityNotes": []
+ "dataQualityNotes": [
+  "24 award record(s) carry a NIH-reported award notice date outside their own declared fiscal year; retained and dated by the source's current notice date."
+ ]
 }
