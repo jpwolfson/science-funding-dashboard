@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-26",
+ "generated": "2026-11-02",
  "node": {
   "name": "National Institute of General Medical Sciences",
   "abbrev": "NIGMS",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.reporter.nih.gov/v2/projects/search (NIH RePORTER v2), administering IC NIGMS; one application record per fiscal year; intramural projects excluded; dated by award notice, then budget/project start when unavailable",
  "warnings": [],
- "totalAwards": 81396,
+ "totalAwards": 81397,
  "currentFY": 2027,
  "monthly": [
   {
@@ -1283,7 +1283,7 @@
   {
    "month": "2026-07",
    "awards": 1182,
-   "dollars": 585737965,
+   "dollars": 585567567,
    "std": 386,
    "cont": 776,
    "fell": 20,
@@ -1300,15 +1300,24 @@
   },
   {
    "month": "2026-09",
-   "awards": 336,
-   "dollars": 217303832,
+   "awards": 337,
+   "dollars": 217380612,
    "std": 175,
    "cont": 151,
-   "fell": 10,
+   "fell": 11,
    "other": 0
   },
   {
    "month": "2026-10",
+   "awards": 0,
+   "dollars": 0,
+   "std": 0,
+   "cont": 0,
+   "fell": 0,
+   "other": 0
+  },
+  {
+   "month": "2026-11",
    "awards": 0,
    "dollars": 0,
    "std": 0,
@@ -1717,13 +1726,13 @@
   {
    "fy": 2026,
    "partial": false,
-   "awards": 6160,
-   "dollars": 3108150873,
-   "median": 405318,
-   "exTop3Dollars": 3088819092,
+   "awards": 6161,
+   "dollars": 3108057255,
+   "median": 405314,
+   "exTop3Dollars": 3088725474,
    "octJul": {
     "awards": 4841,
-    "dollars": 2363355755,
+    "dollars": 2363185357,
     "std": 1295,
     "cont": 3435,
     "fell": 111,
@@ -2787,57 +2796,57 @@
     {
      "d": 307,
      "awards": 4923,
-     "dollars": 2409983339
+     "dollars": 2409812941
     },
     {
      "d": 314,
      "awards": 5131,
-     "dollars": 2531494825
+     "dollars": 2531324427
     },
     {
      "d": 321,
      "awards": 5360,
-     "dollars": 2670777108
+     "dollars": 2670606710
     },
     {
      "d": 328,
      "awards": 5652,
-     "dollars": 2811621915
+     "dollars": 2811451517
     },
     {
      "d": 335,
      "awards": 5863,
-     "dollars": 2916385395
+     "dollars": 2916214997
     },
     {
      "d": 342,
      "awards": 6023,
-     "dollars": 3021550790
+     "dollars": 3021380392
     },
     {
      "d": 349,
-     "awards": 6131,
-     "dollars": 3083206876
+     "awards": 6132,
+     "dollars": 3083113258
     },
     {
      "d": 356,
-     "awards": 6160,
-     "dollars": 3108150873
+     "awards": 6161,
+     "dollars": 3108057255
     },
     {
      "d": 363,
-     "awards": 6160,
-     "dollars": 3108150873
+     "awards": 6161,
+     "dollars": 3108057255
     },
     {
      "d": 364,
-     "awards": 6160,
-     "dollars": 3108150873
+     "awards": 6161,
+     "dollars": 3108057255
     }
    ]
   }
  ],
- "storeIdCount": 81396,
+ "storeIdCount": 81397,
  "children": [],
  "provider": "nih",
  "dataComplete": true,
@@ -2850,5 +2859,9 @@
   "other": "Other awards"
  },
  "methodologyNote": "counts as of the pull date; NIH revises award notice dates and amounts.",
- "dataQualityNotes": []
+ "dataQualityNotes": [
+  "1 stored award record(s) were not returned by the 2026-11-02 full pull and are retained; NIH revises and withdraws notices.",
+  "2 award record(s) had their amount, title, or type revised by NIH since the previous pull; figures reflect the source as of the pull date.",
+  "752 award record(s) carry a NIH-reported award notice date outside their own declared fiscal year; retained and dated by the source's current notice date."
+ ]
 }
