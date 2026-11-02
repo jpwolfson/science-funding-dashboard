@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-26",
+ "generated": "2026-11-02",
  "node": {
   "name": "Oia-office of Integrative Activities",
   "abbrev": "OIA",
@@ -7,8 +7,10 @@
   "level": "division"
  },
  "source": "https://api.nsf.gov/services/v1/awards.json?org_code_div=01060000 (NSF Award Search API), month-by-month on Original Award Date",
- "warnings": [],
- "totalAwards": 1088,
+ "warnings": [
+  "2 stored awards not returned by this full re-pull; retained from the store"
+ ],
+ "totalAwards": 1089,
  "currentFY": 2027,
  "monthly": [
   {
@@ -1309,6 +1311,15 @@
   },
   {
    "month": "2026-10",
+   "awards": 1,
+   "dollars": 410775,
+   "std": 0,
+   "cont": 1,
+   "fell": 0,
+   "other": 0
+  },
+  {
+   "month": "2026-11",
    "awards": 0,
    "dollars": 0,
    "std": 0,
@@ -1747,6 +1758,30 @@
      "title": "STC: Center for Genome Intelligence Engineering (GENIE)",
      "awardee": "Northwestern University at Chicago",
      "amount": 29999944
+    }
+   ]
+  },
+  {
+   "fy": 2027,
+   "partial": true,
+   "awards": 1,
+   "dollars": 410775,
+   "median": 410775,
+   "exTop3Dollars": 0,
+   "octJul": {
+    "awards": 1,
+    "dollars": 410775,
+    "std": 0,
+    "cont": 1,
+    "fell": 0,
+    "other": 0
+   },
+   "top3": [
+    {
+     "id": "2700833",
+     "title": "Collaborative Research: E-RISE RII: Establishment of the Mississippi Nano-bio and ImmunoEngineering Consortium",
+     "awardee": "Jackson State University",
+     "amount": 410775
     }
    ]
   }
@@ -2835,9 +2870,40 @@
      "dollars": 265924488
     }
    ]
+  },
+  {
+   "fy": 2027,
+   "partial": true,
+   "points": [
+    {
+     "d": 6,
+     "awards": 0,
+     "dollars": 0
+    },
+    {
+     "d": 13,
+     "awards": 0,
+     "dollars": 0
+    },
+    {
+     "d": 20,
+     "awards": 0,
+     "dollars": 0
+    },
+    {
+     "d": 27,
+     "awards": 1,
+     "dollars": 410775
+    },
+    {
+     "d": 32,
+     "awards": 1,
+     "dollars": 410775
+    }
+   ]
   }
  ],
- "storeIdCount": 1088,
+ "storeIdCount": 1089,
  "children": [],
  "provider": "nsf",
  "dataComplete": true,
