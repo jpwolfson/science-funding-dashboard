@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-26",
+ "generated": "2026-11-02",
  "node": {
   "name": "National Institute of Neurological Disorders and Stroke",
   "abbrev": "NINDS",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.reporter.nih.gov/v2/projects/search (NIH RePORTER v2), administering IC NINDS; one application record per fiscal year; intramural projects excluded; dated by award notice, then budget/project start when unavailable",
  "warnings": [],
- "totalAwards": 53435,
+ "totalAwards": 53436,
  "currentFY": 2027,
  "monthly": [
   {
@@ -1273,12 +1273,12 @@
   },
   {
    "month": "2026-06",
-   "awards": 482,
-   "dollars": 249490955,
+   "awards": 483,
+   "dollars": 251507786,
    "std": 118,
    "cont": 335,
    "fell": 29,
-   "other": 0
+   "other": 1
   },
   {
    "month": "2026-07",
@@ -1309,6 +1309,15 @@
   },
   {
    "month": "2026-10",
+   "awards": 0,
+   "dollars": 0,
+   "std": 0,
+   "cont": 0,
+   "fell": 0,
+   "other": 0
+  },
+  {
+   "month": "2026-11",
    "awards": 0,
    "dollars": 0,
    "std": 0,
@@ -1717,17 +1726,17 @@
   {
    "fy": 2026,
    "partial": false,
-   "awards": 4371,
-   "dollars": 2456546281,
-   "median": 469159,
-   "exTop3Dollars": 2396024669,
+   "awards": 4372,
+   "dollars": 2458563112,
+   "median": 469163,
+   "exTop3Dollars": 2398041500,
    "octJul": {
-    "awards": 3030,
-    "dollars": 1536728409,
+    "awards": 3031,
+    "dollars": 1538745240,
     "std": 568,
     "cont": 2255,
     "fell": 207,
-    "other": 0
+    "other": 1
    },
    "top3": [
     {
@@ -2761,83 +2770,83 @@
     },
     {
      "d": 272,
-     "awards": 2489,
-     "dollars": 1238903763
+     "awards": 2490,
+     "dollars": 1240920594
     },
     {
      "d": 279,
-     "awards": 2613,
-     "dollars": 1303259946
+     "awards": 2614,
+     "dollars": 1305276777
     },
     {
      "d": 286,
-     "awards": 2736,
-     "dollars": 1376177017
+     "awards": 2737,
+     "dollars": 1378193848
     },
     {
      "d": 293,
-     "awards": 2811,
-     "dollars": 1421965329
+     "awards": 2812,
+     "dollars": 1423982160
     },
     {
      "d": 300,
-     "awards": 2955,
-     "dollars": 1501815948
+     "awards": 2956,
+     "dollars": 1503832779
     },
     {
      "d": 307,
-     "awards": 3091,
-     "dollars": 1571775892
+     "awards": 3092,
+     "dollars": 1573792723
     },
     {
      "d": 314,
-     "awards": 3261,
-     "dollars": 1659609193
+     "awards": 3262,
+     "dollars": 1661626024
     },
     {
      "d": 321,
-     "awards": 3420,
-     "dollars": 1728801171
+     "awards": 3421,
+     "dollars": 1730818002
     },
     {
      "d": 328,
-     "awards": 3626,
-     "dollars": 1879381965
+     "awards": 3627,
+     "dollars": 1881398796
     },
     {
      "d": 335,
-     "awards": 3843,
-     "dollars": 2010640685
+     "awards": 3844,
+     "dollars": 2012657516
     },
     {
      "d": 342,
-     "awards": 4040,
-     "dollars": 2189291725
+     "awards": 4041,
+     "dollars": 2191308556
     },
     {
      "d": 349,
-     "awards": 4157,
-     "dollars": 2305272612
+     "awards": 4158,
+     "dollars": 2307289443
     },
     {
      "d": 356,
-     "awards": 4371,
-     "dollars": 2456546281
+     "awards": 4372,
+     "dollars": 2458563112
     },
     {
      "d": 363,
-     "awards": 4371,
-     "dollars": 2456546281
+     "awards": 4372,
+     "dollars": 2458563112
     },
     {
      "d": 364,
-     "awards": 4371,
-     "dollars": 2456546281
+     "awards": 4372,
+     "dollars": 2458563112
     }
    ]
   }
  ],
- "storeIdCount": 53435,
+ "storeIdCount": 53436,
  "children": [],
  "provider": "nih",
  "dataComplete": true,
@@ -2851,7 +2860,8 @@
  },
  "methodologyNote": "counts as of the pull date; NIH revises award notice dates and amounts.",
  "dataQualityNotes": [
-  "1 stored award record(s) were not returned by the 2026-10-05 full pull and are retained; NIH revises and withdraws notices.",
-  "1 award record(s) had their amount, title, or type revised by NIH since the previous pull; figures reflect the source as of the pull date."
+  "1 stored award record(s) were not returned by the 2026-11-02 full pull and are retained; NIH revises and withdraws notices.",
+  "3 award record(s) had their amount, title, or type revised by NIH since the previous pull; figures reflect the source as of the pull date.",
+  "493 award record(s) carry a NIH-reported award notice date outside their own declared fiscal year; retained and dated by the source's current notice date."
  ]
 }
