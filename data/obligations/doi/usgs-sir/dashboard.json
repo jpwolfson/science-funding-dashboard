@@ -1,7 +1,7 @@
 {
  "schemaVersion": 2,
  "kind": "obligations",
- "generated": "2026-09-30",
+ "generated": "2026-11-04",
  "node": {
   "level": "account",
   "path": "obligations/doi/usgs-sir",
@@ -2434,7 +2434,7 @@
      "id": "d7ae0eb5f65a5b6e2816952a0835f9ea6414fe447d39d6d59abd6d803bf415f5",
      "awardId": "CONT_AWD_ING16PD00776_1434_ING13PC00037_1434",
      "title": "BIOLOGIST IGF::OT::IGF NWQL TECHNICAL SUPPORT SERVICES",
-     "recipient": "CHEROKEE NATION TECHNOLOGY SOLUTIONS LLC",
+     "recipient": "CHEROKEE FEDERAL SOLUTIONS, LLC",
      "amountCents": -7259793,
      "amount": -72597.93,
      "netAmountCents": -7259793,
@@ -9302,8 +9302,10 @@
   "maxAgeDays": 10,
   "refreshStatus": {
    "lastAcceptedAt": "2026-09-29T08:33:38+00:00",
-   "lastRefreshAttemptAt": "2026-09-29T22:37:28.464525+00:00",
-   "status": "fresh"
+   "lastRefreshAttemptAt": "2026-11-04T04:23:48.776695+00:00",
+   "reason": "the scheduled current-FY (FY2026) pull for this account did not produce a partition in this run",
+   "staleSince": "2026-09-29",
+   "status": "stale"
   }
  }
 }

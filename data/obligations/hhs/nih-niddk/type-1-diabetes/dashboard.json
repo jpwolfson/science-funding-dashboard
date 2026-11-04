@@ -1,7 +1,7 @@
 {
  "schemaVersion": 2,
  "kind": "obligations",
- "generated": "2026-09-30",
+ "generated": "2026-11-04",
  "node": {
   "level": "programActivity",
   "path": "obligations/hhs/nih-niddk/type-1-diabetes",
@@ -5576,7 +5576,11 @@
   "latestAcceptedAt": "2026-09-27T12:03:58+00:00",
   "maxAgeDays": 10,
   "refreshStatus": {
-   "status": "fresh"
+   "lastAcceptedAt": "2026-09-27T12:03:58+00:00",
+   "lastRefreshAttemptAt": "2026-11-04T04:23:48.776695+00:00",
+   "reason": "the scheduled current-FY (FY2026) pull for this account did not produce a partition in this run",
+   "staleSince": "2026-09-27",
+   "status": "stale"
   }
  },
  "interpretationNote": "USAspending reports no separate Type 1 Diabetes program activity for FY2026; all NIDDK FY2026 obligations are reported under the institute's single program activity. The FY2026 $0 here reflects that reporting structure. FY2025 obligations reported under this program activity were $1.7 million, well below prior years; this page does not attribute a cause."

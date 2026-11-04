@@ -1,7 +1,7 @@
 {
  "schemaVersion": 2,
  "kind": "obligations",
- "generated": "2026-09-30",
+ "generated": "2026-11-04",
  "node": {
   "level": "agency",
   "path": "obligations/epa",
@@ -9180,7 +9180,14 @@
    "hasData": true,
    "currentFYNetObligations": 497865780.21,
    "fileCToNetRatio": 0.24418602511448154,
-   "distinctLinkedAwards": 818
+   "distinctLinkedAwards": 818,
+   "refreshStatus": {
+    "lastAcceptedAt": "2026-09-29T11:12:41+00:00",
+    "lastRefreshAttemptAt": "2026-11-04T04:23:48.776695+00:00",
+    "reason": "the scheduled current-FY (FY2026) pull for this account did not produce a partition in this run",
+    "staleSince": "2026-09-29",
+    "status": "stale"
+   }
   }
  ],
  "freshness": {

@@ -1,7 +1,7 @@
 {
  "schemaVersion": 2,
  "kind": "obligations",
- "generated": "2026-09-30",
+ "generated": "2026-11-04",
  "node": {
   "level": "programActivity",
   "path": "obligations/hhs/nih-ninds/national-institute-of-neurological-disorders-and-stroke",
@@ -6683,7 +6683,11 @@
   "latestAcceptedAt": "2026-09-25T11:40:36+00:00",
   "maxAgeDays": 10,
   "refreshStatus": {
-   "status": "fresh"
+   "lastAcceptedAt": "2026-09-25T11:40:36+00:00",
+   "lastRefreshAttemptAt": "2026-11-04T04:23:48.776695+00:00",
+   "reason": "the scheduled current-FY (FY2026) pull for this account did not produce a partition in this run",
+   "staleSince": "2026-09-25",
+   "status": "stale"
   }
  }
 }

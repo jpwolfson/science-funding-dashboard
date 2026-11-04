@@ -1,7 +1,7 @@
 {
  "schemaVersion": 2,
  "kind": "obligations",
- "generated": "2026-09-30",
+ "generated": "2026-11-04",
  "node": {
   "level": "programActivity",
   "path": "obligations/doe/electricity/resilient-distribution-systems",
@@ -1902,7 +1902,7 @@
     },
     {
      "recipientUEI": "GAZZGS3YV389",
-     "recipient": "LOS ALAMOS NATIONAL SECURITY LLC",
+     "recipient": "LOS ALAMOS NATIONAL SECURITY, LLC",
      "netObligationsCents": 156674800,
      "netObligations": 1566748.0,
      "distinctLinkedAwards": 1
@@ -2096,7 +2096,7 @@
      "id": "661f1d3ad00dab8dfa864742a92bc1d05671da17a29a8b3ce84e29973084b925",
      "awardId": "CONT_AWD_DEAC5206NA25396_8900_-NONE-_-NONE-",
      "title": "THE CONTRACTOR SHALL, IN ACCORDANCE WITH THE TERMS AND CONDITIONS OF THIS CONTRACT, PROVIDE THE PERSONNEL, EQUIPMENT, MATERIALS, SUPPLIES, AND SERVICES (EXCEPT AS MAY BE FURNISHED BY THE GOVERNMENT) AND OTHERWISE DO ALL THING NECESSARY FOR, OR INCIDENT TO PROVIDING ITS BEST EFFORTS TO EFFECTIVELY, EFFICIENTLY AND SAFELY MANAGE AND OPERATE THE LOS ALAMOS NATIONAL LABORATORY FOR THE U.S. DEPARTMENT OF ENERGY/NATIONAL NUCLEAR SECURITY ADMINISTRATION.",
-     "recipient": "LOS ALAMOS NATIONAL SECURITY LLC",
+     "recipient": "LOS ALAMOS NATIONAL SECURITY, LLC",
      "amountCents": 156674800,
      "amount": 1566748.0,
      "netAmountCents": 156674800,
@@ -7631,8 +7631,10 @@
   "maxAgeDays": 10,
   "refreshStatus": {
    "lastAcceptedAt": "2026-09-29T05:04:31+00:00",
-   "lastRefreshAttemptAt": "2026-09-29T22:37:28.464525+00:00",
-   "status": "fresh"
+   "lastRefreshAttemptAt": "2026-11-04T04:23:48.776695+00:00",
+   "reason": "the scheduled current-FY (FY2026) pull for this account did not produce a partition in this run",
+   "staleSince": "2026-09-29",
+   "status": "stale"
   }
  }
 }

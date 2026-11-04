@@ -1,7 +1,7 @@
 {
  "schemaVersion": 2,
  "kind": "obligations",
- "generated": "2026-09-30",
+ "generated": "2026-11-04",
  "node": {
   "level": "account",
   "path": "obligations/hhs/nih-nigms",
@@ -1859,18 +1859,18 @@
      "distinctLinkedAwards": 127
     },
     {
-     "recipientUEI": "GM1XX56LEP58",
-     "recipient": "TRUSTEES OF THE UNIVERSITY OF PENNSYLVANIA, THE",
-     "netObligationsCents": 3746086643,
-     "netObligations": 37460866.43,
-     "distinctLinkedAwards": 129
-    },
-    {
      "recipientUEI": "FTMTDMBR29C7",
      "recipient": "THE JOHNS HOPKINS UNIVERSITY",
      "netObligationsCents": 3728001754,
      "netObligations": 37280017.54,
      "distinctLinkedAwards": 113
+    },
+    {
+     "recipientUEI": "GM1XX56LEP58",
+     "recipient": "TRUSTEES OF THE UNIVERSITY OF PENNSYLVANIA, THE",
+     "netObligationsCents": 3719626643,
+     "netObligations": 37196266.43,
+     "distinctLinkedAwards": 128
     },
     {
      "recipientUEI": "FL6GV84CKN57",
@@ -1943,13 +1943,6 @@
      "distinctLinkedAwards": 89
     },
     {
-     "recipientUEI": "GS3YEVSS12N6",
-     "recipient": "REGENTS OF THE UNIVERSITY OF CALIFORNIA, THE",
-     "netObligationsCents": 2437754716,
-     "netObligations": 24377547.16,
-     "distinctLinkedAwards": 121
-    },
-    {
      "recipientUEI": "TP7EK8DZV6N5",
      "recipient": "DUKE UNIVERSITY",
      "netObligationsCents": 2416152544,
@@ -1962,6 +1955,13 @@
      "netObligationsCents": 2406648025,
      "netObligations": 24066480.25,
      "distinctLinkedAwards": 59
+    },
+    {
+     "recipientUEI": "GS3YEVSS12N6",
+     "recipient": "REGENTS OF THE UNIVERSITY OF CALIFORNIA, THE",
+     "netObligationsCents": 2400354716,
+     "netObligations": 24003547.16,
+     "distinctLinkedAwards": 120
     },
     {
      "recipientUEI": "PHZJFZ32NKH4",
@@ -9202,7 +9202,11 @@
   "latestAcceptedAt": "2026-09-27T14:49:26+00:00",
   "maxAgeDays": 10,
   "refreshStatus": {
-   "status": "fresh"
+   "lastAcceptedAt": "2026-09-27T14:49:26+00:00",
+   "lastRefreshAttemptAt": "2026-11-04T04:23:48.776695+00:00",
+   "reason": "the scheduled current-FY (FY2026) pull for this account did not produce a partition in this run",
+   "staleSince": "2026-09-27",
+   "status": "stale"
   }
  }
 }

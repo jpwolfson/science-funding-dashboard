@@ -1,7 +1,7 @@
 {
  "schemaVersion": 2,
  "kind": "obligations",
- "generated": "2026-09-30",
+ "generated": "2026-11-04",
  "node": {
   "level": "programActivity",
   "path": "obligations/hhs/nih-nci/nih-reimbursable-other",
@@ -4251,7 +4251,11 @@
   "latestAcceptedAt": "2026-09-24T19:31:32+00:00",
   "maxAgeDays": 10,
   "refreshStatus": {
-   "status": "fresh"
+   "lastAcceptedAt": "2026-09-24T19:31:32+00:00",
+   "lastRefreshAttemptAt": "2026-11-04T04:23:48.776695+00:00",
+   "reason": "the scheduled current-FY (FY2026) pull for this account did not produce a partition in this run",
+   "staleSince": "2026-09-24",
+   "status": "stale"
   }
  },
  "interpretationNote": "Reimbursable obligations cover work paid for by other agencies. Amounts reported under this line since FY2023 are well below FY2017\u20132020 levels in the source data; this page shows the reported figures without attributing a cause."

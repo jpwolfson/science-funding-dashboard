@@ -1,7 +1,7 @@
 {
  "schemaVersion": 2,
  "kind": "obligations",
- "generated": "2026-09-30",
+ "generated": "2026-11-04",
  "node": {
   "level": "programActivity",
   "path": "obligations/doe/sc/basic-energy-sciences",
@@ -1867,7 +1867,7 @@
     },
     {
      "recipientUEI": "GAZZGS3YV389",
-     "recipient": "LOS ALAMOS NATIONAL SECURITY LLC",
+     "recipient": "LOS ALAMOS NATIONAL SECURITY, LLC",
      "netObligationsCents": 1081410826,
      "netObligations": 10814108.26,
      "distinctLinkedAwards": 1
@@ -1875,9 +1875,9 @@
     {
      "recipientUEI": "EXZVPWZBLUE8",
      "recipient": "NORTHWESTERN UNIVERSITY",
-     "netObligationsCents": 1053873364,
-     "netObligations": 10538733.64,
-     "distinctLinkedAwards": 11
+     "netObligationsCents": 1017856764,
+     "netObligations": 10178567.64,
+     "distinctLinkedAwards": 10
     },
     {
      "recipientUEI": "NPM2J7MSCF61",
@@ -2138,7 +2138,7 @@
      "id": "1c47746d8dfd0efb12ae00785dc019202b08e6e821c8f61e10b8cfa9aa54195c",
      "awardId": "CONT_AWD_DEAC5206NA25396_8900_-NONE-_-NONE-",
      "title": "THE CONTRACTOR SHALL, IN ACCORDANCE WITH THE TERMS AND CONDITIONS OF THIS CONTRACT, PROVIDE THE PERSONNEL, EQUIPMENT, MATERIALS, SUPPLIES, AND SERVICES (EXCEPT AS MAY BE FURNISHED BY THE GOVERNMENT) AND OTHERWISE DO ALL THING NECESSARY FOR, OR INCIDENT TO PROVIDING ITS BEST EFFORTS TO EFFECTIVELY, EFFICIENTLY AND SAFELY MANAGE AND OPERATE THE LOS ALAMOS NATIONAL LABORATORY FOR THE U.S. DEPARTMENT OF ENERGY/NATIONAL NUCLEAR SECURITY ADMINISTRATION.",
-     "recipient": "LOS ALAMOS NATIONAL SECURITY LLC",
+     "recipient": "LOS ALAMOS NATIONAL SECURITY, LLC",
      "amountCents": 795900000,
      "amount": 7959000.0,
      "netAmountCents": 795900000,
@@ -9134,8 +9134,10 @@
   "maxAgeDays": 10,
   "refreshStatus": {
    "lastAcceptedAt": "2026-09-29T08:01:24+00:00",
-   "lastRefreshAttemptAt": "2026-09-29T22:37:28.464525+00:00",
-   "status": "fresh"
+   "lastRefreshAttemptAt": "2026-11-04T04:23:48.776695+00:00",
+   "reason": "the scheduled current-FY (FY2026) pull for this account did not produce a partition in this run",
+   "staleSince": "2026-09-29",
+   "status": "stale"
   }
  }
 }

@@ -1,7 +1,7 @@
 {
  "schemaVersion": 2,
  "kind": "obligations",
- "generated": "2026-09-30",
+ "generated": "2026-11-04",
  "node": {
   "level": "account",
   "path": "obligations/nsf/aoam",
@@ -2446,7 +2446,7 @@
      "id": "99756e0a83b924a11a20d763355025db84d691ddeb73b5a2ef9f01936a67ea8a",
      "awardId": "CONT_IDV_NSFDACS09B1813_4900",
      "title": "ALTERNATIVE DISPUTE RESOLUTION SERVICES (ADRS)",
-     "recipient": "APPRIO INC",
+     "recipient": "VARETIS, INC.",
      "amountCents": -1112182,
      "amount": -11121.82,
      "netAmountCents": -1112182,
@@ -9212,8 +9212,10 @@
   "maxAgeDays": 10,
   "refreshStatus": {
    "lastAcceptedAt": "2026-09-29T15:58:14+00:00",
-   "lastRefreshAttemptAt": "2026-09-29T22:37:28.464525+00:00",
-   "status": "fresh"
+   "lastRefreshAttemptAt": "2026-11-04T04:23:48.776695+00:00",
+   "reason": "the scheduled current-FY (FY2026) pull for this account did not produce a partition in this run",
+   "staleSince": "2026-09-29",
+   "status": "stale"
   }
  }
 }
