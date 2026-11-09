@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-02",
+ "generated": "2026-11-09",
  "node": {
   "name": "National Institute on Alcohol Abuse and Alcoholism",
   "abbrev": "NIAAA",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.reporter.nih.gov/v2/projects/search (NIH RePORTER v2), administering IC NIAAA; one application record per fiscal year; intramural projects excluded; dated by award notice, then budget/project start when unavailable",
  "warnings": [],
- "totalAwards": 13312,
+ "totalAwards": 13313,
  "currentFY": 2027,
  "monthly": [
   {
@@ -1318,11 +1318,11 @@
   },
   {
    "month": "2026-11",
-   "awards": 0,
-   "dollars": 0,
+   "awards": 1,
+   "dollars": 39309,
    "std": 0,
    "cont": 0,
-   "fell": 0,
+   "fell": 1,
    "other": 0
   }
  ],
@@ -1756,6 +1756,30 @@
      "title": "Histone Acetylation and Synaptic Mechanisms in D1-MSNs Underlying Resilience to Compulsive-like Alcohol Drinking",
      "awardee": "ICAHN SCHOOL OF MEDICINE AT MOUNT SINAI",
      "amount": 3112314
+    }
+   ]
+  },
+  {
+   "fy": 2027,
+   "partial": true,
+   "awards": 1,
+   "dollars": 39309,
+   "median": 39309,
+   "exTop3Dollars": 0,
+   "octJul": {
+    "awards": 1,
+    "dollars": 39309,
+    "std": 0,
+    "cont": 0,
+    "fell": 1,
+    "other": 0
+   },
+   "top3": [
+    {
+     "id": "nih:11424178",
+     "title": "Advancing precision medicine through measurement of reward and relief drinking",
+     "awardee": "UNIVERSITY OF NEW MEXICO",
+     "amount": 39309
     }
    ]
   }
@@ -2844,9 +2868,45 @@
      "dollars": 456806800
     }
    ]
+  },
+  {
+   "fy": 2027,
+   "partial": true,
+   "points": [
+    {
+     "d": 6,
+     "awards": 0,
+     "dollars": 0
+    },
+    {
+     "d": 13,
+     "awards": 0,
+     "dollars": 0
+    },
+    {
+     "d": 20,
+     "awards": 0,
+     "dollars": 0
+    },
+    {
+     "d": 27,
+     "awards": 0,
+     "dollars": 0
+    },
+    {
+     "d": 34,
+     "awards": 1,
+     "dollars": 39309
+    },
+    {
+     "d": 39,
+     "awards": 1,
+     "dollars": 39309
+    }
+   ]
   }
  ],
- "storeIdCount": 13312,
+ "storeIdCount": 13313,
  "children": [],
  "provider": "nih",
  "dataComplete": true,
@@ -2859,8 +2919,5 @@
   "other": "Other awards"
  },
  "methodologyNote": "counts as of the pull date; NIH revises award notice dates and amounts.",
- "dataQualityNotes": [
-  "3 award record(s) had their amount, title, or type revised by NIH since the previous pull; figures reflect the source as of the pull date.",
-  "115 award record(s) carry a NIH-reported award notice date outside their own declared fiscal year; retained and dated by the source's current notice date."
- ]
+ "dataQualityNotes": []
 }
