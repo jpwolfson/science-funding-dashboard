@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-02",
+ "generated": "2026-11-09",
  "node": {
   "name": "National Institute on Minority Health and Health Disparities",
   "abbrev": "NIMHD",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.reporter.nih.gov/v2/projects/search (NIH RePORTER v2), administering IC NIMHD; one application record per fiscal year; intramural projects excluded; dated by award notice, then budget/project start when unavailable",
  "warnings": [],
- "totalAwards": 6324,
+ "totalAwards": 6329,
  "currentFY": 2027,
  "monthly": [
   {
@@ -1309,20 +1309,20 @@
   },
   {
    "month": "2026-10",
-   "awards": 0,
-   "dollars": 0,
+   "awards": 4,
+   "dollars": 2228950,
    "std": 0,
-   "cont": 0,
+   "cont": 4,
    "fell": 0,
    "other": 0
   },
   {
    "month": "2026-11",
-   "awards": 0,
-   "dollars": 0,
+   "awards": 1,
+   "dollars": 47105,
    "std": 0,
    "cont": 0,
-   "fell": 0,
+   "fell": 1,
    "other": 0
   }
  ],
@@ -1756,6 +1756,42 @@
      "title": "UTEP Border Biomedical Research Center",
      "awardee": "UNIVERSITY OF TEXAS EL PASO",
      "amount": 4908986
+    }
+   ]
+  },
+  {
+   "fy": 2027,
+   "partial": true,
+   "awards": 5,
+   "dollars": 2276055,
+   "median": 538992,
+   "exTop3Dollars": 278847,
+   "octJul": {
+    "awards": 5,
+    "dollars": 2276055,
+    "std": 0,
+    "cont": 4,
+    "fell": 1,
+    "other": 0
+   },
+   "top3": [
+    {
+     "id": "nih:11371402",
+     "title": "REDES: a peer network and mobile health (mHealth) enhanced CHW model to maximize COVID-19 vaccination among low income Latinos",
+     "awardee": "JOHNS HOPKINS UNIVERSITY",
+     "amount": 736867
+    },
+    {
+     "id": "nih:11468426",
+     "title": "A Hybrid Mobile Phone Family Intervention to Prevent Childhood Obesity",
+     "awardee": "UNIVERSITY OF CALIFORNIA LOS ANGELES",
+     "amount": 721349
+    },
+    {
+     "id": "nih:11413396",
+     "title": "Harnessing Mobile Tech Enabled Community Driven Data, Big Population Health Data, & Agent-Based Models to Transform the Measures & Metrics around Healthcare Access",
+     "awardee": "DIGITAL ORGANIZING POWER-BUILDING AND ENGAGEMENT LABS",
+     "amount": 538992
     }
    ]
   }
@@ -2844,9 +2880,45 @@
      "dollars": 374370238
     }
    ]
+  },
+  {
+   "fy": 2027,
+   "partial": true,
+   "points": [
+    {
+     "d": 6,
+     "awards": 0,
+     "dollars": 0
+    },
+    {
+     "d": 13,
+     "awards": 0,
+     "dollars": 0
+    },
+    {
+     "d": 20,
+     "awards": 0,
+     "dollars": 0
+    },
+    {
+     "d": 27,
+     "awards": 0,
+     "dollars": 0
+    },
+    {
+     "d": 34,
+     "awards": 5,
+     "dollars": 2276055
+    },
+    {
+     "d": 39,
+     "awards": 5,
+     "dollars": 2276055
+    }
+   ]
   }
  ],
- "storeIdCount": 6324,
+ "storeIdCount": 6329,
  "children": [],
  "provider": "nih",
  "dataComplete": true,
@@ -2859,8 +2931,5 @@
   "other": "Other awards"
  },
  "methodologyNote": "counts as of the pull date; NIH revises award notice dates and amounts.",
- "dataQualityNotes": [
-  "1 award record(s) had their amount, title, or type revised by NIH since the previous pull; figures reflect the source as of the pull date.",
-  "89 award record(s) carry a NIH-reported award notice date outside their own declared fiscal year; retained and dated by the source's current notice date."
- ]
+ "dataQualityNotes": []
 }
