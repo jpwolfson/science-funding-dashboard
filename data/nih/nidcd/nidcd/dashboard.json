@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-02",
+ "generated": "2026-11-09",
  "node": {
   "name": "National Institute on Deafness and Other Communication Disorders",
   "abbrev": "NIDCD",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.reporter.nih.gov/v2/projects/search (NIH RePORTER v2), administering IC NIDCD; one application record per fiscal year; intramural projects excluded; dated by award notice, then budget/project start when unavailable",
  "warnings": [],
- "totalAwards": 13633,
+ "totalAwards": 13634,
  "currentFY": 2027,
  "monthly": [
   {
@@ -1318,10 +1318,10 @@
   },
   {
    "month": "2026-11",
-   "awards": 0,
-   "dollars": 0,
+   "awards": 1,
+   "dollars": 249000,
    "std": 0,
-   "cont": 0,
+   "cont": 1,
    "fell": 0,
    "other": 0
   }
@@ -1762,19 +1762,25 @@
   {
    "fy": 2027,
    "partial": true,
-   "awards": 2,
-   "dollars": 121012,
-   "median": 60506,
+   "awards": 3,
+   "dollars": 370012,
+   "median": 94340,
    "exTop3Dollars": 0,
    "octJul": {
-    "awards": 2,
-    "dollars": 121012,
+    "awards": 3,
+    "dollars": 370012,
     "std": 0,
-    "cont": 2,
+    "cont": 3,
     "fell": 0,
     "other": 0
    },
    "top3": [
+    {
+     "id": "nih:11626440",
+     "title": "Cell surface protein dynamics in neural circuit assembly",
+     "awardee": "UNIVERSITY OF MICHIGAN AT ANN ARBOR",
+     "amount": 249000
+    },
     {
      "id": "nih:11657731",
      "title": "Pharmacological Approaches for Transepithelial Delivery of Therapeutics to the Vocal Folds",
@@ -2900,14 +2906,19 @@
      "dollars": 121012
     },
     {
-     "d": 32,
+     "d": 34,
      "awards": 2,
      "dollars": 121012
+    },
+    {
+     "d": 39,
+     "awards": 3,
+     "dollars": 370012
     }
    ]
   }
  ],
- "storeIdCount": 13633,
+ "storeIdCount": 13634,
  "children": [],
  "provider": "nih",
  "dataComplete": true,
@@ -2921,7 +2932,6 @@
  },
  "methodologyNote": "counts as of the pull date; NIH revises award notice dates and amounts.",
  "dataQualityNotes": [
-  "3 award record(s) had their amount, title, or type revised by NIH since the previous pull; figures reflect the source as of the pull date.",
-  "175 award record(s) carry a NIH-reported award notice date outside their own declared fiscal year; retained and dated by the source's current notice date."
+  "1 award record(s) carry a NIH-reported award notice date outside their own declared fiscal year; retained and dated by the source's current notice date."
  ]
 }
