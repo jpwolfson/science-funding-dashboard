@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-09",
+ "generated": "2026-11-16",
  "node": {
   "name": "National Institute of Dental and Craniofacial Research",
   "abbrev": "NIDCR",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.reporter.nih.gov/v2/projects/search (NIH RePORTER v2), administering IC NIDCR; one application record per fiscal year; intramural projects excluded; dated by award notice, then budget/project start when unavailable",
  "warnings": [],
- "totalAwards": 11047,
+ "totalAwards": 11048,
  "currentFY": 2027,
  "monthly": [
   {
@@ -1318,10 +1318,10 @@
   },
   {
    "month": "2026-11",
-   "awards": 0,
-   "dollars": 0,
+   "awards": 1,
+   "dollars": 721483,
    "std": 0,
-   "cont": 0,
+   "cont": 1,
    "fell": 0,
    "other": 0
   }
@@ -1756,6 +1756,30 @@
      "title": "Sex-specific Mechanisms of Sympathetic Dysregulation in TMD and Comorbid Pain Disorders",
      "awardee": "UNIVERSITY OF CALIFORNIA LOS ANGELES",
      "amount": 2591752
+    }
+   ]
+  },
+  {
+   "fy": 2027,
+   "partial": true,
+   "awards": 1,
+   "dollars": 721483,
+   "median": 721483,
+   "exTop3Dollars": 0,
+   "octJul": {
+    "awards": 1,
+    "dollars": 721483,
+    "std": 0,
+    "cont": 1,
+    "fell": 0,
+    "other": 0
+   },
+   "top3": [
+    {
+     "id": "nih:11649450",
+     "title": "A generative image framework to democratize the study of cranial development",
+     "awardee": "UNIVERSITY OF CHICAGO",
+     "amount": 721483
     }
    ]
   }
@@ -2844,9 +2868,50 @@
      "dollars": 416788543
     }
    ]
+  },
+  {
+   "fy": 2027,
+   "partial": true,
+   "points": [
+    {
+     "d": 6,
+     "awards": 0,
+     "dollars": 0
+    },
+    {
+     "d": 13,
+     "awards": 0,
+     "dollars": 0
+    },
+    {
+     "d": 20,
+     "awards": 0,
+     "dollars": 0
+    },
+    {
+     "d": 27,
+     "awards": 0,
+     "dollars": 0
+    },
+    {
+     "d": 34,
+     "awards": 0,
+     "dollars": 0
+    },
+    {
+     "d": 41,
+     "awards": 1,
+     "dollars": 721483
+    },
+    {
+     "d": 46,
+     "awards": 1,
+     "dollars": 721483
+    }
+   ]
   }
  ],
- "storeIdCount": 11047,
+ "storeIdCount": 11048,
  "children": [],
  "provider": "nih",
  "dataComplete": true,
@@ -2859,5 +2924,7 @@
   "other": "Other awards"
  },
  "methodologyNote": "counts as of the pull date; NIH revises award notice dates and amounts.",
- "dataQualityNotes": []
+ "dataQualityNotes": [
+  "1 award record(s) carry a NIH-reported award notice date outside their own declared fiscal year; retained and dated by the source's current notice date."
+ ]
 }
