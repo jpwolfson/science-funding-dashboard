@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-09",
+ "generated": "2026-11-16",
  "node": {
   "name": "National Human Genome Research Institute",
   "abbrev": "NHGRI",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.reporter.nih.gov/v2/projects/search (NIH RePORTER v2), administering IC NHGRI; one application record per fiscal year; intramural projects excluded; dated by award notice, then budget/project start when unavailable",
  "warnings": [],
- "totalAwards": 7000,
+ "totalAwards": 7001,
  "currentFY": 2027,
  "monthly": [
   {
@@ -1291,17 +1291,17 @@
   },
   {
    "month": "2026-08",
-   "awards": 95,
-   "dollars": 87841230,
+   "awards": 96,
+   "dollars": 87879513,
    "std": 25,
    "cont": 68,
-   "fell": 2,
+   "fell": 3,
    "other": 0
   },
   {
    "month": "2026-09",
    "awards": 68,
-   "dollars": 72907629,
+   "dollars": 73407629,
    "std": 45,
    "cont": 21,
    "fell": 2,
@@ -1726,10 +1726,10 @@
   {
    "fy": 2026,
    "partial": false,
-   "awards": 488,
-   "dollars": 450753177,
-   "median": 635250,
-   "exTop3Dollars": 421432882,
+   "awards": 489,
+   "dollars": 451291460,
+   "median": 633714,
+   "exTop3Dollars": 421971165,
    "octJul": {
     "awards": 325,
     "dollars": 290004318,
@@ -2805,48 +2805,48 @@
     },
     {
      "d": 321,
-     "awards": 393,
-     "dollars": 350880191
+     "awards": 394,
+     "dollars": 350918474
     },
     {
      "d": 328,
-     "awards": 407,
-     "dollars": 359114781
+     "awards": 408,
+     "dollars": 359153064
     },
     {
      "d": 335,
-     "awards": 428,
-     "dollars": 385179505
+     "awards": 429,
+     "dollars": 385217788
     },
     {
      "d": 342,
-     "awards": 456,
-     "dollars": 406220169
+     "awards": 457,
+     "dollars": 406258452
     },
     {
      "d": 349,
-     "awards": 465,
-     "dollars": 416650529
+     "awards": 466,
+     "dollars": 417188812
     },
     {
      "d": 356,
-     "awards": 487,
-     "dollars": 450703063
+     "awards": 488,
+     "dollars": 451241346
     },
     {
      "d": 363,
-     "awards": 488,
-     "dollars": 450753177
+     "awards": 489,
+     "dollars": 451291460
     },
     {
      "d": 364,
-     "awards": 488,
-     "dollars": 450753177
+     "awards": 489,
+     "dollars": 451291460
     }
    ]
   }
  ],
- "storeIdCount": 7000,
+ "storeIdCount": 7001,
  "children": [],
  "provider": "nih",
  "dataComplete": true,
@@ -2860,6 +2860,7 @@
  },
  "methodologyNote": "counts as of the pull date; NIH revises award notice dates and amounts.",
  "dataQualityNotes": [
-  "3 stored award record(s) were not returned by the 2026-11-02 full pull and are retained; NIH revises and withdraws notices."
+  "3 stored award record(s) were not returned by the 2026-11-02 full pull and are retained; NIH revises and withdraws notices.",
+  "1 award record(s) had their amount, title, or type revised by NIH since the previous pull; figures reflect the source as of the pull date."
  ]
 }
