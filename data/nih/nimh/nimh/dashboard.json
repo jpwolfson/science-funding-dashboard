@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-09",
+ "generated": "2026-11-16",
  "node": {
   "name": "National Institute of Mental Health",
   "abbrev": "NIMH",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.reporter.nih.gov/v2/projects/search (NIH RePORTER v2), administering IC NIMH; one application record per fiscal year; intramural projects excluded; dated by award notice, then budget/project start when unavailable",
  "warnings": [],
- "totalAwards": 39299,
+ "totalAwards": 39316,
  "currentFY": 2027,
  "monthly": [
   {
@@ -1318,10 +1318,10 @@
   },
   {
    "month": "2026-11",
-   "awards": 16,
-   "dollars": 8362475,
+   "awards": 33,
+   "dollars": 19095468,
    "std": 0,
-   "cont": 14,
+   "cont": 31,
    "fell": 2,
    "other": 0
   }
@@ -1762,19 +1762,25 @@
   {
    "fy": 2027,
    "partial": true,
-   "awards": 34,
-   "dollars": 19521495,
-   "median": 637871,
-   "exTop3Dollars": 16825332,
+   "awards": 51,
+   "dollars": 30254488,
+   "median": 617515,
+   "exTop3Dollars": 27333769,
    "octJul": {
-    "awards": 34,
-    "dollars": 19521495,
+    "awards": 51,
+    "dollars": 30254488,
     "std": 0,
-    "cont": 31,
+    "cont": 48,
     "fell": 3,
     "other": 0
    },
    "top3": [
+    {
+     "id": "nih:11507799",
+     "title": "Multidimensional aging trajectories in mid to late-life psychosis (MAP)",
+     "awardee": "UNIVERSITY OF ALABAMA AT BIRMINGHAM",
+     "amount": 1115747
+    },
     {
      "id": "nih:11465150",
      "title": "Evolution and Latency of T-Tropic and M-Tropic HIV in People Infected with Subtype C",
@@ -1786,12 +1792,6 @@
      "title": "Progression of Social Cognitive Deficits in Mid- and Late-Life Schizophrenia Spectrum Disorders",
      "awardee": "OHIO STATE UNIVERSITY",
      "amount": 891315
-    },
-    {
-     "id": "nih:11470668",
-     "title": "Intersection of causal neurodevelopmental disorder risk genes, cortical circuit function, and cognitive processing required for behavioral adaptions",
-     "awardee": "UNIVERSITY OF FLORIDA",
-     "amount": 891191
     }
    ]
   }
@@ -2911,14 +2911,19 @@
      "dollars": 16506063
     },
     {
-     "d": 39,
-     "awards": 34,
-     "dollars": 19521495
+     "d": 41,
+     "awards": 43,
+     "dollars": 25821901
+    },
+    {
+     "d": 46,
+     "awards": 51,
+     "dollars": 30254488
     }
    ]
   }
  ],
- "storeIdCount": 39299,
+ "storeIdCount": 39316,
  "children": [],
  "provider": "nih",
  "dataComplete": true,
@@ -2931,7 +2936,5 @@
   "other": "Other awards"
  },
  "methodologyNote": "counts as of the pull date; NIH revises award notice dates and amounts.",
- "dataQualityNotes": [
-  "1 award record(s) had their amount, title, or type revised by NIH since the previous pull; figures reflect the source as of the pull date."
- ]
+ "dataQualityNotes": []
 }
