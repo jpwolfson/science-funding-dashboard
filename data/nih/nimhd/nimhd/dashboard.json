@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-09",
+ "generated": "2026-11-16",
  "node": {
   "name": "National Institute on Minority Health and Health Disparities",
   "abbrev": "NIMHD",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.reporter.nih.gov/v2/projects/search (NIH RePORTER v2), administering IC NIMHD; one application record per fiscal year; intramural projects excluded; dated by award notice, then budget/project start when unavailable",
  "warnings": [],
- "totalAwards": 6329,
+ "totalAwards": 6330,
  "currentFY": 2027,
  "monthly": [
   {
@@ -1318,10 +1318,10 @@
   },
   {
    "month": "2026-11",
-   "awards": 1,
-   "dollars": 47105,
+   "awards": 2,
+   "dollars": 199020,
    "std": 0,
-   "cont": 0,
+   "cont": 1,
    "fell": 1,
    "other": 0
   }
@@ -1762,15 +1762,15 @@
   {
    "fy": 2027,
    "partial": true,
-   "awards": 5,
-   "dollars": 2276055,
-   "median": 538992,
-   "exTop3Dollars": 278847,
+   "awards": 6,
+   "dollars": 2427970,
+   "median": 385367,
+   "exTop3Dollars": 430762,
    "octJul": {
-    "awards": 5,
-    "dollars": 2276055,
+    "awards": 6,
+    "dollars": 2427970,
     "std": 0,
-    "cont": 4,
+    "cont": 5,
     "fell": 1,
     "other": 0
    },
@@ -2911,14 +2911,19 @@
      "dollars": 2276055
     },
     {
-     "d": 39,
-     "awards": 5,
-     "dollars": 2276055
+     "d": 41,
+     "awards": 6,
+     "dollars": 2427970
+    },
+    {
+     "d": 46,
+     "awards": 6,
+     "dollars": 2427970
     }
    ]
   }
  ],
- "storeIdCount": 6329,
+ "storeIdCount": 6330,
  "children": [],
  "provider": "nih",
  "dataComplete": true,
@@ -2931,5 +2936,7 @@
   "other": "Other awards"
  },
  "methodologyNote": "counts as of the pull date; NIH revises award notice dates and amounts.",
- "dataQualityNotes": []
+ "dataQualityNotes": [
+  "1 award record(s) had their amount, title, or type revised by NIH since the previous pull; figures reflect the source as of the pull date."
+ ]
 }
