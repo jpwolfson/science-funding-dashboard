@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-09",
+ "generated": "2026-11-16",
  "node": {
   "name": "National Institute of General Medical Sciences",
   "abbrev": "NIGMS",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.reporter.nih.gov/v2/projects/search (NIH RePORTER v2), administering IC NIGMS; one application record per fiscal year; intramural projects excluded; dated by award notice, then budget/project start when unavailable",
  "warnings": [],
- "totalAwards": 81399,
+ "totalAwards": 81401,
  "currentFY": 2027,
  "monthly": [
   {
@@ -1318,10 +1318,10 @@
   },
   {
    "month": "2026-11",
-   "awards": 0,
-   "dollars": 0,
-   "std": 0,
-   "cont": 0,
+   "awards": 2,
+   "dollars": 358772,
+   "std": 1,
+   "cont": 1,
    "fell": 0,
    "other": 0
   }
@@ -1756,6 +1756,36 @@
      "title": "Pacific Northwest Center for Cryo-EM",
      "awardee": "OREGON HEALTH & SCIENCE UNIVERSITY",
      "amount": 6411209
+    }
+   ]
+  },
+  {
+   "fy": 2027,
+   "partial": true,
+   "awards": 2,
+   "dollars": 358772,
+   "median": 179386,
+   "exTop3Dollars": 0,
+   "octJul": {
+    "awards": 2,
+    "dollars": 358772,
+    "std": 1,
+    "cont": 1,
+    "fell": 0,
+    "other": 0
+   },
+   "top3": [
+    {
+     "id": "nih:11687176",
+     "title": "Understanding what regulates a regulator: the molecular basis for homeostatic small RNA-mediated gene regulation",
+     "awardee": "UNIVERSITY OF GEORGIA",
+     "amount": 352772
+    },
+    {
+     "id": "nih:11685636",
+     "title": "Training Grant in Genetics",
+     "awardee": "BRIGHAM AND WOMEN'S HOSPITAL",
+     "amount": 6000
     }
    ]
   }
@@ -2844,9 +2874,50 @@
      "dollars": 3108213335
     }
    ]
+  },
+  {
+   "fy": 2027,
+   "partial": true,
+   "points": [
+    {
+     "d": 6,
+     "awards": 0,
+     "dollars": 0
+    },
+    {
+     "d": 13,
+     "awards": 0,
+     "dollars": 0
+    },
+    {
+     "d": 20,
+     "awards": 0,
+     "dollars": 0
+    },
+    {
+     "d": 27,
+     "awards": 0,
+     "dollars": 0
+    },
+    {
+     "d": 34,
+     "awards": 0,
+     "dollars": 0
+    },
+    {
+     "d": 41,
+     "awards": 1,
+     "dollars": 6000
+    },
+    {
+     "d": 46,
+     "awards": 2,
+     "dollars": 358772
+    }
+   ]
   }
  ],
- "storeIdCount": 81399,
+ "storeIdCount": 81401,
  "children": [],
  "provider": "nih",
  "dataComplete": true,
@@ -2860,6 +2931,7 @@
  },
  "methodologyNote": "counts as of the pull date; NIH revises award notice dates and amounts.",
  "dataQualityNotes": [
-  "1 stored award record(s) were not returned by the 2026-11-02 full pull and are retained; NIH revises and withdraws notices."
+  "1 stored award record(s) were not returned by the 2026-11-02 full pull and are retained; NIH revises and withdraws notices.",
+  "1 award record(s) carry a NIH-reported award notice date outside their own declared fiscal year; retained and dated by the source's current notice date."
  ]
 }
