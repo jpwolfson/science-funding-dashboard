@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-16",
+ "generated": "2026-11-23",
  "node": {
   "name": "National Eye Institute",
   "abbrev": "NEI",
@@ -8,7 +8,7 @@
  },
  "source": "https://api.reporter.nih.gov/v2/projects/search (NIH RePORTER v2), administering IC NEI; one application record per fiscal year; intramural projects excluded; dated by award notice, then budget/project start when unavailable",
  "warnings": [],
- "totalAwards": 19812,
+ "totalAwards": 19813,
  "currentFY": 2027,
  "monthly": [
   {
@@ -1318,10 +1318,10 @@
   },
   {
    "month": "2026-11",
-   "awards": 0,
-   "dollars": 0,
+   "awards": 1,
+   "dollars": 410224,
    "std": 0,
-   "cont": 0,
+   "cont": 1,
    "fell": 0,
    "other": 0
   }
@@ -1756,6 +1756,30 @@
      "title": "Delaying the onset of nearsightedness study \u2013 coordinating center",
      "awardee": "OHIO STATE UNIVERSITY",
      "amount": 6510938
+    }
+   ]
+  },
+  {
+   "fy": 2027,
+   "partial": true,
+   "awards": 1,
+   "dollars": 410224,
+   "median": 410224,
+   "exTop3Dollars": 0,
+   "octJul": {
+    "awards": 1,
+    "dollars": 410224,
+    "std": 0,
+    "cont": 1,
+    "fell": 0,
+    "other": 0
+   },
+   "top3": [
+    {
+     "id": "nih:11692063",
+     "title": "Genetic Underpinnings of ipRGC Diversity",
+     "awardee": "NORTHWESTERN UNIVERSITY",
+     "amount": 410224
     }
    ]
   }
@@ -2844,9 +2868,55 @@
      "dollars": 706706694
     }
    ]
+  },
+  {
+   "fy": 2027,
+   "partial": true,
+   "points": [
+    {
+     "d": 6,
+     "awards": 0,
+     "dollars": 0
+    },
+    {
+     "d": 13,
+     "awards": 0,
+     "dollars": 0
+    },
+    {
+     "d": 20,
+     "awards": 0,
+     "dollars": 0
+    },
+    {
+     "d": 27,
+     "awards": 0,
+     "dollars": 0
+    },
+    {
+     "d": 34,
+     "awards": 0,
+     "dollars": 0
+    },
+    {
+     "d": 41,
+     "awards": 0,
+     "dollars": 0
+    },
+    {
+     "d": 48,
+     "awards": 1,
+     "dollars": 410224
+    },
+    {
+     "d": 53,
+     "awards": 1,
+     "dollars": 410224
+    }
+   ]
   }
  ],
- "storeIdCount": 19812,
+ "storeIdCount": 19813,
  "children": [],
  "provider": "nih",
  "dataComplete": true,
@@ -2860,6 +2930,7 @@
  },
  "methodologyNote": "counts as of the pull date; NIH revises award notice dates and amounts.",
  "dataQualityNotes": [
-  "1 stored award record(s) were not returned by the 2026-11-02 full pull and are retained; NIH revises and withdraws notices."
+  "1 stored award record(s) were not returned by the 2026-11-02 full pull and are retained; NIH revises and withdraws notices.",
+  "1 award record(s) carry a NIH-reported award notice date outside their own declared fiscal year; retained and dated by the source's current notice date."
  ]
 }
